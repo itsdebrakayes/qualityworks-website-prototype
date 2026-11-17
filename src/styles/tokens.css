@@ -1,0 +1,132 @@
+/* ==========================================================================
+   QualityWorks design tokens (QM-113 prototype)
+   Derived from: live corporate CSS (bb-theme skin / child theme), logo artwork,
+   agents.qualityworkscg.com and qualitywatcher.ai computed styles (audited 2026-11-17).
+   See docs/02-design-direction.md for provenance of every value.
+   ========================================================================== */
+:root {
+  /* Brand — corporate */
+  --qw-teal-50: #E9F6F7;    /* tint of logo teal; replaces legacy #ECF7F6 */
+  --qw-teal-100: #CDEBEE;
+  --qw-teal-300: #5FC3CF;   /* accent text/links on dark surfaces (8:1 on ink) */
+  --qw-teal-500: #289DAD;   /* LOGO TEAL (exact). Large/decorative use; fails AA as white-text bg (3.2:1) */
+  --qw-teal-700: #1B7480;   /* Interactive teal: buttons + links on light (5.45:1) */
+  --qw-teal-800: #155E68;   /* hover/pressed */
+  --qw-green-400: #8FC640;  /* LOGO GREEN (exact). Accent on dark only */
+  --qw-green-700: #4E7A1C;  /* green text on light (5.1:1) */
+  --qw-mint-500: #29A59A;   /* legacy corporate button colour — retained as data-viz/secondary accent only */
+  --qw-gold-400: #F4B942;   /* legacy accent; highlights, event status */
+
+  /* Neutrals */
+  --qw-ink-950: #0E1817;    /* product surfaces (from Agents as a Service #0B1413, warmed to brand) */
+  --qw-ink-900: #16202B;    /* dark corporate sections */
+  --qw-ink-800: #222B37;    /* legacy dark (#222B37) */
+  --qw-ink-700: #2C3846;
+  --qw-slate-700: #36414F;  /* legacy body text colour (exact) */
+  --qw-slate-500: #5A6675;  /* muted text (5.85:1 on white) */
+  --qw-slate-300: #9AA7B4;  /* muted text on dark (6.7:1 on ink-900) */
+  --qw-line: #DCE3E6;
+  --qw-line-dark: rgba(255, 255, 255, 0.12);
+  --qw-canvas: #F4F7F7;
+  --qw-white: #FFFFFF;
+
+  /* Feedback */
+  --qw-danger: #B42318;
+  --qw-danger-bg: #FDECEA;
+  --qw-warning: #B45309;
+  --qw-warning-bg: #FFF4E0;
+  --qw-success: #2F7A3E;
+  --qw-success-bg: #E8F5EA;
+  --qw-info-bg: var(--qw-teal-50);
+
+  /* Semantic */
+  --color-text: var(--qw-slate-700);
+  --color-heading: var(--qw-ink-900);
+  --color-muted: var(--qw-slate-500);
+  --color-link: var(--qw-teal-700);
+  --color-bg: var(--qw-white);
+  --color-surface: var(--qw-white);
+  --color-surface-alt: var(--qw-canvas);
+  --color-border: var(--qw-line);
+  --color-primary: var(--qw-teal-700);
+  --color-primary-hover: var(--qw-teal-800);
+  --color-accent: var(--qw-teal-500);
+  --focus-ring: var(--qw-teal-700);
+
+  /* Typography — Red Hat Display is the existing corporate face; Red Hat Mono is the
+     same superfamily, used only for technical labels (eyebrows, indices, data). */
+  --font-sans: 'Red Hat Display', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --font-mono: 'Red Hat Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --fs-xs: 0.8125rem;   /* 13 */
+  --fs-sm: 0.9375rem;   /* 15 */
+  --fs-base: 1.0625rem; /* 17 */
+  --fs-md: 1.25rem;     /* 20 */
+  --fs-lg: clamp(1.375rem, 1.2rem + 0.6vw, 1.625rem);
+  --fs-xl: clamp(1.75rem, 1.4rem + 1.2vw, 2.375rem);
+  --fs-2xl: clamp(2.125rem, 1.6rem + 2vw, 3.25rem);
+  --fs-3xl: clamp(2.5rem, 1.7rem + 3.4vw, 4.75rem);
+  --lh-tight: 1.08;
+  --lh-snug: 1.25;
+  --lh-body: 1.6;
+  --fw-light: 300;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --tracking-tight: -0.02em;
+  --tracking-label: 0.08em;
+
+  /* Spacing (4px base) */
+  --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem;
+  --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem;
+  --space-12: 3rem; --space-16: 4rem; --space-20: 5rem; --space-24: 6rem;
+  --section-y: clamp(3.5rem, 2.5rem + 4vw, 6.5rem);
+  --gutter: clamp(1rem, 0.5rem + 2.5vw, 2.5rem);
+  --container: 76rem;     /* 1216px */
+  --container-narrow: 46rem;
+
+  /* Shape */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;   /* buttons stay pill-shaped: retained from legacy + product sites */
+
+  /* Elevation */
+  --shadow-sm: 0 1px 2px rgba(22, 32, 43, 0.06), 0 1px 1px rgba(22, 32, 43, 0.04);
+  --shadow-md: 0 6px 20px -8px rgba(22, 32, 43, 0.18), 0 2px 6px rgba(22, 32, 43, 0.06);
+  --shadow-lg: 0 24px 48px -20px rgba(22, 32, 43, 0.35);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 320ms;
+
+  /* Layers */
+  --z-header: 50;
+  --z-drawer: 80;
+  --z-banner: 60;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-fast: 0ms; --dur-base: 0ms; --dur-slow: 0ms; }
+}
+
+/* Surface themes: any section can opt into a surface. Components read semantic tokens. */
+.surface-dark, .surface-product {
+  --color-text: #D5DDE4;
+  --color-heading: var(--qw-white);
+  --color-muted: var(--qw-slate-300);
+  --color-link: var(--qw-teal-300);
+  --color-bg: var(--qw-ink-900);
+  --color-surface: var(--qw-ink-800);
+  --color-surface-alt: var(--qw-ink-700);
+  --color-border: var(--qw-line-dark);
+  --color-accent: var(--qw-green-400);
+  --focus-ring: var(--qw-green-400);
+}
+.surface-product { --color-bg: var(--qw-ink-950); --color-surface: #15221F; --color-surface-alt: #1B2B28; }
+.surface-tint { --color-bg: var(--qw-teal-50); --color-surface: var(--qw-white); }
+/* Any element with a surface class paints its own text colour (not only .section elements). */
+.surface-dark, .surface-product { color: var(--color-text); }
+.surface-alt { --color-bg: var(--qw-canvas); }

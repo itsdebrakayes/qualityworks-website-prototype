@@ -1,0 +1,71 @@
+---
+/** Global footer — link columns are derived from navigation.ts (same source as the header). */
+import Icon from './Icon.astro';
+import { footerColumns } from '../data/navigation';
+import { site } from '../data/site';
+const columns = footerColumns();
+const year = new Date().getFullYear();
+---
+<footer class="site-footer surface-dark">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__brand">
+        <a href="/" aria-label="QualityWorks Consulting Group — home"><img src="/brand/qualityworks-logo-color.png" alt="" width="190" height="41" /></a>
+        <p>{site.footerStatement}</p>
+        <address>
+          {site.offices.map((o) => (
+            <div class="office">
+              <p class="office__label">{o.label}</p>
+              <p>{o.locality}</p>
+              {o.phones.map((p) => <p><a href={`tel:${p.tel}`}>{p.display}</a></p>)}
+            </div>
+          ))}
+          <p class="office__mail"><Icon name="mail" /><a href={`mailto:${site.email}`}>{site.email}</a></p>
+        </address>
+      </div>
+      <nav class="site-footer__nav" aria-label="Footer">
+        {columns.map((col) => (
+          <div>
+            <p class="site-footer__heading">{col.heading}</p>
+            <ul>
+              {col.links.map((l: any) => (
+                <li><a href={l.href} {...(l.external ? { target: '_blank', rel: 'noopener' } : {})}>{l.label}{l.external && <span class="visually-hidden"> (external site, opens in a new tab)</span>}</a></li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <p>© {year} {site.name}. All rights reserved.</p>
+      <ul class="site-footer__legal">
+        {site.legal.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+        <li><a href="/careers/">Careers</a></li>
+      </ul>
+      <ul class="site-footer__social" aria-label="QualityWorks on social media">
+        {site.social.map((s) => <li><a href={s.href} target="_blank" rel="noopener">{s.label}<span class="visually-hidden"> (opens in a new tab)</span></a></li>)}
+      </ul>
+    </div>
+  </div>
+</footer>
+<style>
+  .site-footer { color: var(--color-text); background: var(--qw-ink-900); padding-block: var(--space-16) var(--space-8); font-size: var(--fs-sm); }
+  .site-footer a { color: #D5DDE4; text-decoration: none; }
+  .site-footer a:hover { color: #fff; text-decoration: underline; }
+  .site-footer__top { display: grid; gap: var(--space-12); }
+  @media (min-width: 1024px) { .site-footer__top { grid-template-columns: 19rem 1fr; gap: var(--space-16); } }
+  .site-footer__brand img { width: 180px; margin-bottom: var(--space-5); }
+  .site-footer__brand > p { color: var(--qw-slate-300); }
+  address { font-style: normal; display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); margin-top: var(--space-6); }
+  address p { margin: 0; }
+  .office__label { font: var(--fw-medium) var(--fs-xs)/1.4 var(--font-mono); text-transform: uppercase; letter-spacing: var(--tracking-label); color: var(--qw-green-400); margin-bottom: 0.3rem !important; }
+  .office__mail { grid-column: 1 / -1; display: flex; gap: 0.5rem; align-items: center; }
+  .office__mail :global(svg) { width: 18px; height: 18px; color: var(--qw-teal-300); }
+  .site-footer__nav { display: grid; grid-template-columns: repeat(auto-fit, minmax(8.75rem, 1fr)); gap: var(--space-8); }
+  .site-footer__heading { font-weight: var(--fw-bold); color: #fff; margin-bottom: var(--space-3); }
+  .site-footer__nav ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.55rem; }
+  .site-footer__nav a { display: inline-block; padding-block: 2px; }
+  .site-footer__bottom { display: flex; flex-wrap: wrap; gap: var(--space-4) var(--space-8); justify-content: space-between; align-items: center; margin-top: var(--space-12); padding-top: var(--space-6); border-top: 1px solid rgba(255,255,255,0.1); color: var(--qw-slate-300); }
+  .site-footer__bottom p { margin: 0; }
+  .site-footer__legal, .site-footer__social { display: flex; flex-wrap: wrap; gap: var(--space-5); list-style: none; margin: 0; padding: 0; }
+</style>

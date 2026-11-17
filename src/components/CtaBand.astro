@@ -1,0 +1,27 @@
+---
+import Button from './Button.astro';
+import type { Cta } from '../data/types';
+interface Props { title: string; text?: string; primary: Cta; secondary?: Cta; eyebrow?: string }
+const { title, text, primary, secondary, eyebrow = 'Next step' } = Astro.props;
+---
+<section class="cta-band surface-dark" aria-labelledby="cta-band-title">
+  <div class="container cta-band__inner">
+    <div>
+      <p class="eyebrow">{eyebrow}</p>
+      <h2 id="cta-band-title">{title}</h2>
+      {text && <p class="cta-band__text">{text}</p>}
+    </div>
+    <div class="btn-row">
+      <Button cta={{ ...primary, kind: 'primary' }} />
+      {secondary && <Button cta={{ ...secondary, kind: 'secondary' }} />}
+    </div>
+  </div>
+</section>
+<style>
+  .cta-band { position: relative; overflow: hidden; padding-block: var(--space-16); background: linear-gradient(120deg, var(--qw-ink-900) 0%, #123C44 100%); }
+  .cta-band::after { content: ""; position: absolute; right: -8rem; bottom: -14rem; width: 30rem; height: 30rem; border-radius: 50%; background: repeating-radial-gradient(circle, transparent 0 20px, rgba(143,198,64,0.14) 20px 21px); pointer-events: none; }
+  .cta-band__inner { position: relative; z-index: 1; display: grid; gap: var(--space-8); align-items: end; }
+  @media (min-width: 900px) { .cta-band__inner { grid-template-columns: 1.5fr auto; } }
+  .cta-band h2 { font-size: var(--fs-xl); max-width: 26ch; margin-bottom: var(--space-3); }
+  .cta-band__text { color: var(--color-muted); max-width: 46ch; margin: 0; }
+</style>

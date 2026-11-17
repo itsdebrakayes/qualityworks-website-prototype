@@ -1,0 +1,53 @@
+---
+/**
+ * CONTACT (/contact-us/ — legacy URL). Preserves the live field set. Submission is simulated.
+ * Persona: all. Core question: "How do I reach the right person, and what happens next?"
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import ContactForm from '../../components/ContactForm.astro';
+import Icon from '../../components/Icon.astro';
+import { site } from '../../data/site';
+const crumbs = [{ label: 'Home', href: '/' }, { label: 'Contact Us' }];
+---
+<BaseLayout seo={{ title: 'Contact QualityWorks | Talk to a Software Quality & AI Expert', description: 'Get in touch with QualityWorks about software testing, custom development or AI solutions. Offices in Los Angeles and Kingston, Jamaica.' }} breadcrumbs={crumbs}>
+  <section class="contact surface-dark">
+    <div class="container contact__grid">
+      <div class="contact__intro">
+        <Breadcrumbs items={crumbs} />
+        <p class="eyebrow">Contact us</p>
+        <h1>Got questions? Let’s talk.</h1>
+        <p class="lede">We have the expertise you need to solve the problems you don’t want to handle on your own. Tell us what you’re working on.</p>
+        <h2 class="contact__h">What happens next</h2>
+        <ol class="next">
+          <li>We read every message and route it to the right practice lead.</li>
+          <li>We reply by email to arrange a conversation.</li>
+          <li>If we’re not the right fit, we’ll tell you.</li>
+        </ol>
+        <p class="next__note" data-review-note="Response-time commitment intentionally omitted">We don’t state a response time until one is approved.</p>
+        <h2 class="contact__h">Other ways to reach us</h2>
+        <ul class="ways">
+          <li><Icon name="mail" /><a href={`mailto:${site.email}`}>{site.email}</a></li>
+          {site.offices.map((o) => <li><Icon name="phone" /><span><span class="muted">{o.label} · {o.locality}</span><br />{o.phones.map((p, i) => <>{i > 0 && ' · '}<a href={`tel:${p.tel}`}>{p.display}</a></>)}</span></li>)}
+          <li><Icon name="person-plus" /><span>Looking for a job? Visit <a href="/careers/">Careers</a> — we don’t accept CVs through this form.</span></li>
+        </ul>
+      </div>
+      <div class="contact__form">
+        <h2 class="visually-hidden">Contact form</h2>
+        <ContactForm />
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+<style>
+  .contact { padding-block: var(--space-10) var(--space-20); background: radial-gradient(60% 70% at 0% 0%, rgba(40,157,173,0.22), transparent 60%), var(--qw-ink-900); }
+  .contact__grid { display: grid; gap: var(--space-12); }
+  @media (min-width: 1024px) { .contact__grid { grid-template-columns: 0.9fr 1.1fr; gap: var(--space-16); align-items: start; } }
+  .contact h1 { font-size: var(--fs-2xl); }
+  .contact__h { font-size: var(--fs-md); margin-top: var(--space-10); }
+  .next { padding-left: 1.25rem; display: grid; gap: var(--space-2); }
+  .next__note { font-size: var(--fs-xs); color: var(--color-muted); }
+  .ways { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-4); }
+  .ways li { display: flex; gap: var(--space-3); align-items: flex-start; }
+  .ways :global(svg) { width: 20px; height: 20px; color: var(--qw-teal-300); flex: none; margin-top: 3px; }
+</style>

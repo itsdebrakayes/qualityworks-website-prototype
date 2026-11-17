@@ -1,0 +1,28 @@
+---
+/** BLOG (/blog/ — legacy URL). Articles stay at root-level slugs to preserve WordPress URLs. */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import FilterBar from '../../components/FilterBar.astro';
+import EmptyState from '../../components/EmptyState.astro';
+import { blogPosts } from '../../data/articles';
+const crumbs = [{ label: 'Home', href: '/' }, { label: 'Resources', href: '/resources/' }, { label: 'Blog' }];
+const cats = [...new Set(blogPosts.flatMap((a) => a.categories))].filter((c) => c !== 'Uncategorized').sort().map((c) => ({ value: c, label: c, count: blogPosts.filter((a) => a.categories.includes(c)).length }));
+---
+<BaseLayout seo={{ title: 'Blog: Software Testing, QA & AI Insights | QualityWorks', description: 'What QualityWorks experts are saying about software testing, test automation, agentic QA, AI adoption, agile and software development.' }} breadcrumbs={crumbs}>
+  <PageHero eyebrow="Blog" title="Our blog" lede="See what our experts are saying about end-to-end testing, agile, automation, AI and software development." breadcrumbs={crumbs} compact />
+  <section class="section">
+    <div class="container">
+      <h2 class="visually-hidden">Articles</h2>
+      <FilterBar id="blog-filter" resultLabel="articles" filters={[{ name: 'category', label: 'Category', options: cats }]} />
+      <div class="grid grid--3" id="blog-results">{blogPosts.map((a) => <ArticleCard a={a} />)}</div>
+      <EmptyState title="No articles in this category" id="blog-empty" hidden><p>Choose another category.</p></EmptyState>
+      <p class="migration">Showing the 12 most recent posts migrated from WordPress for the prototype. The live blog has 99 posts; pagination (12 per page, <code>/blog/page/2/</code>) is required in production.</p>
+    </div>
+  </section>
+</BaseLayout>
+<style>.migration { margin-top: var(--space-8); font-size: var(--fs-sm); color: var(--color-muted); }</style>
+<script>
+  import { initFilters } from '../../lib/filters';
+  initFilters({ bar: '#blog-filter', results: '#blog-results', empty: '#blog-empty', noun: ['article', 'articles'], match: (el, f) => !f.category || (el.dataset.categories ?? '').split('|').includes(f.category) });
+</script>

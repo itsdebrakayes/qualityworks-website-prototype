@@ -1,0 +1,18 @@
+---
+/** Loading placeholder for dynamic lists. Announced politely via the parent region's aria-busy. */
+interface Props { count?: number; id?: string; hidden?: boolean }
+const { count = 3, id, hidden } = Astro.props;
+---
+<div class="skeleton-grid grid grid--3" id={id} hidden={hidden} aria-hidden="true">
+  {Array.from({ length: count }).map(() => (
+    <div class="skeleton card"><div class="sk sk-media"></div><div class="card__body"><div class="sk sk-line w40"></div><div class="sk sk-line w90"></div><div class="sk sk-line w70"></div></div></div>
+  ))}
+</div>
+<style>
+  .skeleton-grid[hidden] { display: none; }
+  .sk { background: linear-gradient(90deg, #E7ECEE 0%, #F3F6F7 50%, #E7ECEE 100%); background-size: 200% 100%; border-radius: 6px; animation: shimmer 1.4s infinite linear; }
+  .sk-media { aspect-ratio: 16/9; border-radius: 0; }
+  .sk-line { height: 0.9rem; margin-bottom: 0.6rem; }
+  .w40 { width: 40%; } .w70 { width: 70%; } .w90 { width: 90%; }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+</style>

@@ -1,0 +1,104 @@
+---
+/**
+ * CAREERS (/careers/ — legacy URL). Vacancies are owned by BambooHR; applications are handed off
+ * to BambooHR. No résumé collection on the corporate site.
+ * Default view = REAL observed state (0 open roles on 17 Nov 2026). A labelled prototype control
+ * switches to fixture states: roles available, expired role, BambooHR unavailable.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import EmptyState from '../../components/EmptyState.astro';
+import Alert from '../../components/Alert.astro';
+import FixtureLabel from '../../components/FixtureLabel.astro';
+import Icon from '../../components/Icon.astro';
+import { fixtureJobs, bambooHr, isExpired } from '../../data/jobs';
+const crumbs = [{ label: 'Home', href: '/' }, { label: 'Company', href: '/about-us/' }, { label: 'Careers' }];
+const benefits = [
+  ['Be yourself', 'Your quirks are welcome here. We’ve built a culture that embraces individuality and diverse perspectives, and encourages you to have fun while doing work that makes a difference.'],
+  ['Work flexibly', 'Whether you work from our office or from home, our priority is to give you the freedom to be comfortable and productive, with flexible start and end times.'],
+  ['Shape your future', 'From day one we encourage our team to own their role and share in the leadership of the company in their own way. We welcome fresh ideas that spark meaningful improvements.'],
+];
+const workModel = { remote: 'Remote', hybrid: 'Hybrid', 'on-site': 'On-site' };
+---
+<BaseLayout seo={{ title: 'Careers at QualityWorks | Join the Team', description: 'Join QualityWorks: flexible work, a culture that welcomes individuality, and room to shape your future. See open roles and apply through our BambooHR careers site.' }} breadcrumbs={crumbs}>
+  <PageHero eyebrow="Careers" title="Join the dream team" lede="We’re always on the lookout for people who are ready to shake things up and make a meaningful impact. If that’s you, welcome." breadcrumbs={crumbs} primary={{ label: 'See open roles', href: '#open-roles' }} />
+  <section class="section" aria-labelledby="benefits-title">
+    <div class="container">
+      <SectionHeading eyebrow="Don’t miss out" title="Benefits of working with us" id="benefits-title" />
+      <div class="grid grid--3">{benefits.map(([t, d]) => <div class="benefit"><h3>{t}</h3><p>{d}</p></div>)}</div>
+    </div>
+  </section>
+
+  <section class="section surface-alt" id="open-roles" aria-labelledby="roles-title">
+    <div class="container">
+      <SectionHeading eyebrow="Open opportunities" title="Open roles" lede="Roles are listed from our BambooHR careers site. Applications are completed on BambooHR." id="roles-title" />
+
+      <fieldset class="state-switch" data-review-note="Prototype-only control">
+        <legend><FixtureLabel text="Prototype control — vacancy states" /></legend>
+        <div class="state-switch__opts">
+          <label><input type="radio" name="jobstate" value="live" checked /> Live snapshot ({bambooHr.observed.totalCount} roles, {bambooHr.observed.at})</label>
+          <label><input type="radio" name="jobstate" value="jobs" /> Fixture: roles available (incl. one expired)</label>
+          <label><input type="radio" name="jobstate" value="down" /> Simulate BambooHR unavailable</label>
+        </div>
+      </fieldset>
+
+      <div aria-live="polite">
+        <div data-state="live">
+          <EmptyState title="No open roles right now" icon="team">
+            <p>We don’t have vacancies at the moment, but we’re always interested in hearing from people who want to make an impact.</p>
+            <a class="btn btn--secondary btn--sm" href={bambooHr.careersUrl} target="_blank" rel="noopener">Check our BambooHR careers page<span class="visually-hidden"> (opens in a new tab)</span></a>
+          </EmptyState>
+        </div>
+        <div data-state="jobs" hidden>
+          <ul class="jobs">
+            {fixtureJobs.map((j) => {
+              const expired = isExpired(j);
+              return (
+                <li class:list={['job', { 'job--expired': expired }]}>
+                  <div>
+                    <h3 class="job__title">{j.title}</h3>
+                    <p class="job__meta"><span>{j.department}</span><span>{j.location}</span><span>{workModel[j.workModel]}</span><span>{j.employmentType}</span></p>
+                    <FixtureLabel text="Fixture vacancy" />
+                  </div>
+                  {expired ? (
+                    <p class="job__closed"><span class="badge badge--neutral">Closed</span> Applications closed {new Date(j.closesAt + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}</p>
+                  ) : (
+                    <a class="btn btn--sm" href={j.applicationUrl} target="_blank" rel="noopener" aria-describedby="bamboo-note">Apply on BambooHR<Icon name="external" /><span class="visually-hidden"> for {j.title} (opens in a new tab)</span></a>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+          <p id="bamboo-note" class="hint">Applications open on qualityworksconsulting.bamboohr.com. QualityWorks does not collect résumés on this website.</p>
+        </div>
+        <div data-state="down" hidden>
+          <Alert tone="warning" title="We can’t load open roles right now">
+            <p>Our careers listing (BambooHR) isn’t responding. You can view roles directly on <a href={bambooHr.careersUrl} target="_blank" rel="noopener">our BambooHR careers page<span class="visually-hidden"> (opens in a new tab)</span></a>, or try again later.</p>
+          </Alert>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+<style>
+  .benefit { padding: var(--space-6); border: 1px solid var(--color-border); border-radius: var(--radius-lg); border-top: 3px solid var(--qw-green-400); }
+  .benefit h3 { font-size: var(--fs-md); }
+  .benefit p { margin: 0; color: var(--color-muted); }
+  .state-switch { border: 1px dashed #C99A2E; border-radius: var(--radius-md); background: #FFFCF2; padding: var(--space-4); margin: 0 0 var(--space-6); }
+  .state-switch__opts { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); font-size: var(--fs-sm); }
+  .state-switch label { display: inline-flex; gap: 0.4rem; align-items: center; min-height: 36px; }
+  [data-state][hidden] { display: none; }
+  .jobs { list-style: none; padding: 0; margin: 0 0 var(--space-4); display: grid; gap: var(--space-3); }
+  .job { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--space-4); padding: var(--space-5) var(--space-6); background: #fff; border: 1px solid var(--qw-line); border-radius: var(--radius-lg); }
+  .job--expired { background: var(--qw-canvas); }
+  .job--expired .job__title { color: var(--qw-slate-500); }
+  .job__title { font-size: var(--fs-md); margin-bottom: var(--space-2); }
+  .job__meta { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); font-size: var(--fs-sm); color: var(--qw-slate-500); margin-bottom: var(--space-2); }
+  .job__closed { display: flex; gap: var(--space-2); align-items: center; font-size: var(--fs-sm); color: var(--qw-slate-500); margin: 0; }
+</style>
+<script>
+  const radios = document.querySelectorAll<HTMLInputElement>('input[name="jobstate"]');
+  const panels = document.querySelectorAll<HTMLElement>('[data-state]');
+  radios.forEach((r) => r.addEventListener('change', () => panels.forEach((p) => (p.hidden = p.dataset.state !== r.value))));
+</script>

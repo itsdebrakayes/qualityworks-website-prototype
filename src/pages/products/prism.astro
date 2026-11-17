@@ -1,0 +1,85 @@
+---
+/**
+ * PRISM™ (proposed page). Only the homepage teaser content is confirmed. Every other module is a
+ * labelled wireframe naming the decision the product owner must make. The layout is final-ready:
+ * approved content drops into the same sections without a rebuild.
+ * Primary persona: Enterprise CTO / AI lead. Secondary: QA Director, public-sector technology lead.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import Wireframe from '../../components/Wireframe.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import ClaimRef from '../../components/ClaimRef.astro';
+import Alert from '../../components/Alert.astro';
+
+const crumbs = [{ label: 'Home', href: '/' }, { label: 'Products', href: '/products/' }, { label: 'PRISM™' }];
+const topics = ['AI Test Strategy', 'Autonomous Testing', 'Generative Test Creation', 'Reasoning Model Testing', 'LLM Testing'];
+const grades = ['A+', 'A', 'B', 'C', 'D', 'F'];
+---
+<BaseLayout seo={{ title: 'PRISM™ AI Output Quality Standard | QualityWorks', description: 'PRISM (Performance & Reasoning Intelligence Scoring Method) is a QualityWorks framework that grades AI-generated outputs in production on an A+ to F scale.' }} breadcrumbs={crumbs}>
+  <PageHero variant="product" eyebrow="PRISM™ · Performance & Reasoning Intelligence Scoring Method" title="The AI output quality standard" lede="Benchmark scores tell you how a model performs on academic tests. PRISM™ tells you how it performs on your business." breadcrumbs={crumbs} primary={{ label: 'Ask about PRISM', href: '/contact-us/' }}>
+    <Fragment slot="aside">
+      <div class="grade" aria-label="PRISM grading scale A plus to F">
+        <p class="grade__label mono">Grading scale</p>
+        <ol class="grade__scale">{grades.map((g) => <li>{g}</li>)}</ol>
+        <p class="grade__note">A proprietary 10-dimension framework<ClaimRef id="C17" /> translates complex model behavior into a clear grade your entire team can act on.</p>
+      </div>
+    </Fragment>
+  </PageHero>
+
+  <div class="container"><Alert tone="info" title="What is confirmed and what is not" class="prism-alert">
+    <p>Confirmed from the live homepage: the name, its expansion, the 10-dimension framework, the A+–F grade and five topic areas. Not found: the whitepaper file, the list of dimensions, how a score is produced, who can use PRISM and on what commercial terms. Those modules are shown as wireframes.</p>
+  </Alert></div>
+
+  <section class="section" aria-labelledby="what-title">
+    <div class="container split">
+      <div><p class="eyebrow">What it is</p><h2 id="what-title">A structured way to evaluate AI-generated outputs in production</h2></div>
+      <div>
+        <p class="lede">PRISM™ adds a layer to AI testing: instead of only testing the software around a model, it evaluates the quality of the outputs the model produces.</p>
+        <p>Topic areas covered:</p>
+        <ul class="chip-list">{topics.map((t) => <li class="badge badge--neutral">{t}</li>)}</ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section surface-alt" aria-labelledby="dims-title">
+    <div class="container">
+      <SectionHeading eyebrow="Framework" title="The 10 dimensions" id="dims-title" />
+      <div class="grid grid--2">
+        <Wireframe title="Dimension list and definitions" decision="Publish the 10 dimension names and one-line definitions, or keep them proprietary and describe them only in aggregate?" />
+        <Wireframe title="How a score is produced" decision="Describe the evaluation method (human review, automated scoring, sample sizes) at a level that is accurate but does not expose IP." />
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="report-title">
+    <div class="container">
+      <SectionHeading eyebrow="In practice" title="What a PRISM report looks like" id="report-title" />
+      <div class="grid grid--2">
+        <Wireframe title="Sample report / scorecard" decision="Provide an approved, anonymized sample scorecard (image + text alternative). The homepage currently shows “78% · C+ · Fair — correct in parts”." />
+        <Wireframe title="Who it’s for and how to engage" decision="Is PRISM a service engagement, a licensed framework, a tool, or a whitepaper only? This decides the primary CTA." owner="Leadership" />
+      </div>
+    </div>
+  </section>
+
+  <section class="section surface-alt" aria-labelledby="wp-title">
+    <div class="container">
+      <SectionHeading eyebrow="Whitepaper" title="Read the PRISM™ whitepaper" id="wp-title" />
+      <Wireframe title="Whitepaper download" decision="Supply the PDF and decide gated (form) vs. ungated. If gated, the form uses the same fields and consent as the contact form." owner="Marketing" />
+    </div>
+  </section>
+
+  <CtaBand title="Evaluating AI outputs in production?" text="Talk to the team behind PRISM™ about your use case." primary={{ label: 'Ask about PRISM', href: '/contact-us/' }} secondary={{ label: 'AI & agentic solutions', href: '/services/ai-service/' }} />
+</BaseLayout>
+<style>
+  .grade { border: 1px solid rgba(244,185,66,0.4); border-radius: var(--radius-lg); padding: var(--space-6); background: rgba(244,185,66,0.05); }
+  .grade__label { font-size: var(--fs-xs); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-gold-400); }
+  .grade__scale { list-style: none; padding: 0; margin: var(--space-4) 0; display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+  .grade__scale li { text-align: center; padding: var(--space-3) 0; font-weight: var(--fw-bold); font-size: var(--fs-md); color: #fff; border-radius: var(--radius-sm); background: rgba(255,255,255,0.06); }
+  .grade__scale li:nth-child(1), .grade__scale li:nth-child(2) { background: rgba(143,198,64,0.25); }
+  .grade__scale li:nth-child(4) { background: rgba(244,185,66,0.25); }
+  .grade__scale li:nth-child(6) { background: rgba(255,120,100,0.22); }
+  .grade__note { font-size: var(--fs-sm); margin: 0; }
+  :global(.prism-alert) { margin-top: var(--space-8); }
+</style>

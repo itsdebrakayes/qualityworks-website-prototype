@@ -1,0 +1,8 @@
+---
+/** Review-mode annotation linking a displayed claim to the claims register. Hidden unless review mode is on. */
+import { claimById } from '../data/claims';
+interface Props { id: string }
+const c = claimById(Astro.props.id);
+if (!c) throw new Error(`Unknown claim id ${Astro.props.id}`);
+---
+<a class="claim-ref" href={`/prototype/claims/#${c.id}`} title={`${c.id}: ${c.approval} — ${c.context}`}>{c.id}</a>

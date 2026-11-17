@@ -1,0 +1,110 @@
+---
+/**
+ * CASE STUDY DETAIL (/case-study/{slug}/ — legacy URL pattern preserved).
+ * Structured fields: customer, challenge, contribution, approach, outcome, metrics (+source/context).
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import CaseStudyCard from '../../components/CaseStudyCard.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import Button from '../../components/Button.astro';
+import MetricValue from '../../components/MetricValue.astro';
+import { caseStudies } from '../../data/caseStudies';
+import { industryBySlug } from '../../data/industries';
+import { serviceBySlug } from '../../data/services';
+import { productBySlug } from '../../data/products';
+import type { CaseStudy } from '../../data/types';
+export function getStaticPaths() { return caseStudies.map((c) => ({ params: { slug: c.slug }, props: { cs: c } })); }
+const { cs } = Astro.props as { cs: CaseStudy };
+const industry = industryBySlug(cs.industry);
+const solution = serviceBySlug(cs.relatedSolution) ?? productBySlug(cs.relatedSolution);
+const more = caseStudies.filter((c) => c.slug !== cs.slug && (c.industry === cs.industry || c.serviceTags.some((t) => cs.serviceTags.includes(t)))).slice(0, 3);
+const crumbs = [{ label: 'Home', href: '/' }, { label: 'Case Studies', href: '/case-studies/' }, { label: cs.title }];
+const sections = [
+  ['The customer', cs.customer], ['The challenge', cs.challenge], ['Our solution', cs.approach], ['The result', cs.outcome],
+].filter(([, v]) => v && v.length > 20) as [string, string][];
+const description = (cs.summary || cs.challenge).slice(0, 155).replace(/\s+\S*$/, '') + '…';
+---
+<BaseLayout seo={{ title: `${cs.title} | QualityWorks Case Study`.slice(0, 90), description, ogImage: cs.image ?? undefined }} breadcrumbs={crumbs} ogType="article">
+  <section class="cs-hero surface-dark">
+    <div class="container cs-hero__grid">
+      <div>
+        <Breadcrumbs items={crumbs} />
+        <p class="eyebrow">Case study · {industry?.name}</p>
+        <h1>{cs.title}</h1>
+        <p class="lede">{cs.summary}</p>
+        <dl class="cs-facts">
+          <div><dt>Client</dt><dd>{cs.client}</dd></div>
+          <div><dt>Industry</dt><dd><a href={industry?.path}>{industry?.name}</a></dd></div>
+          <div><dt>Services</dt><dd>{cs.serviceTags.map((t, i) => { const s = serviceBySlug(t); return <>{i > 0 && ', '}{s ? <a href={s.path}>{s.name}</a> : t}</>; })}</dd></div>
+        </dl>
+      </div>
+      {cs.image && <div class="cs-hero__media"><img src={cs.image} alt={cs.altText} width="720" height="480" /></div>}
+    </div>
+  </section>
+
+  {cs.metrics.length > 0 && (
+    <section class="section section--tight" aria-labelledby="metrics-title">
+      <div class="container">
+        <h2 id="metrics-title" class="visually-hidden">Key results</h2>
+        <dl class="metrics">
+          {cs.metrics.map((m) => (
+            <div class="metric">
+              <dt>{m.label}</dt>
+              <dd class="metric__value"><MetricValue value={m.value} /></dd>
+              <dd class="metric__ctx">{m.context}</dd>
+            </div>
+          ))}
+        </dl>
+        <p class="metric-src">Results as reported in the published case study (<a href={cs.metrics[0].metricSource} target="_blank" rel="noopener">source<span class="visually-hidden">, opens current live page in a new tab</span></a>). Client disclosure approval: <strong>{cs.clientDisclosureApproved === null ? 'to be confirmed' : cs.clientDisclosureApproved ? 'approved' : 'not approved'}</strong>.</p>
+      </div>
+    </section>
+  )}
+
+  <section class="section surface-alt">
+    <div class="container cs-body">
+      <aside class="cs-aside" aria-label="Our contribution">
+        <p class="eyebrow">Our contribution</p>
+        <p class="cs-aside__text">{cs.contribution}</p>
+        {solution && <Button href={solution.path} label={`About ${solution.name}`} variant="secondary" size="sm" />}
+      </aside>
+      <div class="cs-story">
+        {sections.map(([h, v]) => (<><h2>{h}</h2><p>{v}</p></>))}
+      </div>
+    </div>
+  </section>
+
+  {more.length > 0 && (
+    <section class="section">
+      <div class="container">
+        <SectionHeading eyebrow="More results" title="Related case studies" />
+        <div class="grid grid--3">{more.map((c) => <CaseStudyCard cs={c} />)}</div>
+      </div>
+    </section>
+  )}
+  <CtaBand title="Discuss a similar challenge with our team." primary={cs.cta} secondary={{ label: 'All case studies', href: '/case-studies/' }} />
+</BaseLayout>
+<style>
+  .cs-hero { padding-block: var(--space-10) var(--space-16); background: radial-gradient(60% 80% at 100% 0%, rgba(40,157,173,0.25), transparent 60%), var(--qw-ink-900); }
+  .cs-hero__grid { display: grid; gap: var(--space-10); align-items: center; }
+  @media (min-width: 1024px) { .cs-hero__grid { grid-template-columns: 1.2fr 0.8fr; } }
+  .cs-hero h1 { font-size: var(--fs-2xl); }
+  .cs-hero__media img { border-radius: var(--radius-lg); aspect-ratio: 4/3; object-fit: cover; width: 100%; }
+  .cs-facts { display: grid; gap: var(--space-3); margin: var(--space-8) 0 0; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }
+  .cs-facts dt { font: var(--fw-medium) var(--fs-xs)/1.3 var(--font-mono); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-green-400); }
+  .cs-facts dd { margin: 0.2rem 0 0; color: #fff; }
+  .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: var(--space-6); margin: 0; }
+  .metric { display: flex; flex-direction: column; padding: var(--space-6); border: 1px solid var(--color-border); border-radius: var(--radius-lg); border-top: 4px solid var(--qw-teal-500); }
+  .metric dt { order: 2; font-weight: var(--fw-semibold); color: var(--qw-ink-900); }
+  .metric__value { order: 1; margin: 0 0 var(--space-2); font-size: var(--fs-2xl); font-weight: var(--fw-bold); line-height: 1.05; color: var(--qw-teal-700); letter-spacing: -0.02em; }
+  .metric__ctx { order: 3; margin: var(--space-2) 0 0; font-size: var(--fs-xs); color: var(--color-muted); }
+  .metric-src { font-size: var(--fs-xs); color: var(--color-muted); margin: var(--space-4) 0 0; }
+  .cs-body { display: grid; gap: var(--space-10); }
+  @media (min-width: 960px) { .cs-body { grid-template-columns: 18rem 1fr; gap: var(--space-16); } .cs-aside { position: sticky; top: 7rem; align-self: start; } }
+  .cs-aside { padding: var(--space-6); background: #fff; border: 1px solid var(--qw-line); border-radius: var(--radius-lg); }
+  .cs-aside__text { font-weight: var(--fw-medium); color: var(--qw-ink-900); }
+  .cs-story { max-width: 44rem; font-size: 1.0625rem; line-height: 1.75; }
+  .cs-story h2 { font-size: var(--fs-xl); margin-top: var(--space-10); }
+  .cs-story h2:first-child { margin-top: 0; }
+</style>

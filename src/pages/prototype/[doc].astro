@@ -1,0 +1,43 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import { docs } from '../../lib/docs';
+export function getStaticPaths() { return docs.map((d) => ({ params: { doc: d.slug }, props: { d: d } })); }
+const { d } = Astro.props as { d: (typeof docs)[number] };
+const { Content } = d;
+const crumbs = [{ label: 'Home', href: '/' }, { label: 'Prototype review hub', href: '/prototype/' }, { label: d.title }];
+const i = docs.findIndex((x) => x.slug === d.slug);
+---
+<BaseLayout seo={{ title: `${d.title} | QM-113 Prototype`, description: d.summary, noindex: true }} breadcrumbs={crumbs}>
+  <div class="doc-wrap container">
+    <Breadcrumbs items={crumbs} />
+    <div class="doc-grid">
+      <nav class="doc-nav" aria-label="Prototype documents">
+        <ol>{docs.map((x) => <li><a href={`/prototype/${x.slug}/`} aria-current={x.slug === d.slug ? 'page' : undefined}>{x.title}</a></li>)}</ol>
+        <p><a href="/prototype/claims/">Claims register</a> · <a href="/design-system/">Design system</a></p>
+      </nav>
+      <article class="prose doc">
+        <Content />
+        <p class="doc-pager">{i > 0 && <a href={`/prototype/${docs[i - 1].slug}/`}>Previous: {docs[i - 1].title}</a>}{i < docs.length - 1 && <a href={`/prototype/${docs[i + 1].slug}/`}>Next: {docs[i + 1].title}</a>}</p>
+      </article>
+    </div>
+  </div>
+</BaseLayout>
+<style>
+  .doc-wrap { padding-block: var(--space-8) var(--space-16); }
+  .doc-grid { display: grid; gap: var(--space-10); }
+  @media (min-width: 1100px) { .doc-grid { grid-template-columns: 16rem minmax(0, 1fr); } .doc-nav { position: sticky; top: 6.5rem; align-self: start; } }
+  .doc-nav ol { list-style: none; padding: 0; margin: 0 0 var(--space-4); display: grid; gap: 2px; font-size: var(--fs-sm); }
+  .doc-nav a { display: block; padding: 0.4rem 0.6rem; border-radius: var(--radius-sm); text-decoration: none; color: var(--qw-ink-900); }
+  .doc-nav a:hover { background: var(--qw-teal-50); }
+  .doc-nav a[aria-current] { background: var(--qw-teal-50); box-shadow: inset 3px 0 0 var(--qw-teal-700); font-weight: var(--fw-semibold); }
+  .doc-nav p { font-size: var(--fs-sm); }
+  .doc { font-size: 1rem; max-width: none; min-width: 0; }
+  .doc :global(h1) { font-size: var(--fs-2xl); }
+  .doc :global(h2) { font-size: var(--fs-xl); margin-top: 1.8em; }
+  .doc :global(table) { font-size: var(--fs-xs); display: block; overflow-x: auto; max-width: 100%; }
+  .doc :global(td), .doc :global(th) { min-width: 7rem; }
+  .doc :global(pre) { font-size: var(--fs-xs); line-height: 1.5; }
+  .doc :global(blockquote) { font-size: var(--fs-base); }
+  .doc-pager { display: flex; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; margin-top: var(--space-12); padding-top: var(--space-6); border-top: 1px solid var(--qw-line); font-weight: var(--fw-semibold); }
+</style>

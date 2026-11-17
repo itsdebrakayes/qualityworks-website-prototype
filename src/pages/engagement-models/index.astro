@@ -1,0 +1,15 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import ServiceCard from '../../components/ServiceCard.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { services } from '../../data/services';
+import { ctas } from '../../data/site';
+const models = services.filter((s) => s.kind === 'engagement-model');
+const crumbs = [{ label: 'Home', href: '/' }, { label: 'Solutions', href: '/services/' }, { label: 'Engagement models' }];
+---
+<BaseLayout seo={{ title: 'Engagement Models: Dedicated Teams, Staff Augmentation | QualityWorks', description: 'Work with QualityWorks through dedicated teams, staff augmentation or consulting and training — whichever fits your roadmap.' }} breadcrumbs={crumbs}>
+  <PageHero eyebrow="Engagement models" title="Choose how we work together" lede="The same QualityWorks standards, delivered in the way that fits your team: a dedicated team, embedded specialists, or consulting and training." breadcrumbs={crumbs} primary={ctas.contact} />
+  <section class="section"><div class="container"><h2 class="visually-hidden">Models</h2><div class="grid grid--3">{models.map((m) => <ServiceCard service={m} />)}</div></div></section>
+  <CtaBand title="Not sure which model fits?" primary={ctas.contact} />
+</BaseLayout>

@@ -1,0 +1,26 @@
+---
+import Icon from './Icon.astro';
+import type { Product } from '../data/types';
+interface Props { p: Product; headingLevel?: 'h2' | 'h3' }
+const { p, headingLevel = 'h3' } = Astro.props;
+const H = headingLevel;
+const external = p.path.startsWith('http');
+const statusLabel = { available: 'On this site', external: 'Separate platform', 'information-only': 'Information', 'awaiting-product-owner': 'Details pending' }[p.status];
+---
+<article class:list={['card', 'product-card', `product-card--${p.accent}`]}>
+  <div class="card__body">
+    <p class="product-card__top"><span class="badge">{statusLabel}</span></p>
+    <H class="card__title"><a href={p.path} {...(external ? { target: '_blank', rel: 'noopener' } : {})}>{p.name}{external && <span class="visually-hidden"> (external site, opens in a new tab)</span>}</a></H>
+    <p class="product-card__tagline">{p.tagline}</p>
+    <p class="product-card__summary">{p.summary}</p>
+    <span class="card__footer link-arrow" aria-hidden="true">{external ? `Visit ${new URL(p.path).hostname.replace('www.', '')}` : 'Learn more'}<Icon name={external ? 'external' : 'arrow'} /></span>
+  </div>
+</article>
+<style>
+  .product-card { border-top: 4px solid var(--accent, var(--qw-teal-500)); }
+  .product-card--green { --accent: var(--qw-green-400); }
+  .product-card--gold { --accent: var(--qw-gold-400); }
+  .product-card--slate { --accent: var(--qw-slate-300); }
+  .product-card__tagline { font-weight: var(--fw-semibold); color: var(--color-heading); font-size: var(--fs-sm); }
+  .product-card__summary { font-size: var(--fs-sm); color: var(--color-muted); }
+</style>

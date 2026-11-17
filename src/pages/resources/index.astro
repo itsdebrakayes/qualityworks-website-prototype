@@ -1,0 +1,69 @@
+---
+/**
+ * RESOURCE HUB (proposed new route; live "Resources" menu holds only Blog).
+ * Combines articles, news/awards, whitepapers and events with type chips + topic filter.
+ * Persona: QA Director (B), Marketing/Ops (E). Core question: "What can I learn before I talk to sales?"
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import EventCard from '../../components/EventCard.astro';
+import EmptyState from '../../components/EmptyState.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { articles, contentTypes } from '../../data/articles';
+import { events } from '../../data/events';
+import { ctas } from '../../data/site';
+const crumbs = [{ label: 'Home', href: '/' }, { label: 'Resources' }];
+const topics = [...new Set(articles.flatMap((a) => a.categories))].filter((c) => c !== 'Uncategorized').sort();
+const count = (t: string) => t === 'event' ? events.length : articles.filter((a) => a.type === t).length;
+---
+<BaseLayout seo={{ title: 'Resources: Articles, Whitepapers, News & Events | QualityWorks', description: 'Insights on software testing, test automation, agentic QA and AI adoption from QualityWorks, plus company news, whitepapers and speaking events.' }} breadcrumbs={crumbs}>
+  <PageHero eyebrow="Resources" title="Insights, news and events" lede="Practical thinking on software quality, AI and delivery from the QualityWorks team." breadcrumbs={crumbs} compact />
+  <section class="section">
+    <div class="container">
+      <h2 class="visually-hidden">All resources</h2>
+      <form class="filter-bar res-filter" id="res-filter" role="search" aria-label="Filter resources" data-filter-bar onsubmit="return false">
+        <div class="res-filter__types">
+          <p class="res-filter__label" id="type-label">Content type</p>
+          <div class="chips" role="group" aria-labelledby="type-label" data-chip-filter="type">
+            <button type="button" class="chip" aria-pressed="true" data-value="">All</button>
+            {contentTypes.map((t) => <button type="button" class="chip" aria-pressed="false" data-value={t.id}>{t.label} <span class="chip__n">{count(t.id)}</span></button>)}
+          </div>
+        </div>
+        <div class="field">
+          <label for="res-topic">Topic</label>
+          <select class="select" id="res-topic" data-filter="topic"><option value="">All topics</option>{topics.map((t) => <option value={t}>{t}</option>)}</select>
+        </div>
+        <div class="filter-bar__actions"><button type="button" class="btn btn--ghost btn--sm" data-filter-clear disabled>Clear filters</button></div>
+        <p class="filter-bar__count" aria-live="polite" data-filter-count></p>
+      </form>
+      <div class="grid grid--3" id="res-results">
+        {articles.map((a) => <ArticleCard a={a} />)}
+        {events.map((e) => <div class="res-event" data-type="event" data-categories=""><EventCard e={e} /></div>)}
+      </div>
+      <EmptyState title="Nothing matches those filters" id="res-empty" hidden><p>Events have no topic tags yet. Try another topic or content type.</p><button type="button" class="btn btn--secondary btn--sm" data-empty-clear>Clear filters</button></EmptyState>
+    </div>
+  </section>
+  <CtaBand title="Want to talk it through with the authors?" primary={ctas.contact} />
+</BaseLayout>
+<style>
+  .filter-bar { display: grid; gap: var(--space-4); align-items: end; grid-template-columns: 1fr; padding: var(--space-5); background: var(--qw-canvas); border: 1px solid var(--qw-line); border-radius: var(--radius-lg); margin-bottom: var(--space-8); }
+  @media (min-width: 900px) { .filter-bar { grid-template-columns: 1fr 16rem auto; } }
+  .res-filter__label { font-weight: var(--fw-semibold); font-size: var(--fs-sm); color: var(--qw-ink-900); margin-bottom: var(--space-2); }
+  .chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .chip { min-height: 44px; padding: 0.4rem 1rem; border-radius: var(--radius-pill); border: 1.5px solid #A9B5BF; background: #fff; color: var(--qw-ink-900); font: var(--fw-semibold) var(--fs-sm)/1 var(--font-sans); cursor: pointer; display: inline-flex; gap: 0.4rem; align-items: center; }
+  .chip:hover { border-color: var(--qw-teal-700); }
+  .chip[aria-pressed="true"] { background: var(--qw-teal-700); border-color: var(--qw-teal-700); color: #fff; }
+  .chip__n { font-family: var(--font-mono); font-size: var(--fs-xs); opacity: 0.75; }
+  .filter-bar__actions { display: flex; align-items: center; min-height: 48px; }
+  .filter-bar__count { grid-column: 1 / -1; margin: 0; font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--qw-ink-900); }
+  .res-event { display: flex; }
+  .res-event > :global(*) { flex: 1; }
+  .res-event[hidden] { display: none; }
+</style>
+<script>
+  import { initFilters } from '../../lib/filters';
+  const api = initFilters({ bar: '#res-filter', results: '#res-results', empty: '#res-empty', noun: ['resource', 'resources'],
+    match: (el, f) => (!f.type || el.dataset.type === f.type) && (!f.topic || (el.dataset.categories ?? '').split('|').includes(f.topic)) });
+  document.querySelector('[data-empty-clear]')!.addEventListener('click', () => api.clear());
+</script>

@@ -1,0 +1,179 @@
+---
+/**
+ * QUALITYWATCHER AI TOOLS (/qualitywatcher-ai-tools/ — legacy URL preserved).
+ * Product-forward presentation inside the shared system (same header/footer/type/buttons).
+ * Primary persona: QA Director (B). Secondary: Automation engineer / CTO.
+ * Core question: "What does it automate, how do I access it, where do humans review?"
+ * Conversion: open the tool on qualitywatcher.ai (external hand-off) or talk to an automation expert.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import ProcessSteps from '../../components/ProcessSteps.astro';
+import StatBlock from '../../components/StatBlock.astro';
+import FaqAccordion from '../../components/FaqAccordion.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import Alert from '../../components/Alert.astro';
+import Button from '../../components/Button.astro';
+import Icon from '../../components/Icon.astro';
+import CaseStudyCard from '../../components/CaseStudyCard.astro';
+import { qwTools } from '../../data/products';
+import { caseStudyBySlug } from '../../data/caseStudies';
+import { faqLd } from '../../lib/schema';
+import type { FaqItem } from '../../data/types';
+
+const crumbs = [{ label: 'Home', href: '/' }, { label: 'Products', href: '/products/' }, { label: 'QualityWatcher AI Tools' }];
+const qwExternal = { label: 'Open QualityWatcher AI', href: 'https://www.qualitywatcher.ai/', external: true, handoffNote: 'Opens qualitywatcher.ai, the separate QualityWatcher product site' };
+const statusMeta = {
+  'requires-sign-in': { label: 'Requires sign-in', cls: 'badge--warning' },
+  'not-found-404': { label: 'Unavailable (404)', cls: 'badge--danger' },
+  available: { label: 'Available', cls: 'badge--success' },
+  'not-verified': { label: 'Not verified', cls: 'badge--neutral' },
+} as const;
+const faqs: FaqItem[] = [
+  { q: 'What is QualityWatcher AI?', a: 'QualityWatcher AI is a set of AI tools from QualityWorks that generate test cases from requirements in any format, convert test cases into UI automation scripts, and answer test automation questions. The tools run on qualitywatcher.ai.', provenance: { source: 'live-site-copy', approval: 'published-live' } },
+  { q: 'Do I need an account?', a: 'As of November 2026 the tool links lead to a sign-in page. The current corporate page describes free registered access and three uses without registration; the product owner must confirm which is correct before launch.', provenance: { source: 'proposed-copy', approval: 'pending-approval', note: 'Discrepancy P-03' } },
+  { q: 'Does AI replace testers?', a: 'No. Generated test cases and scripts are drafts. QA engineers review titles, steps, data and expected results before they are used, and our consultants train teams to do that review well.', provenance: { source: 'proposed-copy', approval: 'pending-approval', note: 'Human-review wording to be confirmed by product owner.' } },
+  { q: 'How is QualityWatcher AI different from QualityWatcher test management?', a: 'QualityWatcher test management (qualitywatcher.com) is a test case management platform. QualityWatcher AI (qualitywatcher.ai) is the AI tool suite. Generated test cases can be exported to QualityWatcher.', provenance: { source: 'proposed-copy', approval: 'pending-approval', note: 'Relationship P-02 to confirm.' } },
+];
+const wssc = caseStudyBySlug('ai-powered-test-case-generation-wssc');
+---
+<BaseLayout seo={{ title: 'QualityWatcher AI Tools: AI Test Case & Automation Generation | QualityWorks', description: 'Generate test cases from any requirement format, turn them into UI automation and get automation help with QualityWatcher AI tools from QualityWorks.' }} breadcrumbs={crumbs} jsonLd={[faqLd(faqs)]}>
+  <PageHero variant="product" eyebrow="QualityWatcher AI · Product" title="Simplify quality with AI-driven testing tools" lede="Generate real-world test cases from requirements in any format, convert them into automation scripts, and get expert automation help — with your QA team reviewing every output." breadcrumbs={crumbs} primary={qwExternal} secondary={{ label: 'Talk to an automation expert', href: '/contact-us/' }}>
+    <Fragment slot="aside">
+      <figure class="mock" aria-labelledby="mock-cap">
+        <div class="mock__bar" aria-hidden="true"><span></span><span></span><span></span><p>Rapid Test Case Generation</p></div>
+        <div class="mock__body">
+          <p class="mock__label mono">Input · user story</p>
+          <p class="mock__input">As a member, I can reset my password from the login page using my registered email.</p>
+          <p class="mock__label mono">Generated · for review</p>
+          <table class="mock__table">
+            <thead><tr><th scope="col">Title</th><th scope="col">Expected result</th><th scope="col">Review</th></tr></thead>
+            <tbody>
+              <tr><td>Reset with registered email</td><td>Reset link sent</td><td><span class="pill ok">Approved</span></td></tr>
+              <tr><td>Reset with unknown email</td><td>Neutral message shown</td><td><span class="pill ok">Approved</span></td></tr>
+              <tr><td>Expired reset link</td><td>Prompt to request new link</td><td><span class="pill wait">Needs edit</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <figcaption id="mock-cap">Illustrative interface preview built for the prototype — not a product screenshot. Replace with approved screenshots.</figcaption>
+      </figure>
+    </Fragment>
+  </PageHero>
+
+  <section class="section" aria-labelledby="how-title">
+    <div class="container">
+      <SectionHeading eyebrow="How it works" title="From any input to reviewed test assets" id="how-title" />
+      <ProcessSteps steps={[
+        { title: 'Explore tools', text: 'Start with pre-populated examples, or enter your own requirements, stories or schemas.' },
+        { title: 'Observe and review results', text: 'Test cases are generated with titles, steps, test data and expected results, ready for your team to review.' },
+        { title: 'Automate and export', text: 'Transform reviewed test cases into automation scripts, or export them to QualityWatcher or CSV.' },
+      ]} />
+    </div>
+  </section>
+
+  <section class="section surface-product" aria-labelledby="tools-title">
+    <div class="container">
+      <SectionHeading eyebrow="The tools" title="Four QualityWatcher AI tools" lede="Status shown is what the prototype observed on 17 Nov 2026. The product owner must confirm availability before launch." id="tools-title" />
+      <div class="tools">
+        {qwTools.map((t) => {
+          const st = statusMeta[t.observedStatus];
+          return (
+            <article class="tool">
+              <p class="tool__status"><span class:list={['badge', st.cls]}>{st.label}</span></p>
+              <h3>{t.name}</h3>
+              <p>{t.description}</p>
+              {t.observedStatus === 'not-found-404' ? (
+                <p class="tool__unavailable"><Icon name="alert" />Link currently returns “not found”. CTA disabled until confirmed.</p>
+              ) : (
+                <Button cta={{ label: t.ctaLabel, href: t.ctaHref, external: true, kind: 'secondary', handoffNote: 'Opens qualitywatcher.ai; sign-in required' }} size="sm" />
+              )}
+            </article>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="human-title">
+    <div class="container split">
+      <div>
+        <p class="eyebrow">Human review</p>
+        <h2 id="human-title">AI drafts. People decide.</h2>
+        <p class="lede">The tools reduce repetitive work that invites human error. They don’t decide what “correct” means for your product.</p>
+      </div>
+      <div>
+        <ul class="checklist review-list">
+          <li><span><strong>Automated:</strong> drafting test case titles, steps, test data and expected results from your input; converting reviewed cases into UI automation scripts; suggesting fixes when automation fails.</span></li>
+          <li><span><strong>Human-validated:</strong> whether a test case reflects the real requirement, edge cases specific to your domain, data privacy of inputs, and whether a script is fit to run in your pipeline.</span></li>
+          <li><span><strong>Where QualityWorks helps:</strong> our consultants set up review workflows and train teams — see the WSSC pilot below.</span></li>
+        </ul>
+        <p class="muted small-note" data-review-note="Proposed copy — confirm with product owner">Proposed copy. The exact automated vs. human steps must be confirmed by the product owner.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section surface-alt" aria-labelledby="results-title">
+    <div class="container">
+      <SectionHeading eyebrow="Results" title="Average results per client project" id="results-title" />
+      <StatBlock stats={[
+        { value: '10×', label: 'Reduction in time to create test cases', claim: 'C07' },
+        { value: '3×', label: 'Reduction in time to create an automated test', claim: 'C08' },
+        { value: '80%', label: 'Accelerated automation debugging', claim: 'C09' },
+      ]} footnote="These metrics represent QualityWorks’ average result per client project, as stated on the current page. Sample and method to be documented." />
+      {wssc && <div class="grid grid--3 wssc"><CaseStudyCard cs={wssc} /></div>}
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="access-title">
+    <div class="container">
+      <SectionHeading eyebrow="Access" title="Registered and unregistered access" id="access-title" />
+      <Alert tone="warning" title="Discrepancy to resolve before launch (P-03)">
+        <p>The live page lists the tiers below, but every tool link currently redirects to a sign-in page. Keep, change or remove this section once the product owner confirms the access model.</p>
+      </Alert>
+      <div class="grid grid--2 tiers">
+        <div class="tier"><h3>Registered user</h3><ul class="checklist"><li>Free access</li><li>Daily usage</li><li>Detailed filtering</li><li>Chat history</li><li>Export test cases to QualityWatcher</li><li>Export as CSV</li></ul></div>
+        <div class="tier"><h3>Unregistered user</h3><ul class="checklist"><li>Free access</li><li>Limited access: 3 uses</li><li>Export test cases to QualityWatcher</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section surface-alt" aria-labelledby="faq-title">
+    <div class="container container--narrow">
+      <SectionHeading eyebrow="FAQ" title="QualityWatcher AI questions" id="faq-title" />
+      <FaqAccordion items={faqs} />
+    </div>
+  </section>
+
+  <CtaBand eyebrow="Get started" title="Try the tools, or let us set them up with your team." primary={qwExternal} secondary={{ label: 'Talk to an automation expert', href: '/contact-us/' }} />
+</BaseLayout>
+<style>
+  .mock { margin: 0; background: #0B1312; border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-lg); }
+  .mock__bar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); }
+  .mock__bar span { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,0.18); }
+  .mock__bar p { margin: 0 0 0 10px; font-size: var(--fs-xs); color: var(--qw-slate-300); }
+  .mock__body { padding: var(--space-5); }
+  .mock__label { font-size: 0.6875rem; letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-teal-300); margin-bottom: var(--space-2); }
+  .mock__input { font-size: var(--fs-sm); padding: var(--space-3); border-radius: var(--radius-sm); background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); color: #E6ECF0; margin-bottom: var(--space-4); }
+  .mock__table { font-size: var(--fs-xs); color: #D5DDE4; }
+  .mock__table th { text-align: left; font-weight: var(--fw-semibold); color: var(--qw-slate-300); padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+  .mock__table td { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 99px; font-weight: var(--fw-semibold); white-space: nowrap; }
+  .pill.ok { background: rgba(143,198,64,0.15); color: var(--qw-green-400); }
+  .pill.wait { background: rgba(244,185,66,0.15); color: var(--qw-gold-400); }
+  .mock figcaption { font-size: var(--fs-xs); color: var(--qw-gold-400); padding: var(--space-3) var(--space-5); border-top: 1px dashed rgba(244,185,66,0.4); }
+  .tools { display: grid; gap: var(--space-5); grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
+  .tool { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-6); border-radius: var(--radius-lg); background: var(--color-surface); border: 1px solid var(--color-border); }
+  .tool h3 { font-size: var(--fs-md); margin: 0; }
+  .tool p { margin: 0; font-size: var(--fs-sm); }
+  .tool :global(.btn) { margin-top: auto; align-self: flex-start; }
+  .tool__unavailable { margin-top: auto !important; display: flex; gap: 0.5rem; color: var(--qw-gold-400); }
+  .tool__unavailable :global(svg) { width: 18px; height: 18px; flex: none; }
+  .surface-product .badge--warning { background: rgba(244,185,66,0.12); color: var(--qw-gold-400); border-color: rgba(244,185,66,0.4); }
+  .surface-product .badge--danger { background: rgba(255,120,100,0.12); color: #FFB4A8; border-color: rgba(255,120,100,0.4); }
+  .review-list li span { display: block; }
+  .small-note { font-size: var(--fs-xs); margin-top: var(--space-4); }
+  .wssc { margin-top: var(--space-10); }
+  .tiers { margin-top: var(--space-6); }
+  .tier { padding: var(--space-6); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
+</style>

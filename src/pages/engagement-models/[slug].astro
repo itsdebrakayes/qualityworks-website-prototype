@@ -1,0 +1,8 @@
+---
+import ServiceTemplate from '../../components/templates/ServiceTemplate.astro';
+import { services } from '../../data/services';
+export function getStaticPaths() {
+  return services.filter((s) => s.path.startsWith('/engagement-models/')).map((s) => ({ params: { slug: s.slug }, props: { service: s } }));
+}
+---
+<ServiceTemplate service={Astro.props.service} />

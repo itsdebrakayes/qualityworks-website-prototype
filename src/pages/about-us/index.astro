@@ -1,0 +1,87 @@
+---
+/** ABOUT (/about-us/ — legacy URL). Persona: Public sector (C), Enterprise (A), job applicants (F). */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import ProofBlock from '../../components/ProofBlock.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import ClaimRef from '../../components/ClaimRef.astro';
+import Wireframe from '../../components/Wireframe.astro';
+import Button from '../../components/Button.astro';
+import { leadership } from '../../data/team';
+import { ctas, site } from '../../data/site';
+const crumbs = [{ label: 'Home', href: '/' }, { label: 'Company' }, { label: 'About Us' }];
+const values = [
+  ['Quality', 'We infuse quality into everything we do to deliver industry-leading solutions.'],
+  ['Innovation', 'We’re innovators who focus on creating the highest value for our customers.'],
+  ['Integrity', 'We pride ourselves on being true to our word and transparent in our work.'],
+  ['Teamwork', 'We take a one-team approach to ensure the success of every project.'],
+  ['Entrepreneurial spirit', 'We actively seek out change and opportunities for continuous improvement.'],
+  ['Results oriented', 'We are a results-driven bunch, focused on deliverables and hitting our milestones.'],
+];
+const ceo = leadership[0];
+---
+<BaseLayout seo={{ title: 'About QualityWorks | The Quality-Driven Innovation Company', description: 'Founded in 2010, QualityWorks is a Black-owned, woman-led software solutions firm helping companies build higher-quality software, future-ready teams and faster delivery.' }} breadcrumbs={crumbs}>
+  <PageHero eyebrow="About us" title="The quality-driven innovation company" lede="We go beyond the code and beyond testing to help our clients achieve their most extraordinary digital goals." breadcrumbs={crumbs} primary={{ label: 'Work with us', href: '/contact-us/' }} secondary={{ label: 'Explore careers', href: '/careers/' }} />
+
+  <section class="section" aria-labelledby="story-title">
+    <div class="container split">
+      <div><p class="eyebrow">Who we are</p><h2 id="story-title">Our story</h2></div>
+      <div class="story">
+        <p class="lede">Founded in 2010, QualityWorks is a Black-owned, woman-led software solutions firm<ClaimRef id="C14" /> focused on enabling companies to build higher-quality software, create future-ready teams and accelerate software delivery.</p>
+        <p>The company has grown to serve clients in the US, UK, Latin America and the Caribbean<ClaimRef id="C15" />. Our vision is to deliver next-level digital solutions through innovations in testing and quality-driven development. At our core, we are an innovation company committed to revolutionizing how the world efficiently and collaboratively builds quality software.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section surface-dark" aria-labelledby="ceo-title">
+    <div class="container ceo">
+      <img src={ceo.photo} alt={ceo.photoAlt} width="320" height="303" loading="lazy" />
+      <div>
+        <p class="eyebrow">From our CEO</p>
+        <h2 id="ceo-title">{ceo.name}, {ceo.role}</h2>
+        <blockquote><p>“I started QualityWorks because I wanted to build a company that was passionate about what it takes to deliver continuous quality and value to users. Our philosophy as a company is to always take a ‘One Team Approach.’ We do this by focusing on creating partnerships with our clients that are built on transparency, collaboration, and diverse perspectives.”</p></blockquote>
+        <p class="ceo__cert">QualityWorks describes itself as WBE, MBE and WOSB certified<ClaimRef id="C13" />. Certificate details will be shown here once supplied.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="values-title">
+    <div class="container">
+      <SectionHeading eyebrow="What we stand for" title="Our core values" id="values-title" />
+      <dl class="values">{values.map(([t, d]) => <div><dt>{t}</dt><dd>{d}</dd></div>)}</dl>
+    </div>
+  </section>
+
+  <section class="section surface-alt" aria-labelledby="team-title">
+    <div class="container">
+      <SectionHeading eyebrow="Our team" title="Leadership and team" lede="We provide agile-minded digital experience experts who are ready to make an impact from day one — coaches focused on team capacity building, not just technologists who write and test code." id="team-title" />
+      <div class="grid grid--3">
+        <Wireframe title="Leadership profiles" decision="Supply approved names, roles, photos and short bios for the leadership team. The prototype shows only the CEO, whose profile is on the live site." owner="HR / Marketing" />
+        <Wireframe title="How we protect your data" decision="The live page has a “How We Protect Your Data” section. Migrate its exact copy after security review." owner="Security" />
+        <Wireframe title="Communities we contribute to" decision="The live page has a logo carousel of communities. Confirm each logo use is permitted." owner="Marketing" />
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="reviews-title">
+    <div class="container">
+      <SectionHeading eyebrow="Reviews" title="Ranked by our clients as one of the top companies in the industry" id="reviews-title" />
+      <ProofBlock />
+      <p class="reviews-more"><Button cta={{ label: 'Read more reviews on Clutch', href: site.externalPlatforms.clutch, external: true, kind: 'secondary', handoffNote: 'Opens clutch.co' }} /></p>
+    </div>
+  </section>
+  <CtaBand title="Want to work with us?" text="Jumpstart your project, or your career in tech." primary={ctas.contact} secondary={{ label: 'Explore careers', href: '/careers/' }} />
+</BaseLayout>
+<style>
+  .story p:not(.lede) { color: var(--color-muted); }
+  .ceo { display: grid; gap: var(--space-10); align-items: center; }
+  @media (min-width: 860px) { .ceo { grid-template-columns: 18rem 1fr; gap: var(--space-16); } }
+  .ceo img { border-radius: 50%; width: 100%; max-width: 18rem; aspect-ratio: 1; object-fit: cover; }
+  .ceo blockquote { margin: 0 0 var(--space-6); font-size: var(--fs-md); line-height: 1.6; color: #fff; }
+  .ceo__cert { font-size: var(--fs-sm); color: var(--color-muted); }
+  .values { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: var(--space-8) var(--space-6); margin: 0; }
+  .values dt { font-size: var(--fs-md); font-weight: var(--fw-bold); color: var(--color-heading); padding-top: var(--space-4); border-top: 2px solid var(--qw-teal-500); }
+  .values dd { margin: var(--space-2) 0 0; color: var(--color-muted); }
+  .reviews-more { margin-top: var(--space-6); }
+</style>

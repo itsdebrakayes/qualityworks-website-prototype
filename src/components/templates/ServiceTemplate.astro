@@ -1,0 +1,156 @@
+---
+/**
+ * Service detail template — reused by /services/*, /engagement-models/*, /maturity-assessments/,
+ * /innovation-tourism/. Sections render only when data exists, so "summary" records degrade
+ * gracefully without layout changes.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../PageHero.astro';
+import SectionHeading from '../SectionHeading.astro';
+import ProcessSteps from '../ProcessSteps.astro';
+import FaqAccordion from '../FaqAccordion.astro';
+import CaseStudyCard from '../CaseStudyCard.astro';
+import ProductCard from '../ProductCard.astro';
+import ServiceCard from '../ServiceCard.astro';
+import CtaBand from '../CtaBand.astro';
+import Alert from '../Alert.astro';
+import Icon from '../Icon.astro';
+import ClaimRef from '../ClaimRef.astro';
+import { caseStudyBySlug } from '../../data/caseStudies';
+import { productBySlug } from '../../data/products';
+import { services } from '../../data/services';
+import { industryBySlug } from '../../data/industries';
+import { faqLd, serviceLd } from '../../lib/schema';
+import type { Service } from '../../data/types';
+interface Props { service: Service }
+const { service: s } = Astro.props;
+
+const parentCrumb = s.kind === 'engagement-model' ? { label: 'Engagement models', href: '/engagement-models/' } : { label: 'Solutions', href: '/services/' };
+const crumbs = [{ label: 'Home', href: '/' }, parentCrumb, { label: s.name }];
+const related = (s.relatedCaseStudies ?? []).map(caseStudyBySlug).filter(Boolean).slice(0, 3);
+const relProducts = (s.relatedProducts ?? []).map(productBySlug).filter(Boolean);
+const relIndustries = (s.relatedIndustries ?? []).map(industryBySlug).filter(Boolean);
+const siblings = services.filter((x) => x.group === s.group && x.slug !== s.slug && x.contentDepth === 'full').slice(0, 3);
+const jsonLd = [serviceLd(s.name, s.seo.description, s.path), ...(s.faqs?.length ? [faqLd(s.faqs)] : [])];
+---
+<BaseLayout seo={s.seo} breadcrumbs={crumbs} jsonLd={jsonLd}>
+  <PageHero eyebrow={s.group} title={s.heroTitle} lede={s.heroLede} breadcrumbs={crumbs} primary={s.primaryCta} secondary={s.secondaryCta}>
+    <Fragment slot="aside">
+      <div class="svc-glance">
+        <p class="svc-glance__label mono">At a glance</p>
+        <dl>
+          <div><dt>Problem it solves</dt><dd>{s.buyerProblem}</dd></div>
+          <div><dt>Best for</dt><dd>{s.personas.primary}{s.personas.secondary && <>; {s.personas.secondary}</>}</dd></div>
+          <div><dt>Type</dt><dd>{{ service: 'Consulting service', 'engagement-model': 'Engagement model', assessment: 'Assessment', program: 'Program' }[s.kind]}</dd></div>
+        </dl>
+        {s.claims?.length ? <p class="svc-glance__claims">{s.claims.map((c) => <ClaimRef id={c} />)}</p> : null}
+      </div>
+    </Fragment>
+  </PageHero>
+
+  {s.contentDepth === 'summary' && (
+    <div class="container"><Alert tone="warning" title="Summary record — full content pending migration" class="svc-alert">
+      <p>This page exists on the live site. The prototype shows the template with a summary only. {s.provenance.note}</p>
+    </Alert></div>
+  )}
+
+  {s.challenge && (
+    <section class="section" aria-labelledby="challenge-title">
+      <div class="container split">
+        <div><p class="eyebrow">The challenge</p><h2 id="challenge-title">{s.buyerProblem}</h2></div>
+        <div><p class="lede">{s.challenge}</p></div>
+      </div>
+    </section>
+  )}
+
+  <section class:list={['section', { 'surface-alt': !!s.challenge }]} aria-labelledby="caps-title">
+    <div class="container">
+      <SectionHeading eyebrow="What we deliver" title={s.kind === 'engagement-model' ? 'How this model works' : `${s.name} capabilities`} id="caps-title" />
+      <div class="caps grid grid--2">
+        {s.capabilities.map((c) => (
+          <div class="cap">
+            <span class="cap__mark" aria-hidden="true"><Icon name="check" /></span>
+            <div><h3>{c.title}</h3><p>{c.text}</p></div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  {s.process && (
+    <section class="section" aria-labelledby="process-title">
+      <div class="container">
+        <SectionHeading eyebrow="Our approach" title="How we deliver" id="process-title" />
+        <ProcessSteps steps={s.process} />
+      </div>
+    </section>
+  )}
+
+  {s.considerations && s.considerations.length > 0 && (
+    <section class="section surface-dark" aria-labelledby="consider-title" data-review-note="Proposed buyer-specific copy (pending approval)">
+      <div class="container">
+        <SectionHeading eyebrow="Buyer considerations" title="What to know before you start" id="consider-title" />
+        <div class="grid grid--3">
+          {s.considerations.map((c) => (
+            <div class="consider"><h3>{c.audience}</h3><p>{c.text}</p></div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {(related.length > 0 || relProducts.length > 0) && (
+    <section class="section" aria-labelledby="proof-title">
+      <div class="container">
+        <SectionHeading eyebrow="Proof" title="Related results" id="proof-title" />
+        {related.length > 0 && <div class="grid grid--3">{related.map((cs) => <CaseStudyCard cs={cs!} />)}</div>}
+        {relProducts.length > 0 && (
+          <div class="rel-products">
+            <h3 class="rel-title">Related products</h3>
+            <div class="grid grid--3">{relProducts.map((p) => <ProductCard p={p!} />)}</div>
+          </div>
+        )}
+      </div>
+    </section>
+  )}
+
+  {s.faqs && s.faqs.length > 0 && (
+    <section class="section surface-alt" aria-labelledby="faq-title">
+      <div class="container container--narrow">
+        <SectionHeading eyebrow="FAQ" title={`${s.name}: common questions`} id="faq-title" />
+        <FaqAccordion items={s.faqs} />
+      </div>
+    </section>
+  )}
+
+  {(siblings.length > 0 || relIndustries.length > 0) && (
+    <section class="section" aria-labelledby="more-title">
+      <div class="container">
+        <SectionHeading eyebrow="Keep exploring" title="Related services and industries" id="more-title" />
+        <div class="grid grid--3">{siblings.map((x) => <ServiceCard service={x} />)}</div>
+        {relIndustries.length > 0 && <p class="ind-links">Industries: {relIndustries.map((i, n) => <>{n > 0 && ' · '}<a href={i!.path}>{i!.name}</a></>)}</p>}
+      </div>
+    </section>
+  )}
+
+  <CtaBand title={`Talk to us about ${s.name.toLowerCase()}.`} text="Tell us where you are today. We’ll recommend a starting point — or tell you if you don’t need us." primary={s.primaryCta} secondary={{ label: 'See case studies', href: '/case-studies/' }} />
+</BaseLayout>
+<style>
+  .svc-glance { background: #fff; border: 1px solid var(--qw-line); border-radius: var(--radius-lg); padding: var(--space-6); box-shadow: var(--shadow-md); }
+  .svc-glance__label { font-size: var(--fs-xs); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-slate-500); }
+  .svc-glance dl { margin: 0; display: grid; gap: var(--space-4); }
+  .svc-glance dt { font-size: var(--fs-xs); font-weight: var(--fw-bold); text-transform: uppercase; letter-spacing: 0.06em; color: var(--qw-teal-700); }
+  .svc-glance dd { margin: 0.2rem 0 0; color: var(--qw-ink-900); font-weight: var(--fw-medium); }
+  :global(.svc-alert) { margin-top: var(--space-8); }
+  .cap { display: grid; grid-template-columns: 2.25rem 1fr; gap: var(--space-4); padding: var(--space-6); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
+  .cap__mark { width: 2.25rem; height: 2.25rem; border-radius: var(--radius-md); background: var(--qw-teal-50); color: var(--qw-teal-700); display: grid; place-items: center; }
+  .cap__mark :global(svg) { width: 20px; height: 20px; }
+  .cap h3 { font-size: var(--fs-md); margin-bottom: var(--space-2); }
+  .cap p { margin: 0; color: var(--color-muted); }
+  .consider { padding: var(--space-6); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); }
+  .consider h3 { font-size: var(--fs-md); color: var(--qw-green-400); }
+  .consider p { margin: 0; }
+  .rel-products { margin-top: var(--space-12); }
+  .rel-title { font-size: var(--fs-md); }
+  .ind-links { margin-top: var(--space-6); font-weight: var(--fw-semibold); }
+</style>

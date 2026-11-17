@@ -1,0 +1,30 @@
+---
+import Icon from './Icon.astro';
+interface Props { tone?: 'info' | 'success' | 'warning' | 'danger'; title?: string; role?: 'status' | 'alert' | 'none'; id?: string; hidden?: boolean; class?: string }
+const { tone = 'info', title, role = 'none', id, hidden, class: cls } = Astro.props;
+const icon = tone === 'success' ? 'check' : tone === 'info' ? 'info' : 'alert';
+---
+<div class:list={['alert', `alert--${tone}`, cls]} role={role === 'none' ? undefined : role} id={id} hidden={hidden} tabindex="-1">
+  <Icon name={icon} />
+  <div>
+    {title && <p class="alert__title">{title}</p>}
+    <div class="alert__body"><slot /></div>
+  </div>
+</div>
+<style>
+  .alert { display: grid; grid-template-columns: 1.4rem 1fr; gap: var(--space-3); padding: var(--space-4) var(--space-5); border-radius: var(--radius-md); border: 1px solid; font-size: var(--fs-sm); color: var(--qw-ink-900); }
+  .alert[hidden] { display: none; }
+  .alert :global(svg) { width: 1.4rem; height: 1.4rem; }
+  .alert--info { background: var(--qw-info-bg); border-color: var(--qw-teal-100); }
+  .alert--info :global(svg) { color: var(--qw-teal-700); }
+  .alert--success { background: var(--qw-success-bg); border-color: #BFE0C5; }
+  .alert--success :global(svg) { color: var(--qw-success); }
+  .alert--warning { background: var(--qw-warning-bg); border-color: #F5D7A8; }
+  .alert--warning :global(svg) { color: var(--qw-warning); }
+  .alert--danger { background: var(--qw-danger-bg); border-color: #F4C2BD; }
+  .alert--danger :global(svg) { color: var(--qw-danger); }
+  .alert__title { font-weight: var(--fw-bold); margin: 0 0 0.25rem; }
+  .alert__body :global(p:last-child) { margin-bottom: 0; }
+  .alert:focus { outline: none; }
+  .alert:focus-visible { outline: 3px solid var(--focus-ring); }
+</style>

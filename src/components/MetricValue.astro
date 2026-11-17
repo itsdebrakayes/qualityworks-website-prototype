@@ -1,0 +1,17 @@
+---
+/**
+ * Renders a metric value. The "→" character (U+2192) is NOT in Red Hat Display's Latin subset and
+ * would render in a fallback font, so "A → B" is drawn with an SVG arrow + accessible "to".
+ */
+interface Props { value: string }
+const parts = Astro.props.value.split('→').map((s) => s.trim());
+---
+{parts.length === 1 ? <>{parts[0]}</> : (
+  <span class="mv">{parts.map((p, i) => (
+    <>{i > 0 && <><svg class="mv__arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="visually-hidden"> to </span></>}<span>{p}</span></>
+  ))}</span>
+)}
+<style>
+  .mv { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 0.2em 0.3em; }
+  .mv__arrow { width: 0.8em; height: 0.8em; flex: none; }
+</style>

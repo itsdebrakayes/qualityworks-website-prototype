@@ -1,0 +1,25 @@
+---
+/** Visible breadcrumb trail. BreadcrumbList JSON-LD is emitted by BaseLayout from the same data. */
+import Icon from './Icon.astro';
+interface Props { items: { label: string; href?: string }[] }
+const { items } = Astro.props;
+---
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <ol>
+    {items.map((it, i) => (
+      <li>
+        {i > 0 && <Icon name="chevron-right" />}
+        {it.href && i < items.length - 1 ? <a href={it.href}>{it.label}</a> : <span aria-current="page">{it.label}</span>}
+      </li>
+    ))}
+  </ol>
+</nav>
+<style>
+  .breadcrumbs ol { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.5rem; list-style: none; padding: 0; margin: 0 0 var(--space-6); font-size: var(--fs-sm); }
+  .breadcrumbs li { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--color-muted); }
+  .breadcrumbs :global(svg) { width: 14px; height: 14px; opacity: 0.6; }
+  .breadcrumbs a { color: var(--color-text); text-decoration: none; }
+  .breadcrumbs a:hover { text-decoration: underline; }
+  .breadcrumbs li:last-child { min-width: 0; flex: 1 1 10rem; }
+  .breadcrumbs [aria-current] { color: var(--color-muted); display: block; max-width: 40ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+</style>

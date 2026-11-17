@@ -1,0 +1,52 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import Alert from '../../components/Alert.astro';
+import Button from '../../components/Button.astro';
+import FixtureLabel from '../../components/FixtureLabel.astro';
+import Icon from '../../components/Icon.astro';
+import { events, eventPhase, canRegister, formatEventDate } from '../../data/events';
+import type { EventRecord } from '../../data/types';
+export function getStaticPaths() { return events.map((e) => ({ params: { slug: e.slug }, props: { e } })); }
+const { e } = Astro.props as { e: EventRecord };
+const phase = eventPhase(e);
+const crumbs = [{ label: 'Home', href: '/' }, { label: 'Events', href: '/events/' }, { label: e.title }];
+const time = e.startDate ? new Date(e.startDate).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: e.timeZone, timeZoneName: 'short' }) : null;
+const ld = e.startDate && e.provenance.approval !== 'fixture' ? [{ '@context': 'https://schema.org', '@type': 'Event', name: e.title, startDate: e.startDate, endDate: e.endDate,
+  eventStatus: phase === 'cancelled' ? 'https://schema.org/EventCancelled' : 'https://schema.org/EventScheduled',
+  eventAttendanceMode: e.venueType === 'online' ? 'https://schema.org/OnlineEventAttendanceMode' : 'https://schema.org/OfflineEventAttendanceMode',
+  location: e.venueType === 'online' ? { '@type': 'VirtualLocation', url: e.registrationUrl } : { '@type': 'Place', name: e.venue ?? 'TBC', address: e.venue ?? 'TBC' } }] : [];
+---
+<BaseLayout seo={{ title: `${e.title} | QualityWorks Events`, description: e.summary.slice(0, 155), noindex: e.provenance.approval === 'fixture' }} breadcrumbs={crumbs} jsonLd={ld}>
+  <PageHero eyebrow="Event" title={e.title} lede={e.summary} breadcrumbs={crumbs} compact>
+    {e.provenance.approval === 'fixture' && <p><FixtureLabel /></p>}
+  </PageHero>
+  <section class="section">
+    <div class="container ev">
+      <div>
+        {phase === 'past' && <Alert tone="info" title="This event has ended" role="status"><p>Registration is closed. See <a href="/events/">upcoming events</a>.</p></Alert>}
+        {phase === 'cancelled' && <Alert tone="danger" title="This event has been cancelled" role="status"><p>It will not take place. Registration is not available.</p></Alert>}
+        {phase === 'date-tbc' && <Alert tone="warning" title="Date to be confirmed" role="status"><p>Registration will open once the organiser confirms the date.</p></Alert>}
+        <h2>About this event</h2>
+        <p>{e.description}</p>
+        {e.speaker && <p><strong>Speaker:</strong> {e.speaker}</p>}
+      </div>
+      <aside class="ev__card" aria-label="Event details">
+        <ul>
+          <li><Icon name="calendar" /><span>{phase === 'cancelled' ? <s>{formatEventDate(e)}</s> : formatEventDate(e)}{time && <><br /><span class="muted">Starts {time}</span></>}</span></li>
+          <li><Icon name={e.venueType === 'online' ? 'globe' : 'pin'} /><span>{e.venueType === 'online' ? 'Online' : e.venue ?? 'Venue to be confirmed'}</span></li>
+        </ul>
+        {canRegister(e) ? <Button cta={{ label: 'Register', href: e.registrationUrl!, external: e.registrationUrl!.startsWith('http'), handoffNote: 'Registration is handled by the event organiser' }} /> : <p class="muted">{phase === 'past' ? 'Registration closed' : phase === 'cancelled' ? 'No registration — cancelled' : 'Registration not yet open'}</p>}
+      </aside>
+    </div>
+  </section>
+</BaseLayout>
+<style>
+  .ev { display: grid; gap: var(--space-10); }
+  @media (min-width: 900px) { .ev { grid-template-columns: 1fr 20rem; } }
+  .ev :global(.alert) { margin-bottom: var(--space-6); }
+  .ev__card { padding: var(--space-6); border: 1px solid var(--color-border); border-radius: var(--radius-lg); align-self: start; }
+  .ev__card ul { list-style: none; padding: 0; margin: 0 0 var(--space-6); display: grid; gap: var(--space-4); }
+  .ev__card li { display: flex; gap: var(--space-3); }
+  .ev__card :global(svg) { width: 20px; height: 20px; color: var(--qw-teal-700); flex: none; }
+</style>

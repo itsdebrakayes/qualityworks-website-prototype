@@ -1,0 +1,83 @@
+---
+/**
+ * INDUSTRY / AUDIENCE template. Each record supplies its own challenge, considerations, capabilities
+ * and evidence — pages are not name-swapped copies. Summary records show a migration notice.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import ServiceCard from '../../components/ServiceCard.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import CaseStudyCard from '../../components/CaseStudyCard.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import Alert from '../../components/Alert.astro';
+import ClaimRef from '../../components/ClaimRef.astro';
+import { industries } from '../../data/industries';
+import { serviceBySlug } from '../../data/services';
+import { productBySlug } from '../../data/products';
+import { caseStudyBySlug } from '../../data/caseStudies';
+import type { Industry } from '../../data/types';
+export function getStaticPaths() { return industries.map((i) => ({ params: { slug: i.slug }, props: { ind: i } })); }
+const { ind } = Astro.props as { ind: Industry };
+const crumbs = [{ label: 'Home', href: '/' }, { label: 'Who We Help', href: '/industries/' }, { label: ind.name }];
+const caps = ind.capabilities.map(serviceBySlug).filter(Boolean);
+const prods = (ind.products ?? []).map(productBySlug).filter(Boolean);
+const cases = ind.caseStudies.map(caseStudyBySlug).filter(Boolean);
+---
+<BaseLayout seo={ind.seo} breadcrumbs={crumbs}>
+  <PageHero eyebrow={ind.status === 'proposed' ? `${ind.name} · proposed page` : ind.name} title={ind.heroTitle} lede={ind.heroLede} breadcrumbs={crumbs} primary={ind.primaryCta} secondary={{ label: 'See relevant results', href: '#evidence' }} />
+
+  {ind.contentDepth === 'summary' && (
+    <div class="container"><Alert tone="warning" title="Summary record — full content pending migration" class="ind-alert"><p>{ind.provenance.note}</p></Alert></div>
+  )}
+  {ind.status === 'proposed' && (
+    <div class="container"><Alert tone="info" title="Proposed page — requires QM-41 sitemap approval" class="ind-alert"><p>{ind.provenance.note}</p></Alert></div>
+  )}
+
+  <section class="section" aria-labelledby="challenge-title">
+    <div class="container split">
+      <div><p class="eyebrow">The challenge</p><h2 id="challenge-title">What makes {ind.name.toLowerCase()} different</h2></div>
+      <div><p class="lede">{ind.buyerChallenge}</p></div>
+    </div>
+  </section>
+
+  {ind.considerations.length > 0 && (
+    <section class="section surface-alt" aria-labelledby="consider-title">
+      <div class="container">
+        <SectionHeading eyebrow="How we approach it" title={`Considerations for ${ind.name.toLowerCase()}`} id="consider-title" />
+        <div class="grid grid--2">
+          {ind.considerations.map((c) => (
+            <div class="consider"><h3>{c.title}</h3><p>{c.text}{ind.slug === 'healthcare' && c.title.startsWith('Compliance') && <ClaimRef id="C19" />}{ind.slug === 'public-sector' && c.title.startsWith('Procurement') && <ClaimRef id="C13" />}</p></div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section class="section" aria-labelledby="caps-title">
+    <div class="container">
+      <SectionHeading eyebrow="Relevant capabilities" title="Services that apply" id="caps-title" />
+      <div class="grid grid--3">{caps.map((s) => <ServiceCard service={s!} />)}</div>
+      {prods.length > 0 && <div class="prods"><h3>Related products</h3><div class="grid grid--3">{prods.map((p) => <ProductCard p={p!} />)}</div></div>}
+    </div>
+  </section>
+
+  <section class="section surface-alt" id="evidence" aria-labelledby="evidence-title">
+    <div class="container">
+      <SectionHeading eyebrow="Evidence" title="Published results" id="evidence-title" />
+      {cases.length ? <div class="grid grid--3">{cases.map((c) => <CaseStudyCard cs={c!} />)}</div> : <p>No published case studies for this sector yet.</p>}
+      {ind.evidenceNote && <p class="evidence-note" data-review-note="Evidence note">{ind.evidenceNote}</p>}
+    </div>
+  </section>
+
+  <CtaBand title={ind.status === 'proposed' && ind.slug === 'public-sector' ? 'Make a procurement or capability inquiry.' : `Talk to our ${ind.name.toLowerCase()} team.`} primary={ind.primaryCta} secondary={{ label: 'All industries', href: '/industries/' }} />
+</BaseLayout>
+<style>
+  :global(.ind-alert) { margin-top: var(--space-8); }
+  .consider { padding: var(--space-6); background: #fff; border: 1px solid var(--qw-line); border-radius: var(--radius-lg); border-top: 3px solid var(--qw-teal-500); }
+  .consider h3 { font-size: var(--fs-md); }
+  .consider p { margin: 0; color: var(--qw-slate-700); }
+  .prods { margin-top: var(--space-12); }
+  .prods h3 { font-size: var(--fs-md); }
+  .evidence-note { margin-top: var(--space-6); font-size: var(--fs-sm); color: var(--color-muted); }
+</style>

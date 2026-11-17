@@ -1,0 +1,21 @@
+{
+  "name": "qualityworks-website-prototype",
+  "version": "0.1.0",
+  "private": true,
+  "description": "QM-113 code-first prototype of the QualityWorks corporate website (not for production deployment).",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build && node scripts/glyph-lint.mjs",
+    "preview": "astro preview",
+    "migrate:wordpress": "node scripts/migrate-wordpress.mjs",
+    "qa:screens": "node scripts/qa-screenshots.mjs",
+    "qa:checks": "node scripts/qa-checks.mjs && node scripts/qa-report.mjs"
+  },
+  "dependencies": {
+    "astro": "5.18.2"
+  },
+  "devDependencies": {
+    "axe-core": "^4.10.2"
+  }
+}

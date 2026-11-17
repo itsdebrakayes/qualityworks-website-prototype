@@ -1,0 +1,34 @@
+---
+/** Prototype-only banner. Must be removed for production. Toggles review annotations (claims, proposed nav items, provenance). */
+---
+<div class="proto-bar" role="region" aria-label="Prototype notice">
+  <div class="container proto-bar__inner">
+    <p><strong>Prototype · QM-113</strong> — for internal review only. Not the live website; forms do not send data.</p>
+    <div class="proto-bar__actions">
+      <a href="/prototype/">Review hub</a>
+      <button type="button" class="proto-toggle" aria-pressed="false" data-review-toggle>Review annotations</button>
+    </div>
+  </div>
+</div>
+<style>
+  .proto-bar { background: #FFF3CC; color: #4A3200; font-size: var(--fs-xs); border-bottom: 1px solid #E8CF84; --focus-ring: #7A4B00; }
+  .proto-bar__inner { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.25rem var(--space-4); padding-block: 0.35rem; }
+  .proto-bar p { margin: 0; }
+  .proto-bar__actions { display: flex; gap: var(--space-4); align-items: center; }
+  .proto-bar a { color: #4A3200; font-weight: var(--fw-semibold); }
+  .proto-toggle { font: inherit; font-weight: var(--fw-semibold); color: #4A3200; background: transparent; border: 1.5px solid #B28A2C; border-radius: var(--radius-pill); padding: 0.2rem 0.7rem; cursor: pointer; min-height: 30px; }
+  .proto-toggle[aria-pressed="true"] { background: #4A3200; color: #FFF3CC; border-color: #4A3200; }
+</style>
+<script>
+  const btn = document.querySelector<HTMLButtonElement>('[data-review-toggle]')!;
+  const apply = (on: boolean) => { document.documentElement.classList.toggle('review-mode', on); btn.setAttribute('aria-pressed', String(on)); };
+  let initial = false;
+  try { initial = localStorage.getItem('qw-review') === '1'; } catch {}
+  if (new URLSearchParams(location.search).has('review')) initial = true;
+  apply(initial);
+  btn.addEventListener('click', () => {
+    const on = !document.documentElement.classList.contains('review-mode');
+    apply(on);
+    try { localStorage.setItem('qw-review', on ? '1' : '0'); } catch {}
+  });
+</script>

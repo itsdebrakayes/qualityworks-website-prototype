@@ -1,0 +1,351 @@
+---
+/**
+ * HOMEPAGE — reference implementation of the design system.
+ * Primary persona: Enterprise CTO/VP Eng (A) and SMB Founder/COO (D). Secondary: QA Director (B), Public sector (C).
+ * Core question: "What does QualityWorks do, and which part is relevant to me?"
+ * Conversion: Talk to an expert (/contact-us/) or self-select a pathway.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/Button.astro';
+import Icon from '../components/Icon.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import StatBlock from '../components/StatBlock.astro';
+import ClaimRef from '../components/ClaimRef.astro';
+import ProductCard from '../components/ProductCard.astro';
+import CaseStudyCard from '../components/CaseStudyCard.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import EventCard from '../components/EventCard.astro';
+import ProofBlock from '../components/ProofBlock.astro';
+import CtaBand from '../components/CtaBand.astro';
+import EmptyState from '../components/EmptyState.astro';
+import { pathways, servicesByPathway } from '../data/services';
+import { products } from '../data/products';
+import { caseStudyBySlug } from '../data/caseStudies';
+import { blogPosts } from '../data/articles';
+import { events, eventPhase } from '../data/events';
+import { industries } from '../data/industries';
+import { ctas, site } from '../data/site';
+import { organizationLd } from '../lib/schema';
+
+const pathwayBullets = {
+  quality: ['AI-generated test cases & automation scripts', 'Autonomous regression testing', 'Web, mobile, API & USSD coverage', 'Full-stack QA managed service', 'Test maturity assessments & roadmaps'],
+  build: ['Custom web & mobile applications', 'AI-accelerated development cycles', 'Rapid prototyping & MVP delivery', 'UX/UI design & product strategy', 'Nearshore delivery at competitive rates'],
+  ai: ['Custom AI agent design & deployment', 'Generative AI integration & strategy', 'Data quality and governance', 'Technology advisory (CTO-as-a-service)'],
+};
+const featuredCases = ['ai-powered-test-case-generation-wssc', 'ipipelines-legacy-platform-modernization', 'jmmb-group-leverages-automation-best-practices'].map(caseStudyBySlug).filter(Boolean);
+const latest = blogPosts.slice(0, 3);
+const homeEvents = events.filter((e) => e.provenance.approval !== 'fixture');
+const upcoming = homeEvents.filter((e) => eventPhase(e) === 'upcoming');
+const eventsToShow = upcoming.length ? upcoming.slice(0, 2) : homeEvents.slice(0, 2);
+const featuredProducts = products.filter((p) => ['qualitywatcher-ai-tools', 'agents-as-a-service', 'prism'].includes(p.slug));
+const otherProducts = products.filter((p) => !featuredProducts.includes(p));
+const industryList = industries.filter((i) => i.status === 'live');
+---
+<BaseLayout
+  seo={{ title: 'QualityWorks Consulting Group | Software Quality, Custom Software & AI', description: 'QualityWorks tests smarter, builds faster and deploys AI: AI-powered testing, custom web and mobile development, and agentic business solutions since 2010.' }}
+  jsonLd={[organizationLd()]}
+>
+  <!-- HERO -->
+  <section class="home-hero surface-dark" aria-labelledby="hero-title">
+    <div class="home-hero__motif" aria-hidden="true"></div>
+    <div class="container home-hero__grid">
+      <div class="home-hero__copy">
+        <p class="eyebrow">QualityWorks Consulting Group</p>
+        <h1 id="hero-title">Engineered for Excellence</h1>
+        <p class="lede">We test smarter, build faster, and deploy AI to transform how businesses operate — from autonomous testing to custom apps to intelligent agents that change what’s possible.</p>
+        <div class="btn-row home-hero__ctas">
+          <Button cta={ctas.contact} />
+          <Button cta={ctas.exploreSolutions} />
+        </div>
+        <ul class="home-hero__facts" aria-label="Company facts">
+          <li>Founded 2010<ClaimRef id="C14" /></li>
+          <li>Los Angeles · Kingston</li>
+          <li>US, UK, Latin America & Caribbean<ClaimRef id="C15" /></li>
+        </ul>
+      </div>
+      <nav class="pathways" aria-labelledby="pathways-title">
+        <p class="pathways__title" id="pathways-title"><span class="mono">&lt;</span>what do you need to do?<span class="mono">&gt;</span></p>
+        <ol class="pathways__list">
+          {pathways.map((p) => (
+            <li>
+              <a class="pathway" href={p.href}>
+                <span class="pathway__index" aria-hidden="true">{p.index}</span>
+                <span class="pathway__body">
+                  <span class="pathway__label">{p.label}</span>
+                  <span class="pathway__title">{p.title}</span>
+                </span>
+                <Icon name="arrow" class="pathway__arrow" />
+              </a>
+            </li>
+          ))}
+        </ol>
+        <p class="pathways__foot">Not sure? <a href="/contact-us/">Describe the problem</a> and we’ll point you to the right team.</p>
+      </nav>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="section section--tight" aria-labelledby="impact-title">
+    <div class="container">
+      <h2 id="impact-title" class="visually-hidden">QualityWorks impact</h2>
+      <StatBlock
+        stats={[
+          { value: '16+', label: 'Years of quality-driven development', claim: 'C01' },
+          { value: '90%', label: 'Increase in quality releases (avg. per client)', claim: 'C02' },
+          { value: '$30M', label: 'Cost savings through automation', claim: 'C03' },
+          { value: '80%', label: 'Faster time to market (avg. per client)', claim: 'C04' },
+        ]}
+        footnote="Figures as published on qualityworkscg.com. Measurement context is being confirmed before launch (see claims register C01–C04)."
+      />
+    </div>
+  </section>
+
+  <!-- INTRO -->
+  <section class="section surface-alt intro" aria-labelledby="intro-title">
+    <div class="container split">
+      <div>
+        <p class="eyebrow">Why QualityWorks</p>
+        <h2 id="intro-title">We go <span class="beyond">&lt;beyond the code&gt;</span> to help clients reach their most extraordinary digital goals.</h2>
+      </div>
+      <div class="intro__copy">
+        <p class="lede">Founded in 2010, QualityWorks is a Black-owned, woman-led software solutions firm<ClaimRef id="C14" /> focused on helping companies build higher-quality software, create future-ready teams and accelerate delivery.</p>
+        <div class="why">
+          <div class="why__item">
+            <h3>We make your team faster without making it bigger</h3>
+            <p>AI-powered automation and process improvements have taken regression cycles from 4 days to 45 minutes<ClaimRef id="C05" /> and saved nearly 500 testing hours weekly for a single client<ClaimRef id="C06" />.</p>
+          </div>
+          <div class="why__item">
+            <h3>AI is baked in, not bolted on</h3>
+            <p>Our own AI tools help create test cases and automation faster<ClaimRef id="C07" />, and PRISM™ evaluates the quality of AI-generated outputs themselves.</p>
+          </div>
+          <div class="why__item">
+            <h3>We leave your team better than we found it</h3>
+            <p>We train your QA and development teams alongside every engagement. At JMMB, manual testers learned to write and run automated tests.</p>
+          </div>
+        </div>
+        <a class="link-arrow" href="/about-us/">About QualityWorks<Icon name="arrow" /></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- THREE WAYS -->
+  <section class="section" id="solutions" aria-labelledby="ways-title">
+    <div class="container">
+      <SectionHeading eyebrow="Our services" title="Three ways we drive your business forward" lede="From bulletproof testing to full-scale digital products to AI-powered operations — we handle the hard parts so you can move faster." id="ways-title" />
+      <div class="ways">
+        {pathways.map((p) => (
+          <article class="way reveal" data-pathway={p.id}>
+            <p class="way__index mono">{p.index} / {p.label}</p>
+            <h3 class="way__title">{p.title}</h3>
+            <p class="way__text">{p.text}</p>
+            <ul class="checklist way__list">{pathwayBullets[p.id].map((b) => <li>{b}</li>)}</ul>
+            <div class="way__links">
+              <p class="way__links-title">Related services</p>
+              <ul>
+                {servicesByPathway(p.id).filter((s) => s.contentDepth === 'full').slice(0, 4).map((s) => <li><a href={s.path}>{s.name}</a></li>)}
+              </ul>
+            </div>
+            <Button href={p.href} label={p.cta} variant="secondary" size="sm" />
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUCTS -->
+  <section class="section surface-product products" aria-labelledby="products-title">
+    <div class="container">
+      <div class="products__head">
+        <SectionHeading eyebrow="Products & innovations" title="Software we build for quality and AI" lede="Our products are separate from our consulting services. Some live on their own platforms — we’ll always tell you when a link takes you there." id="products-title" />
+        <div class="prism-sample" data-review-note="Sample score reproduced from the live homepage">
+          <p class="prism-sample__label mono">PRISM™ sample score</p>
+          <p class="prism-sample__grade">C+</p>
+          <p class="prism-sample__desc">Fair — correct in parts</p>
+          <div class="prism-sample__bar" role="img" aria-label="Sample score 78 percent"><span style="width:78%"></span></div>
+          <p class="prism-sample__note">Illustrative sample, as shown on the current homepage.</p>
+        </div>
+      </div>
+      <div class="grid grid--3">
+        {featuredProducts.map((p) => <ProductCard p={p} />)}
+      </div>
+      <ul class="products__more">
+        {otherProducts.map((p) => (
+          <li><a href={p.path} target="_blank" rel="noopener"><strong>{p.name}</strong> — {p.tagline}<Icon name="external" /><span class="visually-hidden"> (external site, opens in a new tab)</span></a></li>
+        ))}
+        <li><a href="/products/"><strong>All products</strong> — compare what each one does<Icon name="arrow" /></a></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- PROOF -->
+  <section class="section" aria-labelledby="proof-title">
+    <div class="container">
+      <SectionHeading eyebrow="Recognition" title="What our clients say" id="proof-title" />
+      <ul class="awards" aria-label="Awards and recognition">
+        <li><img src="/brand/Clutch_TopAutomationTesting-500x540.png" alt="Clutch: Top Automation Testing Company" width="96" height="104" loading="lazy" /></li>
+        <li><img src="/brand/Clutch_TopComplianceTesting-500x540.png" alt="Clutch: Top Compliance Testing Company" width="96" height="104" loading="lazy" /></li>
+        <li><img src="/brand/Clutch_TopRecoveryTesting-1-500x540.png" alt="Clutch: Top Global Recovery Testing Company" width="96" height="104" loading="lazy" /><ClaimRef id="C12" /></li>
+        <li class="awards__text"><a href="/qualityworks-wins-inc-best-in-business-2025-award/">Inc. Best in Business 2025</a><ClaimRef id="C11" /></li>
+        <li class="awards__text"><a href="/qualityworks-wins-us-navy-ai-testing-challenge/">First Prize, U.S. Navy AI Autonomous Testing Challenge</a><ClaimRef id="C10" /></li>
+      </ul>
+      <ProofBlock />
+      <p class="proof-more"><a class="link-arrow" href={site.externalPlatforms.clutch} target="_blank" rel="noopener">Read more reviews on Clutch<Icon name="external" /><span class="visually-hidden"> (opens in a new tab)</span></a></p>
+    </div>
+  </section>
+
+  <!-- WHO WE HELP -->
+  <section class="section surface-tint" aria-labelledby="help-title">
+    <div class="container split split--reverse">
+      <div>
+        <SectionHeading eyebrow="Who we help" title="Quality for the way your industry works" lede="Each industry carries its own risks — regulated calculations in banking, patient data in healthcare, peak-day traffic in entertainment." id="help-title" />
+        <ul class="industry-chips">
+          {industryList.map((i) => <li><a href={i.path}>{i.name}</a></li>)}
+        </ul>
+      </div>
+      <div class="audience-cards">
+        <a class="audience" href="/industries/public-sector/">
+          <span class="eyebrow">Public sector & utilities</span>
+          <span class="audience__title">Documented, requirement-based QA — with evidence you can verify.</span>
+          <span class="link-arrow">For agencies and utilities<Icon name="arrow" /></span>
+        </a>
+        <a class="audience" href="/industries/small-business/">
+          <span class="eyebrow">Small & mid-size businesses</span>
+          <span class="audience__title">Ready-made AI agent, custom build, or neither? Start with the problem.</span>
+          <span class="link-arrow">For growing businesses<Icon name="arrow" /></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section class="section" aria-labelledby="results-title">
+    <div class="container">
+      <div class="section-row">
+        <SectionHeading eyebrow="Results" title="Outcomes from recent engagements" id="results-title" />
+        <Button href="/case-studies/" label="All case studies" variant="secondary" size="sm" />
+      </div>
+      <div class="grid grid--3">
+        {featuredCases.map((cs) => <CaseStudyCard cs={cs!} />)}
+      </div>
+    </div>
+  </section>
+
+  <!-- INSIGHTS + EVENTS -->
+  <section class="section surface-alt" aria-labelledby="insights-title">
+    <div class="container insights">
+      <div>
+        <div class="section-row">
+          <SectionHeading eyebrow="Insights" title="From our team" id="insights-title" />
+          <Button href="/blog/" label="All articles" variant="secondary" size="sm" />
+        </div>
+        {latest.length ? (
+          <div class="grid grid--3">{latest.map((a) => <ArticleCard a={a} />)}</div>
+        ) : (
+          <EmptyState title="New articles are on the way"><p>Meanwhile, browse our <a href="/case-studies/">case studies</a>.</p></EmptyState>
+        )}
+      </div>
+      <div class="events-strip">
+        <div class="section-row">
+          <SectionHeading eyebrow="Where’s Stacy?" title="Events & speaking" level="h2" lede="Stacy Kirk, CEO and Founder, speaks to professional and student groups across the United States and abroad." />
+        </div>
+        {upcoming.length === 0 && (
+          <p class="events-strip__fallback"><Icon name="info" />No confirmed upcoming events right now. Recent and to-be-confirmed appearances are below.</p>
+        )}
+        <div class="grid grid--2">{eventsToShow.map((e) => <EventCard e={e} />)}</div>
+        <p><a class="link-arrow" href="/events/">All events<Icon name="arrow" /></a></p>
+      </div>
+    </div>
+  </section>
+
+  <CtaBand title="Tell us what you’re trying to ship." text="Testing, a new product or an AI initiative — one conversation is enough to find out whether we can help." primary={ctas.contact} secondary={ctas.caseStudies} eyebrow="Let’s talk" />
+</BaseLayout>
+
+<style>
+  /* Hero */
+  .home-hero { position: relative; overflow: hidden; background: radial-gradient(70% 90% at 100% 0%, rgba(40,157,173,0.28), transparent 60%), radial-gradient(50% 60% at 0% 100%, rgba(143,198,64,0.10), transparent 60%), var(--qw-ink-900); padding-block: clamp(3rem, 2rem + 4vw, 6rem) clamp(3rem, 2rem + 3vw, 5rem); }
+  .home-hero::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px); background-size: 56px 56px; mask: radial-gradient(90% 80% at 70% 30%, #000, transparent 75%); -webkit-mask: radial-gradient(90% 80% at 70% 30%, #000, transparent 75%); pointer-events: none; }
+  .home-hero__motif { position: absolute; width: 46rem; height: 46rem; right: -16rem; top: -18rem; border-radius: 50%; pointer-events: none; background: repeating-radial-gradient(circle, transparent 0 26px, rgba(143,198,64,0.12) 26px 27px); mask: radial-gradient(circle, #000 30%, transparent 70%); -webkit-mask: radial-gradient(circle, #000 30%, transparent 70%); }
+  .home-hero__grid { position: relative; display: grid; gap: var(--space-12); align-items: center; }
+  @media (min-width: 1024px) { .home-hero__grid { grid-template-columns: 1.1fr 0.9fr; gap: var(--space-16); } }
+  .home-hero h1 { font-size: var(--fs-3xl); font-weight: var(--fw-bold); max-width: 12ch; margin-bottom: var(--space-6); }
+  .home-hero .lede { color: #D5DDE4; }
+  .home-hero__ctas { margin-top: var(--space-8); }
+  .home-hero__facts { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); list-style: none; padding: 0; margin: var(--space-10) 0 0; font-size: var(--fs-sm); color: var(--qw-slate-300); }
+  .home-hero__facts li { display: inline-flex; align-items: center; gap: var(--space-2); }
+  .home-hero__facts li::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--qw-green-400); }
+
+  .pathways { background: rgba(14, 24, 23, 0.72); border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius-lg); padding: var(--space-6); backdrop-filter: blur(6px); box-shadow: var(--shadow-lg); }
+  .pathways__title { font: var(--fw-medium) var(--fs-sm)/1.4 var(--font-mono); color: var(--qw-teal-300); margin-bottom: var(--space-4); }
+  .pathways__list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+  .pathway { display: grid; grid-template-columns: auto 1fr auto; gap: var(--space-4); align-items: center; padding: var(--space-4) var(--space-5); border-radius: var(--radius-md); background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #fff; text-decoration: none; transition: background var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out); }
+  .pathway:hover { background: rgba(95,195,207,0.12); border-color: rgba(95,195,207,0.45); }
+  .pathway__index { font: var(--fw-semibold) var(--fs-md)/1 var(--font-mono); color: var(--qw-green-400); }
+  .pathway__label { display: block; font: var(--fw-medium) var(--fs-xs)/1.3 var(--font-mono); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-slate-300); }
+  .pathway__title { display: block; font-weight: var(--fw-semibold); font-size: var(--fs-base); line-height: 1.3; margin-top: 2px; }
+  .pathway :global(.pathway__arrow) { width: 20px; height: 20px; color: var(--qw-teal-300); transition: transform var(--dur-base) var(--ease-out); }
+  .pathway:hover :global(.pathway__arrow) { transform: translateX(4px); }
+  .pathways__foot { font-size: var(--fs-sm); color: var(--qw-slate-300); margin: var(--space-4) 0 0; }
+
+  /* Intro */
+  .intro h2 { font-size: var(--fs-xl); font-weight: var(--fw-semibold); line-height: 1.2; }
+  .intro .beyond { white-space: normal; font-size: 0.9em; }
+  .why { display: grid; gap: var(--space-6); margin: var(--space-8) 0; }
+  .why__item { padding-left: var(--space-5); border-left: 2px solid var(--qw-teal-500); }
+  .why__item h3 { font-size: var(--fs-md); margin-bottom: var(--space-2); }
+  .why__item p { margin: 0; color: var(--color-muted); }
+
+  /* Three ways */
+  .ways { display: grid; gap: var(--space-6); grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); }
+  .way { display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-8) var(--space-6); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: #fff; position: relative; }
+  .way::before { content: ""; position: absolute; top: -1px; left: var(--space-6); right: var(--space-6); height: 3px; border-radius: 0 0 3px 3px; background: var(--qw-teal-500); }
+  .way[data-pathway="build"]::before { background: var(--qw-teal-700); }
+  .way[data-pathway="ai"]::before { background: var(--qw-green-400); }
+  .way__index { font-size: var(--fs-xs); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--color-muted); margin: 0; }
+  .way__title { font-size: var(--fs-lg); margin: 0; }
+  .way__text { color: var(--color-muted); margin: 0; }
+  .way__list { font-size: var(--fs-sm); }
+  .way__links { margin-top: auto; padding-top: var(--space-4); border-top: 1px solid var(--color-border); }
+  .way__links-title { font: var(--fw-medium) var(--fs-xs)/1.3 var(--font-mono); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--color-muted); margin-bottom: var(--space-2); }
+  .way__links ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); font-size: var(--fs-sm); font-weight: var(--fw-semibold); }
+  .way :global(.btn) { align-self: flex-start; }
+
+  /* Products */
+  .products__head { display: grid; gap: var(--space-8); align-items: end; margin-bottom: var(--space-10); }
+  .products__head :global(.section-heading) { margin-bottom: 0; }
+  @media (min-width: 960px) { .products__head { grid-template-columns: 1fr 18rem; } }
+  .prism-sample { border: 1px solid rgba(244,185,66,0.4); border-radius: var(--radius-lg); padding: var(--space-5); background: rgba(244,185,66,0.06); }
+  .prism-sample__label { font-size: var(--fs-xs); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-gold-400); margin-bottom: var(--space-2); }
+  .prism-sample__grade { font-size: 3.25rem; font-weight: var(--fw-bold); line-height: 1; color: #fff; margin: 0; }
+  .prism-sample__desc { color: var(--color-text); margin: var(--space-1) 0 var(--space-3); font-size: var(--fs-sm); }
+  .prism-sample__bar { height: 6px; border-radius: 6px; background: rgba(255,255,255,0.1); overflow: hidden; }
+  .prism-sample__bar span { display: block; height: 100%; background: linear-gradient(90deg, var(--qw-teal-500), var(--qw-gold-400)); }
+  .prism-sample__note { font-size: var(--fs-xs); color: var(--color-muted); margin: var(--space-3) 0 0; }
+  .products__more { list-style: none; padding: 0; margin: var(--space-8) 0 0; display: grid; gap: var(--space-2); grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); }
+  .products__more a { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-4) var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-md); color: var(--color-text); text-decoration: none; font-size: var(--fs-sm); }
+  .products__more a:hover { border-color: var(--qw-teal-300); }
+  .products__more strong { color: #fff; }
+  .products__more :global(svg) { width: 16px; height: 16px; margin-left: auto; flex: none; color: var(--qw-teal-300); }
+
+  /* Awards */
+  .awards { list-style: none; padding: 0; margin: 0 0 var(--space-10); display: flex; flex-wrap: wrap; gap: var(--space-4) var(--space-8); align-items: center; }
+  .awards img { width: 72px; height: auto; }
+  .awards li { display: flex; align-items: center; }
+  .awards__text { max-width: 16rem; font-weight: var(--fw-semibold); font-size: var(--fs-sm); padding-left: var(--space-6); border-left: 1px solid var(--color-border); }
+  .proof-more { margin-top: var(--space-6); }
+
+  /* Who we help */
+  .industry-chips { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .industry-chips a { display: inline-flex; align-items: center; min-height: 44px; padding: 0.5rem 1rem; border-radius: var(--radius-pill); background: #fff; border: 1px solid var(--qw-teal-100); color: var(--qw-ink-900); font-weight: var(--fw-semibold); font-size: var(--fs-sm); text-decoration: none; }
+  .industry-chips a:hover { border-color: var(--qw-teal-700); color: var(--qw-teal-800); }
+  .audience-cards { display: grid; gap: var(--space-4); }
+  .audience { display: grid; gap: var(--space-3); padding: var(--space-6); background: #fff; border: 1px solid var(--qw-teal-100); border-radius: var(--radius-lg); text-decoration: none; color: var(--qw-slate-700); transition: box-shadow var(--dur-base), border-color var(--dur-base); }
+  .audience:hover { box-shadow: var(--shadow-md); border-color: var(--qw-teal-500); }
+  .audience .eyebrow { margin: 0; }
+  .audience__title { font-size: var(--fs-lg); font-weight: var(--fw-bold); color: var(--qw-ink-900); line-height: 1.25; }
+
+  .section-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: var(--space-4); margin-bottom: var(--space-8); }
+  .section-row :global(.section-heading) { margin-bottom: 0; }
+  .insights { display: grid; gap: var(--space-16); }
+  .events-strip__fallback { display: flex; gap: var(--space-2); align-items: center; font-size: var(--fs-sm); color: var(--color-muted); margin-bottom: var(--space-4); }
+  .events-strip__fallback :global(svg) { width: 18px; height: 18px; color: var(--qw-teal-700); flex: none; }
+</style>

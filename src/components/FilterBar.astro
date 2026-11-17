@@ -1,0 +1,29 @@
+---
+/**
+ * Filter bar: labelled selects (combinable), clear button, live result count.
+ * Works as progressive enhancement — without JS every item is listed.
+ */
+interface Props { filters: { name: string; label: string; options: { value: string; label: string; count?: number }[] }[]; resultLabel: string; id: string }
+const { filters, resultLabel, id } = Astro.props;
+---
+<form class="filter-bar" id={id} role="search" aria-label={`Filter ${resultLabel}`} data-filter-bar onsubmit="return false">
+  {filters.map((f) => (
+    <div class="field filter-bar__field">
+      <label for={`${id}-${f.name}`}>{f.label}</label>
+      <select class="select" id={`${id}-${f.name}`} name={f.name} data-filter={f.name}>
+        <option value="">All</option>
+        {f.options.map((o) => <option value={o.value}>{o.label}{o.count !== undefined ? ` (${o.count})` : ''}</option>)}
+      </select>
+    </div>
+  ))}
+  <div class="filter-bar__actions">
+    <button type="button" class="btn btn--ghost btn--sm" data-filter-clear disabled>Clear filters</button>
+  </div>
+  <p class="filter-bar__count" aria-live="polite" data-filter-count></p>
+</form>
+<style>
+  .filter-bar { display: grid; gap: var(--space-4); align-items: end; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); padding: var(--space-5); background: var(--qw-canvas); border: 1px solid var(--qw-line); border-radius: var(--radius-lg); margin-bottom: var(--space-8); }
+  .filter-bar__actions { display: flex; align-items: center; min-height: 48px; }
+  .filter-bar__count { grid-column: 1 / -1; margin: 0; font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--qw-ink-900); }
+  .filter-bar :global(.btn[disabled]) { opacity: 0.45; }
+</style>

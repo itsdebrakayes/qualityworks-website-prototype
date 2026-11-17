@@ -1,0 +1,49 @@
+---
+/** WHO WE HELP overview (/industries/ — legacy URL). Persona: all buyers self-identifying by sector. */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import Icon from '../../components/Icon.astro';
+import { industries } from '../../data/industries';
+import { caseStudies } from '../../data/caseStudies';
+import { ctas } from '../../data/site';
+const crumbs = [{ label: 'Home', href: '/' }, { label: 'Who We Help' }];
+const audiences = industries.filter((i) => i.status === 'proposed');
+const sectors = industries.filter((i) => i.status === 'live');
+const count = (slug: string) => caseStudies.filter((c) => c.industry === slug).length;
+---
+<BaseLayout seo={{ title: 'Who We Help: Industries and Organizations | QualityWorks', description: 'QualityWorks works with banks, insurers, healthcare, logistics, media, retail, technology, social impact organizations, public agencies and growing businesses.' }} breadcrumbs={crumbs}>
+  <PageHero eyebrow="Who we help" title="Making quality work for your organization" lede="Different sectors fail in different ways. Choose yours to see the risks we focus on, the services that apply and the evidence behind them." breadcrumbs={crumbs} primary={ctas.contact} />
+  <section class="section" aria-labelledby="sectors-title">
+    <div class="container">
+      <SectionHeading eyebrow="Industries" title="By industry" id="sectors-title" />
+      <ul class="ind-grid">
+        {sectors.map((i) => (
+          <li><a class="ind" href={i.path}><span class="ind__name">{i.name}</span><span class="ind__text">{i.heroLede}</span><span class="ind__meta">{count(i.slug)} case {count(i.slug) === 1 ? 'study' : 'studies'}<Icon name="arrow" /></span></a></li>
+        ))}
+      </ul>
+    </div>
+  </section>
+  <section class="section surface-tint" aria-labelledby="org-title">
+    <div class="container">
+      <SectionHeading eyebrow="Organizations" title="By type of organization" id="org-title" />
+      <ul class="ind-grid ind-grid--2">
+        {audiences.map((i) => (
+          <li><a class="ind" href={i.path}><span class="ind__name">{i.name}</span><span class="ind__text">{i.heroLede}</span><span class="ind__meta">For {i.personas.primary.split('/')[0].trim()}<Icon name="arrow" /></span></a></li>
+        ))}
+      </ul>
+    </div>
+  </section>
+  <CtaBand title="Don’t see your industry?" text="Most of our work transfers across sectors. Tell us about yours." primary={ctas.contact} />
+</BaseLayout>
+<style>
+  .ind-grid { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); }
+  .ind-grid--2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); }
+  .ind { height: 100%; display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-6); background: #fff; border: 1px solid var(--qw-line); border-radius: var(--radius-lg); text-decoration: none; color: var(--qw-slate-700); transition: border-color var(--dur-base), box-shadow var(--dur-base); }
+  .ind:hover { border-color: var(--qw-teal-500); box-shadow: var(--shadow-md); }
+  .ind__name { font-size: var(--fs-md); font-weight: var(--fw-bold); color: var(--qw-ink-900); }
+  .ind__text { font-size: var(--fs-sm); color: var(--qw-slate-500); }
+  .ind__meta { margin-top: auto; display: inline-flex; gap: 0.4rem; align-items: center; font-weight: var(--fw-semibold); font-size: var(--fs-sm); color: var(--qw-teal-700); }
+  .ind__meta :global(svg) { width: 16px; height: 16px; }
+</style>

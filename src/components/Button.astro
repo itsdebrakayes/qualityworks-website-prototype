@@ -1,0 +1,28 @@
+---
+/**
+ * Single button/link grammar for all CTAs. External destinations get a visible marker and an
+ * accessible description of the hand-off so visitors know they are leaving the corporate site.
+ */
+import Icon from './Icon.astro';
+import type { Cta } from '../data/types';
+interface Props { cta?: Cta; href?: string; label?: string; variant?: 'primary' | 'secondary' | 'ghost'; size?: 'sm' | 'md'; type?: 'button' | 'submit'; class?: string; arrow?: boolean; disabled?: boolean; [k: string]: any }
+const { cta, href: h, label: l, variant: v, size = 'md', type, class: cls, arrow = true, disabled, ...rest } = Astro.props;
+const href = cta?.href ?? h;
+const label = cta?.label ?? l;
+const variant = v ?? cta?.kind ?? 'primary';
+const external = cta?.external ?? (href ? /^https?:\/\//.test(href) : false);
+const classes = ['btn', variant !== 'primary' && `btn--${variant}`, size === 'sm' && 'btn--sm', cls];
+const descId = external && cta?.handoffNote ? `handoff-${Math.random().toString(36).slice(2, 8)}` : undefined;
+---
+{href && !disabled ? (
+  <a class:list={classes} href={href} {...(external ? { target: '_blank', rel: 'noopener', 'data-external': 'true' } : {})} aria-describedby={descId} {...rest}>
+    <span>{label ?? <slot />}</span>
+    {external ? <Icon name="external" /> : arrow && variant !== 'ghost' ? <Icon name="arrow" class="icon-arrow" /> : null}
+    {external && <span class="visually-hidden"> (opens in a new tab)</span>}
+  </a>
+) : (
+  <button class:list={classes} type={type ?? 'button'} disabled={disabled} aria-disabled={disabled ? 'true' : undefined} {...rest}>
+    <span>{label ?? <slot />}</span>
+  </button>
+)}
+{descId && <span id={descId} class="visually-hidden">{cta?.handoffNote}</span>}

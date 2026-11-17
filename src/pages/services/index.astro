@@ -1,0 +1,77 @@
+---
+/**
+ * SOLUTIONS OVERVIEW (/services/ — legacy URL preserved; labelled "Solutions" per QM-112).
+ * Primary persona: Enterprise CTO / VP Eng. Secondary: QA Director, SMB Founder.
+ * Core question: "Which QualityWorks service fits my problem?"  Conversion: service detail → contact.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import ServiceCard from '../../components/ServiceCard.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import Icon from '../../components/Icon.astro';
+import { services, pathways } from '../../data/services';
+import { primaryNav } from '../../data/navigation';
+import { ctas } from '../../data/site';
+
+const groups = primaryNav.find((n) => n.id === 'solutions')!.groups!;
+const byPath = (href: string) => services.find((s) => s.path === href);
+const specialist = services.filter((s) => ['performance-testing', 'security-testing', 'accessibility', 'user-experience-testing'].includes(s.slug));
+const crumbs = [{ label: 'Home', href: '/' }, { label: 'Solutions' }];
+const guide = [
+  ['Releases are slow because regression testing is manual', 'Test Automation', '/services/test-automation/'],
+  ['We need more testing capacity without hiring', 'Managed AI Test Squad', '/services/ai-test-squad/'],
+  ['We don’t know where our QA process is weakest', 'Maturity Assessments', '/maturity-assessments/'],
+  ['We need a new web or mobile product built', 'Custom Software Development', '/services/custom-software-development/'],
+  ['We need senior technical leadership, part-time', 'Tech Advisory / Fractional CTO', '/services/technology-advisory-partnership/'],
+  ['We want AI agents designed around our own processes', 'AI & Agentic Business Solutions', '/services/ai-service/'],
+  ['We want a ready-made AI agent for a common task', 'Agents as a Service (product)', '/products/agents-as-a-service/'],
+];
+---
+<BaseLayout seo={{ title: 'Solutions: Software Testing, Development & AI Services | QualityWorks', description: 'QualityWorks solutions: test automation, full-stack and non-functional testing, custom software development, technology advisory and AI & agentic business solutions.' }} breadcrumbs={crumbs}>
+  <PageHero eyebrow="Solutions" title="Services for quality, delivery and AI" lede="Three practices, one standard. Whether you need to improve software quality, build or modernize a product, or deploy AI responsibly, start with the problem you are trying to solve." breadcrumbs={crumbs} primary={ctas.contact} />
+
+  <section class="section" aria-labelledby="guide-title">
+    <div class="container">
+      <SectionHeading eyebrow="Quick guide" title="Which service fits your problem?" lede="Answer-first: find your situation, follow the link." id="guide-title" />
+      <div class="table-scroll">
+        <table class="data-table guide">
+          <caption class="visually-hidden">Common problems and the QualityWorks service that addresses each</caption>
+          <thead><tr><th scope="col">If this sounds like you…</th><th scope="col">Start with</th></tr></thead>
+          <tbody>{guide.map(([p, n, h]) => <tr><td>{p}</td><td><a href={h}>{n}</a></td></tr>)}</tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  {groups.map((g, i) => {
+    const pw = pathways[i];
+    const list = g.links.map((l) => byPath(l.href)).filter(Boolean);
+    return (
+      <section class:list={['section', { 'surface-alt': i % 2 === 0 }]} aria-labelledby={`g-${i}`} id={pw?.id}>
+        <div class="container">
+          <SectionHeading eyebrow={`${pw?.index ?? ''} / ${pw?.label ?? ''}`} title={g.heading} lede={pw?.text} id={`g-${i}`} />
+          <div class="grid grid--3">{list.map((s) => <ServiceCard service={s!} />)}</div>
+          {i === 0 && (
+            <div class="specialist">
+              <p class="specialist__title">Specialist testing pages</p>
+              <ul>{specialist.map((s) => <li><a href={s.path}>{s.name}<Icon name="arrow" /></a></li>)}</ul>
+            </div>
+          )}
+        </div>
+      </section>
+    );
+  })}
+
+  <CtaBand title="Not sure which service you need?" text="Describe what you’re trying to achieve and we’ll recommend a starting point." primary={ctas.contact} secondary={{ label: 'Browse case studies', href: '/case-studies/' }} />
+</BaseLayout>
+<style>
+  .guide td:first-child { color: var(--qw-ink-900); }
+  .guide td:last-child { font-weight: var(--fw-semibold); white-space: nowrap; }
+  .specialist { margin-top: var(--space-8); padding: var(--space-5) var(--space-6); border: 1px dashed var(--color-border); border-radius: var(--radius-lg); }
+  .specialist__title { font: var(--fw-medium) var(--fs-xs)/1.3 var(--font-mono); text-transform: uppercase; letter-spacing: var(--tracking-label); color: var(--color-muted); }
+  .specialist ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); }
+  .specialist a { display: inline-flex; align-items: center; gap: 0.35rem; font-weight: var(--fw-semibold); min-height: 44px; }
+  .specialist a :global(svg) { width: 16px; height: 16px; }
+  @media (max-width: 640px) { .guide td:last-child { white-space: normal; } }
+</style>

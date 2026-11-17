@@ -1,0 +1,185 @@
+---
+/**
+ * DESIGN SYSTEM & COMPONENT INVENTORY. Token values are parsed from src/styles/tokens.css at build
+ * time (single source of truth). Every component is rendered live from the real component file.
+ */
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import Button from '../../components/Button.astro';
+import ServiceCard from '../../components/ServiceCard.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import CaseStudyCard from '../../components/CaseStudyCard.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import EventCard from '../../components/EventCard.astro';
+import StatBlock from '../../components/StatBlock.astro';
+import ProofBlock from '../../components/ProofBlock.astro';
+import FaqAccordion from '../../components/FaqAccordion.astro';
+import Alert from '../../components/Alert.astro';
+import EmptyState from '../../components/EmptyState.astro';
+import Skeleton from '../../components/Skeleton.astro';
+import FixtureLabel from '../../components/FixtureLabel.astro';
+import Wireframe from '../../components/Wireframe.astro';
+import ProcessSteps from '../../components/ProcessSteps.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { serviceBySlug } from '../../data/services';
+import { productBySlug } from '../../data/products';
+import { caseStudies } from '../../data/caseStudies';
+import { blogPosts } from '../../data/articles';
+import { events } from '../../data/events';
+
+const css = readFileSync(join(process.cwd(), 'src/styles/tokens.css'), 'utf8');
+const rootBlock = css.slice(css.indexOf(':root {'), css.indexOf('@media'));
+const tokens = [...rootBlock.matchAll(/(--[\w-]+):\s*([^;]+);\s*(?:\/\*\s*(.*?)\s*\*\/)?/g)].map(([, name, value, note]) => ({ name, value: value.trim(), note: note ?? '' }));
+const colors = tokens.filter((t) => t.name.startsWith('--qw-'));
+const group = (p: string) => tokens.filter((t) => t.name.startsWith(p));
+const crumbs = [{ label: 'Home', href: '/' }, { label: 'Prototype', href: '/prototype/' }, { label: 'Design system' }];
+const inventory = [
+  ['Header + mega-menu', 'components/Header.astro', 'Global; desktop disclosure menus with hover intent; mobile modal drawer from the same data'],
+  ['Footer', 'components/Footer.astro', 'Global; link columns derived from navigation.ts'],
+  ['Page hero', 'components/PageHero.astro', 'light / dark / product variants; breadcrumbs; aside slot'],
+  ['Homepage hero + pathways', 'pages/index.astro', 'Unique to home; three buyer pathways above the fold'],
+  ['Button', 'components/Button.astro', 'primary / secondary / ghost; md / sm; external hand-off marker + description'],
+  ['Section heading', 'components/SectionHeading.astro', 'eyebrow + h2/h3 + lede'],
+  ['Service card', 'components/ServiceCard.astro', 'Icon, buyer problem, summary; whole card clickable via one link'],
+  ['Product card', 'components/ProductCard.astro', 'Status badge says where the product lives'],
+  ['Case-study card', 'components/CaseStudyCard.astro', 'Industry, headline metric, client'],
+  ['Article card', 'components/ArticleCard.astro', 'Type, date, excerpt, fixture label when fictional'],
+  ['Event card', 'components/EventCard.astro', 'Upcoming / past / cancelled / date TBC derived from dates'],
+  ['Statistic block', 'components/StatBlock.astro', 'Refuses to render a stat without a claim id'],
+  ['Claim reference', 'components/ClaimRef.astro', 'Review-mode annotation linking to the claims register'],
+  ['Testimonial / proof', 'components/ProofBlock.astro', 'Verbatim quotes with provenance'],
+  ['FAQ accordion', 'components/FaqAccordion.astro', 'Native details/summary; FAQPage JSON-LD emitted by page'],
+  ['Filter bar', 'components/FilterBar.astro + lib/filters.ts', 'Combinable selects/chips, URL state, live count, clear'],
+  ['Empty state', 'components/EmptyState.astro', 'No results / no jobs / no events'],
+  ['Loading state', 'components/Skeleton.astro', 'Skeleton grid; parent sets aria-busy'],
+  ['Alert', 'components/Alert.astro', 'info / success / warning / danger; optional role=alert'],
+  ['Contact form', 'components/ContactForm.astro', 'Live field set; validation; simulated loading/success/error'],
+  ['CTA band', 'components/CtaBand.astro', 'Closing conversion section'],
+  ['Breadcrumbs', 'components/Breadcrumbs.astro', 'Visible trail; BreadcrumbList JSON-LD from same data'],
+  ['Process steps', 'components/ProcessSteps.astro', 'Numbered delivery approach'],
+  ['Mobile navigation drawer', 'components/Header.astro', 'Modal <dialog>: focus contained, Esc, focus return'],
+  ['Wireframe module', 'components/Wireframe.astro', 'Placeholder naming the owner decision (PRISM, About)'],
+  ['Fixture label', 'components/FixtureLabel.astro', 'Always-visible marker on fictional content'],
+  ['Metric value', 'components/MetricValue.astro', 'Draws “A to B” metrics with an SVG arrow (glyph not in brand font)'],
+  ['Modal dialog', '— (not used)', 'Not genuinely needed beyond the mobile drawer; none built'],
+];
+---
+<BaseLayout seo={{ title: 'Design System & Components | QualityWorks Prototype', description: 'Design tokens, typography, buttons, cards, states and the reusable component inventory for the QualityWorks website prototype.', noindex: true }} breadcrumbs={crumbs}>
+  <PageHero eyebrow="Prototype · Design system" title="One system for corporate and product pages" lede="Tokens and components derived from the current QualityWorks brand, reconciled with the newer QualityWatcher AI and Agents as a Service treatments. Everything below is rendered from the real component files." breadcrumbs={crumbs} compact />
+
+  <section class="section" aria-labelledby="color-title">
+    <div class="container">
+      <SectionHeading eyebrow="Tokens" title="Colour" lede="Exact logo teal (#289DAD) and logo green (#8FC640) are retained. Interactive teal is darkened to #1B7480 so white text passes WCAG AA (the live #289DAD button is 3.2:1)." id="color-title" />
+      <ul class="swatches">
+        {colors.map((c) => (
+          <li><span class="sw" style={`background:${c.value}`}></span><code>{c.name}</code><span class="sw__v">{c.value}</span>{c.note && <span class="sw__n">{c.note}</span>}</li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section surface-alt" aria-labelledby="type-title">
+    <div class="container">
+      <SectionHeading eyebrow="Tokens" title="Typography" lede="Red Hat Display (the existing corporate face) for everything; Red Hat Mono — same superfamily — only for technical labels. Self-hosted, font-synthesis disabled." id="type-title" />
+      <div class="type-specimen">
+        <p class="ts" style="font-size:var(--fs-3xl);font-weight:700;line-height:1.08;letter-spacing:-0.02em">Display 3xl — Engineered</p>
+        <p class="ts" style="font-size:var(--fs-2xl);font-weight:700;letter-spacing:-0.02em">Heading 2xl — Section title</p>
+        <p class="ts" style="font-size:var(--fs-xl);font-weight:700">Heading xl — Sub-section</p>
+        <p class="ts" style="font-size:var(--fs-lg);font-weight:700">Heading lg — Card title</p>
+        <p class="ts" style="font-size:var(--fs-md)">Lede md — Supporting explanation in a single, readable line length.</p>
+        <p class="ts">Body base (17px / 1.6) — We go beyond the code to help clients reach their most extraordinary digital goals.</p>
+        <p class="eyebrow">Eyebrow · Red Hat Mono</p>
+      </div>
+      <div class="table-scroll"><table class="data-table"><thead><tr><th>Token</th><th>Value</th></tr></thead><tbody>{[...group('--fs-'), ...group('--lh-'), ...group('--fw-')].map((t) => <tr><td><code>{t.name}</code></td><td><code>{t.value}</code></td></tr>)}</tbody></table></div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="space-title">
+    <div class="container">
+      <SectionHeading eyebrow="Tokens" title="Space, radius, elevation, motion" id="space-title" />
+      <div class="grid grid--2">
+        <div class="table-scroll"><table class="data-table"><tbody>{[...group('--space-'), ...group('--section'), ...group('--gutter'), ...group('--container')].map((t) => <tr><td><code>{t.name}</code></td><td><code>{t.value}</code></td></tr>)}</tbody></table></div>
+        <div class="table-scroll"><table class="data-table"><tbody>{[...group('--radius'), ...group('--shadow'), ...group('--ease'), ...group('--dur')].map((t) => <tr><td><code>{t.name}</code></td><td><code>{t.value}</code></td></tr>)}</tbody></table></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section surface-alt" aria-labelledby="btn-title">
+    <div class="container">
+      <SectionHeading eyebrow="Components" title="Buttons and links" lede="One pill grammar everywhere (retained from the live site and both product sites). Min height 48px (40px small)." id="btn-title" />
+      <div class="demo-row"><Button href="#btn-title" label="Primary" /><Button href="#btn-title" label="Secondary" variant="secondary" /><Button href="#btn-title" label="Ghost" variant="ghost" /><Button cta={{ label: 'External hand-off', href: 'https://www.qualitywatcher.ai/', external: true, handoffNote: 'Opens qualitywatcher.ai' }} /><Button label="Disabled" disabled /><Button href="#btn-title" label="Small" size="sm" /></div>
+      <div class="demo-row surface-dark demo-dark"><Button href="#btn-title" label="Primary on dark" /><Button href="#btn-title" label="Secondary on dark" variant="secondary" /><a class="link-arrow" href="#btn-title">Text link with arrow</a></div>
+      <div class="demo-row"><span class="badge">Default badge</span><span class="badge badge--neutral">Neutral</span><span class="badge badge--success">Upcoming</span><span class="badge badge--warning">Date TBC</span><span class="badge badge--danger">Cancelled</span><FixtureLabel /></div>
+      <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Solutions', href: '/services/' }, { label: 'Test Automation' }]} />
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="cards-title">
+    <div class="container">
+      <SectionHeading eyebrow="Components" title="Cards" lede="Shared radius (16px), border, hover elevation and single-link click target." id="cards-title" />
+      <div class="grid grid--3">
+        <ServiceCard service={serviceBySlug('test-automation')!} />
+        <CaseStudyCard cs={caseStudies[0]} />
+        <ArticleCard a={blogPosts[0]} />
+      </div>
+      <div class="grid grid--3 demo-gap">
+        <EventCard e={events[0]} />
+        <EventCard e={events[3]} />
+        <EventCard e={events[4]} />
+      </div>
+      <div class="surface-product demo-product"><div class="grid grid--3"><ProductCard p={productBySlug('qualitywatcher-ai-tools')!} /><ProductCard p={productBySlug('agents-as-a-service')!} /><ProductCard p={productBySlug('prism')!} /></div></div>
+    </div>
+  </section>
+
+  <section class="section surface-alt" aria-labelledby="proof-title">
+    <div class="container">
+      <SectionHeading eyebrow="Components" title="Proof: statistics and testimonials" id="proof-title" />
+      <StatBlock stats={[{ value: '16+', label: 'Years of quality-driven development', claim: 'C01' }, { value: '10×', label: 'Faster test case creation', claim: 'C07' }]} footnote="Every statistic must reference a claims-register id." />
+      <div class="demo-gap"><ProofBlock ids={['T1']} /></div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="states-title">
+    <div class="container">
+      <SectionHeading eyebrow="Components" title="Feedback and states" id="states-title" />
+      <div class="grid grid--2">
+        <Alert tone="info" title="Info"><p>Neutral information.</p></Alert>
+        <Alert tone="success" title="Success"><p>Action completed.</p></Alert>
+        <Alert tone="warning" title="Warning"><p>Needs attention.</p></Alert>
+        <Alert tone="danger" title="Error"><p>Something failed; how to recover.</p></Alert>
+      </div>
+      <div class="grid grid--2 demo-gap">
+        <EmptyState title="No results"><p>Explain why, and how to recover.</p></EmptyState>
+        <Wireframe title="Wireframe module" decision="Names the content decision that blocks this module." />
+      </div>
+      <div class="demo-gap"><Skeleton count={3} /></div>
+      <div class="demo-gap"><ProcessSteps steps={[{ title: 'Assess', text: 'Step text' }, { title: 'Strategize', text: 'Step text' }, { title: 'Enable', text: 'Step text' }, { title: 'Optimize', text: 'Step text' }]} /></div>
+      <div class="container--narrow demo-gap"><FaqAccordion items={[{ q: 'Accordion question', a: 'Answer content stays in the DOM and is crawlable.' }, { q: 'Second question', a: 'Keyboard: Tab to focus, Enter/Space to toggle.' }]} /></div>
+    </div>
+  </section>
+
+  <section class="section surface-alt" aria-labelledby="inv-title">
+    <div class="container">
+      <SectionHeading eyebrow="Inventory" title="Component inventory" id="inv-title" />
+      <div class="table-scroll"><table class="data-table"><thead><tr><th scope="col">Component</th><th scope="col">Source</th><th scope="col">Notes</th></tr></thead><tbody>{inventory.map(([a, b, c]) => <tr><td>{a}</td><td><code>{b}</code></td><td>{c}</td></tr>)}</tbody></table></div>
+    </div>
+  </section>
+  <CtaBand eyebrow="Component" title="CTA band — closing conversion section" primary={{ label: 'Primary action', href: '/contact-us/' }} secondary={{ label: 'Secondary action', href: '/case-studies/' }} />
+</BaseLayout>
+<style>
+  .swatches { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr)); }
+  .swatches li { display: grid; gap: 2px; font-size: var(--fs-xs); }
+  .sw { height: 64px; border-radius: var(--radius-md); border: 1px solid var(--qw-line); margin-bottom: var(--space-2); }
+  .sw__v { font-family: var(--font-mono); color: var(--qw-slate-500); }
+  .sw__n { color: var(--qw-slate-500); }
+  .type-specimen { margin-bottom: var(--space-8); }
+  .ts { margin: 0 0 var(--space-4); color: var(--qw-ink-900); }
+  .demo-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; margin-bottom: var(--space-6); }
+  .demo-dark { padding: var(--space-6); border-radius: var(--radius-lg); background: var(--qw-ink-900); }
+  .demo-gap { margin-top: var(--space-6); }
+  .demo-product { margin-top: var(--space-6); padding: var(--space-6); border-radius: var(--radius-lg); background: var(--qw-ink-950); }
+</style>

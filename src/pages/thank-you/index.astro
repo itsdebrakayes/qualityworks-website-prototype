@@ -1,0 +1,12 @@
+---
+/** Legacy /thank-you/ (WPForms redirect target). Kept as noindex non-JS fallback; inline success state is primary. */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Button from '../../components/Button.astro';
+---
+<BaseLayout seo={{ title: 'Thank you | QualityWorks', description: 'Thank you for contacting QualityWorks.', noindex: true }}>
+  <section class="section"><div class="container container--narrow" style="padding-block: 4rem">
+    <h1 style="font-size: var(--fs-2xl)">Thank you for reaching out.</h1>
+    <p class="lede">A member of the QualityWorks team will be in touch.</p>
+    <div class="btn-row"><Button href="/" label="Back to home" /><Button href="/case-studies/" label="Browse case studies" variant="secondary" /></div>
+  </div></section>
+</BaseLayout>

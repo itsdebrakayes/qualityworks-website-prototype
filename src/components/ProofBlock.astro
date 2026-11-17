@@ -1,0 +1,27 @@
+---
+/**
+ * Testimonial / proof block. Quotes are published on the live site today; each requires re-approval
+ * from the person quoted before reuse (approval state shown in review mode).
+ */
+import { testimonials } from '../data/testimonials';
+interface Props { ids?: string[] }
+const list = Astro.props.ids ? testimonials.filter((t) => Astro.props.ids!.includes(t.id)) : testimonials;
+---
+<div class="proof">
+  {list.map((t) => (
+    <figure class="proof__item" data-review-note={`${t.id}: ${t.provenance.approval}`}>
+      <blockquote><p>{t.quote}</p></blockquote>
+      <figcaption><span class="proof__name">{t.name}</span><span class="proof__role">{t.role}</span></figcaption>
+    </figure>
+  ))}
+</div>
+<style>
+  .proof { display: grid; gap: var(--space-6); grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); }
+  .proof__item { margin: 0; display: flex; flex-direction: column; justify-content: space-between; gap: var(--space-6); padding: var(--space-8) var(--space-6) var(--space-6); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); position: relative; }
+  .proof__item::before { content: ""; position: absolute; top: var(--space-6); left: var(--space-6); width: 28px; height: 3px; background: var(--qw-teal-500); }
+  blockquote { margin: var(--space-4) 0 0; font-size: var(--fs-base); line-height: 1.6; color: var(--color-heading); }
+  blockquote p { margin: 0; }
+  figcaption { display: grid; gap: 2px; font-size: var(--fs-sm); }
+  .proof__name { font-weight: var(--fw-bold); color: var(--color-heading); }
+  .proof__role { color: var(--color-muted); }
+</style>

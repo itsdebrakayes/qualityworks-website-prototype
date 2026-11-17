@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from './PageHero.astro';
+import Alert from './Alert.astro';
+interface Props { title: string; path: string }
+const { title, path } = Astro.props;
+const crumbs = [{ label: 'Home', href: '/' }, { label: title }];
+---
+<BaseLayout seo={{ title: `${title} | QualityWorks`, description: `${title} for qualityworkscg.com.` }} breadcrumbs={crumbs}>
+  <PageHero title={title} breadcrumbs={crumbs} compact />
+  <section class="section"><div class="container container--narrow">
+    <Alert tone="info" title="Prototype route">
+      <p>Legal text is not reproduced in the prototype. It must be migrated verbatim (and reviewed by counsel if the site’s data processing changes — e.g. a new form provider). Current version: <a href={`https://qualityworkscg.com${path}`} target="_blank" rel="noopener">qualityworkscg.com{path}<span class="visually-hidden"> (opens in a new tab)</span></a>.</p>
+    </Alert>
+  </div></section>
+</BaseLayout>

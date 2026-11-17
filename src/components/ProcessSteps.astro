@@ -1,0 +1,22 @@
+---
+interface Props { steps: { title: string; text: string }[] }
+const { steps } = Astro.props;
+---
+<ol class="steps">
+  {steps.map((s, i) => (
+    <li class="steps__item">
+      <span class="steps__index" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+      <h3 class="steps__title">{s.title}</h3>
+      <p>{s.text}</p>
+    </li>
+  ))}
+</ol>
+<style>
+  .steps { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-6); grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); counter-reset: s; }
+  .steps__item { position: relative; padding-top: var(--space-6); border-top: 2px solid var(--color-border); }
+  .steps__item::before { content: ""; position: absolute; top: -2px; left: 0; width: 3rem; height: 2px; background: var(--qw-teal-500); }
+  .surface-dark .steps__item::before, .surface-product .steps__item::before { background: var(--qw-green-400); }
+  .steps__index { font: var(--fw-medium) var(--fs-sm)/1 var(--font-mono); color: var(--color-muted); }
+  .steps__title { font-size: var(--fs-md); margin: var(--space-3) 0 var(--space-2); }
+  .steps__item p { font-size: var(--fs-sm); color: var(--color-muted); margin: 0; }
+</style>

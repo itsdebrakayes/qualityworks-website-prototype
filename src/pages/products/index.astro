@@ -1,0 +1,49 @@
+---
+/**
+ * PRODUCTS OVERVIEW (proposed new route — live nav "Products & Innovations" has no overview page).
+ * Persona: QA Director (B) / SMB Founder (D). Core question: "Which product is which, and where does each live?"
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import Icon from '../../components/Icon.astro';
+import { products } from '../../data/products';
+import { ctas } from '../../data/site';
+const crumbs = [{ label: 'Home', href: '/' }, { label: 'Products & Innovations' }];
+const forWhom: Record<string, string> = { 'qualitywatcher-ai-tools': 'QA teams and automation engineers', 'qualitywatcher-tcm': 'QA teams managing test cases', 'agents-as-a-service': 'Small businesses and business teams', prism: 'Teams running AI in production', posture: 'Suppliers managing cyber risk' };
+---
+<BaseLayout seo={{ title: 'Products & Innovations: QualityWatcher, Agents as a Service, PRISM | QualityWorks', description: 'Compare QualityWorks products: QualityWatcher AI tools and test management, Agents as a Service, the PRISM AI output quality standard and Posture.' }} breadcrumbs={crumbs}>
+  <PageHero variant="product" eyebrow="Products & Innovations" title="Software we build, alongside the services we deliver" lede="Products are things you can use or buy; services are work we do with you. Several products live on their own platforms — this page shows where each one lives before you click." breadcrumbs={crumbs} />
+  <section class="section" aria-labelledby="compare-title">
+    <div class="container">
+      <SectionHeading eyebrow="Compare" title="Which product is which" id="compare-title" />
+      <div class="table-scroll">
+        <table class="data-table">
+          <caption class="visually-hidden">QualityWorks products compared</caption>
+          <thead><tr><th scope="col">Product</th><th scope="col">What it is</th><th scope="col">For</th><th scope="col">Where it lives</th></tr></thead>
+          <tbody>{products.map((p) => (
+            <tr>
+              <th scope="row"><a href={p.path} {...(p.path.startsWith('http') ? { target: '_blank', rel: 'noopener' } : {})}>{p.name}</a></th>
+              <td>{p.tagline}</td>
+              <td>{forWhom[p.slug]}</td>
+              <td>{p.path.startsWith('http') ? <span class="where"><Icon name="external" />{new URL(p.path).hostname.replace('www.', '')}</span> : p.externalUrl ? <span class="where">This site, then {new URL(p.externalUrl).hostname.replace('www.', '')}</span> : 'This site'}</td>
+            </tr>
+          ))}</tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  <section class="section surface-alt" aria-labelledby="all-title">
+    <div class="container">
+      <h2 id="all-title" class="visually-hidden">All products</h2>
+      <div class="grid grid--3">{products.map((p) => <ProductCard p={p} />)}</div>
+    </div>
+  </section>
+  <CtaBand title="Need help choosing between a product and a service?" primary={ctas.contact} />
+</BaseLayout>
+<style>
+  .where { display: inline-flex; gap: 0.35rem; align-items: center; } .where :global(svg) { width: 14px; height: 14px; }
+  th[scope="row"] { font-weight: var(--fw-semibold); background: transparent; position: static; }
+</style>

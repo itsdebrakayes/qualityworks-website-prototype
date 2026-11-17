@@ -1,0 +1,33 @@
+---
+/**
+ * FAQ accordion: native <details>/<summary> — keyboard and screen-reader support built in,
+ * content is in the DOM (crawlable) and works without JavaScript. FAQPage JSON-LD is emitted
+ * by the page only when the visible FAQ is shown (see lib/schema.ts).
+ */
+import type { FaqItem } from '../data/types';
+interface Props { items: FaqItem[]; headingLevel?: 'h3' | 'h4' }
+const { items, headingLevel = 'h3' } = Astro.props;
+const H = headingLevel;
+---
+<div class="faq">
+  {items.map((f, i) => (
+    <details class="faq__item" open={i === 0} data-review-note={f.provenance ? `${f.provenance.source} / ${f.provenance.approval}` : undefined}>
+      <summary><H class="faq__q">{f.q}</H><span class="faq__icon" aria-hidden="true"></span></summary>
+      <div class="faq__a"><p>{f.a}</p></div>
+    </details>
+  ))}
+</div>
+<style>
+  .faq { border-top: 1px solid var(--color-border); }
+  .faq__item { border-bottom: 1px solid var(--color-border); }
+  summary { list-style: none; display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); padding: var(--space-5) 0; cursor: pointer; min-height: 48px; }
+  summary::-webkit-details-marker { display: none; }
+  .faq__q { font-size: var(--fs-md); margin: 0; letter-spacing: -0.01em; }
+  .faq__icon { flex: none; width: 2rem; height: 2rem; border-radius: 50%; border: 1.5px solid var(--color-border); position: relative; transition: transform var(--dur-base) var(--ease-out), background var(--dur-base); }
+  .faq__icon::before, .faq__icon::after { content: ""; position: absolute; left: 50%; top: 50%; width: 11px; height: 2px; background: var(--color-heading); transform: translate(-50%, -50%); }
+  .faq__icon::after { transform: translate(-50%, -50%) rotate(90deg); transition: transform var(--dur-base) var(--ease-out); }
+  details[open] .faq__icon::after { transform: translate(-50%, -50%) rotate(0deg); }
+  summary:hover .faq__icon { background: var(--qw-teal-50); }
+  .faq__a { padding: 0 var(--space-12) var(--space-6) 0; color: var(--color-text); max-width: 60rem; }
+  .faq__a p { margin: 0; }
+</style>

@@ -1,0 +1,36 @@
+---
+import Icon from './Icon.astro';
+import FixtureLabel from './FixtureLabel.astro';
+import type { EventRecord } from '../data/types';
+import { eventPhase, canRegister, formatEventDate } from '../data/events';
+interface Props { e: EventRecord; headingLevel?: 'h2' | 'h3' }
+const { e, headingLevel = 'h3' } = Astro.props;
+const H = headingLevel;
+const phase = eventPhase(e);
+const statusMap = { upcoming: ['Upcoming', 'badge--success'], past: ['Past event', 'badge--neutral'], cancelled: ['Cancelled', 'badge--danger'], 'date-tbc': ['Date to be confirmed', 'badge--warning'] } as const;
+const [statusLabel, statusClass] = statusMap[phase];
+const fixture = e.provenance.approval === 'fixture';
+---
+<article class:list={['card', 'event-card', `event-card--${phase}`]} data-phase={phase}>
+  <div class="card__body">
+    <p class="event-card__status"><span class:list={['badge', statusClass]}>{statusLabel}</span>{fixture && <FixtureLabel text="Fixture" />}</p>
+    <H class="card__title"><a href={`/events/${e.slug}/`}>{e.title}</a></H>
+    <p class="event-card__summary">{e.summary}</p>
+    <ul class="event-card__facts">
+      <li><Icon name="calendar" />{phase === 'cancelled' ? <s>{formatEventDate(e)}</s> : formatEventDate(e)}</li>
+      <li><Icon name={e.venueType === 'online' ? 'globe' : 'pin'} />{e.venueType === 'online' ? 'Online' : e.venue ?? 'Venue to be confirmed'}</li>
+    </ul>
+    <p class="event-card__action">
+      {canRegister(e) ? <span class="badge">Registration open</span> : phase === 'past' ? <span class="muted">Registration closed</span> : phase === 'cancelled' ? <span class="muted">This event will not take place</span> : <span class="muted">Registration details to follow</span>}
+    </p>
+  </div>
+</article>
+<style>
+  .event-card__status { display: flex; flex-wrap: wrap; gap: var(--space-2); position: relative; z-index: 2; }
+  .event-card__summary { font-size: var(--fs-sm); color: var(--color-muted); }
+  .event-card__facts { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.35rem; font-size: var(--fs-sm); }
+  .event-card__facts li { display: flex; gap: 0.5rem; align-items: center; }
+  .event-card__facts :global(svg) { width: 18px; height: 18px; color: var(--qw-teal-700); flex: none; }
+  .event-card__action { margin-top: auto !important; padding-top: var(--space-2); font-size: var(--fs-sm); }
+  .event-card--past, .event-card--cancelled { background: var(--qw-canvas); }
+</style>

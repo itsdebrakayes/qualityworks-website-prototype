@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import Icon from '../../components/Icon.astro';
+import { docs } from '../../lib/docs';
+const crumbs = [{ label: 'Home', href: '/' }, { label: 'Prototype review hub' }];
+const journeys = [
+  ['A · Enterprise CTO', '/', 'Home › Pathway 01 › Full-Stack Testing › CMN case study › Talk to an expert'],
+  ['B · QA Director', '/qualitywatcher-ai-tools/', 'QualityWatcher AI › tools & human review › WSSC case study › Open QualityWatcher AI'],
+  ['C · Public sector', '/industries/public-sector/', 'Public Sector & Utilities › WSSC evidence › Make a procurement inquiry'],
+  ['D · SMB founder', '/industries/small-business/', 'Small business › Agents as a Service comparison › Marketplace or Help me choose'],
+  ['E · Marketing / Ops', '/products/agents-as-a-service/', 'Agent catalog (filter PR & Marketing) › Talk to us first'],
+  ['F · Job applicant', '/careers/', 'Careers › open roles states › Apply on BambooHR'],
+];
+const states = [
+  ['Contact form: empty, invalid, consent, loading, success, error', '/contact-us/'],
+  ['Case studies: filters, combined, no results, loading, error', '/case-studies/?industry=finance-banking&service=test-automation'],
+  ['Resources: type chips + topic filter', '/resources/'],
+  ['Events: upcoming, date TBC, past, cancelled', '/events/'],
+  ['Careers: none (real), available, expired, BambooHR unavailable', '/careers/#open-roles'],
+  ['QualityWatcher tools: sign-in required, 404 disabled', '/qualitywatcher-ai-tools/'],
+  ['Summary-record notice (content pending migration)', '/services/performance-testing/'],
+  ['PRISM wireframe modules (owner decisions)', '/products/prism/'],
+];
+---
+<BaseLayout seo={{ title: 'Prototype Review Hub | QM-113', description: 'Review hub for the QualityWorks website prototype: documents, journeys, interaction states and QA.', noindex: true }} breadcrumbs={crumbs}>
+  <PageHero eyebrow="QM-113 · Prototype" title="Prototype review hub" lede="Start here. Walk the persona journeys, try each interaction state, then read the audit, design decisions and open questions. Toggle “Review annotations” in the yellow bar to see claim IDs, proposed navigation items and provenance." breadcrumbs={crumbs} compact />
+  <section class="section"><div class="container">
+    <SectionHeading eyebrow="1" title="Persona journeys" />
+    <ol class="hub-list">{journeys.map(([p, h, d]) => <li><a href={h}><strong>{p}</strong><span>{d}</span><Icon name="arrow" /></a></li>)}</ol>
+  </div></section>
+  <section class="section surface-alt"><div class="container">
+    <SectionHeading eyebrow="2" title="Interaction states to try" />
+    <ol class="hub-list">{states.map(([d, h]) => <li><a href={h}><span>{d}</span><Icon name="arrow" /></a></li>)}</ol>
+  </div></section>
+  <section class="section"><div class="container">
+    <SectionHeading eyebrow="3" title="Documents" />
+    <ol class="hub-list">
+      {docs.map((d) => <li><a href={`/prototype/${d.slug}/`}><strong>{d.title}</strong><span>{d.summary}</span><Icon name="arrow" /></a></li>)}
+      <li><a href="/prototype/claims/"><strong>Claims register</strong><span>Every number and award with source and approval state</span><Icon name="arrow" /></a></li>
+      <li><a href="/design-system/"><strong>Design system</strong><span>Tokens and live component inventory</span><Icon name="arrow" /></a></li>
+    </ol>
+  </div></section>
+</BaseLayout>
+<style>
+  .hub-list { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-2); }
+  .hub-list a { display: grid; grid-template-columns: 1fr auto; gap: 0.25rem var(--space-4); align-items: center; padding: var(--space-4) var(--space-5); background: #fff; border: 1px solid var(--qw-line); border-radius: var(--radius-md); text-decoration: none; color: var(--qw-slate-700); }
+  .hub-list a:hover { border-color: var(--qw-teal-500); }
+  .hub-list strong { color: var(--qw-ink-900); grid-column: 1; }
+  .hub-list span { grid-column: 1; font-size: var(--fs-sm); }
+  .hub-list :global(svg) { grid-column: 2; grid-row: 1 / span 2; color: var(--qw-teal-700); width: 20px; }
+</style>

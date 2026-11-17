@@ -1,0 +1,13 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/Button.astro';
+---
+<BaseLayout seo={{ title: 'Page not found | QualityWorks', description: 'The page you were looking for could not be found.', noindex: true }}>
+  <section class="section"><div class="container container--narrow nf">
+    <p class="eyebrow">Error 404</p>
+    <h1>We couldn’t find that page.</h1>
+    <p class="lede">It may have moved during our website update. Try one of these instead:</p>
+    <div class="btn-row"><Button href="/" label="Home" /><Button href="/services/" label="Solutions" variant="secondary" /><Button href="/contact-us/" label="Contact us" variant="secondary" /></div>
+  </div></section>
+</BaseLayout>
+<style>.nf { padding-block: var(--space-16); } .nf h1 { font-size: var(--fs-2xl); }</style>

@@ -1,0 +1,73 @@
+---
+/**
+ * RESULTS / CASE STUDIES (/case-studies/ — legacy URL). Filterable by industry and service (combined).
+ * Primary persona: Enterprise CTO (A) and Public sector (C). Core question: "Have they solved this before?"
+ * Data: WordPress-migrated snapshot. Loading and error states are demonstrated via a labelled prototype control.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import CaseStudyCard from '../../components/CaseStudyCard.astro';
+import FilterBar from '../../components/FilterBar.astro';
+import EmptyState from '../../components/EmptyState.astro';
+import Skeleton from '../../components/Skeleton.astro';
+import Alert from '../../components/Alert.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import FixtureLabel from '../../components/FixtureLabel.astro';
+import { caseStudies } from '../../data/caseStudies';
+import { industryBySlug } from '../../data/industries';
+import { serviceBySlug } from '../../data/services';
+import { ctas } from '../../data/site';
+
+const crumbs = [{ label: 'Home', href: '/' }, { label: 'Results' }, { label: 'Case Studies' }];
+const count = (fn: (c: typeof caseStudies[number]) => boolean) => caseStudies.filter(fn).length;
+const industryOpts = [...new Set(caseStudies.map((c) => c.industry))].map((v) => ({ value: v, label: industryBySlug(v)?.name ?? v, count: count((c) => c.industry === v) })).sort((a, b) => a.label.localeCompare(b.label));
+const serviceOpts = [...new Set(caseStudies.flatMap((c) => c.serviceTags))].map((v) => ({ value: v, label: serviceBySlug(v)?.name ?? v, count: count((c) => c.serviceTags.includes(v)) })).sort((a, b) => a.label.localeCompare(b.label));
+---
+<BaseLayout seo={{ title: 'Case Studies: Testing, Development & AI Results | QualityWorks', description: 'Results from QualityWorks engagements in banking, insurance, healthcare, utilities, media and more. Filter case studies by industry and service.' }} breadcrumbs={crumbs}>
+  <PageHero eyebrow="Results" title="Case studies" lede="How we’ve helped organizations solve difficult digital challenges — with the outcomes as each client engagement reported them." breadcrumbs={crumbs} compact />
+  <section class="section" aria-labelledby="list-title">
+    <div class="container">
+      <h2 id="list-title" class="visually-hidden">Case study list</h2>
+      <FilterBar id="cs-filter" resultLabel="case studies" filters={[{ name: 'industry', label: 'Industry', options: industryOpts }, { name: 'service', label: 'Service', options: serviceOpts }]} />
+
+      <details class="proto-states" data-review-note="Prototype-only">
+        <summary><FixtureLabel text="Prototype control — data states" /></summary>
+        <p>Case studies are static today. If they move to a CMS/API, the list must handle these states:</p>
+        <div class="btn-row"><button type="button" class="btn btn--secondary btn--sm" data-sim="loading">Show loading state</button><button type="button" class="btn btn--secondary btn--sm" data-sim="error">Simulate data error</button></div>
+      </details>
+
+      <Alert tone="danger" title="Case studies couldn’t be loaded" role="alert" id="cs-error" hidden>
+        <p>This is a simulated error. <button type="button" class="btn btn--sm" data-retry>Try again</button></p>
+      </Alert>
+      <Skeleton count={3} id="cs-loading" hidden />
+      <div class="grid grid--3" id="cs-results" data-results aria-busy="false">
+        {caseStudies.map((cs) => <CaseStudyCard cs={cs} />)}
+      </div>
+      <EmptyState title="No case studies match these filters" id="cs-empty" hidden>
+        <p>Try a different industry or service, or clear the filters to see all {caseStudies.length}.</p>
+        <button type="button" class="btn btn--secondary btn--sm" data-empty-clear>Clear filters</button>
+      </EmptyState>
+    </div>
+  </section>
+  <CtaBand title="Facing a similar challenge?" primary={ctas.contact} secondary={{ label: 'Explore solutions', href: '/services/' }} />
+</BaseLayout>
+<style>
+  .proto-states { margin: calc(var(--space-4) * -1) 0 var(--space-6); font-size: var(--fs-sm); }
+  .proto-states summary { cursor: pointer; display: inline-block; }
+  .proto-states p { margin: var(--space-3) 0; }
+  #cs-error { margin-bottom: var(--space-6); }
+</style>
+<script>
+  import { initFilters } from '../../lib/filters';
+  const api = initFilters({ bar: '#cs-filter', results: '#cs-results', empty: '#cs-empty', noun: ['case study', 'case studies'],
+    match: (el, f) => (!f.industry || el.dataset.industry === f.industry) && (!f.service || (el.dataset.services ?? '').split(' ').includes(f.service)) });
+  const results = document.getElementById('cs-results')!;
+  const loading = document.getElementById('cs-loading')!;
+  const error = document.getElementById('cs-error')!;
+  const showLoading = () => { error.hidden = true; results.hidden = true; loading.hidden = false; results.setAttribute('aria-busy', 'true'); api.announce('Loading case studies…');
+    setTimeout(() => { loading.hidden = true; results.hidden = false; results.setAttribute('aria-busy', 'false'); api.apply(); }, 1500); };
+  document.querySelector('[data-sim="loading"]')!.addEventListener('click', showLoading);
+  document.querySelector('[data-sim="error"]')!.addEventListener('click', () => { results.hidden = true; document.getElementById('cs-empty')!.hidden = true; error.hidden = false; error.focus(); api.announce(''); });
+  document.querySelector('[data-retry]')!.addEventListener('click', showLoading);
+  document.querySelector('[data-empty-clear]')!.addEventListener('click', () => api.clear());
+</script>

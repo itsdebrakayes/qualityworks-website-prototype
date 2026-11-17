@@ -1,0 +1,29 @@
+---
+import type { CaseStudy } from '../data/types';
+import { industryBySlug } from '../data/industries';
+import MetricValue from './MetricValue.astro';
+interface Props { cs: CaseStudy; headingLevel?: 'h2' | 'h3'; compact?: boolean }
+const { cs, headingLevel = 'h3', compact } = Astro.props;
+const H = headingLevel;
+const metric = cs.metrics[0];
+const industry = industryBySlug(cs.industry);
+---
+<article class="card cs-card" data-industry={cs.industry} data-services={cs.serviceTags.join(' ')}>
+  {!compact && <div class="card__media">{cs.image ? <img src={cs.image} alt="" loading="lazy" width="640" height="360" /> : <div class="cs-card__ph" />}</div>}
+  <div class="card__body">
+    <p class="card__meta">{industry?.name ?? cs.industry}</p>
+    <H class="card__title"><a href={`/case-study/${cs.slug}/`}>{cs.title}</a></H>
+    {metric && (
+      <p class="cs-card__metric"><strong><MetricValue value={metric.value} /></strong> <span>{metric.label.toLowerCase()}</span></p>
+    )}
+    <p class="cs-card__client">{cs.client}</p>
+  </div>
+</article>
+<style>
+  .cs-card__metric { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0.25rem 0.5rem; margin: 0; }
+  .cs-card__metric strong { font-size: var(--fs-lg); color: var(--qw-teal-700); letter-spacing: -0.01em; }
+  .surface-dark .cs-card__metric strong { color: var(--qw-green-400); }
+  .cs-card__metric span { font-size: var(--fs-sm); color: var(--color-text); }
+  .cs-card__client { font-size: var(--fs-xs); color: var(--color-muted); margin-top: auto !important; padding-top: var(--space-2); }
+  .cs-card__ph { width: 100%; height: 100%; background: linear-gradient(135deg, var(--qw-teal-50), var(--qw-canvas)); }
+</style>
