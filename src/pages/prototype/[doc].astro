@@ -1,21 +1,46 @@
 ---
+/**
+ * PROTOTYPE DOCUMENT VIEWER (review-only, dynamic) — renders /prototype/{doc}/.
+ *
+ * URLs: getStaticPaths() emits one route per entry in `docs` from src/lib/docs.ts, which globs every
+ *   numbered Markdown file in /docs (docs/[0-9]*.md). The URL segment is the file name without ".md",
+ *   e.g. docs/03-page-map-personas.md -> /prototype/03-page-map-personas/.
+ * What: a two-column reader: a sticky document list (with links to the claims register and design system)
+ *   and the rendered Markdown, followed by Previous / Next links in file-name order.
+ * Why: the docs are the single source; rendering them inside the prototype lets reviewers read them next
+ *   to the pages they describe (CONTRIBUTING.md §2: "Numbered docs are also rendered inside the site").
+ * Persona / CTA: none. Reviewer tooling.
+ * Data: src/lib/docs.ts (`docs`: slug, title, summary, compiled `Content`).
+ * SEO: title "{doc title} | QM-113 Prototype", description = the doc's frontmatter `summary`,
+ *   `noindex: true`. Breadcrumbs Home > Prototype review hub > {title} produce BreadcrumbList JSON-LD.
+ * Review/release: the /prototype/ folder is deleted from the release output by scripts/release-check.mjs.
+ * Gotchas:
+ *   - The page has no <h1> of its own; the h1 comes from the Markdown's first "# " heading. Every numbered
+ *     doc must start with one (QA-01 checks one h1 per page).
+ *   - External links inside the Markdown are made safe by the rehype external-link plugin configured in
+ *     astro.config.mjs, not by this page.
+ */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import { docs } from '../../lib/docs';
 export function getStaticPaths() { return docs.map((d) => ({ params: { doc: d.slug }, props: { d: d } })); }
 const { d } = Astro.props as { d: (typeof docs)[number] };
+// Compiled Markdown component for this document.
 const { Content } = d;
 const crumbs = [{ label: 'Home', href: '/' }, { label: 'Prototype review hub', href: '/prototype/' }, { label: d.title }];
+// Position in the sorted list, for the Previous / Next pager.
 const i = docs.findIndex((x) => x.slug === d.slug);
 ---
 <BaseLayout seo={{ title: `${d.title} | QM-113 Prototype`, description: d.summary, noindex: true }} breadcrumbs={crumbs}>
   <div class="doc-wrap container">
     <Breadcrumbs items={crumbs} />
     <div class="doc-grid">
+      {/* Document list: aria-current marks the open document. */}
       <nav class="doc-nav" aria-label="Prototype documents">
         <ol>{docs.map((x) => <li><a href={`/prototype/${x.slug}/`} aria-current={x.slug === d.slug ? 'page' : undefined}>{x.title}</a></li>)}</ol>
         <p><a href="/prototype/claims/">Claims register</a> · <a href="/design-system/">Design system</a></p>
       </nav>
+      {/* Rendered Markdown plus the Previous / Next pager (each link only when a neighbour exists). */}
       <article class="prose doc">
         <Content />
         <p class="doc-pager">{i > 0 && <a href={`/prototype/${docs[i - 1].slug}/`}>Previous: {docs[i - 1].title}</a>}{i < docs.length - 1 && <a href={`/prototype/${docs[i + 1].slug}/`}>Next: {docs[i + 1].title}</a>}</p>
@@ -24,14 +49,19 @@ const i = docs.findIndex((x) => x.slug === d.slug);
   </div>
 </BaseLayout>
 <style>
+  /* Layout: single column, then a 16rem sticky nav + content from 1100px. minmax(0, 1fr) lets wide tables
+     and code blocks scroll inside the column instead of stretching the page. top: 6.5rem clears the sticky header. */
   .doc-wrap { padding-block: var(--space-8) var(--space-16); }
   .doc-grid { display: grid; gap: var(--space-10); }
   @media (min-width: 1100px) { .doc-grid { grid-template-columns: 16rem minmax(0, 1fr); } .doc-nav { position: sticky; top: 6.5rem; align-self: start; } }
+  /* Document list: the current doc gets a teal inset bar on its left edge. */
   .doc-nav ol { list-style: none; padding: 0; margin: 0 0 var(--space-4); display: grid; gap: 2px; font-size: var(--fs-sm); }
   .doc-nav a { display: block; padding: 0.4rem 0.6rem; border-radius: var(--radius-sm); text-decoration: none; color: var(--qw-ink-900); }
   .doc-nav a:hover { background: var(--qw-teal-50); }
   .doc-nav a[aria-current] { background: var(--qw-teal-50); box-shadow: inset 3px 0 0 var(--qw-teal-700); font-weight: var(--fw-semibold); }
   .doc-nav p { font-size: var(--fs-sm); }
+  /* Markdown content: docs are dense, so tables and code use smaller type; tables scroll horizontally and
+     cells keep a 7rem minimum width so columns stay readable. */
   .doc { font-size: 1rem; max-width: none; min-width: 0; }
   .doc :global(h1) { font-size: var(--fs-2xl); }
   .doc :global(h2) { font-size: var(--fs-xl); margin-top: 1.8em; }

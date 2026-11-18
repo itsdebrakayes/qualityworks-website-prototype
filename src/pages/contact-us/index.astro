@@ -3,6 +3,26 @@ import { rn } from '../../lib/release';
 /**
  * CONTACT (/contact-us/ — legacy URL). Preserves the live field set. Submission is simulated.
  * Persona: all. Core question: "How do I reach the right person, and what happens next?"
+ *
+ * What: the main conversion page. Left column: intro, "What happens next" steps and other ways to reach
+ *   the company (email, office phones, careers pointer). Right column: the shared ContactForm component.
+ * Persona / CTA (docs/03-page-map-personas.md §2, "Contact" row): primary persona All; no secondary.
+ *   Proof required: none. Primary CTA: "Send message" (the ContactForm submit button). Required data:
+ *   a form endpoint, which is NOT connected.
+ * Inbound links: almost every "Talk to an expert" / "Contact us" CTA on the site points here (src/data/site.ts
+ *   `ctas`). Some add `?topic=` (e.g. ?topic=procurement from /industries/public-sector/, ?topic=smb-ai from
+ *   /industries/small-business/); ContactForm.astro reads that and shows an "Inquiry type" line.
+ * Data: src/data/site.ts (`site.email`, `site.offices` with labels, localities and phone numbers).
+ * SEO: inline title/description in the BaseLayout call. Breadcrumbs Home > Contact Us produce
+ *   BreadcrumbList JSON-LD via BaseLayout. No other JSON-LD.
+ * Review/release: the response-time note carries `data-review-note={rn(...)}`, so reviewers see a
+ *   dashed outline in review mode explaining that a response-time promise was left out on purpose;
+ *   in release builds the attribute is omitted. The form's simulation control and release behaviour
+ *   (error, never a false success, until an endpoint exists) live inside ContactForm.astro.
+ * Gotchas:
+ *   - This page renders its own hero (no PageHero), so it places <Breadcrumbs> and the single <h1> itself.
+ *   - Do not add a response time ("we reply within 24 hours") until the business approves one.
+ *   - CVs are not accepted through the form; applicants are sent to /careers/ (BambooHR).
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
@@ -12,6 +32,7 @@ import { site } from '../../data/site';
 const crumbs = [{ label: 'Home', href: '/' }, { label: 'Contact Us' }];
 ---
 <BaseLayout seo={{ title: 'Contact QualityWorks | Talk to a Software Quality & AI Expert', description: 'Get in touch with QualityWorks about software testing, custom development or AI solutions. Offices in Los Angeles and Kingston, Jamaica.' }} breadcrumbs={crumbs}>
+  {/* Custom dark hero: intro column and form column side by side from 1024px, stacked below. */}
   <section class="contact surface-dark">
     <div class="container contact__grid">
       <div class="contact__intro">
@@ -19,6 +40,7 @@ const crumbs = [{ label: 'Home', href: '/' }, { label: 'Contact Us' }];
         <p class="eyebrow">Contact us</p>
         <h1>Got questions? Let’s talk.</h1>
         <p class="lede">We have the expertise you need to solve the problems you don’t want to handle on your own. Tell us what you’re working on.</p>
+        {/* Sets expectations without committing to a response time (see the review note below). */}
         <h2 class="contact__h">What happens next</h2>
         <ol class="next">
           <li>We read every message and route it to the right practice lead.</li>
@@ -26,6 +48,7 @@ const crumbs = [{ label: 'Home', href: '/' }, { label: 'Contact Us' }];
           <li>If we’re not the right fit, we’ll tell you.</li>
         </ol>
         <p class="next__note" data-review-note={rn('Response-time commitment intentionally omitted')}>We don’t state a response time until one is approved.</p>
+        {/* Contact channels from site.ts. Each office can list several phones, joined with a middle dot. */}
         <h2 class="contact__h">Other ways to reach us</h2>
         <ul class="ways">
           <li><Icon name="mail" /><a href={`mailto:${site.email}`}>{site.email}</a></li>
@@ -33,6 +56,7 @@ const crumbs = [{ label: 'Home', href: '/' }, { label: 'Contact Us' }];
           <li><Icon name="person-plus" /><span>Looking for a job? Visit <a href="/careers/">Careers</a> — we don’t accept CVs through this form.</span></li>
         </ul>
       </div>
+      {/* Form column. The visually hidden h2 keeps the heading outline intact for screen-reader users. */}
       <div class="contact__form">
         <h2 class="visually-hidden">Contact form</h2>
         <ContactForm />
@@ -41,13 +65,17 @@ const crumbs = [{ label: 'Home', href: '/' }, { label: 'Contact Us' }];
   </section>
 </BaseLayout>
 <style>
+  /* Hero surface: a soft teal glow (logo teal #289DAD at 22% opacity) in the top-left corner over ink-900. */
   .contact { padding-block: var(--space-10) var(--space-20); background: radial-gradient(60% 70% at 0% 0%, rgba(40,157,173,0.22), transparent 60%), var(--qw-ink-900); }
+  /* Two-column layout from 1024px; the form column is slightly wider because it carries more content. */
   .contact__grid { display: grid; gap: var(--space-12); }
   @media (min-width: 1024px) { .contact__grid { grid-template-columns: 0.9fr 1.1fr; gap: var(--space-16); align-items: start; } }
+  /* Typography and the numbered "What happens next" list. */
   .contact h1 { font-size: var(--fs-2xl); }
   .contact__h { font-size: var(--fs-md); margin-top: var(--space-10); }
   .next { padding-left: 1.25rem; display: grid; gap: var(--space-2); }
   .next__note { font-size: var(--fs-xs); color: var(--color-muted); }
+  /* Contact-channel list: icon + text rows. margin-top: 3px nudges the 20px icon onto the first text line. */
   .ways { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-4); }
   .ways li { display: flex; gap: var(--space-3); align-items: flex-start; }
   .ways :global(svg) { width: 20px; height: 20px; color: var(--qw-teal-300); flex: none; margin-top: 3px; }

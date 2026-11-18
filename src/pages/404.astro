@@ -1,8 +1,26 @@
 ---
+/**
+ * NOT FOUND — Astro builds this file as /404.html, the page the host serves for any unknown URL.
+ *
+ * What: a friendly error page that offers three ways forward (Home, Solutions, Contact us).
+ * Why: during the migration some legacy WordPress URLs may not be mapped yet (see src/data/redirects.json
+ *   and docs/06-url-mapping.md), so the copy explains that pages "may have moved during our website update".
+ * Persona / CTA: not listed in docs/03-page-map-personas.md §2 (utility page; "404" in the §1 page map).
+ *   Primary button: Home; secondary: Solutions and Contact us.
+ * Data: none. Copy is inline because the page is a utility stub.
+ * SEO: inline title and description; `noindex: true` (release build emits "noindex, follow"; review
+ *   builds are always "noindex, nofollow", see BaseLayout.astro). No breadcrumbs and no JSON-LD.
+ * Review/release: no REVIEW/RELEASE logic.
+ * Gotchas: the file name must stay `404.astro` at the root of src/pages/ for Astro and static hosts
+ *   (Netlify, Cloudflare Pages) to pick it up as the not-found page.
+ * Styles: the one-line <style> block adds extra vertical padding (.nf) because the page is short, and
+ *   uses a smaller h1 size than the global default.
+ */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Button from '../components/Button.astro';
 ---
 <BaseLayout seo={{ title: 'Page not found | QualityWorks', description: 'The page you were looking for could not be found.', noindex: true }}>
+  {/* Error message plus recovery links. Keep exactly one h1 (QA-01 heading check). */}
   <section class="section"><div class="container container--narrow nf">
     <p class="eyebrow">Error 404</p>
     <h1>We couldn’t find that page.</h1>

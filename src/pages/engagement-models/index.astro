@@ -1,15 +1,36 @@
 ---
+/**
+ * ENGAGEMENT MODELS OVERVIEW — renders /engagement-models/.
+ *
+ * What: a short hub listing the three ways to work with QualityWorks (dedicated teams, staff augmentation,
+ *   consulting and training) as ServiceCards that link to /engagement-models/{slug}/.
+ * Why: the docs/03 page map lists "Engagement models /engagement-models/" under Solutions >
+ *   Build or Modernize a Digital Product; the detail pages need a parent for the breadcrumb trail
+ *   (ServiceTemplate uses "Engagement models" as the parent crumb for these records).
+ * Persona / CTA: no dedicated row in docs/03-page-map-personas.md §2; it behaves like the
+ *   "Solutions overview" row (primary A; secondary B, D; core question "Which service fits my problem?";
+ *   primary CTA "Talk to an expert", here `ctas.contact` in the hero and the closing CtaBand).
+ * Data: src/data/services.ts (records with kind 'engagement-model'), src/data/site.ts (`ctas.contact`).
+ * SEO: title and description are inline in the BaseLayout call. Breadcrumbs Home > Solutions >
+ *   Engagement models produce BreadcrumbList JSON-LD via BaseLayout. No other JSON-LD.
+ * Review/release: no REVIEW/RELEASE logic on this page.
+ * Gotchas: this list filters by `kind`, while engagement-models/[slug].astro builds routes by `path`
+ *   prefix. A new model needs kind 'engagement-model' AND a /engagement-models/ path.
+ */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
 import ServiceCard from '../../components/ServiceCard.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import { services } from '../../data/services';
 import { ctas } from '../../data/site';
+// Selected by `kind` (not path) so the cards follow the content model; order follows services.ts.
 const models = services.filter((s) => s.kind === 'engagement-model');
 const crumbs = [{ label: 'Home', href: '/' }, { label: 'Solutions', href: '/services/' }, { label: 'Engagement models' }];
 ---
 <BaseLayout seo={{ title: 'Engagement Models: Dedicated Teams, Staff Augmentation | QualityWorks', description: 'Work with QualityWorks through dedicated teams, staff augmentation or consulting and training — whichever fits your roadmap.' }} breadcrumbs={crumbs}>
   <PageHero eyebrow="Engagement models" title="Choose how we work together" lede="The same QualityWorks standards, delivered in the way that fits your team: a dedicated team, embedded specialists, or consulting and training." breadcrumbs={crumbs} primary={ctas.contact} />
+  {/* Model cards. The visually hidden h2 keeps the heading outline valid (h1 in hero, then h2). */}
   <section class="section"><div class="container"><h2 class="visually-hidden">Models</h2><div class="grid grid--3">{models.map((m) => <ServiceCard service={m} />)}</div></div></section>
+  {/* Closing conversion band: same global contact CTA as the hero. */}
   <CtaBand title="Not sure which model fits?" primary={ctas.contact} />
 </BaseLayout>

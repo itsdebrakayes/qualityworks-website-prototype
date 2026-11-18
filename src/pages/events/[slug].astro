@@ -1,4 +1,32 @@
 ---
+/**
+ * EVENT DETAIL (dynamic) — renders /events/{slug}/.
+ *
+ * URLs: getStaticPaths() emits one route per record in `events` from src/data/events.ts, using `slug` as
+ *   the URL segment and passing the record as `props.e`. Because `events` is filtered in RELEASE builds
+ *   (no fixtures, no unverified events, no undated events), those detail pages are not built at all in a
+ *   release build.
+ * Proposed route: /events/{slug}/ is marked "(proposed)" in the docs/03 page map; needs QM-41.
+ * Persona / CTA (docs/03-page-map-personas.md §2, "Events" row): primary All; no secondary. Core
+ *   question: "Where can I see the team, and is it upcoming?" Proof: dates verified with the organiser.
+ *   Primary CTA: "Register" — upcoming events only.
+ * What: compact hero (with a Fixture label for fixture records), a status Alert for past / cancelled /
+ *   date-TBC events, the description and speaker, and a details card (date, start time, venue) holding
+ *   exactly one of: a disabled demo Register button (fixtures), a real Register link, or a short
+ *   "registration closed / not open" message.
+ * Data: src/data/events.ts (`events`, `eventPhase`, `canRegister`, `showsDemoRegistration`,
+ *   `formatEventDate`). Phase is computed at BUILD time from the dates, so the page reflects the build date.
+ * SEO: title "{event title} | QualityWorks Events"; description = first 155 characters of `summary`.
+ *   Fixture events set `noindex` (production robots directive). JSON-LD: an Event object only when the
+ *   event has a start date and is not a fixture (so date-TBC and fictional events never emit schema),
+ *   plus BreadcrumbList from BaseLayout.
+ * Review/release: no REVIEW/RELEASE checks in this file; fixtures are removed at the data layer in RELEASE.
+ * Gotchas:
+ *   - A past or cancelled event can never show a Register link (canRegister requires phase "upcoming").
+ *   - Online events put `registrationUrl` in the VirtualLocation; an online event with no registration URL
+ *     would emit a location with an undefined url. Give real online events a URL.
+ *   - The start time uses the event's own IANA `timeZone`, with a short zone name (e.g. "PDT").
+ */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
 import Alert from '../../components/Alert.astro';
@@ -7,11 +35,16 @@ import FixtureLabel from '../../components/FixtureLabel.astro';
 import Icon from '../../components/Icon.astro';
 import { events, eventPhase, canRegister, showsDemoRegistration, formatEventDate } from '../../data/events';
 import type { EventRecord } from '../../data/types';
+// One static page per event record (filtered by build mode inside events.ts).
 export function getStaticPaths() { return events.map((e) => ({ params: { slug: e.slug }, props: { e } })); }
 const { e } = Astro.props as { e: EventRecord };
+// upcoming | past | cancelled | date-tbc, derived from status and dates at build time.
 const phase = eventPhase(e);
 const crumbs = [{ label: 'Home', href: '/' }, { label: 'Events', href: '/events/' }, { label: e.title }];
+// Local start time in the event's own time zone; null when the date is still to be confirmed.
 const time = e.startDate ? new Date(e.startDate).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: e.timeZone, timeZoneName: 'short' }) : null;
+// schema.org Event, only for dated, non-fixture events. Cancelled maps to EventCancelled; in-person and
+// hybrid both map to OfflineEventAttendanceMode with a Place ("TBC" when the venue is unknown).
 const ld = e.startDate && e.provenance.approval !== 'fixture' ? [{ '@context': 'https://schema.org', '@type': 'Event', name: e.title, startDate: e.startDate, endDate: e.endDate,
   eventStatus: phase === 'cancelled' ? 'https://schema.org/EventCancelled' : 'https://schema.org/EventScheduled',
   eventAttendanceMode: e.venueType === 'online' ? 'https://schema.org/OnlineEventAttendanceMode' : 'https://schema.org/OfflineEventAttendanceMode',
@@ -21,9 +54,11 @@ const ld = e.startDate && e.provenance.approval !== 'fixture' ? [{ '@context': '
   <PageHero eyebrow="Event" title={e.title} lede={e.summary} breadcrumbs={crumbs} compact>
     {e.provenance.approval === 'fixture' && <p><FixtureLabel /></p>}
   </PageHero>
+  {/* Two-column body from 900px: description on the left, details/registration card on the right. */}
   <section class="section">
     <div class="container ev">
       <div>
+        {/* Phase notice (role="status"): explains why registration is or is not available. Upcoming events get none. */}
         {phase === 'past' && <Alert tone="info" title="This event has ended" role="status"><p>Registration is closed. See <a href="/events/">upcoming events</a>.</p></Alert>}
         {phase === 'cancelled' && <Alert tone="danger" title="This event has been cancelled" role="status"><p>It will not take place. Registration is not available.</p></Alert>}
         {phase === 'date-tbc' && <Alert tone="warning" title="Date to be confirmed" role="status"><p>Registration will open once the organiser confirms the date.</p></Alert>}
@@ -36,15 +71,18 @@ const ld = e.startDate && e.provenance.approval !== 'fixture' ? [{ '@context': '
           <li><Icon name="calendar" /><span>{phase === 'cancelled' ? <s>{formatEventDate(e)}</s> : formatEventDate(e)}{time && <><br /><span class="muted">Starts {time}</span></>}</span></li>
           <li><Icon name={e.venueType === 'online' ? 'globe' : 'pin'} /><span>{e.venueType === 'online' ? 'Online' : e.venue ?? 'Venue to be confirmed'}</span></li>
         </ul>
+        {/* Registration: demo-only disabled button for fixtures, real external link when open, otherwise a reason. */}
         {showsDemoRegistration(e) ? <p class="demo-reg"><button type="button" class="btn" disabled aria-describedby="demo-reg-note">Register</button><span id="demo-reg-note" class="muted">Demo only: this is a fixture event and no registration is taken.</span></p> : canRegister(e) ? <Button cta={{ label: 'Register', href: e.registrationUrl!, external: e.registrationUrl!.startsWith('http'), handoffNote: 'Registration is handled by the event organiser' }} /> : <p class="muted">{phase === 'past' ? 'Registration closed' : phase === 'cancelled' ? 'No registration — cancelled' : 'Registration not yet open'}</p>}
       </aside>
     </div>
   </section>
 </BaseLayout>
 <style>
+  /* Body layout: single column, then content + fixed 20rem details card from 900px. */
   .ev { display: grid; gap: var(--space-10); }
   @media (min-width: 900px) { .ev { grid-template-columns: 1fr 20rem; } }
   .ev :global(.alert) { margin-bottom: var(--space-6); }
+  /* Details card: date / venue list and the registration control. align-self: start stops it stretching. */
   .ev__card { padding: var(--space-6); border: 1px solid var(--color-border); border-radius: var(--radius-lg); align-self: start; }
   .ev__card ul { list-style: none; padding: 0; margin: 0 0 var(--space-6); display: grid; gap: var(--space-4); }
   .ev__card li { display: flex; gap: var(--space-3); }

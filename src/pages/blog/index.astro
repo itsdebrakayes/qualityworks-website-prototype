@@ -1,5 +1,24 @@
 ---
-/** BLOG (/blog/ — legacy URL). Articles stay at root-level slugs to preserve WordPress URLs. */
+/**
+ * BLOG (/blog/ — legacy URL). Articles stay at root-level slugs to preserve WordPress URLs.
+ *
+ * What: the blog listing. Every migrated post is rendered as an ArticleCard linking to /{post-slug}/
+ *   (built by src/pages/[slug].astro), with a client-side category filter.
+ * Persona / CTA: "Resources / Blog / Article" row in docs/03-page-map-personas.md §2. Primary persona
+ *   B and E; secondary A. Core question: "What can I learn before talking to sales?" Primary CTA:
+ *   "Talk to an expert" (shown at the end of each article, not on this list).
+ * Data: src/data/articles.ts (`blogPosts` = migrated WordPress posts only, so the PRISM whitepaper
+ *   fixture in `articles` never appears here).
+ * SEO: inline title/description. Breadcrumbs Home > Resources > Blog produce BreadcrumbList JSON-LD via
+ *   BaseLayout. No other JSON-LD.
+ * Review/release: no REVIEW/RELEASE logic. The "migration" note below is visible in both builds.
+ * Gotchas:
+ *   - Only 12 of the 99 live posts are migrated. Production needs pagination (/blog/page/2/), which is
+ *     not built.
+ *   - The filter matches against ArticleCard's `data-categories` attribute, a "|"-joined list. If that
+ *     separator changes in ArticleCard.astro, update the `match` function in the <script> below.
+ *   - Filter state lives in the URL (?category=...) via src/lib/filters.ts, so filtered views are shareable.
+ */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
 import ArticleCard from '../../components/ArticleCard.astro';
@@ -7,22 +26,30 @@ import FilterBar from '../../components/FilterBar.astro';
 import EmptyState from '../../components/EmptyState.astro';
 import { blogPosts } from '../../data/articles';
 const crumbs = [{ label: 'Home', href: '/' }, { label: 'Resources', href: '/resources/' }, { label: 'Blog' }];
+// Category options for the filter: unique categories across all posts, minus WordPress's default
+// "Uncategorized", sorted A-Z, each with a post count for the option label.
 const cats = [...new Set(blogPosts.flatMap((a) => a.categories))].filter((c) => c !== 'Uncategorized').sort().map((c) => ({ value: c, label: c, count: blogPosts.filter((a) => a.categories.includes(c)).length }));
 ---
 <BaseLayout seo={{ title: 'Blog: Software Testing, QA & AI Insights | QualityWorks', description: 'What QualityWorks experts are saying about software testing, test automation, agentic QA, AI adoption, agile and software development.' }} breadcrumbs={crumbs}>
   <PageHero eyebrow="Blog" title="Our blog" lede="See what our experts are saying about end-to-end testing, agile, automation, AI and software development." breadcrumbs={crumbs} compact />
   <section class="section">
     <div class="container">
+      {/* Filter bar, results grid and empty state. The ids are wired up by initFilters() in the script below. */}
       <h2 class="visually-hidden">Articles</h2>
       <FilterBar id="blog-filter" resultLabel="articles" filters={[{ name: 'category', label: 'Category', options: cats }]} />
       <div class="grid grid--3" id="blog-results">{blogPosts.map((a) => <ArticleCard a={a} />)}</div>
       <EmptyState title="No articles in this category" id="blog-empty" hidden><p>Choose another category.</p></EmptyState>
+      {/* Migration note: tells reviewers the list is a partial snapshot and pagination is still required. */}
       <p class="migration">Showing the 12 most recent posts migrated from WordPress for the prototype. The live blog has 99 posts; pagination (12 per page, <code>/blog/page/2/</code>) is required in production.</p>
     </div>
   </section>
 </BaseLayout>
 <style>.migration { margin-top: var(--space-8); font-size: var(--fs-sm); color: var(--color-muted); }</style>
 <script>
+  // Client-side category filter. initFilters() reads/writes ?category= in the URL, hides non-matching
+  // cards, announces the result count in a live region and shows #blog-empty when nothing matches.
   import { initFilters } from '../../lib/filters';
+  // match: no category selected shows every card; otherwise the card's "|"-joined data-categories must
+  // contain the selected value exactly (not a substring match).
   initFilters({ bar: '#blog-filter', results: '#blog-results', empty: '#blog-empty', noun: ['article', 'articles'], match: (el, f) => !f.category || (el.dataset.categories ?? '').split('|').includes(f.category) });
 </script>

@@ -3,6 +3,35 @@
  * CASE STUDY DETAIL (/case-studies/{slug}/). Standardised in review round 1; the legacy
  * /case-study/{slug}/ addresses need 301 redirects at launch (docs/06-url-mapping.md) — NOT configured in the prototype.
  * Structured fields: customer, challenge, contribution, approach, outcome, metrics (+source/context).
+ *
+ * URLs: getStaticPaths() emits one route per record in `caseStudies` (src/data/caseStudies.ts), using the
+ *   record's PUBLIC `slug` (a WordPress slug that must not be public, e.g. one containing a client name, is
+ *   renamed via src/data/redirects.json `caseStudySlugRenames`; see CONTRIBUTING.md recipe 4.2).
+ * Persona / CTA (docs/03-page-map-personas.md §2, "Case studies" row): primary A, C; secondary B. Core
+ *   question: "Have they solved this before?" Proof required: metrics with source/context. Primary CTA:
+ *   "Discuss a similar challenge" (closing CtaBand; the button itself is the record's `cta`).
+ * What, top to bottom: dark hero (breadcrumbs, eyebrow with industry, h1, summary, Client / Industry /
+ *   Services facts, optional image); key-result metrics with their source and the client-disclosure state;
+ *   the story (client, challenge, solution, result) beside a sticky "Our contribution" aside; up to three
+ *   related case studies; closing CtaBand.
+ * Data: src/data/caseStudies.ts (the record and the related list), src/data/industries.ts (industry name
+ *   and link), src/data/services.ts and src/data/products.ts (service links and the "About {solution}"
+ *   button, resolved from `relatedSolution`, service first then product).
+ * SEO: title "{title} | QualityWorks Case Study", cut to 90 characters. Description: `summary` (or
+ *   `challenge`), cut at a word boundary when longer than 160 characters. og:type "article" and og:image =
+ *   the case-study image when present. JSON-LD: BreadcrumbList only (from BaseLayout).
+ * Review/release: no REVIEW/RELEASE logic in this file. The disclosure line ("Client disclosure approval:
+ *   to be confirmed / approved / not approved") is shown in every build.
+ * Gotchas:
+ *   - The page renders its own hero (no PageHero), so it places <Breadcrumbs> and the single <h1> itself.
+ *   - The metrics source line uses only the FIRST metric's `metricSource`; all metrics in one record are
+ *     assumed to share a source.
+ *   - Story sections with 20 characters or fewer are dropped, so stub values like "N/A" never render as a
+ *     section.
+ *   - `cs.client` is shown as-is: unapproved client names must already be replaced by a neutral descriptor
+ *     in the data (CONTRIBUTING.md recipe 4.2, step 5).
+ *   - Metric values go through MetricValue so characters like the "A -> B" arrow use brand-font glyphs
+ *     (glyph-lint fails the build otherwise).
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
@@ -18,10 +47,13 @@ import { productBySlug } from '../../data/products';
 import type { CaseStudy } from '../../data/types';
 export function getStaticPaths() { return caseStudies.map((c) => ({ params: { slug: c.slug }, props: { cs: c } })); }
 const { cs } = Astro.props as { cs: CaseStudy };
+// Lookups for the facts list and the aside button. `relatedSolution` may name a service OR a product.
 const industry = industryBySlug(cs.industry);
 const solution = serviceBySlug(cs.relatedSolution) ?? productBySlug(cs.relatedSolution);
+// Related case studies: same industry or at least one shared service tag, first three in data order.
 const more = caseStudies.filter((c) => c.slug !== cs.slug && (c.industry === cs.industry || c.serviceTags.some((t) => cs.serviceTags.includes(t)))).slice(0, 3);
 const crumbs = [{ label: 'Home', href: '/' }, { label: 'Case Studies', href: '/case-studies/' }, { label: cs.title }];
+// Story sections as [heading, text] pairs; empty or very short fields are filtered out (see Gotchas).
 const sections = [
   // Section heading says “The client”: QualityWorks calls the organisations it works for clients (review round 2).
   ['The client', cs.customer], ['The challenge', cs.challenge], ['Our solution', cs.approach], ['The result', cs.outcome],
@@ -31,6 +63,7 @@ const rawDescription = cs.summary || cs.challenge;
 const description = rawDescription.length <= 160 ? rawDescription : rawDescription.slice(0, 155).replace(/\s+\S*$/, '') + '…';
 ---
 <BaseLayout seo={{ title: `${cs.title} | QualityWorks Case Study`.slice(0, 90), description, ogImage: cs.image ?? undefined }} breadcrumbs={crumbs} ogType="article">
+  {/* Custom dark hero: breadcrumbs, h1, summary, key facts and the optional case-study image. */}
   <section class="cs-hero surface-dark">
     <div class="container cs-hero__grid">
       <div>
@@ -48,6 +81,7 @@ const description = rawDescription.length <= 160 ? rawDescription : rawDescripti
     </div>
   </section>
 
+  {/* Key results: each metric shows value, label and measurement context, plus one source/disclosure line. */}
   {cs.metrics.length > 0 && (
     <section class="section section--tight" aria-labelledby="metrics-title">
       <div class="container">
@@ -66,6 +100,7 @@ const description = rawDescription.length <= 160 ? rawDescription : rawDescripti
     </section>
   )}
 
+  {/* Story body: contribution aside (sticky from 960px) and the client / challenge / solution / result sections. */}
   <section class="section surface-alt">
     <div class="container cs-body">
       <aside class="cs-aside" aria-label="Our contribution">
@@ -79,6 +114,7 @@ const description = rawDescription.length <= 160 ? rawDescription : rawDescripti
     </div>
   </section>
 
+  {/* Related case studies (only when at least one matches). */}
   {more.length > 0 && (
     <section class="section">
       <div class="container">
@@ -87,23 +123,30 @@ const description = rawDescription.length <= 160 ? rawDescription : rawDescripti
       </div>
     </section>
   )}
+  {/* Closing CTA: the record's own `cta`, plus a link back to the list. */}
   <CtaBand title="Discuss a similar challenge with our team." primary={cs.cta} secondary={{ label: 'All case studies', href: '/case-studies/' }} />
 </BaseLayout>
 <style>
+  /* Hero: teal glow (logo teal #289DAD at 25%) from the top-right corner over ink-900. Image column from 1024px. */
   .cs-hero { padding-block: var(--space-10) var(--space-16); background: radial-gradient(60% 80% at 100% 0%, rgba(40,157,173,0.25), transparent 60%), var(--qw-ink-900); }
   .cs-hero__grid { display: grid; gap: var(--space-10); align-items: center; }
   @media (min-width: 1024px) { .cs-hero__grid { grid-template-columns: 1.2fr 0.8fr; } }
   .cs-hero h1 { font-size: var(--fs-2xl); }
   .cs-hero__media img { border-radius: var(--radius-lg); aspect-ratio: 4/3; object-fit: cover; width: 100%; }
+  /* Facts list: mono uppercase labels in logo green, which is an accent meant for dark surfaces like this one. */
   .cs-facts { display: grid; gap: var(--space-3); margin: var(--space-8) 0 0; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }
   .cs-facts dt { font: var(--fw-medium) var(--fs-xs)/1.3 var(--font-mono); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-green-400); }
   .cs-facts dd { margin: 0.2rem 0 0; color: #fff; }
+  /* Metric cards. The markup order is dt (label) then dd (value) for valid <dl> structure; CSS `order` shows
+     the big value first, then the label, then the context. */
   .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: var(--space-6); margin: 0; }
   .metric { display: flex; flex-direction: column; padding: var(--space-6); border: 1px solid var(--color-border); border-radius: var(--radius-lg); border-top: 4px solid var(--qw-teal-500); }
   .metric dt { order: 2; font-weight: var(--fw-semibold); color: var(--qw-ink-900); }
   .metric__value { order: 1; margin: 0 0 var(--space-2); font-size: var(--fs-2xl); font-weight: var(--fw-bold); line-height: 1.05; color: var(--qw-teal-700); letter-spacing: -0.02em; }
   .metric__ctx { order: 3; margin: var(--space-2) 0 0; font-size: var(--fs-xs); color: var(--color-muted); }
   .metric-src { font-size: var(--fs-xs); color: var(--color-muted); margin: var(--space-4) 0 0; }
+  /* Story layout: 18rem aside + text column from 960px. The aside sticks at top: 7rem to clear the sticky
+     site header. Body text is capped at 44rem for a comfortable line length. */
   .cs-body { display: grid; gap: var(--space-10); }
   @media (min-width: 960px) { .cs-body { grid-template-columns: 18rem 1fr; gap: var(--space-16); } .cs-aside { position: sticky; top: 7rem; align-self: start; } }
   .cs-aside { padding: var(--space-6); background: #fff; border: 1px solid var(--qw-line); border-radius: var(--radius-lg); }

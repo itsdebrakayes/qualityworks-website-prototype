@@ -3,6 +3,30 @@
  * RESOURCE HUB (proposed new route; live "Resources" menu holds only Blog).
  * Combines articles, news/awards, whitepapers and events with type chips + topic filter.
  * Persona: QA Director (B), Marketing/Ops (E). Core question: "What can I learn before I talk to sales?"
+ *
+ * URL: /resources/. Marked "(proposed hub)" in the docs/03 page map: not in the live sitemap, needs QM-41.
+ * Persona / CTA (docs/03-page-map-personas.md §2, "Resources / Blog / Article" row): primary B, E;
+ *   secondary A. Proof required: author, dates, references. Primary CTA: "Talk to an expert" (here the
+ *   closing CtaBand with `ctas.contact`). Required data: articles (WordPress), events.
+ * What: one mixed grid of ArticleCards and EventCards with two combinable filters: content-type chips
+ *   (single-select toggle buttons) and a topic <select>. Empty state with its own "Clear filters" button.
+ * Data: src/data/articles.ts (`articles` = migrated posts plus, in review builds only, the PRISM
+ *   whitepaper fixture; `contentTypes` for the chips), src/data/events.ts (`events`; release builds drop
+ *   fixtures, unverified and undated events), src/data/site.ts (`ctas.contact`).
+ * SEO: inline title/description. Breadcrumbs Home > Resources produce BreadcrumbList JSON-LD via
+ *   BaseLayout. No other JSON-LD.
+ * Review/release: no REVIEW/RELEASE logic in this file; the review/release difference comes from the
+ *   data modules (fixtures filtered out in RELEASE), so chip counts differ between builds.
+ * Gotchas:
+ *   - The filter form is written by hand here instead of using FilterBar.astro, because FilterBar only
+ *     renders <select>s and this page needs chip buttons. It still uses the same data-* hooks
+ *     (data-filter-bar, data-chip-filter, data-filter, data-filter-clear, data-filter-count) that
+ *     src/lib/filters.ts expects, and repeats the .filter-bar styles locally (FilterBar's are scoped).
+ *   - Events are wrapped in a div with data-type="event" and an empty data-categories, because EventCard
+ *     does not carry those attributes. Consequence: choosing any topic hides all events (the empty-state
+ *     copy says so).
+ *   - Topic options come from article categories only.
+ *   - Filter state is mirrored in the URL (?type=...&topic=...) so filtered views are shareable.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
@@ -14,13 +38,16 @@ import { articles, contentTypes } from '../../data/articles';
 import { events } from '../../data/events';
 import { ctas } from '../../data/site';
 const crumbs = [{ label: 'Home', href: '/' }, { label: 'Resources' }];
+// Topic options: unique article categories, minus WordPress's default "Uncategorized", sorted A-Z.
 const topics = [...new Set(articles.flatMap((a) => a.categories))].filter((c) => c !== 'Uncategorized').sort();
+// Item count shown on each content-type chip; "event" is not an article type, so count events separately.
 const count = (t: string) => t === 'event' ? events.length : articles.filter((a) => a.type === t).length;
 ---
 <BaseLayout seo={{ title: 'Resources: Articles, Whitepapers, News & Events | QualityWorks', description: 'Insights on software testing, test automation, agentic QA and AI adoption from QualityWorks, plus company news, whitepapers and speaking events.' }} breadcrumbs={crumbs}>
   <PageHero eyebrow="Resources" title="Insights, news and events" lede="Practical thinking on software quality, AI and delivery from the QualityWorks team." breadcrumbs={crumbs} compact />
   <section class="section">
     <div class="container">
+      {/* Hand-built filter form (see Gotchas). onsubmit="return false" stops Enter from reloading the page. */}
       <h2 class="visually-hidden">All resources</h2>
       <form class="filter-bar res-filter" id="res-filter" role="search" aria-label="Filter resources" data-filter-bar onsubmit="return false">
         <div class="res-filter__types">
@@ -37,33 +64,45 @@ const count = (t: string) => t === 'event' ? events.length : articles.filter((a)
         <div class="filter-bar__actions"><button type="button" class="btn btn--ghost btn--sm" data-filter-clear disabled>Clear filters</button></div>
         <p class="filter-bar__count" aria-live="polite" data-filter-count></p>
       </form>
+      {/* Results grid: articles first (newest first, sorted in articles.ts), then events wrapped with filter data attributes. */}
       <div class="grid grid--3" id="res-results">
         {articles.map((a) => <ArticleCard a={a} />)}
         {events.map((e) => <div class="res-event" data-type="event" data-categories=""><EventCard e={e} /></div>)}
       </div>
+      {/* Empty state: shown by initFilters() when no item matches; its button is wired in the script below. */}
       <EmptyState title="Nothing matches those filters" id="res-empty" hidden><p>Events have no topic tags yet. Try another topic or content type.</p><button type="button" class="btn btn--secondary btn--sm" data-empty-clear>Clear filters</button></EmptyState>
     </div>
   </section>
   <CtaBand title="Want to talk it through with the authors?" primary={ctas.contact} />
 </BaseLayout>
 <style>
+  /* Filter panel layout: stacked on small screens; from 900px, chips | 16rem topic select | clear button. */
   .filter-bar { display: grid; gap: var(--space-4); align-items: end; grid-template-columns: 1fr; padding: var(--space-5); background: var(--qw-canvas); border: 1px solid var(--qw-line); border-radius: var(--radius-lg); margin-bottom: var(--space-8); }
   @media (min-width: 900px) { .filter-bar { grid-template-columns: 1fr 16rem auto; } }
   .res-filter__label { font-weight: var(--fw-semibold); font-size: var(--fs-sm); color: var(--qw-ink-900); margin-bottom: var(--space-2); }
+  /* Content-type chips. 44px min height for touch targets; the #A9B5BF border keeps the unselected chip
+     outline visible on white. Pressed state (aria-pressed="true") uses interactive teal-700 with white text. */
   .chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
   .chip { min-height: 44px; padding: 0.4rem 1rem; border-radius: var(--radius-pill); border: 1.5px solid #A9B5BF; background: #fff; color: var(--qw-ink-900); font: var(--fw-semibold) var(--fs-sm)/1 var(--font-sans); cursor: pointer; display: inline-flex; gap: 0.4rem; align-items: center; }
   .chip:hover { border-color: var(--qw-teal-700); }
   .chip[aria-pressed="true"] { background: var(--qw-teal-700); border-color: var(--qw-teal-700); color: #fff; }
   .chip__n { font-family: var(--font-mono); font-size: var(--fs-xs); opacity: 0.75; }
+  /* Clear button row and the live result count, which spans the full width. */
   .filter-bar__actions { display: flex; align-items: center; min-height: 48px; }
   .filter-bar__count { grid-column: 1 / -1; margin: 0; font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--qw-ink-900); }
+  /* Event wrapper: stretch the EventCard to the grid cell height. The explicit [hidden] rule is needed because
+     display: flex would otherwise override the hidden attribute the filter script sets. */
   .res-event { display: flex; }
   .res-event > :global(*) { flex: 1; }
   .res-event[hidden] { display: none; }
 </style>
 <script>
+  // Client-side filtering via the shared controller in src/lib/filters.ts (URL state, live count, empty state).
   import { initFilters } from '../../lib/filters';
+  // match: an item passes when no type chip is active or its data-type equals the chip value, AND no topic
+  // is chosen or its "|"-joined data-categories contains the topic exactly.
   const api = initFilters({ bar: '#res-filter', results: '#res-results', empty: '#res-empty', noun: ['resource', 'resources'],
     match: (el, f) => (!f.type || el.dataset.type === f.type) && (!f.topic || (el.dataset.categories ?? '').split('|').includes(f.topic)) });
+  // The empty state's own "Clear filters" button reuses the controller's clear() (resets chips, select and URL).
   document.querySelector('[data-empty-clear]')!.addEventListener('click', () => api.clear());
 </script>

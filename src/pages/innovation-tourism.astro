@@ -1,4 +1,23 @@
 ---
+/**
+ * INNOVATION TOURISM — renders /innovation-tourism/ (legacy URL preserved at the site root).
+ *
+ * What: a one-line route that hands the `innovation-tourism` record from src/data/services.ts to the shared
+ *   ServiceTemplate (src/components/templates/ServiceTemplate.astro), which renders the whole page.
+ * Why a separate file: src/pages/services/[slug].astro only builds records whose `path` starts with
+ *   /services/. This record keeps its live root-level path, so it needs its own page file
+ *   (CONTRIBUTING.md recipe 4.1, step 5).
+ * Persona / CTA: "Service detail" row in docs/03-page-map-personas.md §2. Primary persona B (testing) /
+ *   D (build, AI) / A; secondary varies. The record's own `personas` and `primaryCta` fields decide.
+ *   Core question: "Can they solve this problem, and how?"
+ * Data: src/data/services.ts (`serviceBySlug('innovation-tourism')`), plus whatever the template looks up
+ *   (related case studies, products, industries, sibling services).
+ * SEO: title/description come from the record's `seo`. The template emits Service JSON-LD, FAQPage
+ *   JSON-LD when the record has FAQs, and BaseLayout adds BreadcrumbList JSON-LD.
+ * Review/release: any review-only notes and release blockers live inside ServiceTemplate.astro.
+ * Gotchas: the non-null `!` means a renamed or deleted slug only fails at build time with a runtime error,
+ *   so keep the slug here in sync with services.ts.
+ */
 import ServiceTemplate from '../components/templates/ServiceTemplate.astro';
 import { serviceBySlug } from '../data/services';
 ---

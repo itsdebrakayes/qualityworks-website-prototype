@@ -1,4 +1,19 @@
 ---
+/**
+ * TERMS & CONDITIONS — renders /terms-conditions/ (legacy URL preserved).
+ *
+ * What: a placeholder route. All markup comes from src/components/LegalStub.astro.
+ * Why: legal text is deliberately NOT reproduced in the prototype. It must be migrated verbatim from the
+ *   live site. The stub shows a "Prototype route" notice linking to the current live version.
+ * Persona / CTA: not listed in docs/03-page-map-personas.md §2 (utility page in the §1 page map).
+ * Data: none; `title` and `path` props only. `path` must match this route so the stub links to
+ *   https://qualityworkscg.com/terms-conditions/.
+ * SEO: LegalStub builds the title ("Terms & Conditions | QualityWorks") and description from `title`, and
+ *   passes Home > Terms & Conditions breadcrumbs, so BaseLayout emits BreadcrumbList JSON-LD.
+ * Review/release: no REVIEW/RELEASE logic; the stub notice appears in both builds, so the real terms
+ *   must replace it before launch.
+ * Gotchas: the sibling /privacy-policy/ page uses the same pattern. Edit LegalStub.astro to change both.
+ */
 import LegalStub from '../../components/LegalStub.astro';
 ---
 <LegalStub title="Terms & Conditions" path="/terms-conditions/" />

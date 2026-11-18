@@ -2,6 +2,32 @@
 /**
  * DESIGN SYSTEM & COMPONENT INVENTORY. Token values are parsed from src/styles/tokens.css at build
  * time (single source of truth). Every component is rendered live from the real component file.
+ *
+ * URL: /design-system/ (review-only).
+ * What, top to bottom: colour swatches (every --qw-* token); typography specimen + font tokens; space,
+ *   radius, elevation and motion tokens; buttons, badges and breadcrumbs; cards (service, case study,
+ *   article, event, product); stats and testimonials; feedback states (alerts, empty state, wireframe,
+ *   skeleton, process steps, FAQ); the component inventory table; a sample CtaBand.
+ * Why: one place for developers and reviewers to see the real tokens and components together.
+ *   CONTRIBUTING.md recipe 4.6 says every new component must be added to `inventory` below, with a live
+ *   example if it is visual.
+ * Persona / CTA: none. Reviewer/developer tooling, not in the docs/03 persona table.
+ * Data: src/styles/tokens.css (read from disk), plus sample records from src/data/services.ts,
+ *   products.ts, caseStudies.ts, articles.ts and events.ts to feed the live component demos.
+ * SEO: inline title/description with `noindex: true`. Breadcrumbs Home > Prototype > Design system
+ *   produce BreadcrumbList JSON-LD via BaseLayout. No other JSON-LD.
+ * Review/release: no REVIEW guard in this file; scripts/release-check.mjs deletes /design-system/ from the
+ *   release output (CONTRIBUTING.md §6). Components shown here still follow their own review/release rules.
+ * Gotchas:
+ *   - Token parsing is a regex over the text of tokens.css between the first ":root {" and the first
+ *     "@media" (today the prefers-reduced-motion block). Anything after it, such as the reduced-motion
+ *     overrides and the .surface-* theme variables, is not listed. A token's note is the comment that
+ *     directly follows its value.
+ *   - readFileSync uses process.cwd(), so the build must run from the project root (npm scripts do).
+ *   - The event demo picks events by array position ([0], [3], [4]): today a real event plus the upcoming
+ *     and cancelled fixtures. Reordering events.ts changes which states appear; missing indexes are skipped.
+ *   - ProofBlock demo uses testimonial id 'T1'; it must exist in src/data/testimonials.ts.
+ *   - The inline style attributes on the type specimen are intentional: they show raw token values.
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -31,12 +57,18 @@ import { caseStudies } from '../../data/caseStudies';
 import { blogPosts } from '../../data/articles';
 import { events } from '../../data/events';
 
+// Read the token file at build time so this page can never drift from the real tokens.
 const css = readFileSync(join(process.cwd(), 'src/styles/tokens.css'), 'utf8');
+// Only the base :root block (stops at the first @media; see Gotchas).
 const rootBlock = css.slice(css.indexOf(':root {'), css.indexOf('@media'));
+// Each "--name: value; /* note */" line becomes { name, value, note }. The note is optional.
 const tokens = [...rootBlock.matchAll(/(--[\w-]+):\s*([^;]+);\s*(?:\/\*\s*(.*?)\s*\*\/)?/g)].map(([, name, value, note]) => ({ name, value: value.trim(), note: note ?? '' }));
+// Brand colour tokens (--qw-*) for the swatch grid.
 const colors = tokens.filter((t) => t.name.startsWith('--qw-'));
+// Tokens whose name starts with a prefix, e.g. group('--space-').
 const group = (p: string) => tokens.filter((t) => t.name.startsWith(p));
 const crumbs = [{ label: 'Home', href: '/' }, { label: 'Prototype', href: '/prototype/' }, { label: 'Design system' }];
+// Component inventory: [name, source file, notes]. Add every new component here (CONTRIBUTING.md 4.6).
 const inventory = [
   ['Header + mega-menu', 'components/Header.astro', 'Global; desktop disclosure menus with hover intent; mobile modal drawer from the same data'],
   ['Footer', 'components/Footer.astro', 'Global; link columns derived from navigation.ts'],
@@ -71,6 +103,7 @@ const inventory = [
 <BaseLayout seo={{ title: 'Design System & Components | QualityWorks Prototype', description: 'Design tokens, typography, buttons, cards, states and the reusable component inventory for the QualityWorks website prototype.', noindex: true }} breadcrumbs={crumbs}>
   <PageHero eyebrow="Prototype · Design system" title="One system for corporate and product pages" lede="Tokens and components derived from the current QualityWorks brand, reconciled with the newer QualityWatcher AI and Agents as a Service treatments. Everything below is rendered from the real component files." breadcrumbs={crumbs} compact />
 
+  {/* Colour: swatches rendered from tokens.css, with the token's own comment as the note. */}
   <section class="section" aria-labelledby="color-title">
     <div class="container">
       <SectionHeading eyebrow="Tokens" title="Colour" lede="Exact logo teal (#289DAD) and logo green (#8FC640) are retained. Interactive teal is darkened to #1B7480 so white text passes WCAG AA (the live #289DAD button is 3.2:1)." id="color-title" />
@@ -82,6 +115,7 @@ const inventory = [
     </div>
   </section>
 
+  {/* Typography: specimen lines plus the font-size, line-height and weight tokens. */}
   <section class="section surface-alt" aria-labelledby="type-title">
     <div class="container">
       <SectionHeading eyebrow="Tokens" title="Typography" lede="Red Hat Display (the existing corporate face) for everything; Red Hat Mono — same superfamily — only for technical labels. Self-hosted, font-synthesis disabled." id="type-title" />
@@ -98,6 +132,7 @@ const inventory = [
     </div>
   </section>
 
+  {/* Space, radius, elevation and motion tokens in two tables. */}
   <section class="section" aria-labelledby="space-title">
     <div class="container">
       <SectionHeading eyebrow="Tokens" title="Space, radius, elevation, motion" id="space-title" />
@@ -108,6 +143,7 @@ const inventory = [
     </div>
   </section>
 
+  {/* Buttons on light and dark, badges, fixture label and breadcrumbs. Demo buttons link back to this heading. */}
   <section class="section surface-alt" aria-labelledby="btn-title">
     <div class="container">
       <SectionHeading eyebrow="Components" title="Buttons and links" lede="One pill grammar everywhere (retained from the live site and both product sites). Min height 48px (40px small)." id="btn-title" />
@@ -118,6 +154,7 @@ const inventory = [
     </div>
   </section>
 
+  {/* Cards rendered from real records; product cards sit on the dark product surface they are used on. */}
   <section class="section" aria-labelledby="cards-title">
     <div class="container">
       <SectionHeading eyebrow="Components" title="Cards" lede="Shared radius (16px), border, hover elevation and single-link click target." id="cards-title" />
@@ -133,6 +170,7 @@ const inventory = [
     </div>
   </section>
 
+  {/* Proof components: StatBlock (claim-backed) and one testimonial. */}
   <section class="section surface-alt" aria-labelledby="proof-title">
     <div class="container">
       <SectionHeading eyebrow="Components" title="Proof: statistics and testimonials" id="proof-title" />
@@ -141,6 +179,7 @@ const inventory = [
     </div>
   </section>
 
+  {/* Feedback and states: alerts, empty state, wireframe, skeleton, process steps, FAQ accordion. */}
   <section class="section" aria-labelledby="states-title">
     <div class="container">
       <SectionHeading eyebrow="Components" title="Feedback and states" id="states-title" />
@@ -160,22 +199,28 @@ const inventory = [
     </div>
   </section>
 
+  {/* Inventory table from the `inventory` array. */}
   <section class="section surface-alt" aria-labelledby="inv-title">
     <div class="container">
       <SectionHeading eyebrow="Inventory" title="Component inventory" id="inv-title" />
       <div class="table-scroll"><table class="data-table"><thead><tr><th scope="col">Component</th><th scope="col">Source</th><th scope="col">Notes</th></tr></thead><tbody>{inventory.map(([a, b, c]) => <tr><td>{a}</td><td><code>{b}</code></td><td>{c}</td></tr>)}</tbody></table></div>
     </div>
   </section>
+  {/* Live CtaBand example (the page's last section). */}
   <CtaBand eyebrow="Component" title="CTA band — closing conversion section" primary={{ label: 'Primary action', href: '/contact-us/' }} secondary={{ label: 'Secondary action', href: '/case-studies/' }} />
 </BaseLayout>
 <style>
+  /* Colour swatches: auto-fill grid; each swatch is a 64px block with a hairline border so light colours
+     stay visible on white. */
   .swatches { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr)); }
   .swatches li { display: grid; gap: 2px; font-size: var(--fs-xs); }
   .sw { height: 64px; border-radius: var(--radius-md); border: 1px solid var(--qw-line); margin-bottom: var(--space-2); }
   .sw__v { font-family: var(--font-mono); color: var(--qw-slate-500); }
   .sw__n { color: var(--qw-slate-500); }
+  /* Typography specimen spacing. */
   .type-specimen { margin-bottom: var(--space-8); }
   .ts { margin: 0 0 var(--space-4); color: var(--qw-ink-900); }
+  /* Demo wrappers: rows of inline examples, a dark panel, vertical gaps, and an ink-950 panel for product cards. */
   .demo-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; margin-bottom: var(--space-6); }
   .demo-dark { padding: var(--space-6); border-radius: var(--radius-lg); background: var(--qw-ink-900); }
   .demo-gap { margin-top: var(--space-6); }

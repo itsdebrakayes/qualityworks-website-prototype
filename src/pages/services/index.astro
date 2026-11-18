@@ -3,6 +3,30 @@
  * SOLUTIONS OVERVIEW (/services/ — legacy URL preserved; labelled "Solutions" per QM-112).
  * Primary persona: Enterprise CTO / VP Eng. Secondary: QA Director, SMB Founder.
  * Core question: "Which QualityWorks service fits my problem?"  Conversion: service detail → contact.
+ *
+ * What: the Solutions hub. Sections, top to bottom: hero; a "Quick guide" problem-to-service table;
+ *   one section per Solutions mega-menu group (Improve Software Quality / Build or Modernize a Digital
+ *   Product / Deploy, Integrate, or Govern AI) with ServiceCards; a "Specialist testing pages" link list
+ *   under the first group; closing CtaBand.
+ * Persona / CTA (docs/03-page-map-personas.md §2, "Solutions overview" row): primary A; secondary B, D.
+ *   Proof required: links to case studies. Primary CTA: "Talk to an expert" (`ctas.contact`).
+ *   Required data: services (grouped), problem-to-service guide.
+ * Data: src/data/services.ts (`services`, `pathways`), src/data/navigation.ts (`primaryNav`, Solutions
+ *   groups and their order), src/data/site.ts (`ctas.contact`).
+ * SEO: inline title/description. Breadcrumbs Home > Solutions produce BreadcrumbList JSON-LD via
+ *   BaseLayout. No other JSON-LD.
+ * Review/release: no REVIEW/RELEASE logic on this page. Proposed services (e.g. Managed AI Test Squad) are
+ *   flagged in navigation.ts, not here.
+ * Gotchas:
+ *   - Group sections are built from the navigation, so adding a service to navigation.ts adds its card
+ *     here automatically (when a service record with the same `path` exists).
+ *   - `pathways[i]` is matched to nav group i BY POSITION. The order of groups in navigation.ts must stay
+ *     quality, build, ai to match `pathways` in services.ts, or eyebrows, ledes and section ids
+ *     (#quality, #build, #ai, used as in-page anchors) will be wrong.
+ *   - The quick-guide rows are hard-coded below (labels and URLs). Update them if a service is renamed or
+ *     moved.
+ *   - The four specialist pages are "orphans" on the live site (in the sitemap, not in navigation); they
+ *     are linked here so they stay reachable.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
@@ -14,10 +38,14 @@ import { services, pathways } from '../../data/services';
 import { primaryNav } from '../../data/navigation';
 import { ctas } from '../../data/site';
 
+// Solutions mega-menu groups (headings + links) in navigation order; the page mirrors the menu.
 const groups = primaryNav.find((n) => n.id === 'solutions')!.groups!;
+// Nav links store hrefs, so look up the matching service record by its `path`.
 const byPath = (href: string) => services.find((s) => s.path === href);
+// Orphan specialist-testing records (summary depth) that are not in the navigation.
 const specialist = services.filter((s) => ['performance-testing', 'security-testing', 'accessibility', 'user-experience-testing'].includes(s.slug));
 const crumbs = [{ label: 'Home', href: '/' }, { label: 'Solutions' }];
+// Quick-guide rows: [buyer problem, service name, URL]. Hard-coded, answer-first copy for this page.
 const guide = [
   ['Releases are slow because regression testing is manual', 'Test Automation', '/services/test-automation/'],
   ['We need more testing capacity without hiring', 'Managed AI Test Squad', '/services/ai-test-squad/'],
@@ -31,6 +59,7 @@ const guide = [
 <BaseLayout seo={{ title: 'Solutions: Software Testing, Development & AI Services | QualityWorks', description: 'QualityWorks solutions: test automation, full-stack and non-functional testing, custom software development, technology advisory and AI & agentic business solutions.' }} breadcrumbs={crumbs}>
   <PageHero eyebrow="Solutions" title="Services for quality, delivery and AI" lede="Three practices, one standard. Whether you need to improve software quality, build or modernize a product, or deploy AI responsibly, start with the problem you are trying to solve." breadcrumbs={crumbs} primary={ctas.contact} />
 
+  {/* Quick guide: problem-to-service table (answers the core question directly). */}
   <section class="section" aria-labelledby="guide-title">
     <div class="container">
       <SectionHeading eyebrow="Quick guide" title="Which service fits your problem?" lede="Answer-first: find your situation, follow the link." id="guide-title" />
@@ -44,8 +73,11 @@ const guide = [
     </div>
   </section>
 
+  {/* One section per Solutions group. Alternating tinted backgrounds; section id = pathway id for anchors. */}
   {groups.map((g, i) => {
+    // Positional match: group i uses pathway i for its eyebrow, lede and anchor id (see Gotchas).
     const pw = pathways[i];
+    // Nav links without a matching service record (none today) are skipped.
     const list = g.links.map((l) => byPath(l.href)).filter(Boolean);
     return (
       <section class:list={['section', { 'surface-alt': i % 2 === 0 }]} aria-labelledby={`g-${i}`} id={pw?.id}>
@@ -63,11 +95,15 @@ const guide = [
     );
   })}
 
+  {/* Closing CTA: contact, or browse case studies for proof. */}
   <CtaBand title="Not sure which service you need?" text="Describe what you’re trying to achieve and we’ll recommend a starting point." primary={ctas.contact} secondary={{ label: 'Browse case studies', href: '/case-studies/' }} />
 </BaseLayout>
 <style>
+  /* Quick-guide table: dark problem text; service links bold and kept on one line (wraps again under 640px). */
   .guide td:first-child { color: var(--qw-ink-900); }
   .guide td:last-child { font-weight: var(--fw-semibold); white-space: nowrap; }
+  /* Specialist pages box: dashed border marks it as secondary to the main cards. Links are at least
+     44px tall so they are comfortable touch targets on mobile. */
   .specialist { margin-top: var(--space-8); padding: var(--space-5) var(--space-6); border: 1px dashed var(--color-border); border-radius: var(--radius-lg); }
   .specialist__title { font: var(--fw-medium) var(--fs-xs)/1.3 var(--font-mono); text-transform: uppercase; letter-spacing: var(--tracking-label); color: var(--color-muted); }
   .specialist ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); }

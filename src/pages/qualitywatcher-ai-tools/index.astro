@@ -6,6 +6,37 @@ import { RELEASE, REVIEW, rn } from '../../lib/release';
  * Primary persona: QA Director (B). Secondary: Automation engineer / CTO.
  * Core question: "What does it automate, how do I access it, where do humans review?"
  * Conversion: open the tool on qualitywatcher.ai (external hand-off) or talk to an automation expert.
+ *
+ * Persona / CTA (docs/03-page-map-personas.md §2, "QualityWatcher AI" row): primary B (QA Director);
+ *   secondary automation engineer, A. Proof required: C07–C09 and the WSSC case study. Primary CTA:
+ *   "Open QualityWatcher AI" (external); secondary "Talk to an automation expert" (/contact-us/).
+ *   Journey B in docs/03 §3 runs through this page.
+ * What, top to bottom: product hero with an illustrative interface mock; "How it works" (3 steps); the four
+ *   tools with their observed link status; "AI drafts. People decide." human-review section; results
+ *   (StatBlock C07–C09 + WSSC case study card); access tiers with a discrepancy warning (P-03); FAQ;
+ *   closing CtaBand.
+ * Data: src/data/products.ts (`qwTools`: names, descriptions, CTA links and `observedStatus` from a
+ *   17 Nov 2026 check), src/data/caseStudies.ts (WSSC case study), src/data/claims.ts via StatBlock.
+ *   Hero copy, steps, review list, access tiers and FAQs are inline in this file.
+ * SEO: inline title/description. JSON-LD: FAQPage built from `faqs` (faqLd), plus BreadcrumbList
+ *   (Home > Products > QualityWatcher AI) from BaseLayout.
+ * Review/release behaviour:
+ *   - The hero mock carries `data-release-blocker` in RELEASE builds (illustrative mock, needs approved
+ *     product screenshots). The P-03 access Alert carries one too (access model unresolved). Both keep the
+ *     release gate failing until resolved.
+ *   - The "Proposed copy" note under the human-review list renders in REVIEW builds only.
+ *   - StatBlock: in RELEASE it drops any stat whose claim has a `verification` value and hides the footnote
+ *     (C07–C09 currently have none, so all three stay).
+ * Gotchas:
+ *   - The hero mock is built for the prototype, NOT a product screenshot; its figcaption says so. Keep that
+ *     caption until real screenshots replace it.
+ *   - A tool whose observedStatus is 'not-found-404' shows a disabled-style message instead of a link
+ *     (today: Schema to API Automation). Never link visitors to a known 404.
+ *   - `qwExternal` is defined locally; it is not `ctas.qualityWatcherDemo` from site.ts (different label).
+ *     Change both if the QualityWatcher hand-off wording changes.
+ *   - Three of the four FAQs are proposed copy pending approval, yet all four are emitted as FAQPage
+ *     JSON-LD. src/lib/schema.ts says FAQPage is for factual answers, so review the schema before launch.
+ *   - The access tiers repeat the live page; every tool link currently redirects to sign-in (P-03).
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
@@ -24,23 +55,28 @@ import { faqLd } from '../../lib/schema';
 import type { FaqItem } from '../../data/types';
 
 const crumbs = [{ label: 'Home', href: '/' }, { label: 'Products', href: '/products/' }, { label: 'QualityWatcher AI' }];
+// External hand-off CTA used in the hero and the closing band (Button adds the new-tab text and icon).
 const qwExternal = { label: 'Open QualityWatcher AI', href: 'https://www.qualitywatcher.ai/', external: true, handoffNote: 'Opens qualitywatcher.ai, the separate QualityWatcher product site' };
+// Badge label and colour for each observed tool status (QwTool['observedStatus'] in types.ts).
 const statusMeta = {
   'requires-sign-in': { label: 'Requires sign-in', cls: 'badge--warning' },
   'not-found-404': { label: 'Unavailable (404)', cls: 'badge--danger' },
   available: { label: 'Available', cls: 'badge--success' },
   'not-verified': { label: 'Not verified', cls: 'badge--neutral' },
 } as const;
+// FAQ items with provenance; the notes reference audit discrepancies P-02 and P-03.
 const faqs: FaqItem[] = [
   { q: 'What is QualityWatcher AI?', a: 'QualityWatcher AI is a set of AI tools from QualityWorks that generate test cases from requirements in any format, convert test cases into UI automation scripts, and answer test automation questions. The tools run on qualitywatcher.ai.', provenance: { source: 'live-site-copy', approval: 'published-live' } },
   { q: 'Do I need an account?', a: 'As of November 2026 the tool links lead to a sign-in page. The current corporate page describes free registered access and three uses without registration; the product owner must confirm which is correct before launch.', provenance: { source: 'proposed-copy', approval: 'pending-approval', note: 'Discrepancy P-03' } },
   { q: 'Does AI replace testers?', a: 'No. Generated test cases and scripts are drafts. QA engineers review titles, steps, data and expected results before they are used, and our consultants train teams to do that review well.', provenance: { source: 'proposed-copy', approval: 'pending-approval', note: 'Human-review wording to be confirmed by product owner.' } },
   { q: 'How is QualityWatcher AI different from QualityWatcher test management?', a: 'QualityWatcher test management (qualitywatcher.com) is a test case management platform. QualityWatcher AI (qualitywatcher.ai) is the AI tool suite. Generated test cases can be exported to QualityWatcher.', provenance: { source: 'proposed-copy', approval: 'pending-approval', note: 'Relationship P-02 to confirm.' } },
 ];
+// WSSC AI test-case-generation pilot: the case study that backs this page. Rendered only if the slug exists.
 const wssc = caseStudyBySlug('ai-powered-test-case-generation-wssc');
 ---
 <BaseLayout seo={{ title: 'QualityWatcher AI: AI Test Case & Automation Generation | QualityWorks', description: 'Generate test cases from any requirement format, turn them into UI automation and get automation help with QualityWatcher AI tools from QualityWorks.' }} breadcrumbs={crumbs} jsonLd={[faqLd(faqs)]}>
   <PageHero variant="product" eyebrow="QualityWatcher AI · Product" title="Simplify quality with AI-driven testing tools" lede="Generate real-world test cases from requirements in any format, convert them into automation scripts, and get expert automation help — with your QA team reviewing every output." breadcrumbs={crumbs} primary={qwExternal} secondary={{ label: 'Talk to an automation expert', href: '/contact-us/' }}>
+    {/* Hero aside: illustrative mock of the tool (release blocker in RELEASE builds). Rows are sample text only. */}
     <Fragment slot="aside">
       <figure class="mock" aria-labelledby="mock-cap" data-release-blocker={RELEASE ? 'illustrative-mock: replace with approved product screenshots' : undefined}>
         <div class="mock__bar" aria-hidden="true"><span></span><span></span><span></span><p>Rapid Test Case Generation</p></div>
@@ -62,6 +98,7 @@ const wssc = caseStudyBySlug('ai-powered-test-case-generation-wssc');
     </Fragment>
   </PageHero>
 
+  {/* How it works: three steps from input to reviewed, exported test assets. */}
   <section class="section" aria-labelledby="how-title">
     <div class="container">
       <SectionHeading eyebrow="How it works" title="From any input to reviewed test assets" id="how-title" />
@@ -73,6 +110,7 @@ const wssc = caseStudyBySlug('ai-powered-test-case-generation-wssc');
     </div>
   </section>
 
+  {/* The tools: one card per QwTool with its observed status badge and CTA (or an unavailable notice). */}
   <section class="section surface-product" aria-labelledby="tools-title">
     <div class="container">
       <SectionHeading eyebrow="The tools" title="Four QualityWatcher AI tools" lede="Status shown is what the prototype observed on 17 Nov 2026. The product owner must confirm availability before launch." id="tools-title" />
@@ -96,6 +134,7 @@ const wssc = caseStudyBySlug('ai-powered-test-case-generation-wssc');
     </div>
   </section>
 
+  {/* Human review: answers "where do humans review?" from the core question. */}
   <section class="section" aria-labelledby="human-title">
     <div class="container split">
       <div>
@@ -114,6 +153,7 @@ const wssc = caseStudyBySlug('ai-powered-test-case-generation-wssc');
     </div>
   </section>
 
+  {/* Results: stats must reference claims (StatBlock enforces this), plus the WSSC case study. */}
   <section class="section surface-alt" aria-labelledby="results-title">
     <div class="container">
       <SectionHeading eyebrow="Results" title="Average results per client project" id="results-title" />
@@ -126,6 +166,7 @@ const wssc = caseStudyBySlug('ai-powered-test-case-generation-wssc');
     </div>
   </section>
 
+  {/* Access tiers from the live page, flagged as an unresolved discrepancy (P-03). */}
   <section class="section" aria-labelledby="access-title">
     <div class="container">
       <SectionHeading eyebrow="Access" title="Registered and unregistered access" id="access-title" />
@@ -139,6 +180,7 @@ const wssc = caseStudyBySlug('ai-powered-test-case-generation-wssc');
     </div>
   </section>
 
+  {/* FAQ: same `faqs` array as the FAQPage JSON-LD, so visible content and schema always match. */}
   <section class="section surface-alt" aria-labelledby="faq-title">
     <div class="container container--narrow">
       <SectionHeading eyebrow="FAQ" title="QualityWatcher AI questions" id="faq-title" />
@@ -146,9 +188,12 @@ const wssc = caseStudyBySlug('ai-powered-test-case-generation-wssc');
     </div>
   </section>
 
+  {/* Closing CTA: external tool hand-off, or talk to an automation expert. */}
   <CtaBand eyebrow="Get started" title="Try the tools, or let us set them up with your team." primary={qwExternal} secondary={{ label: 'Talk to an automation expert', href: '/contact-us/' }} />
 </BaseLayout>
 <style>
+  /* Interface mock: a near-black app window (#0B1312) with fake window-control dots, a sample input and a
+     results table. Colours are hard-coded because the mock imitates a product UI, not site chrome. */
   .mock { margin: 0; background: #0B1312; border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-lg); }
   .mock__bar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); }
   .mock__bar span { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,0.18); }
@@ -159,10 +204,14 @@ const wssc = caseStudyBySlug('ai-powered-test-case-generation-wssc');
   .mock__table { font-size: var(--fs-xs); color: #D5DDE4; }
   .mock__table th { text-align: left; font-weight: var(--fw-semibold); color: var(--qw-slate-300); padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.1); }
   .mock__table td { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  /* Review pills: green = approved, gold = needs edit (15% tints of logo green #8FC640 and gold #F4B942). */
   .pill { display: inline-block; padding: 2px 8px; border-radius: 99px; font-weight: var(--fw-semibold); white-space: nowrap; }
   .pill.ok { background: rgba(143,198,64,0.15); color: var(--qw-green-400); }
   .pill.wait { background: rgba(244,185,66,0.15); color: var(--qw-gold-400); }
+  /* Caption in gold with a dashed rule so the "illustrative, not a screenshot" note stands out. */
   .mock figcaption { font-size: var(--fs-xs); color: var(--qw-gold-400); padding: var(--space-3) var(--space-5); border-top: 1px dashed rgba(244,185,66,0.4); }
+  /* Tool cards: auto-fit grid (16rem minimum); the CTA or unavailable note is pushed to the card bottom with
+     margin-top: auto. The !important beats the `.tool p { margin: 0 }` rule above it. */
   .tools { display: grid; gap: var(--space-5); grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
   .tool { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-6); border-radius: var(--radius-lg); background: var(--color-surface); border: 1px solid var(--color-border); }
   .tool h3 { font-size: var(--fs-md); margin: 0; }
@@ -170,8 +219,10 @@ const wssc = caseStudyBySlug('ai-powered-test-case-generation-wssc');
   .tool :global(.btn) { margin-top: auto; align-self: flex-start; }
   .tool__unavailable { margin-top: auto !important; display: flex; gap: 0.5rem; color: var(--qw-gold-400); }
   .tool__unavailable :global(svg) { width: 18px; height: 18px; flex: none; }
+  /* Status badges re-tinted (translucent fills, light text) so they suit the dark product surface. */
   .surface-product .badge--warning { background: rgba(244,185,66,0.12); color: var(--qw-gold-400); border-color: rgba(244,185,66,0.4); }
   .surface-product .badge--danger { background: rgba(255,120,100,0.12); color: #FFB4A8; border-color: rgba(255,120,100,0.4); }
+  /* Human-review list, review note, and spacing for the WSSC card and access tiers. */
   .review-list li span { display: block; }
   .small-note { font-size: var(--fs-xs); margin-top: var(--space-4); }
   .wssc { margin-top: var(--space-10); }

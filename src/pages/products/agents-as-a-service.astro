@@ -5,6 +5,31 @@ import { rn } from '../../lib/release';
  * remains the system of record for catalog, packages, prices and checkout. This page explains
  * the offer, contrasts it with custom consulting, previews the catalog, and hands off clearly.
  * Primary persona: SMB Founder/COO (D). Secondary: Marketing/Ops leader (E).
+ *
+ * URL: /products/agents-as-a-service/. Marked "(proposed)" in the docs/03 page map: the marketplace exists
+ *   but is not linked from the live corporate navigation (audit P-01), so this route needs QM-41.
+ * Persona / CTA (docs/03-page-map-personas.md §2, "Agents as a Service" row): primary D; secondary E.
+ *   Core question: "Is a ready-made agent right for us? How do I buy one?" Proof required: marketplace
+ *   catalog snapshot. Primary CTA: "Browse the marketplace" (external, `ctas.agentsMarketplace`).
+ *   Secondary: "Talk to us first" (/contact-us/?topic=smb-ai). Journeys D and E in docs/03 §3 use this page.
+ * What, top to bottom: product hero with a hand-off note and an example "where agents fit" org chart; the
+ *   problem; a marketplace-vs-custom-AI comparison table; a catalog preview with a label legend and
+ *   department filter chips; three "How it works" steps; FAQ; closing CtaBand.
+ * Data: src/data/products.ts (`agentSnapshot`: 8 agents observed on 17 Nov 2026; `agentCatalogFacts`:
+ *   total observed, departments, steps), src/data/site.ts (`ctas.agentsMarketplace`). Problem list,
+ *   comparison rows and FAQs are inline.
+ * SEO: inline title/description. JSON-LD: FAQPage from `faqs` (faqLd), plus BreadcrumbList
+ *   (Home > Products > Agents as a Service) from BaseLayout.
+ * Review/release: the label legend carries `data-review-note={rn(...)}` (open question Q-21: the
+ *   marketplace does not define its labels). No REVIEW/RELEASE branches otherwise.
+ * Gotchas:
+ *   - Prices are deliberately NOT shown, even though `agentSnapshot` holds them: the marketplace is the
+ *     system of record (see the comment above `agentSnapshot` in products.ts). Do not render `price`.
+ *   - Integrations are unknown per agent (empty arrays); never invent them.
+ *   - The department chip filter is a small local script, not src/lib/filters.ts: no URL state, no empty
+ *     state (every department chip comes from the snapshot, so it always has at least one agent).
+ *   - Two of the four FAQs are proposed copy pending approval but are still emitted as FAQPage JSON-LD.
+ *     src/lib/schema.ts says FAQPage is for factual answers, so review before launch.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
@@ -20,8 +45,11 @@ import { faqLd } from '../../lib/schema';
 import type { FaqItem } from '../../data/types';
 
 const crumbs = [{ label: 'Home', href: '/' }, { label: 'Products', href: '/products/' }, { label: 'Agents as a Service' }];
+// Departments present in the snapshot (in data order). Drives the org chart rows and the filter chips.
 const departments = [...new Set(agentSnapshot.map((a) => a.category))];
+// Display text for the marketplace listing label (AgentRecord['availabilityStatus']).
 const availability = { 'ready-now': 'Ready now', 'quick-launch': 'Quick launch', 'custom-build': 'Custom build', unknown: 'Check marketplace' } as const;
+// FAQ items with provenance: marketplace facts are 'external-platform'; corporate wording is 'proposed-copy'.
 const faqs: FaqItem[] = [
   { q: 'What is Agents as a Service?', a: 'Agents as a Service is QualityWorks’ marketplace of named AI agents for sales, support, marketing, admin, finance and operations. You choose an agent or a package, and QualityWorks configures it for your tools. Launch support and onboarding are included.', provenance: { source: 'external-platform', approval: 'published-live', sourceUrl: 'https://agents.qualityworkscg.com/' } },
   { q: 'Where do I buy an agent?', a: 'On the separate marketplace at agents.qualityworkscg.com. Prices, packages and checkout live there; this corporate page does not take orders.', provenance: { source: 'proposed-copy', approval: 'pending-approval' } },
@@ -31,7 +59,10 @@ const faqs: FaqItem[] = [
 ---
 <BaseLayout seo={{ title: 'Agents as a Service: AI Agents for Business Teams | QualityWorks', description: 'Named AI agents for sales, support, marketing, admin, finance and operations, configured for your tools by QualityWorks. Compare with custom AI consulting.' }} breadcrumbs={crumbs} jsonLd={[faqLd(faqs)]}>
   <PageHero variant="product" eyebrow="QualityWorks AI Agents as a Service" title="Hire your AI workforce in days, not months" lede="Buy named AI agents for sales, support, marketing, admin, finance and operations. QualityWorks configures them for your tools so your team can stop losing time to repeat work." breadcrumbs={crumbs} primary={ctas.agentsMarketplace} secondary={{ label: 'Not sure? Talk to us first', href: '/contact-us/?topic=smb-ai' }}>
+    {/* Hand-off note under the hero CTAs: buying happens on the separate marketplace. */}
     <p class="handoff"><Icon name="info" /><span>Packages, prices and checkout are on the separate marketplace at <strong>agents.qualityworkscg.com</strong>.</span></p>
+    {/* Hero aside: one row per department. Only the second row (i === 1) is "open" and shows the first agent
+        in that department, as an illustration; the CSS hides the agent line in every other row. */}
     <Fragment slot="aside">
       <div class="orgchart" aria-label="Example: where agents fit in a team">
         <p class="orgchart__label mono">Example · where agents fit</p>
@@ -50,6 +81,7 @@ const faqs: FaqItem[] = [
     </Fragment>
   </PageHero>
 
+  {/* The problem: the repetitive work SMB teams want to offload. */}
   <section class="section" aria-labelledby="problem-title">
     <div class="container split">
       <div><p class="eyebrow">The problem</p><h2 id="problem-title">Your team is doing work AI should handle</h2></div>
@@ -65,6 +97,7 @@ const faqs: FaqItem[] = [
     </div>
   </section>
 
+  {/* Comparison: marketplace agent vs custom AI consulting, so visitors pick the right route before clicking. */}
   <section class="section surface-alt" aria-labelledby="compare-title">
     <div class="container">
       <SectionHeading eyebrow="Choose the right route" title="Marketplace agent or custom AI solution?" lede="Both come from QualityWorks. They solve different problems." id="compare-title" />
@@ -88,6 +121,7 @@ const faqs: FaqItem[] = [
     </div>
   </section>
 
+  {/* Catalog preview: legend for listing labels, department chips, agent cards (no prices), link to the full catalog. */}
   <section class="section surface-product" aria-labelledby="catalog-title">
     <div class="container">
       <SectionHeading eyebrow="Catalog preview" title="A sample of available agents" lede={`The marketplace listed ${agentCatalogFacts.totalAgentsObserved} agents across ${agentCatalogFacts.departments.length} departments on 17 Nov 2026. This preview is a snapshot; the marketplace is always current.`} id="catalog-title" />
@@ -102,6 +136,7 @@ const faqs: FaqItem[] = [
         <button type="button" class="chip" aria-pressed="true" data-dept="all">All</button>
         {departments.map((d) => <button type="button" class="chip" aria-pressed="false" data-dept={d}>{d}</button>)}
       </div>
+      {/* Screen-reader-only live region: the chip script writes "Showing N agents" here after each filter. */}
       <p class="visually-hidden" aria-live="polite" data-agent-count></p>
       <ul class="agents" data-agents>
         {agentSnapshot.map((a) => (
@@ -116,6 +151,7 @@ const faqs: FaqItem[] = [
     </div>
   </section>
 
+  {/* How it works: marketplace steps, with a note that nothing deploys automatically at checkout. */}
   <section class="section" aria-labelledby="steps-title">
     <div class="container">
       <SectionHeading eyebrow="How it works" title="Three steps to an agent in your workflow" id="steps-title" />
@@ -124,6 +160,7 @@ const faqs: FaqItem[] = [
     </div>
   </section>
 
+  {/* FAQ: same `faqs` array as the FAQPage JSON-LD. */}
   <section class="section surface-alt" aria-labelledby="faq-title">
     <div class="container container--narrow">
       <SectionHeading eyebrow="FAQ" title="Agents as a Service questions" id="faq-title" />
@@ -131,12 +168,16 @@ const faqs: FaqItem[] = [
     </div>
   </section>
 
+  {/* Closing CTA: marketplace hand-off or a guided conversation (?topic=smb-ai pre-tags the contact form). */}
   <CtaBand title="Start with one agent, or build a cross-functional team." text="Browse the marketplace, or talk to us if you’re not sure an agent is the right fit." primary={ctas.agentsMarketplace} secondary={{ label: 'Talk to us first', href: '/contact-us/?topic=smb-ai' }} />
 </BaseLayout>
 <style>
+  /* Hand-off notes: teal-300 icon on the dark hero, teal-700 (--light modifier) on the white steps section. */
   .handoff { display: flex; gap: var(--space-2); align-items: flex-start; font-size: var(--fs-sm); color: var(--color-muted); margin-top: var(--space-6); }
   .handoff :global(svg) { width: 18px; height: 18px; flex: none; margin-top: 2px; color: var(--qw-teal-300); }
   .handoff--light :global(svg) { color: var(--qw-teal-700); }
+  /* Org chart in the hero aside. Closed rows show only the department; the open row gets a translucent
+     teal-300 (#5FC3CF) border and fill. */
   .orgchart { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius-lg); padding: var(--space-5); }
   .orgchart__label { font-size: var(--fs-xs); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-green-400); }
   .orgchart ul { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-2); }
@@ -145,19 +186,26 @@ const faqs: FaqItem[] = [
   .orgchart__agent { display: flex; gap: var(--space-3); align-items: center; color: var(--color-text); }
   .orgchart__row:not(.is-open) .orgchart__agent { display: none; }
   .orgchart__row.is-open { border-color: rgba(95,195,207,0.45); background: rgba(95,195,207,0.06); }
+  /* Letter avatar (first letter of the agent name), logo teal to logo green gradient. Decorative: aria-hidden. */
   .avatar { flex: none; width: 2.25rem; height: 2.25rem; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(135deg, var(--qw-teal-500), var(--qw-green-400)); color: var(--qw-ink-950); font-weight: var(--fw-bold); }
+  /* Comparison table: row headers are not sticky (global.css makes .data-table th sticky); the Agents column
+     header gets a light teal tint to mark the product being described. */
   .compare th[scope="row"] { width: 12rem; background: var(--qw-canvas); position: static; }
   .compare thead th:nth-child(2) { background: var(--qw-teal-50); }
   .compare__ctas { margin-top: var(--space-6); }
+  /* Label legend above the catalog. */
   .legend { margin: 0 0 var(--space-8); padding: var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-lg); font-size: var(--fs-sm); }
   .legend__title { font-weight: var(--fw-bold); color: var(--color-heading); }
   .legend dl { margin: 0; display: grid; gap: var(--space-4); }
   .legend dt { display: flex; flex-wrap: wrap; gap: var(--space-2); font-weight: var(--fw-semibold); color: var(--color-heading); margin-bottom: var(--space-1); }
   .legend dd { margin: 0; }
+  /* Department chips for the dark product surface; pressed state = teal-300 fill with ink text. */
   .filter-chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-6); }
   .chip { min-height: 40px; padding: 0.4rem 1rem; border-radius: var(--radius-pill); border: 1px solid var(--color-border); background: transparent; color: var(--color-text); font: var(--fw-semibold) var(--fs-sm)/1 var(--font-sans); cursor: pointer; }
   .chip:hover { border-color: var(--qw-teal-300); }
   .chip[aria-pressed="true"] { background: var(--qw-teal-300); color: var(--qw-ink-950); border-color: var(--qw-teal-300); }
+  /* Agent cards: auto-fill grid with a 16rem minimum. The explicit [hidden] rule is needed because
+     display: flex would otherwise override the hidden attribute set by the filter script. */
   .agents { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr)); }
   .agent { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5); border-radius: var(--radius-lg); background: var(--color-surface); border: 1px solid var(--color-border); }
   .agent[hidden] { display: none; }
@@ -169,6 +217,9 @@ const faqs: FaqItem[] = [
   .catalog-note { margin-top: var(--space-8); }
 </style>
 <script>
+  // Department filter (single-select). Clicking a chip marks it pressed, hides cards from other departments
+  // ("all" shows everything) and announces the visible count in the live region. Simpler than
+  // src/lib/filters.ts: no URL state and no empty state (every chip has at least one agent).
   const chips = document.querySelectorAll<HTMLButtonElement>('.chip[data-dept]');
   const cards = document.querySelectorAll<HTMLElement>('[data-agents] > li');
   const live = document.querySelector('[data-agent-count]')!;

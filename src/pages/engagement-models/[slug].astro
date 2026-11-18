@@ -1,7 +1,28 @@
 ---
+/**
+ * ENGAGEMENT MODEL DETAIL (dynamic) — renders /engagement-models/{slug}/ for every record in
+ * src/data/services.ts whose `path` starts with "/engagement-models/".
+ *
+ * URLs: getStaticPaths() filters `services` by that path prefix and emits one route per record, using the
+ *   record's `slug` as the URL segment. Today: dedicated-teams, staff-augmentation, consulting-training.
+ * What: a thin route. All markup comes from src/components/templates/ServiceTemplate.astro, which switches
+ *   the parent breadcrumb to "Engagement models" for records with kind 'engagement-model'.
+ * Persona / CTA: "Service detail" row in docs/03-page-map-personas.md §2. Primary persona B / D / A;
+ *   secondary varies per record (`personas` field). Core question: "Can they solve this problem, and how?"
+ *   Primary CTA comes from the record's `primaryCta`.
+ * Data: src/data/services.ts (props.service), plus template lookups (case studies, products, industries).
+ * SEO: title/description from the record's `seo`. The template emits Service JSON-LD, FAQPage JSON-LD
+ *   when FAQs exist, and BaseLayout adds BreadcrumbList JSON-LD.
+ * Review/release: handled inside ServiceTemplate.astro.
+ * Gotchas: filtering is by `path` prefix, not by `kind`; the overview page (engagement-models/index.astro)
+ *   filters by `kind === 'engagement-model'`. A new record must have both the right path and the right
+ *   kind to appear in both places. The URL uses `slug`, so keep it equal to the last path segment.
+ */
 import ServiceTemplate from '../../components/templates/ServiceTemplate.astro';
 import { services } from '../../data/services';
 export function getStaticPaths() {
+  // Path-prefix filter: only records that live under /engagement-models/ get a route here; props.service
+  // hands the full record to the page so the template does not need to look it up again.
   return services.filter((s) => s.path.startsWith('/engagement-models/')).map((s) => ({ params: { slug: s.slug }, props: { service: s } }));
 }
 ---

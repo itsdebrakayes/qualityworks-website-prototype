@@ -3,6 +3,32 @@ import { RELEASE, REVIEW, rn } from '../lib/release';
 /**
  * BLOG ARTICLE TEMPLATE at root-level slugs (/{slug}/) — preserves existing WordPress permalinks.
  * Body HTML is migrated verbatim (sanitised); facts are not rewritten during migration.
+ *
+ * URLs: getStaticPaths() emits one route per migrated post in `blogPosts` (src/data/articles.ts), using
+ *   the WordPress `slug` at the site root, e.g. /some-post-title/. Only migrated posts are built (12 of 99
+ *   today); fixtures such as the PRISM whitepaper card are not in `blogPosts` and get no page here.
+ * Persona / CTA (docs/03-page-map-personas.md §2, "Resources / Blog / Article" row): primary B, E;
+ *   secondary A. Core question: "What can I learn before talking to sales?" Proof required: author, dates,
+ *   references. Primary CTA: "Talk to an expert" at the end of the article (closing CtaBand, `ctas.contact`).
+ * What: article header (breadcrumbs, eyebrow with type and up to two categories, h1, author and dates),
+ *   optional featured image, the migrated body HTML, a footer with share links, tags and (review only) the
+ *   migration provenance, then up to three related posts and the closing CtaBand.
+ * Data: src/data/articles.ts (`blogPosts`; title, excerpt, body and tags already have logged corrections from
+ *   src/data/corrections.ts applied), src/data/site.ts (`ctas.contact`, `site.legacyOrigin`),
+ *   src/lib/schema.ts (`articleLd`).
+ * SEO: title "{title} | QualityWorks"; description = WordPress `metaDescription`, or the excerpt cut to
+ *   155 characters at a word boundary. og:type "article", og:image = featured image. Extra
+ *   article:published_time / modified_time / author / section meta tags go into the <head> slot.
+ *   JSON-LD: BlogPosting (or NewsArticle for news posts) via articleLd(), plus BreadcrumbList from BaseLayout.
+ * Review/release: the "Migrated from WordPress post ..." provenance line renders only in REVIEW builds and
+ *   carries a review note. Nothing else differs by mode.
+ * Gotchas:
+ *   - This is a root-level catch-all. Astro gives static routes (e.g. /careers/) priority, so a post slug
+ *     that matches an existing top-level page will not be reachable here. Check new slugs against src/pages.
+ *   - `set:html` injects the body without escaping. It is only safe because the body comes from the
+ *     sanitised migration pipeline; never feed it unsanitised HTML.
+ *   - Never edit migrated wording here or in the JSON snapshot; add a correction (CONTRIBUTING.md recipe 4.3).
+ *   - Share links use the production canonical URL (site.legacyOrigin), not the prototype host.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
@@ -15,10 +41,14 @@ import { ctas, site } from '../data/site';
 import type { Article } from '../data/types';
 export function getStaticPaths() { return blogPosts.map((a) => ({ params: { slug: a.slug }, props: { a } })); }
 const { a } = Astro.props as { a: Article };
+// Display date. Noon UTC + timeZone 'UTC' stops a date-only string shifting by a day on machines in other zones.
 const fmt = (d: string) => new Date(d + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 const crumbs = [{ label: 'Home', href: '/' }, { label: 'Blog', href: '/blog/' }, { label: a.title }];
+// Related reading: other posts sharing a real category (ignoring "Uncategorized"), first three in data order.
 const related = blogPosts.filter((b) => b.slug !== a.slug && b.categories.some((c) => a.categories.includes(c) && c !== 'Uncategorized')).slice(0, 3);
+// Prefer the WordPress meta description; fall back to a trimmed excerpt with an ellipsis.
 const description = a.metaDescription || a.excerpt.slice(0, 155).replace(/\s+\S*$/, '') + '…';
+// Production URL for share links (matches the canonical BaseLayout writes).
 const canonical = new URL(`/${a.slug}/`, site.legacyOrigin).toString();
 const share = [
   { label: 'LinkedIn', href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(canonical)}` },
@@ -27,12 +57,14 @@ const share = [
 ];
 ---
 <BaseLayout seo={{ title: `${a.title} | QualityWorks`, description, ogImage: a.image ?? undefined }} breadcrumbs={crumbs} jsonLd={[articleLd(a)]} ogType="article">
+  {/* Open Graph article metadata injected into BaseLayout's <head> slot. */}
   <Fragment slot="head">
     <meta property="article:published_time" content={a.publishedAt} />
     <meta property="article:modified_time" content={a.updatedAt} />
     <meta property="article:author" content={a.author} />
     {a.categories.map((c) => <meta property="article:section" content={c} />)}
   </Fragment>
+  {/* Article: header, featured image, migrated body and footer. */}
   <article class="article">
     <header class="article__head">
       <div class="container container--narrow">
@@ -48,15 +80,18 @@ const share = [
     </header>
     {a.image && <div class="container article__figure"><img src={a.image} alt={a.imageAlt} width="1200" height="630" /></div>}
     <div class="container container--narrow">
+      {/* Migrated, sanitised WordPress body (see Gotchas about set:html). */}
       <div class="prose" set:html={a.bodyHtml} />
       <footer class="article__foot">
         <p class="article__share-title">Share this article</p>
         <ul class="article__share">{share.map((s) => <li><a href={s.href} target="_blank" rel="noopener">{s.label}<span class="visually-hidden"> (opens in a new tab)</span></a></li>)}</ul>
         {a.tags.length > 0 && <p class="article__tags">Tags: {a.tags.slice(0, 8).join(', ')}</p>}
+        {/* Review-only provenance line: where and when the post was migrated from. */}
         {REVIEW && <p class="article__src" data-review-note={rn('Migration provenance')}>Migrated from WordPress post {a.provenance.sourceUrl} on {a.provenance.retrievedAt}. Content unchanged except sanitised markup.</p>}
       </footer>
     </div>
   </article>
+  {/* Related reading (only when at least one post shares a category). */}
   {related.length > 0 && (
     <section class="section surface-alt" aria-labelledby="related-title">
       <div class="container">
@@ -66,13 +101,17 @@ const share = [
       </div>
     </section>
   )}
+  {/* End-of-article CTA: the persona table's primary CTA for articles. */}
   <CtaBand title="Want to apply this in your organization?" primary={ctas.contact} secondary={{ label: 'Explore solutions', href: '/services/' }} />
 </BaseLayout>
 <style>
+  /* Article header: pale teal-to-white gradient behind the title block. */
   .article__head { padding-block: var(--space-10) var(--space-8); background: linear-gradient(180deg, var(--qw-teal-50), #fff); }
   .article__head h1 { font-size: var(--fs-2xl); }
   .article__meta { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); font-size: var(--fs-sm); color: var(--color-muted); margin: 0; }
+  /* Featured image: full container width, capped at 520px tall and cropped to fit. */
   .article__figure img { width: 100%; max-height: 520px; object-fit: cover; border-radius: var(--radius-lg); margin-bottom: var(--space-10); }
+  /* Footer: share links (44px tall touch targets), tags and the review-only provenance line. */
   .article__foot { margin-block: var(--space-12) var(--space-16); padding-top: var(--space-6); border-top: 1px solid var(--color-border); }
   .article__share-title { font-weight: var(--fw-bold); color: var(--color-heading); }
   .article__share { list-style: none; padding: 0; display: flex; gap: var(--space-4); }

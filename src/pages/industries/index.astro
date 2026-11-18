@@ -1,5 +1,26 @@
 ---
-/** WHO WE HELP overview (/industries/ — legacy URL). Persona: all buyers self-identifying by sector. */
+/**
+ * WHO WE HELP overview (/industries/ — legacy URL). Persona: all buyers self-identifying by sector.
+ *
+ * What: the hub for the "Who We Help" menu. Two card grids: "By industry" (records with status 'live',
+ *   i.e. sectors on the current site) and "By type of organization" (records with status 'proposed':
+ *   Public Sector & Utilities and Small & Mid-Size Businesses). Each card links to /industries/{slug}/.
+ * Persona / CTA: docs/03-page-map-personas.md §2 has no separate overview row; the "Industry pages" row
+ *   applies (primary A, sector buyer; secondary B; core question "Why is QualityWorks relevant to my
+ *   sector?"; primary CTA "Talk to an industry expert", here the global `ctas.contact`).
+ * Data: src/data/industries.ts (`industries`), src/data/caseStudies.ts (to count case studies per sector),
+ *   src/data/site.ts (`ctas.contact`).
+ * SEO: inline title/description. Breadcrumbs Home > Who We Help produce BreadcrumbList JSON-LD via
+ *   BaseLayout. No other JSON-LD.
+ * Proposed routes: the "By type of organization" cards link to routes marked (proposed) in the docs/03 page
+ *   map that need QM-41 confirmation. Their detail pages show a "Proposed page" notice; this hub does not.
+ * Review/release: no REVIEW/RELEASE logic here.
+ * Gotchas:
+ *   - The case-study count matches `caseStudy.industry` against the industry slug, not the industry
+ *     record's own `caseStudies` list, so the two can disagree. The detail page shows the record's list.
+ *   - The organization cards show "For {primary persona}", taking the text before the first "/" in
+ *     `personas.primary`. Keep that field readable as a short audience label.
+ */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
@@ -9,12 +30,15 @@ import { industries } from '../../data/industries';
 import { caseStudies } from '../../data/caseStudies';
 import { ctas } from '../../data/site';
 const crumbs = [{ label: 'Home', href: '/' }, { label: 'Who We Help' }];
+// "Audiences" are the proposed organization-type pages; "sectors" are the live industry pages.
 const audiences = industries.filter((i) => i.status === 'proposed');
 const sectors = industries.filter((i) => i.status === 'live');
+// Number of case studies tagged with this industry slug (drives the "N case studies" label on each card).
 const count = (slug: string) => caseStudies.filter((c) => c.industry === slug).length;
 ---
 <BaseLayout seo={{ title: 'Who We Help: Industries and Organizations | QualityWorks', description: 'QualityWorks works with banks, insurers, healthcare, logistics, media, retail, technology, social impact organizations, public agencies and growing businesses.' }} breadcrumbs={crumbs}>
   <PageHero eyebrow="Who we help" title="Making quality work for your organization" lede="Different sectors fail in different ways. Choose yours to see the risks we focus on, the services that apply and the evidence behind them." breadcrumbs={crumbs} primary={ctas.contact} />
+  {/* By industry: live sector pages with a case-study count. */}
   <section class="section" aria-labelledby="sectors-title">
     <div class="container">
       <SectionHeading eyebrow="Industries" title="By industry" id="sectors-title" />
@@ -25,6 +49,7 @@ const count = (slug: string) => caseStudies.filter((c) => c.industry === slug).l
       </ul>
     </div>
   </section>
+  {/* By type of organization: proposed audience pages, labelled with the intended persona. */}
   <section class="section surface-tint" aria-labelledby="org-title">
     <div class="container">
       <SectionHeading eyebrow="Organizations" title="By type of organization" id="org-title" />
@@ -35,11 +60,15 @@ const count = (slug: string) => caseStudies.filter((c) => c.industry === slug).l
       </ul>
     </div>
   </section>
+  {/* Catch-all CTA for sectors not listed. */}
   <CtaBand title="Don’t see your industry?" text="Most of our work transfers across sectors. Tell us about yours." primary={ctas.contact} />
 </BaseLayout>
 <style>
+  /* Card grids. min(100%, 17rem) stops a card overflowing on screens narrower than 17rem (QA checks 360px).
+     The two organization cards use a wider 24rem minimum and auto-fit so they stretch to fill the row. */
   .ind-grid { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); }
   .ind-grid--2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); }
+  /* Whole-card link: full height so cards in a row align; the meta line is pushed to the bottom (margin-top: auto). */
   .ind { height: 100%; display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-6); background: #fff; border: 1px solid var(--qw-line); border-radius: var(--radius-lg); text-decoration: none; color: var(--qw-slate-700); transition: border-color var(--dur-base), box-shadow var(--dur-base); }
   .ind:hover { border-color: var(--qw-teal-500); box-shadow: var(--shadow-md); }
   .ind__name { font-size: var(--fs-md); font-weight: var(--fw-bold); color: var(--qw-ink-900); }

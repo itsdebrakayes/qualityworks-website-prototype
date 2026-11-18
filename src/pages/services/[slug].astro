@@ -1,7 +1,33 @@
 ---
+/**
+ * SERVICE DETAIL (dynamic) — renders /services/{slug}/ for every service record in src/data/services.ts
+ * whose `path` starts with "/services/".
+ *
+ * URLs: getStaticPaths() filters `services` by path prefix and emits one route per record, using the
+ *   record's `slug` as the URL segment. Today that covers the main testing, build and AI services plus the
+ *   four "orphan" specialist pages (performance-testing, security-testing, accessibility,
+ *   user-experience-testing) that exist on the live site outside the navigation.
+ *   Records with other paths are built elsewhere: /engagement-models/{slug}/ by
+ *   engagement-models/[slug].astro, and root-level paths by their own files (maturity-assessments.astro,
+ *   innovation-tourism.astro).
+ * What: a thin route. All markup comes from src/components/templates/ServiceTemplate.astro.
+ * Persona / CTA: "Service detail" row in docs/03-page-map-personas.md §2. Primary persona B (testing) /
+ *   D (build, AI) / A; secondary varies per record (`personas` field). Core question: "Can they solve this
+ *   problem, and how?" Primary CTA is service-specific (`primaryCta`, e.g. "Talk to an automation expert").
+ * Proposed routes: Managed AI Test Squad, Digital & Agile Transformation and AI Governance are marked
+ *   "(in nav: proposed)" in the docs/03 page map and need QM-41 confirmation; they are still built here.
+ * Data: src/data/services.ts (props.service), plus template lookups (case studies, products, industries).
+ * SEO: title/description from the record's `seo`. The template emits Service JSON-LD, FAQPage JSON-LD
+ *   when FAQs exist, and BaseLayout adds BreadcrumbList JSON-LD.
+ * Review/release: handled inside ServiceTemplate.astro.
+ * Gotchas: the URL uses `slug`, not `path`. If a record's slug and the last segment of its path ever
+ *   differ, the built URL will not match the canonical/legacy URL. Keep them identical.
+ */
 import ServiceTemplate from '../../components/templates/ServiceTemplate.astro';
 import { services } from '../../data/services';
 export function getStaticPaths() {
+  // Path-prefix filter: only records that live under /services/ get a route here; props.service hands the
+  // full record to the page so the template does not need to look it up again.
   return services.filter((s) => s.path.startsWith('/services/')).map((s) => ({ params: { slug: s.slug }, props: { service: s } }));
 }
 ---

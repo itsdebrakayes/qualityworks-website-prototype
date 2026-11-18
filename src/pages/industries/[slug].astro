@@ -3,6 +3,38 @@ import { RELEASE, REVIEW, rn } from '../../lib/release';
 /**
  * INDUSTRY / AUDIENCE template. Each record supplies its own challenge, considerations, capabilities
  * and evidence — pages are not name-swapped copies. Summary records show a migration notice.
+ *
+ * URLs: /industries/{slug}/. getStaticPaths() emits one route per record in src/data/industries.ts
+ *   (`industries`), using `slug` as the URL segment and passing the record as `props.ind`. That covers the
+ *   live sectors (finance-banking, healthcare, social-impact, insurance, logistics, media-entertainment,
+ *   retail, technology) and the two proposed audience pages (public-sector, small-business).
+ * Persona / CTA (docs/03-page-map-personas.md §2):
+ *   - Industry pages: primary A (sector buyer), secondary B. Core question "Why is QualityWorks relevant
+ *     to my sector?" Primary CTA "Talk to an industry expert".
+ *   - Public Sector (proposed): primary C (procurement/tech lead), secondary A. Core question "Can they
+ *     deliver in a regulated environment, with evidence?" CTA "Make a procurement inquiry"
+ *     (/contact-us/?topic=procurement).
+ *   - Small Business (proposed): primary D (founder/COO), secondary E. Core question "Where should we
+ *     begin, and do we need to buy anything?" CTA "Help me choose" (/contact-us/?topic=smb-ai).
+ *   The CTA actually rendered is each record's `primaryCta`; personas are recorded in `personas`.
+ * Data: src/data/industries.ts (the record), src/data/services.ts (capabilities -> ServiceCards),
+ *   src/data/products.ts (optional related products), src/data/caseStudies.ts (evidence cards).
+ * SEO: title/description from the record's `seo`. Breadcrumbs Home > Who We Help > {name} produce
+ *   BreadcrumbList JSON-LD via BaseLayout. No other JSON-LD.
+ * Review/release behaviour:
+ *   - Hero eyebrow gets a "· proposed page" suffix for proposed records in REVIEW builds only.
+ *   - Summary records (contentDepth 'summary') show a warning Alert; proposed records show an info Alert.
+ *     Both Alerts are rendered in every build, but in RELEASE builds their wrapper carries
+ *     `data-release-blocker`, so scripts/release-check.mjs fails until the copy is migrated / QM-41
+ *     approves the route.
+ *   - ClaimRef badges (C19 healthcare training, C13 WBE/MBE/WOSB certifications) only render in review builds.
+ *   - The evidence note carries `data-review-note` (review builds only).
+ * Gotchas:
+ *   - Unknown service/product/case-study slugs in a record are silently dropped by `.filter(Boolean)`, so
+ *     a typo makes a card disappear rather than failing the build. Check the page after editing data.
+ *   - The ClaimRef placement is matched on the record slug plus the consideration title prefix
+ *     ("Compliance", "Procurement"). Renaming those titles in industries.ts removes the annotation.
+ *   - The CtaBand title special-cases public-sector; every other record gets "Talk to our {name} team."
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
@@ -21,13 +53,16 @@ import type { Industry } from '../../data/types';
 export function getStaticPaths() { return industries.map((i) => ({ params: { slug: i.slug }, props: { ind: i } })); }
 const { ind } = Astro.props as { ind: Industry };
 const crumbs = [{ label: 'Home', href: '/' }, { label: 'Who We Help', href: '/industries/' }, { label: ind.name }];
+// Resolve slugs from the record into full objects for the cards; missing slugs are dropped (see Gotchas).
 const caps = ind.capabilities.map(serviceBySlug).filter(Boolean);
 const prods = (ind.products ?? []).map(productBySlug).filter(Boolean);
 const cases = ind.caseStudies.map(caseStudyBySlug).filter(Boolean);
 ---
 <BaseLayout seo={ind.seo} breadcrumbs={crumbs}>
+  {/* Hero: secondary CTA jumps to the #evidence section further down this page. */}
   <PageHero eyebrow={ind.status === 'proposed' && REVIEW ? `${ind.name} · proposed page` : ind.name} title={ind.heroTitle} lede={ind.heroLede} breadcrumbs={crumbs} primary={ind.primaryCta} secondary={{ label: 'See relevant results', href: '#evidence' }} />
 
+  {/* Status notices: migration pending (summary records) and proposed route (needs QM-41). Release blockers in release builds. */}
   {ind.contentDepth === 'summary' && (
     <div class="container" data-release-blocker={RELEASE ? 'summary-record: industry copy not migrated' : undefined}><Alert tone="warning" title="Summary record — full content pending migration" class="ind-alert"><p>{ind.provenance.note}</p></Alert></div>
   )}
@@ -35,6 +70,7 @@ const cases = ind.caseStudies.map(caseStudyBySlug).filter(Boolean);
     <div class="container" data-release-blocker={RELEASE ? 'proposed-route: awaiting QM-41 approval' : undefined}><Alert tone="info" title="Proposed page — requires QM-41 sitemap approval" class="ind-alert"><p>{ind.provenance.note}</p></Alert></div>
   )}
 
+  {/* The challenge: sector-specific buyer problem (buyerChallenge), not shared boilerplate. */}
   <section class="section" aria-labelledby="challenge-title">
     <div class="container split">
       <div><p class="eyebrow">The challenge</p><h2 id="challenge-title">What makes {ind.name.toLowerCase()} different</h2></div>
@@ -42,6 +78,7 @@ const cases = ind.caseStudies.map(caseStudyBySlug).filter(Boolean);
     </div>
   </section>
 
+  {/* Considerations: only full records have them; ClaimRef annotations attach to specific cards (see Gotchas). */}
   {ind.considerations.length > 0 && (
     <section class="section surface-alt" aria-labelledby="consider-title">
       <div class="container">
@@ -55,6 +92,7 @@ const cases = ind.caseStudies.map(caseStudyBySlug).filter(Boolean);
     </section>
   )}
 
+  {/* Services that apply, plus related products when the record lists any. */}
   <section class="section" aria-labelledby="caps-title">
     <div class="container">
       <SectionHeading eyebrow="Relevant capabilities" title="Services that apply" id="caps-title" />
@@ -63,6 +101,7 @@ const cases = ind.caseStudies.map(caseStudyBySlug).filter(Boolean);
     </div>
   </section>
 
+  {/* Evidence: published case studies for this sector (target of the hero's "See relevant results" link). */}
   <section class="section surface-alt" id="evidence" aria-labelledby="evidence-title">
     <div class="container">
       <SectionHeading eyebrow="Evidence" title="Published results" id="evidence-title" />
@@ -71,13 +110,17 @@ const cases = ind.caseStudies.map(caseStudyBySlug).filter(Boolean);
     </div>
   </section>
 
+  {/* Closing CTA: procurement wording for the public-sector page, sector wording for everything else. */}
   <CtaBand title={ind.status === 'proposed' && ind.slug === 'public-sector' ? 'Make a procurement or capability inquiry.' : `Talk to our ${ind.name.toLowerCase()} team.`} primary={ind.primaryCta} secondary={{ label: 'All industries', href: '/industries/' }} />
 </BaseLayout>
 <style>
+  /* :global because the class is passed into the Alert component, outside this file's style scope. */
   :global(.ind-alert) { margin-top: var(--space-8); }
+  /* Consideration cards: white card with a 3px teal top rule to mark them as approach notes. */
   .consider { padding: var(--space-6); background: #fff; border: 1px solid var(--qw-line); border-radius: var(--radius-lg); border-top: 3px solid var(--qw-teal-500); }
   .consider h3 { font-size: var(--fs-md); }
   .consider p { margin: 0; color: var(--qw-slate-700); }
+  /* Related products block and the small evidence footnote. */
   .prods { margin-top: var(--space-12); }
   .prods h3 { font-size: var(--fs-md); }
   .evidence-note { margin-top: var(--space-6); font-size: var(--fs-sm); color: var(--color-muted); }

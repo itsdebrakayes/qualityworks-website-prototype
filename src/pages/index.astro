@@ -5,6 +5,39 @@ import { RELEASE, REVIEW } from '../lib/release';
  * Primary persona: Enterprise CTO/VP Eng (A) and SMB Founder/COO (D). Secondary: QA Director (B), Public sector (C).
  * Core question: "What does QualityWorks do, and which part is relevant to me?"
  * Conversion: Talk to an expert (/contact-us/) or self-select a pathway.
+ *
+ * URL: / (the site root).
+ * Persona / CTA (docs/03-page-map-personas.md §2, "Home" row): primary A Enterprise CTO; D SMB Founder.
+ *   Secondary B QA Director; C Public sector. Proof required: approved stats (C01–C04), awards (C10–C12),
+ *   3 case studies. Primary CTA: "Talk to an expert" to /contact-us/; secondary "Explore solutions".
+ *   Journeys A and D in docs/03 §3 start here.
+ * What, top to bottom (each block is marked with a {comment} in the markup): HERO with company facts and
+ *   the three pathways; STATS; INTRO ("Why QualityWorks"); THREE WAYS (pathway detail cards); PRODUCTS
+ *   (with a review-only PRISM sample); PROOF (awards + testimonials); WHO WE HELP; RESULTS (3 case
+ *   studies); INSIGHTS + EVENTS; closing CtaBand.
+ * Data: src/data/services.ts (`pathways`, `servicesByPathway`), src/data/products.ts, src/data/caseStudies.ts,
+ *   src/data/articles.ts (`blogPosts`), src/data/events.ts, src/data/industries.ts, src/data/site.ts (`ctas`,
+ *   `site.externalPlatforms.clutch`), src/data/claims.ts via StatBlock/ClaimRef, testimonials via ProofBlock.
+ *   The pathway bullet lists and some section copy are inline.
+ * SEO: inline title/description. JSON-LD: Organization (organizationLd from src/lib/schema.ts). No
+ *   breadcrumbs, so no BreadcrumbList.
+ * Requirements: docs/10-acceptance-criteria.md AC-HOME-1 (h1, both hero CTAs and all three pathway links
+ *   visible without scrolling at 1440 x 900; QA-16), AC-HOME-2 (every statistic references a claim ID;
+ *   enforced by StatBlock) and AC-HOME-3 (events fallback message when nothing is upcoming).
+ * Review/release behaviour:
+ *   - StatBlock: in RELEASE it drops stats whose claim has a `verification` value (today C02, C03, C04),
+ *     leaving only C01, and hides the footnote.
+ *   - ClaimRef badges (C05–C07, C10–C12, C14, C15) render in REVIEW only.
+ *   - The PRISM sample score card renders in REVIEW only (`{REVIEW && ...}`).
+ *   - Events: fixtures are excluded here in every build; RELEASE also drops unverified/undated events
+ *     inside events.ts.
+ * Gotchas:
+ *   - Keep the hero short: AC-HOME-1 needs the pathways above the fold at 1440 x 900.
+ *   - Featured case studies and products are chosen by hard-coded slugs below; a renamed slug silently
+ *     drops a card (case studies) or moves it to the "more" list (products).
+ *   - `pathwayBullets` keys must match the pathway ids in services.ts (quality, build, ai).
+ *   - The "beyond the code" phrase must not be wrapped in angle brackets (content-check flags the bracketed
+ *     form); it is styled with <em class="beyond"> instead.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Button from '../components/Button.astro';
@@ -28,25 +61,33 @@ import { industries } from '../data/industries';
 import { ctas, site } from '../data/site';
 import { organizationLd } from '../lib/schema';
 
+// Bullet lists for the THREE WAYS cards, keyed by pathway id. Homepage-only copy.
 const pathwayBullets = {
   quality: ['AI-generated test cases & automation scripts', 'AI-assisted regression testing', 'Web, mobile, API & USSD coverage', 'Full-stack QA managed service', 'Test maturity assessments & roadmaps'],
   build: ['Custom web & mobile applications', 'AI-accelerated development cycles', 'Rapid prototyping & MVP delivery', 'UX/UI design & product strategy', 'Nearshore delivery at competitive rates'],
   ai: ['Custom AI agent design & deployment', 'Generative AI integration & strategy', 'Data quality and governance', 'Technology advisory (CTO-as-a-service)'],
 };
+// Three featured case studies (WSSC, fintech modernization, JMMB); missing slugs are dropped.
 const featuredCases = ['ai-powered-test-case-generation-wssc', 'fintech-legacy-platform-modernization', 'jmmb-group-leverages-automation-best-practices'].map(caseStudyBySlug).filter(Boolean);
+// Latest three migrated posts (articles.ts sorts newest first); fixtures are not in blogPosts.
 const latest = blogPosts.slice(0, 3);
+// Events band (AC-HOME-3): never show fixtures on the homepage. Prefer up to two upcoming events; if there are
+// none, fall back to the first two remaining events (past or date-TBC) and show the fallback message.
 const homeEvents = events.filter((e) => e.provenance.approval !== 'fixture');
 const upcoming = homeEvents.filter((e) => eventPhase(e) === 'upcoming');
 const eventsToShow = upcoming.length ? upcoming.slice(0, 2) : homeEvents.slice(0, 2);
+// Three products get full cards; the rest (external platforms today) are listed as compact external links.
 const featuredProducts = products.filter((p) => ['qualitywatcher-ai-tools', 'agents-as-a-service', 'prism'].includes(p.slug));
 const otherProducts = products.filter((p) => !featuredProducts.includes(p));
+// Live industry pages only; the two proposed audience pages get their own cards in WHO WE HELP.
 const industryList = industries.filter((i) => i.status === 'live');
 ---
 <BaseLayout
   seo={{ title: 'QualityWorks Consulting Group | Software Quality, Custom Software & AI', description: 'QualityWorks tests smarter, builds faster and deploys AI: AI-powered testing, custom web and mobile development, and agentic business solutions since 2010.' }}
   jsonLd={[organizationLd()]}
 >
-  <!-- HERO -->
+  {/* HERO: h1, two CTAs (Talk to an expert, Explore solutions), company facts, then the three pathway cards.
+      Everything here must fit above the fold at 1440 x 900 (AC-HOME-1). The motif div is decorative. */}
   <section class="home-hero surface-dark" aria-labelledby="hero-title">
     <div class="home-hero__motif" aria-hidden="true"></div>
     <div class="container home-hero__grid">
@@ -69,6 +110,8 @@ const industryList = industries.filter((i) => i.status === 'live');
       <ul class="pathways" aria-label="Three ways we help">
         {pathways.map((p) => (
           <li class="pathway" data-pathway={p.id}>
+            {/* Whole card is clickable: the title link's ::after stretches over the card (see CSS). The CTA text is
+                aria-hidden so screen readers hear the link once, via the h2. */}
             <p class="pathway__label">{p.label}</p>
             <h2 class="pathway__title"><a href={p.href}>{p.title}</a></h2>
             <p class="pathway__text">{p.text}</p>
@@ -79,7 +122,7 @@ const industryList = industries.filter((i) => i.status === 'live');
     </div>
   </section>
 
-  <!-- STATS -->
+  {/* STATS: headline figures, each tied to a claim ID (AC-HOME-2). StatBlock removes unverified ones in release. */}
   <section class="section section--tight" aria-labelledby="impact-title">
     <div class="container">
       <h2 id="impact-title" class="visually-hidden">QualityWorks impact</h2>
@@ -95,7 +138,7 @@ const industryList = industries.filter((i) => i.status === 'live');
     </div>
   </section>
 
-  <!-- INTRO -->
+  {/* INTRO: "Why QualityWorks": positioning statement plus three reasons, with claim annotations on each figure. */}
   <section class="section surface-alt intro" aria-labelledby="intro-title">
     <div class="container split">
       <div>
@@ -123,7 +166,8 @@ const industryList = industries.filter((i) => i.status === 'live');
     </div>
   </section>
 
-  <!-- THREE WAYS -->
+  {/* THREE WAYS: one card per pathway with bullets, up to four related full-depth services and a CTA.
+      id="solutions" makes this section an in-page anchor. */}
   <section class="section" id="solutions" aria-labelledby="ways-title">
     <div class="container">
       <SectionHeading eyebrow="Our services" title="Three ways we drive your business forward" lede="From bulletproof testing to full-scale digital products to AI-powered operations — we handle the hard parts so you can move faster." id="ways-title" />
@@ -147,11 +191,12 @@ const industryList = industries.filter((i) => i.status === 'live');
     </div>
   </section>
 
-  <!-- PRODUCTS -->
+  {/* PRODUCTS: featured product cards, review-only PRISM sample score, and compact links to external products. */}
   <section class="section surface-product products" aria-labelledby="products-title">
     <div class="container">
       <div class="products__head">
         <SectionHeading eyebrow="Products & innovations" title="Software we build for quality and AI" lede="Our products are separate from our consulting services. Some live on their own platforms — we’ll always tell you when a link takes you there." id="products-title" />
+        {/* Review-only: reproduces the sample score from the live homepage; removed from release builds. */}
         {REVIEW && <div class="prism-sample" data-review-note="Sample score reproduced from the live homepage">
           <p class="prism-sample__label mono">PRISM™ sample score</p>
           <p class="prism-sample__grade">C+</p>
@@ -172,7 +217,7 @@ const industryList = industries.filter((i) => i.status === 'live');
     </div>
   </section>
 
-  <!-- PROOF -->
+  {/* PROOF: Clutch badges and awards (claims C10–C12), testimonials, and a link to Clutch reviews. */}
   <section class="section" aria-labelledby="proof-title">
     <div class="container">
       <SectionHeading eyebrow="Recognition" title="What our clients say" id="proof-title" />
@@ -188,7 +233,7 @@ const industryList = industries.filter((i) => i.status === 'live');
     </div>
   </section>
 
-  <!-- WHO WE HELP -->
+  {/* WHO WE HELP: live industry chips, plus cards for the two proposed audience pages (personas C and D). */}
   <section class="section surface-tint" aria-labelledby="help-title">
     <div class="container split split--reverse">
       <div>
@@ -212,7 +257,7 @@ const industryList = industries.filter((i) => i.status === 'live');
     </div>
   </section>
 
-  <!-- RESULTS -->
+  {/* RESULTS: the three featured case studies. */}
   <section class="section" aria-labelledby="results-title">
     <div class="container">
       <div class="section-row">
@@ -225,7 +270,7 @@ const industryList = industries.filter((i) => i.status === 'live');
     </div>
   </section>
 
-  <!-- INSIGHTS + EVENTS -->
+  {/* INSIGHTS + EVENTS: latest articles (with an empty state) and the events strip with its no-upcoming fallback (AC-HOME-3). */}
   <section class="section surface-alt" aria-labelledby="insights-title">
     <div class="container insights">
       <div>
@@ -252,16 +297,21 @@ const industryList = industries.filter((i) => i.status === 'live');
     </div>
   </section>
 
+  {/* Closing CTA: contact, or see case studies. */}
   <CtaBand title="Tell us what you’re trying to launch." text="Testing, a new product or an AI initiative — one conversation is enough to find out whether we can help." primary={ctas.contact} secondary={ctas.caseStudies} eyebrow="Let’s talk" />
 </BaseLayout>
 
 <style>
-  /* Hero */
+  /* Hero: two radial glows (logo teal top-right, faint logo green bottom-left) over ink-900. Padding scales
+     with the viewport via clamp(). */
   .home-hero { position: relative; overflow: hidden; background: radial-gradient(70% 90% at 100% 0%, rgba(40,157,173,0.28), transparent 60%), radial-gradient(50% 60% at 0% 100%, rgba(143,198,64,0.10), transparent 60%), var(--qw-ink-900); padding-block: clamp(3rem, 2rem + 4vw, 6rem) clamp(3rem, 2rem + 3vw, 5rem); }
+  /* Faint 56px grid overlay, faded out towards the edges with a radial mask. Decorative only. */
   .home-hero::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px); background-size: 56px 56px; mask: radial-gradient(90% 80% at 70% 30%, #000, transparent 75%); -webkit-mask: radial-gradient(90% 80% at 70% 30%, #000, transparent 75%); pointer-events: none; }
+  /* Concentric-ring motif (thin green rings every 26px) partly off-canvas at the top right. */
   .home-hero__motif { position: absolute; width: 46rem; height: 46rem; right: -16rem; top: -18rem; border-radius: 50%; pointer-events: none; background: repeating-radial-gradient(circle, transparent 0 26px, rgba(143,198,64,0.12) 26px 27px); mask: radial-gradient(circle, #000 30%, transparent 70%); -webkit-mask: radial-gradient(circle, #000 30%, transparent 70%); }
   .home-hero__grid { position: relative; display: grid; gap: var(--space-12); align-items: center; }
   
+  /* Hero text. max-width: 12ch keeps the h1 to about two lines. #D5DDE4 is a light grey for the lede on ink. */
   .home-hero h1 { font-size: var(--fs-3xl); font-weight: var(--fw-bold); max-width: 12ch; margin-bottom: var(--space-6); }
   .home-hero .lede { color: #D5DDE4; max-width: 44rem; }
   .home-hero__ctas { margin-top: var(--space-8); }
@@ -269,6 +319,7 @@ const industryList = industries.filter((i) => i.status === 'live');
   .home-hero__facts li { display: inline-flex; align-items: center; gap: var(--space-2); }
   .home-hero__facts li::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--qw-green-400); }
 
+  /* Pathway cards: teal top rule (green for the AI pathway). */
   .pathways { position: relative; list-style: none; margin: var(--space-12) 0 0; padding: 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); }
   .pathway { position: relative; display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-6); border-radius: var(--radius-lg); background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); border-top: 3px solid var(--qw-teal-500); transition: background var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out); }
   .pathway[data-pathway="ai"] { border-top-color: var(--qw-green-400); }
@@ -276,6 +327,8 @@ const industryList = industries.filter((i) => i.status === 'live');
   .pathway__label { margin: 0; font: var(--fw-semibold) var(--fs-xs)/1.3 var(--font-sans); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-slate-300); }
   .pathway__title { margin: 0; font-size: var(--fs-md); line-height: 1.3; }
   .pathway__title a { color: #fff; text-decoration: none; }
+  /* Stretched link: the title link's ::after covers the whole card, so the card is one click target. The focus
+     ring is drawn on the card (:has) instead of the invisible stretched link. */
   .pathway__title a::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
   .pathway:has(a:focus-visible) { outline: 3px solid var(--qw-green-400); outline-offset: 3px; }
   .pathway__title a:focus-visible { outline: none; }
@@ -284,7 +337,7 @@ const industryList = industries.filter((i) => i.status === 'live');
   .pathway__cta :global(svg) { width: 16px; height: 16px; transition: transform var(--dur-base) var(--ease-out); }
   .pathway:hover .pathway__cta :global(svg) { transform: translateX(3px); }
 
-  /* Intro */
+  /* Intro: positioning headline and three "why" items with a teal left rule. */
   .intro h2 { font-size: var(--fs-xl); font-weight: var(--fw-semibold); line-height: 1.2; }
   .intro .beyond { white-space: normal; font-size: 0.9em; }
   .why { display: grid; gap: var(--space-6); margin: var(--space-8) 0; }
@@ -292,7 +345,8 @@ const industryList = industries.filter((i) => i.status === 'live');
   .why__item h3 { font-size: var(--fs-md); margin-bottom: var(--space-2); }
   .why__item p { margin: 0; color: var(--color-muted); }
 
-  /* Three ways */
+  /* Three ways: one card per pathway. The ::before bar colour marks the pathway (quality = logo teal,
+     build = teal-700, ai = logo green). Related links sit at the bottom (margin-top: auto). */
   .ways { display: grid; gap: var(--space-6); grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); }
   .way { display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-8) var(--space-6); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: #fff; position: relative; }
   .way::before { content: ""; position: absolute; top: -1px; left: var(--space-6); right: var(--space-6); height: 3px; border-radius: 0 0 3px 3px; background: var(--qw-teal-500); }
@@ -307,7 +361,7 @@ const industryList = industries.filter((i) => i.status === 'live');
   .way__links ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); font-size: var(--fs-sm); font-weight: var(--fw-semibold); }
   .way :global(.btn) { align-self: flex-start; }
 
-  /* Products */
+  /* Products: heading + PRISM sample side by side from 960px; sample card tinted gold; external links below. */
   .products__head { display: grid; gap: var(--space-8); align-items: end; margin-bottom: var(--space-10); }
   .products__head :global(.section-heading) { margin-bottom: 0; }
   @media (min-width: 960px) { .products__head { grid-template-columns: 1fr 18rem; } }
@@ -324,7 +378,8 @@ const industryList = industries.filter((i) => i.status === 'live');
   .products__more strong { color: #fff; }
   .products__more :global(svg) { width: 16px; height: 16px; margin-left: auto; flex: none; color: var(--qw-teal-300); }
 
-  /* Awards */
+  /* Awards: Clutch badge images are drawn at 72px wide (intrinsic size attributes 96 x 104 reserve space);
+     text awards are separated by a left rule. */
   .awards { list-style: none; padding: 0; margin: 0 0 var(--space-10); display: flex; flex-wrap: wrap; gap: var(--space-4) var(--space-8); align-items: center; }
   .awards img { width: 72px; height: auto; }
   .awards li { display: flex; align-items: center; }
@@ -333,7 +388,7 @@ const industryList = industries.filter((i) => i.status === 'live');
   .awards__note { font-weight: var(--fw-regular); font-size: var(--fs-xs); color: var(--color-muted); }
   .proof-more { margin-top: var(--space-6); }
 
-  /* Who we help */
+  /* Who we help: industry chips (44px touch targets) and the two audience cards. */
   .industry-chips { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--space-2); }
   .industry-chips a { display: inline-flex; align-items: center; min-height: 44px; padding: 0.5rem 1rem; border-radius: var(--radius-pill); background: #fff; border: 1px solid var(--qw-teal-100); color: var(--qw-ink-900); font-weight: var(--fw-semibold); font-size: var(--fs-sm); text-decoration: none; }
   .industry-chips a:hover { border-color: var(--qw-teal-700); color: var(--qw-teal-800); }
@@ -343,8 +398,10 @@ const industryList = industries.filter((i) => i.status === 'live');
   .audience .eyebrow { margin: 0; }
   .audience__title { font-size: var(--fs-lg); font-weight: var(--fw-bold); color: var(--qw-ink-900); line-height: 1.25; }
 
+  /* Shared row: section heading on the left, "All ..." button on the right (wraps on small screens). */
   .section-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: var(--space-4); margin-bottom: var(--space-8); }
   .section-row :global(.section-heading) { margin-bottom: 0; }
+  /* Insights + events stack, and the no-upcoming-events fallback line. */
   .insights { display: grid; gap: var(--space-16); }
   .events-strip__fallback { display: flex; gap: var(--space-2); align-items: center; font-size: var(--fs-sm); color: var(--color-muted); margin-bottom: var(--space-4); }
   .events-strip__fallback :global(svg) { width: 18px; height: 18px; color: var(--qw-teal-700); flex: none; }

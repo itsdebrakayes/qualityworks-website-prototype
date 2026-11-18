@@ -1,9 +1,27 @@
 ---
-/** Legacy /thank-you/ (WPForms redirect target). Kept as noindex non-JS fallback; inline success state is primary. */
+/**
+ * THANK YOU — renders /thank-you/ (legacy URL preserved).
+ *
+ * What: a static "message received" page.
+ * Why: on the live WordPress site this URL is the WPForms redirect target after the contact form is
+ *   sent. It is kept as a noindex, no-JavaScript fallback so the old URL still resolves; the inline
+ *   success state inside ContactForm.astro (on /contact-us/) is the primary confirmation in the rebuild.
+ * Persona / CTA: not listed in docs/03-page-map-personas.md §2 (utility page, marked "noindex" in the
+ *   §1 page map). The buttons simply send the visitor back to Home or on to case studies.
+ * Data: none. All copy is inline because the page is a utility stub.
+ * SEO: title and description are inline below. `noindex: true` means the release build emits
+ *   "noindex, follow"; review builds are always "noindex, nofollow" (see BaseLayout.astro). No breadcrumbs
+ *   are passed, so no BreadcrumbList JSON-LD is emitted. No other JSON-LD.
+ * Review/release: no REVIEW/RELEASE logic on this page.
+ * Gotchas: nothing in src/ currently links or redirects here (ContactForm does not navigate to it). If a
+ *   real form endpoint is connected later and redirects on success, point it here and keep `noindex`.
+ *   The inline `style` attributes are deliberate one-offs; prefer a scoped <style> block if this page grows.
+ */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Button from '../../components/Button.astro';
 ---
 <BaseLayout seo={{ title: 'Thank you | QualityWorks', description: 'Thank you for contacting QualityWorks.', noindex: true }}>
+  {/* Single confirmation block: one h1, short reassurance, two onward links (home, case studies). */}
   <section class="section"><div class="container container--narrow" style="padding-block: 4rem">
     <h1 style="font-size: var(--fs-2xl)">Thank you for reaching out.</h1>
     <p class="lede">A member of the QualityWorks team will be in touch.</p>

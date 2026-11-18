@@ -1,5 +1,30 @@
 ---
-/** ABOUT (/about-us/ — legacy URL). Persona: Public sector (C), Enterprise (A), job applicants (F). */
+/**
+ * ABOUT (/about-us/ — legacy URL). Persona: Public sector (C), Enterprise (A), job applicants (F).
+ *
+ * Persona / CTA (docs/03-page-map-personas.md §2, "About" row): primary C, A; secondary F. Core question:
+ *   "Who are they; are they credible and stable?" Proof required: C13–C15 and leadership. Primary CTA:
+ *   "Work with us" (hero, to /contact-us/); secondary "Explore careers".
+ * What, top to bottom: hero; "Our story" (company description with ClaimRefs C14, C15); CEO block on a
+ *   dark surface (photo, quote, certification line with ClaimRef C13); six core values; "Leadership and
+ *   team" as three Wireframe placeholders; client reviews (ProofBlock + Clutch link); closing CtaBand.
+ * Data: src/data/team.ts (`leadership[0]` = the CEO, the only profile verifiable on the live site),
+ *   src/data/site.ts (`ctas.contact`, `site.externalPlatforms.clutch`), testimonials via ProofBlock
+ *   (src/data/testimonials.ts). The story, values and CEO quote are live-site copy kept inline.
+ * SEO: inline title/description. Breadcrumbs Home > Company > About Us produce BreadcrumbList JSON-LD via
+ *   BaseLayout ("Company" has no href because there is no company overview page). No other JSON-LD.
+ * Review/release:
+ *   - ClaimRef badges (C13, C14, C15) render in review builds only. C14's wording still needs approval
+ *     (`verification: 'wording-approval-needed'` in claims.ts); C13 lacks certificate details.
+ *   - Each Wireframe carries `data-release-blocker` in RELEASE builds, so the release gate fails until
+ *     leadership profiles, the data-protection copy and the community logos are supplied.
+ *   - ProofBlock adds review notes showing each testimonial's approval state.
+ * Gotchas:
+ *   - `leadership[0]` is assumed to be the CEO. Reordering team.ts changes who appears in the CEO block.
+ *   - The CEO image uses fixed width/height (320 x 303) to reserve space and avoid layout shift; CSS then
+ *     crops it to a circle.
+ *   - Keep "Black-owned, woman-led" wording identical to claim C14 until the wording is approved.
+ */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
@@ -11,6 +36,7 @@ import Button from '../../components/Button.astro';
 import { leadership } from '../../data/team';
 import { ctas, site } from '../../data/site';
 const crumbs = [{ label: 'Home', href: '/' }, { label: 'Company' }, { label: 'About Us' }];
+// Core values as [term, description] pairs, copied from the live About page.
 const values = [
   ['Quality', 'We infuse quality into everything we do to deliver industry-leading solutions.'],
   ['Innovation', 'We’re innovators who focus on creating the highest value for our clients.'],
@@ -19,11 +45,13 @@ const values = [
   ['Entrepreneurial spirit', 'We actively seek out change and opportunities for continuous improvement.'],
   ['Results oriented', 'We are a results-driven bunch, focused on deliverables and hitting our milestones.'],
 ];
+// First leadership record = CEO (see Gotchas).
 const ceo = leadership[0];
 ---
 <BaseLayout seo={{ title: 'About QualityWorks | The Quality-Driven Innovation Company', description: 'Founded in 2010, QualityWorks is a Black-owned, woman-led software solutions firm helping companies build higher-quality software, future-ready teams and faster delivery.' }} breadcrumbs={crumbs}>
   <PageHero eyebrow="About us" title="The quality-driven innovation company" lede="We go beyond the code and beyond testing to help our clients achieve their most extraordinary digital goals." breadcrumbs={crumbs} primary={{ label: 'Work with us', href: '/contact-us/' }} secondary={{ label: 'Explore careers', href: '/careers/' }} />
 
+  {/* Our story: company description with claim annotations for ownership (C14) and regions (C15). */}
   <section class="section" aria-labelledby="story-title">
     <div class="container split">
       <div><p class="eyebrow">Who we are</p><h2 id="story-title">Our story</h2></div>
@@ -34,6 +62,7 @@ const ceo = leadership[0];
     </div>
   </section>
 
+  {/* CEO block: portrait, quote and the certification statement (C13) awaiting certificate details. */}
   <section class="section surface-dark" aria-labelledby="ceo-title">
     <div class="container ceo">
       <img src={ceo.photo} alt={ceo.photoAlt} width="320" height="303" loading="lazy" />
@@ -46,6 +75,7 @@ const ceo = leadership[0];
     </div>
   </section>
 
+  {/* Core values as a description list (dt term, dd description). */}
   <section class="section" aria-labelledby="values-title">
     <div class="container">
       <SectionHeading eyebrow="What we stand for" title="Our core values" id="values-title" />
@@ -53,6 +83,7 @@ const ceo = leadership[0];
     </div>
   </section>
 
+  {/* Team: wireframes for live-site sections whose content is not yet approved for reuse. */}
   <section class="section surface-alt" aria-labelledby="team-title">
     <div class="container">
       <SectionHeading eyebrow="Our team" title="Leadership and team" lede="We provide agile-minded digital experience experts who are ready to make an impact from day one — coaches focused on team capacity building, not just technologists who write and test code." id="team-title" />
@@ -64,6 +95,7 @@ const ceo = leadership[0];
     </div>
   </section>
 
+  {/* Reviews: live-site testimonials plus an external link to the Clutch profile (opens a new tab via Button). */}
   <section class="section" aria-labelledby="reviews-title">
     <div class="container">
       <SectionHeading eyebrow="Reviews" title="Ranked by our clients as one of the top companies in the industry" id="reviews-title" />
@@ -71,15 +103,20 @@ const ceo = leadership[0];
       <p class="reviews-more"><Button cta={{ label: 'Read more reviews on Clutch', href: site.externalPlatforms.clutch, external: true, kind: 'secondary', handoffNote: 'Opens clutch.co' }} /></p>
     </div>
   </section>
+  {/* Closing CTA serves both buyers (contact) and applicants (careers). */}
   <CtaBand title="Want to work with us?" text="Jumpstart your project, or your career in tech." primary={ctas.contact} secondary={{ label: 'Explore careers', href: '/careers/' }} />
 </BaseLayout>
 <style>
+  /* Story: supporting paragraphs in muted text so the lede leads. */
   .story p:not(.lede) { color: var(--color-muted); }
+  /* CEO block: stacked on small screens, 18rem photo column from 860px. The photo is cropped to a circle
+     (aspect-ratio 1 + object-fit: cover) even though the source image is 320 x 303. */
   .ceo { display: grid; gap: var(--space-10); align-items: center; }
   @media (min-width: 860px) { .ceo { grid-template-columns: 18rem 1fr; gap: var(--space-16); } }
   .ceo img { border-radius: 50%; width: 100%; max-width: 18rem; aspect-ratio: 1; object-fit: cover; }
   .ceo blockquote { margin: 0 0 var(--space-6); font-size: var(--fs-md); line-height: 1.6; color: #fff; }
   .ceo__cert { font-size: var(--fs-sm); color: var(--color-muted); }
+  /* Values grid: auto-fit columns of at least 18rem (or full width on narrow screens), teal rule above each term. */
   .values { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: var(--space-8) var(--space-6); margin: 0; }
   .values dt { font-size: var(--fs-md); font-weight: var(--fw-bold); color: var(--color-heading); padding-top: var(--space-4); border-top: 2px solid var(--qw-teal-500); }
   .values dd { margin: var(--space-2) 0 0; color: var(--color-muted); }

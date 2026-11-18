@@ -1,10 +1,32 @@
 ---
+/**
+ * PROTOTYPE REVIEW HUB (review-only) — renders /prototype/.
+ *
+ * What: the reviewer's starting point. Three numbered lists: (1) persona journeys A–F, each linking to its
+ *   first page; (2) interaction states to try, each linking to the page (or pre-filtered URL) that shows
+ *   them; (3) project documents rendered from docs/NN-*.md, plus the claims register and design system.
+ * Why: lets Janique and other reviewers walk the journeys in docs/03-page-map-personas.md §3 and check
+ *   every simulated state without hunting for them.
+ * Persona / CTA: none. Reviewer tooling, not in the docs/03 persona table.
+ * Data: src/lib/docs.ts (`docs`: every numbered Markdown file in /docs, sorted by file name, with title
+ *   and summary from its frontmatter). Journeys and states are hard-coded below.
+ * SEO: inline title/description with `noindex: true`. Breadcrumbs Home > Prototype review hub produce
+ *   BreadcrumbList JSON-LD via BaseLayout. No other JSON-LD.
+ * Review/release: no REVIEW guard inside the page. The whole /prototype/ folder is deleted from the release
+ *   output by scripts/release-check.mjs (see CONTRIBUTING.md §6).
+ * Gotchas:
+ *   - The journey and state lists are hand-maintained. When a journey or simulated state changes (e.g. a
+ *     new prototype control), update the arrays here and docs/03 §3.
+ *   - A new docs/NN-name.md file appears in the Documents list automatically, but only if its frontmatter
+ *     has `title` and `summary`.
+ */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
 import Icon from '../../components/Icon.astro';
 import { docs } from '../../lib/docs';
 const crumbs = [{ label: 'Home', href: '/' }, { label: 'Prototype review hub' }];
+// Persona journeys: [persona, start URL, path summary]. Mirrors docs/03-page-map-personas.md §3.
 const journeys = [
   ['A · Enterprise CTO', '/', 'Home › Pathway 01 › Full-Stack Testing › CMN case study › Talk to an expert'],
   ['B · QA Director', '/qualitywatcher-ai-tools/', 'QualityWatcher AI › tools & human review › WSSC case study › Open QualityWatcher AI'],
@@ -13,6 +35,7 @@ const journeys = [
   ['E · Marketing / Ops', '/products/agents-as-a-service/', 'Agent catalog (filter PR & Marketing) › Talk to us first'],
   ['F · Job applicant', '/careers/', 'Careers › open roles states › Apply on BambooHR'],
 ];
+// Interaction states: [what to try, URL]. Some URLs carry query strings to open a pre-filtered state.
 const states = [
   ['Contact form: empty, invalid, consent, loading, success, error', '/contact-us/'],
   ['Case studies: filters, combined, no results, loading, error', '/case-studies/?industry=finance-banking&service=test-automation'],
@@ -26,14 +49,17 @@ const states = [
 ---
 <BaseLayout seo={{ title: 'Prototype Review Hub | QM-113', description: 'Review hub for the QualityWorks website prototype: documents, journeys, interaction states and QA.', noindex: true }} breadcrumbs={crumbs}>
   <PageHero eyebrow="QM-113 · Prototype" title="Prototype review hub" lede="Start here. Walk the persona journeys, try each interaction state, then read the audit, design decisions and open questions. Toggle “Review annotations” in the yellow bar to see claim IDs, proposed navigation items and provenance." breadcrumbs={crumbs} compact />
+  {/* 1. Persona journeys. */}
   <section class="section"><div class="container">
     <SectionHeading eyebrow="1" title="Persona journeys" />
     <ol class="hub-list">{journeys.map(([p, h, d]) => <li><a href={h}><strong>{p}</strong><span>{d}</span><Icon name="arrow" /></a></li>)}</ol>
   </div></section>
+  {/* 2. Interaction states (forms, filters, loading/error, fixtures, wireframes). */}
   <section class="section surface-alt"><div class="container">
     <SectionHeading eyebrow="2" title="Interaction states to try" />
     <ol class="hub-list">{states.map(([d, h]) => <li><a href={h}><span>{d}</span><Icon name="arrow" /></a></li>)}</ol>
   </div></section>
+  {/* 3. Documents from /docs, then the claims register and design system (also review-only). */}
   <section class="section"><div class="container">
     <SectionHeading eyebrow="3" title="Documents" />
     <ol class="hub-list">
@@ -44,6 +70,8 @@ const states = [
   </div></section>
 </BaseLayout>
 <style>
+  /* Hub list rows: whole-row links laid out as a 2-column grid: text (title + description stacked) in
+     column 1, the arrow icon in column 2 spanning both text rows. */
   .hub-list { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-2); }
   .hub-list a { display: grid; grid-template-columns: 1fr auto; gap: 0.25rem var(--space-4); align-items: center; padding: var(--space-4) var(--space-5); background: #fff; border: 1px solid var(--qw-line); border-radius: var(--radius-md); text-decoration: none; color: var(--qw-slate-700); }
   .hub-list a:hover { border-color: var(--qw-teal-500); }

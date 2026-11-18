@@ -1,4 +1,27 @@
 ---
+/**
+ * CLAIMS REGISTER (review-only) — renders /prototype/claims/.
+ *
+ * What: a governance table listing every number, award and certification the prototype displays
+ *   (claim IDs C01 onward), with measurement context, evidence found at source, approval state and
+ *   verification status.
+ * Why: CONTRIBUTING.md rule 4 ("Never invent facts") and recipe 4.4. Every displayed claim must point at a
+ *   record in src/data/claims.ts. ClaimRef.astro annotations on other pages link here as
+ *   /prototype/claims/#C13 etc., and each table row carries `id={c.id}` so that anchor lands on the row.
+ * Persona / CTA: none. This is reviewer tooling (Janique and the project team), not a visitor page; it is
+ *   not in the docs/03 persona table. No CTA.
+ * Data: src/data/claims.ts (`claims`).
+ * SEO: inline title/description with `noindex: true`. Breadcrumbs Home > Prototype review hub >
+ *   Claims register produce BreadcrumbList JSON-LD via BaseLayout. No other JSON-LD.
+ * Review/release: the whole /prototype/ folder is review-only. The page has no REVIEW guard of its own;
+ *   scripts/release-check.mjs deletes /prototype/ and /design-system/ from the release output, and the
+ *   ClaimRef links that point here are not rendered in release builds.
+ * Gotchas: "approval" shows the raw ApprovalState value (e.g. published-live); being published on the live
+ *   site is NOT approval for the rebuild. "Verification" turns hyphenated values into words for display.
+ * Styles: the one-line <style> block highlights the row targeted by the URL hash (pale yellow #FFF8E1)
+ *   and sets row-header cells back to `position: static`, because global.css makes every .data-table th
+ *   sticky (top: 0), which is meant for column headers only.
+ */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
 import { claims } from '../../data/claims';
@@ -6,6 +29,7 @@ const crumbs = [{ label: 'Home', href: '/' }, { label: 'Prototype review hub', h
 ---
 <BaseLayout seo={{ title: 'Claims Register | QM-113 Prototype', description: 'Every number, award and certification shown in the prototype, with its source, evidence and approval state.', noindex: true }} breadcrumbs={crumbs}>
   <PageHero eyebrow="Prototype · Governance" title="Claims register" lede="Every number, award and certification displayed in the prototype. Turn on “Review annotations” to see claim IDs next to each claim on the pages. Published on the live site does not mean approved for the rebuild." breadcrumbs={crumbs} compact />
+  {/* Register table: one row per claim. Row id = claim id so /prototype/claims/#C05 deep-links work. */}
   <section class="section"><div class="container">
     <div class="table-scroll"><table class="data-table">
       <thead><tr><th scope="col">ID</th><th scope="col">Statement</th><th scope="col">Measurement context</th><th scope="col">Evidence at source</th><th scope="col">Approval</th><th scope="col">Verification</th></tr></thead>

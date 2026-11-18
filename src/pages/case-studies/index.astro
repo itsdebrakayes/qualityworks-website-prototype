@@ -4,6 +4,33 @@ import { RELEASE, REVIEW } from '../../lib/release';
  * RESULTS / CASE STUDIES (/case-studies/ — legacy URL). Filterable by industry and service (combined).
  * Primary persona: Enterprise CTO (A) and Public sector (C). Core question: "Have they solved this before?"
  * Data: WordPress-migrated snapshot. Loading and error states are demonstrated via a labelled prototype control.
+ *
+ * Persona / CTA (docs/03-page-map-personas.md §2, "Case studies" row): primary A, C; secondary B.
+ *   Proof required: metrics with source/context. Primary CTA: "Discuss a similar challenge" (on the detail
+ *   pages); this list closes with a CtaBand using `ctas.contact` plus "Explore solutions".
+ * What: FilterBar (industry + service selects, combinable), a review-only "data states" control, a hidden
+ *   error Alert and loading Skeleton, the CaseStudyCard grid, and an empty state with "Clear filters".
+ * Data: src/data/caseStudies.ts (`caseStudies`: curated records over the WordPress snapshot, with public
+ *   slugs), src/data/industries.ts and src/data/services.ts (only to turn slugs into readable option
+ *   labels), src/data/site.ts (`ctas.contact`).
+ * SEO: inline title/description. Breadcrumbs Home > Results > Case Studies produce BreadcrumbList JSON-LD
+ *   via BaseLayout ("Results" has no href because it has no page of its own). No other JSON-LD.
+ *   Legacy /case-study/{slug}/ URLs need 301s to /case-studies/{slug}/ (README; not configured here).
+ * Review/release:
+ *   - The <details> "Prototype control — data states" (loading / error simulation) renders in REVIEW only.
+ *   - The error Alert ("This is a simulated error") and the Skeleton are rendered in every build but stay
+ *     hidden unless the script shows them.
+ * Gotchas:
+ *   - Filtering relies on CaseStudyCard's `data-industry` (one slug) and `data-services` (SPACE-separated
+ *     service slugs). Keep the separators in sync with the `match` function in the script below.
+ *   - Filter state is mirrored in the URL (?industry=...&service=...) via src/lib/filters.ts.
+ *   - Option labels fall back to the raw slug when industryBySlug/serviceBySlug finds no record, which is
+ *     a visible sign that a case study is tagged with an unknown slug.
+ *   - In RELEASE builds the [data-sim] buttons are not rendered, but the script still calls
+ *     `document.querySelector('[data-sim="loading"]')!.addEventListener(...)`. That throws, and the lines
+ *     after it (error simulation, Retry, and the empty state's "Clear filters" button) never run.
+ *     Filtering itself still works because initFilters() runs first. Needs a code fix (guard the lookups);
+ *     not changed here because this pass was comments-only.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
@@ -20,7 +47,10 @@ import { serviceBySlug } from '../../data/services';
 import { ctas } from '../../data/site';
 
 const crumbs = [{ label: 'Home', href: '/' }, { label: 'Results' }, { label: 'Case Studies' }];
+// Number of case studies matching a predicate (used for the option counts).
 const count = (fn: (c: typeof caseStudies[number]) => boolean) => caseStudies.filter(fn).length;
+// Filter options built from the data itself, so only industries/services that have case studies appear.
+// Labels come from the industry/service records (slug as fallback); sorted A-Z by label.
 const industryOpts = [...new Set(caseStudies.map((c) => c.industry))].map((v) => ({ value: v, label: industryBySlug(v)?.name ?? v, count: count((c) => c.industry === v) })).sort((a, b) => a.label.localeCompare(b.label));
 const serviceOpts = [...new Set(caseStudies.flatMap((c) => c.serviceTags))].map((v) => ({ value: v, label: serviceBySlug(v)?.name ?? v, count: count((c) => c.serviceTags.includes(v)) })).sort((a, b) => a.label.localeCompare(b.label));
 ---
@@ -31,16 +61,19 @@ const serviceOpts = [...new Set(caseStudies.flatMap((c) => c.serviceTags))].map(
       <h2 id="list-title" class="visually-hidden">Case study list</h2>
       <FilterBar id="cs-filter" resultLabel="case studies" filters={[{ name: 'industry', label: 'Industry', options: industryOpts }, { name: 'service', label: 'Service', options: serviceOpts }]} />
 
+      {/* Prototype control (review only): shows how the list must behave if case studies ever load from a CMS/API. */}
       {REVIEW && <details class="proto-states" data-review-note="Prototype-only">
         <summary><FixtureLabel text="Prototype control — data states" /></summary>
         <p>Case studies are static today. If they move to a CMS/API, the list must handle these states:</p>
         <div class="btn-row"><button type="button" class="btn btn--secondary btn--sm" data-sim="loading">Show loading state</button><button type="button" class="btn btn--secondary btn--sm" data-sim="error">Simulate data error</button></div>
       </details>}
 
+      {/* Simulated error and loading states. Hidden by default; toggled by the script. */}
       <Alert tone="danger" title="Case studies couldn’t be loaded" role="alert" id="cs-error" hidden>
         <p>This is a simulated error. <button type="button" class="btn btn--sm" data-retry>Try again</button></p>
       </Alert>
       <Skeleton count={3} id="cs-loading" hidden />
+      {/* Results grid: every card is rendered at build time; filtering only hides cards (works without JS). */}
       <div class="grid grid--3" id="cs-results" data-results aria-busy="false">
         {caseStudies.map((cs) => <CaseStudyCard cs={cs} />)}
       </div>
@@ -50,25 +83,35 @@ const serviceOpts = [...new Set(caseStudies.flatMap((c) => c.serviceTags))].map(
       </EmptyState>
     </div>
   </section>
+  {/* Closing CTA. */}
   <CtaBand title="Facing a similar challenge?" primary={ctas.contact} secondary={{ label: 'Explore solutions', href: '/services/' }} />
 </BaseLayout>
 <style>
+  /* Prototype control: the negative top margin tucks it up under the filter bar (which has a bottom margin). */
   .proto-states { margin: calc(var(--space-4) * -1) 0 var(--space-6); font-size: var(--fs-sm); }
   .proto-states summary { cursor: pointer; display: inline-block; }
   .proto-states p { margin: var(--space-3) 0; }
   #cs-error { margin-bottom: var(--space-6); }
 </style>
 <script>
+  // Combined filters via src/lib/filters.ts: industry must match exactly, and the selected service must be one
+  // of the card's space-separated service slugs. Both conditions must pass.
   import { initFilters } from '../../lib/filters';
   const api = initFilters({ bar: '#cs-filter', results: '#cs-results', empty: '#cs-empty', noun: ['case study', 'case studies'],
     match: (el, f) => (!f.industry || el.dataset.industry === f.industry) && (!f.service || (el.dataset.services ?? '').split(' ').includes(f.service)) });
   const results = document.getElementById('cs-results')!;
   const loading = document.getElementById('cs-loading')!;
   const error = document.getElementById('cs-error')!;
+  // Simulated loading: hide results and error, show the skeleton, mark the grid aria-busy and announce it;
+  // after 1.5 s restore the grid and re-apply the current filters (which also re-announces the count).
   const showLoading = () => { error.hidden = true; results.hidden = true; loading.hidden = false; results.setAttribute('aria-busy', 'true'); api.announce('Loading case studies…');
     setTimeout(() => { loading.hidden = true; results.hidden = false; results.setAttribute('aria-busy', 'false'); api.apply(); }, 1500); };
+  // Prototype buttons. These elements exist only in REVIEW builds (see the RELEASE gotcha in the header).
   document.querySelector('[data-sim="loading"]')!.addEventListener('click', showLoading);
+  // Simulated error: hide results and the empty state, show the alert and move focus to it so it is announced.
   document.querySelector('[data-sim="error"]')!.addEventListener('click', () => { results.hidden = true; document.getElementById('cs-empty')!.hidden = true; error.hidden = false; error.focus(); api.announce(''); });
+  // "Try again" in the error alert replays the loading simulation.
   document.querySelector('[data-retry]')!.addEventListener('click', showLoading);
+  // Empty state's "Clear filters" reuses the shared controller's clear().
   document.querySelector('[data-empty-clear]')!.addEventListener('click', () => api.clear());
 </script>

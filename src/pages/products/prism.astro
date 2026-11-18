@@ -4,6 +4,30 @@
  * labelled wireframe naming the decision the product owner must make. The layout is final-ready:
  * approved content drops into the same sections without a rebuild.
  * Primary persona: Enterprise CTO / AI lead. Secondary: QA Director, public-sector technology lead.
+ *
+ * URL: /products/prism/. Marked "(proposed)" in the docs/03 page map: not in the live sitemap, needs QM-41.
+ * Persona / CTA (docs/03-page-map-personas.md §2, "PRISM™" row): primary A / AI lead; secondary B, C.
+ *   Core question: "How do we know AI outputs are good enough?" Proof required: whitepaper and sample
+ *   scorecard (both missing). Primary CTA: "Ask about PRISM" (to /contact-us/). Required data:
+ *   product-owner content (missing).
+ * What, top to bottom: product hero with a grading-scale aside (A+ to F); an info Alert stating what is
+ *   confirmed vs not; "What it is" with the five topic areas; four Wireframe modules (dimension list, how a
+ *   score is produced, sample report, who it is for / how to engage); a whitepaper Wireframe; closing CtaBand.
+ * Data: no data module for the page body. Confirmed copy (name, expansion, 10 dimensions, A+ to F grade,
+ *   topic areas) is inline here, taken from the live homepage teaser; the matching product record is
+ *   `prism` in src/data/products.ts (status 'awaiting-product-owner'). The 10-dimension statement is claim
+ *   C17 in src/data/claims.ts.
+ * SEO: inline title/description. Breadcrumbs Home > Products > PRISM™ produce BreadcrumbList JSON-LD via
+ *   BaseLayout. No other JSON-LD (no Product schema until the offer is defined).
+ * Review/release: each Wireframe carries `data-release-blocker` ("content-missing: {title}") in RELEASE
+ *   builds, so the release gate fails while any wireframe remains. ClaimRef C17 renders in review builds only.
+ *   The confirmed/not-confirmed Alert has no mode guard and shows in both builds.
+ * Gotchas:
+ *   - Do not invent the 10 dimension names, scoring method or pricing. Each Wireframe's `decision` text
+ *     names the owner decision needed; replace the Wireframe with real content once approved.
+ *   - The primary CTA may change once leadership decides what PRISM is (service, licence, tool or
+ *     whitepaper only); see the "Who it's for and how to engage" wireframe.
+ *   - The grade colours below depend on the order of `grades`; reordering the array breaks them.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
@@ -14,11 +38,14 @@ import ClaimRef from '../../components/ClaimRef.astro';
 import Alert from '../../components/Alert.astro';
 
 const crumbs = [{ label: 'Home', href: '/' }, { label: 'Products', href: '/products/' }, { label: 'PRISM™' }];
+// Five topic areas confirmed from the live homepage teaser.
 const topics = ['AI Test Strategy', 'AI-Augmented Testing', 'Generative Test Creation', 'Reasoning Model Testing', 'LLM Testing'];
+// Grading scale shown in the hero aside. Order matters: CSS colours items by position (nth-child).
 const grades = ['A+', 'A', 'B', 'C', 'D', 'F'];
 ---
 <BaseLayout seo={{ title: 'PRISM™ AI Output Quality Standard | QualityWorks', description: 'PRISM (Performance & Reasoning Intelligence Scoring Method) is a QualityWorks framework that grades AI-generated outputs in production on an A+ to F scale.' }} breadcrumbs={crumbs}>
   <PageHero variant="product" eyebrow="PRISM™ · Performance & Reasoning Intelligence Scoring Method" title="The AI output quality standard" lede="Benchmark scores tell you how a model performs on academic tests. PRISM™ tells you how it performs on your business." breadcrumbs={crumbs} primary={{ label: 'Ask about PRISM', href: '/contact-us/' }}>
+    {/* Hero aside: the A+ to F grading scale with the C17 claim annotation. */}
     <Fragment slot="aside">
       <div class="grade" aria-label="PRISM grading scale A plus to F">
         <p class="grade__label mono">Grading scale</p>
@@ -28,10 +55,12 @@ const grades = ['A+', 'A', 'B', 'C', 'D', 'F'];
     </Fragment>
   </PageHero>
 
+  {/* Transparency notice: what the live site confirms and what is still missing. */}
   <div class="container"><Alert tone="info" title="What is confirmed and what is not" class="prism-alert">
     <p>Confirmed from the live homepage: the name, its expansion, the 10-dimension framework, the A+–F grade and five topic areas. Not found: the whitepaper file, the list of dimensions, how a score is produced, who can use PRISM and on what commercial terms. Those modules are shown as wireframes.</p>
   </Alert></div>
 
+  {/* What it is: confirmed description plus topic-area chips. */}
   <section class="section" aria-labelledby="what-title">
     <div class="container split">
       <div><p class="eyebrow">What it is</p><h2 id="what-title">A structured way to evaluate AI-generated outputs in production</h2></div>
@@ -43,6 +72,7 @@ const grades = ['A+', 'A', 'B', 'C', 'D', 'F'];
     </div>
   </section>
 
+  {/* Framework: placeholders until the product owner decides what to publish about the 10 dimensions. */}
   <section class="section surface-alt" aria-labelledby="dims-title">
     <div class="container">
       <SectionHeading eyebrow="Framework" title="The 10 dimensions" id="dims-title" />
@@ -53,6 +83,7 @@ const grades = ['A+', 'A', 'B', 'C', 'D', 'F'];
     </div>
   </section>
 
+  {/* In practice: sample scorecard and engagement model, both awaiting decisions. */}
   <section class="section" aria-labelledby="report-title">
     <div class="container">
       <SectionHeading eyebrow="In practice" title="What a PRISM report looks like" id="report-title" />
@@ -63,6 +94,7 @@ const grades = ['A+', 'A', 'B', 'C', 'D', 'F'];
     </div>
   </section>
 
+  {/* Whitepaper: the asset advertised on the homepage was not found (see the PRISM fixture card in articles.ts). */}
   <section class="section surface-alt" aria-labelledby="wp-title">
     <div class="container">
       <SectionHeading eyebrow="Whitepaper" title="Read the PRISM™ whitepaper" id="wp-title" />
@@ -70,16 +102,22 @@ const grades = ['A+', 'A', 'B', 'C', 'D', 'F'];
     </div>
   </section>
 
+  {/* Closing CTA: contact, or the related AI service. */}
   <CtaBand title="Evaluating AI outputs in production?" text="Talk to the team behind PRISM™ about your use case." primary={{ label: 'Ask about PRISM', href: '/contact-us/' }} secondary={{ label: 'AI & agentic solutions', href: '/services/ai-service/' }} />
 </BaseLayout>
 <style>
+  /* Grading-scale panel in the dark product hero: faint gold (gold-400, #F4B942) border and tint. */
   .grade { border: 1px solid rgba(244,185,66,0.4); border-radius: var(--radius-lg); padding: var(--space-6); background: rgba(244,185,66,0.05); }
   .grade__label { font-size: var(--fs-xs); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-gold-400); }
+  /* Six equal columns, one per grade. */
   .grade__scale { list-style: none; padding: 0; margin: var(--space-4) 0; display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
   .grade__scale li { text-align: center; padding: var(--space-3) 0; font-weight: var(--fw-bold); font-size: var(--fs-md); color: #fff; border-radius: var(--radius-sm); background: rgba(255,255,255,0.06); }
+  /* Position-based tints: A+ and A in logo green (#8FC640), C in gold, F in a soft red. B and D keep the
+     neutral tint. Tied to the order of the `grades` array in the frontmatter. */
   .grade__scale li:nth-child(1), .grade__scale li:nth-child(2) { background: rgba(143,198,64,0.25); }
   .grade__scale li:nth-child(4) { background: rgba(244,185,66,0.25); }
   .grade__scale li:nth-child(6) { background: rgba(255,120,100,0.22); }
   .grade__note { font-size: var(--fs-sm); margin: 0; }
+  /* :global because the class is passed into the Alert component, outside this file's style scope. */
   :global(.prism-alert) { margin-top: var(--space-8); }
 </style>
