@@ -1,0 +1,6 @@
+{
+  "_note": "Redirect map (review round 2). Single place where legacy slugs are recorded. Status: PENDING — written to dist/_redirects at build time but NOT configured on any host; the prototype viewer cannot execute redirects.",
+  "caseStudySlugRenames": {
+    "ipipelines-legacy-platform-modernization": "fintech-legacy-platform-modernization"
+  }
+}

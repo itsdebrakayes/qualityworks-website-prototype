@@ -13,7 +13,7 @@ export const caseStudyAlt: Record<string, string> = {
   'how-automation-saved-big-bucks-and-drove-faster-app-releases': 'Robotic hand typing on a laptop keyboard',
   'increasing-regression-test-coverage-by-15x': 'Doctor holding a stethoscope in a bright hospital corridor',
   'insurance-faster-to-market': 'Two developers reviewing work together at computer workstations',
-  'ipipelines-legacy-platform-modernization': 'Two developers discussing code on a monitor',
+  'fintech-legacy-platform-modernization': 'Two developers discussing code on a monitor',
   'jmmb-group-leverages-automation-best-practices': 'Banking adviser in conversation with a client across a desk',
   'leading-entertainment-platform-with-site-reliability-engineering': 'Star Wars: Return of the Jedi film poster',
   'mobile-game-development-creating-legacy': 'Title screen of the Legacy mobile game with New Game, Continue and Settings buttons and cartoon characters',

@@ -18,20 +18,20 @@ summary: "Every finding from Johnny's AI review, the correction made, where, how
 
 | # | Finding | Correction made | Location | Verification | Needs Janique / access |
 |---|---|---|---|---|---|
-| A1 | Award named incorrectly | Now “First Prize, U.S. Navy AI Augmented Testing (AIAT) Challenge”, with “Administered by PEO MLB with Palmetto Tech Bridge”. Name taken from the body of QualityWorks' own news post. Shown **only in the Recognition section**, linked to that post; claim C10 updated | `pages/index.astro`, `data/claims.ts` (C10), `data/industries.ts` | `check:terms`: “Autonomous Testing Challenge” = 0 on marketing pages | **Approval:** the published post title is corrected in display (R-01, R-02, R-32); the WordPress source still has the old title. Issuer confirmation not obtained |
+| A1 | Award named incorrectly | Now “First Prize, U.S. Navy AI Augmented Testing (AIAT) Challenge”, with “Administered by PEO MLB with Palmetto Tech Bridge”. Name taken from the body of QualityWorks' own news post. Shown **only in the Recognition section**, linked to that post; claim C10 updated | `pages/index.astro`, `data/claims.ts` (C10), `data/industries.ts` | `check:content`: “Autonomous Testing Challenge” = 0 on marketing pages | **Approval:** the published post title is corrected in display (R-01, R-02, R-32); the WordPress source still has the old title. Issuer confirmation not obtained |
 | A2 | Hero phrase | “…from AI-powered testing to custom apps to AI agents that take work off your team’s plate.” | `pages/index.astro` | Visual (`home-360`, `1440-home`) | Wording approval |
-| A3 | “AI-powered & autonomous testing” | Renamed **“AI-powered testing”** | `data/services.ts` pathway (homepage hero card and “Three ways”) | `check:terms` 0 | **Service rename flagged for Janique's confirmation** |
-| A4 | “Autonomous regression testing” | “AI-assisted regression testing” | `pages/index.astro` | `check:terms` 0 | Wording approval |
-| A5 | “Ship with confidence” (×2) | “Release with confidence”. One data source renders both instances (hero card + “Three ways” card) | `data/services.ts` | `check:terms` 0 | — |
-| A6 | “Tell us what you’re trying to ship” | “Tell us what you’re trying to launch.” | `pages/index.astro` | `check:terms` 0 | — |
-| A7 | Other “autonomous”/“ship” in our copy | 20 corrections to migrated articles and a case study: R-03–R-21, R-33–R-35. Plus “release fast” (custom software), PRISM topic “Autonomous Testing” to “AI-Augmented Testing”, and internal docs. Retained, with reason: “Hazmat shipping documentation” (a logistics term in an industry-ideas article) | `data/corrections.ts`, `data/services.ts`, `pages/products/prism.astro` | `npm run check:terms`: **0 hits on marketing pages**. 1 hit on a review-only doc page that quotes the old wording | **Approval:** article wording edits change published posts (R-07–R-20); PRISM topic rename |
+| A3 | “AI-powered & autonomous testing” | Renamed **“AI-powered testing”** | `data/services.ts` pathway (homepage hero card and “Three ways”) | `check:content` 0 | **Service rename flagged for Janique's confirmation** |
+| A4 | “Autonomous regression testing” | “AI-assisted regression testing” | `pages/index.astro` | `check:content` 0 | Wording approval |
+| A5 | “Ship with confidence” (×2) | “Release with confidence”. One data source renders both instances (hero card + “Three ways” card) | `data/services.ts` | `check:content` 0 | — |
+| A6 | “Tell us what you’re trying to ship” | “Tell us what you’re trying to launch.” | `pages/index.astro` | `check:content` 0 | — |
+| A7 | Other “autonomous”/“ship” in our copy | 20 corrections to migrated articles and a case study: R-03–R-21, R-33–R-35. Plus “release fast” (custom software), PRISM topic “Autonomous Testing” to “AI-Augmented Testing”, and internal docs. Retained, with reason: “Hazmat shipping documentation” (a logistics term in an industry-ideas article) | `data/corrections.ts`, `data/services.ts`, `pages/products/prism.astro` | `npm run check:content`: **0 hits on marketing pages**. 1 hit on a review-only doc page that quotes the old wording | **Approval:** article wording edits change published posts (R-07–R-20); PRISM topic rename |
 
 ## B. Statistical claims (brief §2)
 
 | # | Finding | Correction made | Location | Verification | Needs Janique / access |
 |---|---|---|---|---|---|
 | B1 | WSSC “30–80%” / “up to 80%” | **Removed everywhere** (card metric, detail metrics, summary, solution and result text, a 67%/50% survey line). No WSSC report with methodology is available, so the brief's fallback (remove) was applied. R-25–R-27, R-37, R-39 | `data/caseStudies.ts`, `data/corrections.ts` | grep of built site: 0 occurrences | **External:** WSSC pilot report if the figure should return |
-| B2 | iPipelines “2 weeks to 2 days” | Metric removed; comparison and its “two weeks per cycle” baseline removed from text (R-28, R-29, R-38); derived “85% reduction” strip removed (R-30). Client shown as “Financial technology firm (name not approved for disclosure)”; “3CI” relationship removed (R-31) | same | grep: 0 occurrences of “2 weeks/two weeks/3CI” | **Approval:** client disclosure. The URL slug still contains “ipipelines”; rename + 301 is recommended if disclosure is not approved |
+| B2 | Fintech case study “2 weeks to 2 days” | Metric removed; comparison and its “two weeks per cycle” baseline removed from text (R-28, R-29, R-38); derived “85% reduction” strip removed (R-30). Client shown as “Financial technology firm (name not approved for disclosure)”; “3CI” relationship removed (R-31) | same | grep: 0 occurrences of “2 weeks/two weeks/3CI” | **Approval:** client disclosure. Round 2 renamed the slug to `fintech-legacy-platform-modernization`; legacy URL 301 pending (doc 06) |
 | B3 | Gartner “90% of enterprise software engineers…” | Primary source returned HTTP 403 to verification, so the statistic was removed from 2 sentences, the “Key findings” card and the card excerpt (R-22–R-24, R-36). Reference-list entry kept so footnote numbering stays intact | “More QA, Not Less” article | grep: 0 occurrences | **Approval:** editor to decide on the orphaned reference entry or supply verified wording/date |
 | B4 | C02–C04 context | Annotations kept. Each now has `verification: 'required-before-launch'` and explicit “measurement context requires verification before launch; not independently verified” text. The homepage footnote says the same. Release builds drop these stats | `data/claims.ts`, `pages/index.astro`, `StatBlock.astro`, `/prototype/claims/` | Review build shows the footnote; release gate homepage shows C01 only | **Approval:** definitions, sample and period for 90%, $30M, 80% |
 | B5 | “average per client” attachment | Checked against the live homepage counters: 90% to “(avg. per client)”; $30M to no label (aggregate); 80% to “(avg. per client)”. The prototype matches; recorded in each claim's context | `data/claims.ts` | Manual comparison with live HTML | — |
@@ -43,7 +43,7 @@ summary: "Every finding from Johnny's AI review, the correction made, where, how
 
 | # | Finding | Correction made | Location | Verification | Needs Janique / access |
 |---|---|---|---|---|---|
-| C1 | Angle brackets around “beyond the code” | Emphasised text, no brackets | `pages/index.astro` | `check:terms` rule “angle-brackets-beyond” = 0; visual | — |
+| C1 | Angle brackets around “beyond the code” | Emphasised text, no brackets | `pages/index.astro` | `check:content` rule “angle-brackets-beyond” = 0; visual | — |
 | C2 | “Where’s Stacy?” as main heading | Heading “Events & speaking” with subheading “Where’s Stacy?” (homepage); events page eyebrow “Resources” | `pages/index.astro`, `pages/events/index.astro`, `SectionHeading.astro` (`subheading` prop) | Visual (`sec-events`) | — |
 | C3 | QualityWatcher naming overlap | One name per destination: **QualityWatcher AI** (our page, linking to qualitywatcher.ai) and **QualityWatcher Test Management** (qualitywatcher.com). Different destinations, so both are kept, with the distinction stated in descriptions | `navigation.ts`, `products.ts`, QW page | QA-15 navigates via the new label | **Approval:** product owner names (R-41) |
 | C4 | Mobile nav missing Resource Hub and Case Studies | Drawer lists every group link by name, incl. “Case Studies” and “Resource Hub”. Generic “overview” link only when the section page isn't already listed | `Header.astro` | QA-14: both labels present; all desktop destinations present | — |
@@ -76,7 +76,7 @@ summary: "Every finding from Johnny's AI review, the correction made, where, how
 
 ## G. Final QA (brief §8)
 See doc 07. Summary of checks run after these changes:
-1. `check:terms`: 0 prohibited terms or old award names on marketing pages.
+1. `check:content`: 0 prohibited terms or old award names on marketing pages.
 2. Numerical claims: each remaining figure is in the claims register or a case-study metric with source and context; C02–C04 flagged; unsupported figures removed.
 3. Navigation parity desktop / mobile: QA-14.
 4. Buttons, forms, mock states, filters, menus, links, keyboard: QA-02–QA-30.

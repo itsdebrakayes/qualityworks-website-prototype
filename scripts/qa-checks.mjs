@@ -112,7 +112,7 @@ rec('QA-08', 'BR-12 A11y', '20 key pages (axe-core 4.10, WCAG 2.2 A/AA tags)', '
 const fontFindings = [];
 const cdp = await ctx.newCDPSession(page);
 await cdp.send('DOM.enable'); await cdp.send('CSS.enable');
-for (const r of ['/', '/services/test-automation/', '/qualitywatcher-ai-tools/', '/case-studies/ipipelines-legacy-platform-modernization/', '/case-studies/', '/contact-us/', '/products/prism/', '/more-qa-not-less-closing-the-verification-gap-in-ai-accelerated-software-delivery/']) {
+for (const r of ['/', '/services/test-automation/', '/qualitywatcher-ai-tools/', '/case-studies/fintech-legacy-platform-modernization/', '/case-studies/', '/contact-us/', '/products/prism/', '/more-qa-not-less-closing-the-verification-gap-in-ai-accelerated-software-delivery/']) {
   await page.goto(BASE + r, { waitUntil: 'networkidle' });
   await page.evaluate(() => document.fonts.ready);
   const { root } = await cdp.send('DOM.getDocument', { depth: -1, pierce: false });

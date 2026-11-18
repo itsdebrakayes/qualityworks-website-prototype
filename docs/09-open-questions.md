@@ -28,11 +28,12 @@ summary: "Prioritised decisions needed from stakeholders before development."
 | **P1** | Q-08 | Correct phone numbers (A-06, A-07) | Operations | Header/footer/contact |
 | **P1** | Q-21 | Review round 1 approvals: service rename “AI-powered testing”; corrected award name in the published Navy post title; article wording edits R-03–R-20; PRISM topic “AI-Augmented Testing”; “Book a consultation” | Janique | Release |
 | **P1** | Q-22 | WSSC pilot report (methodology, sample) if any WSSC figure should be reinstated | Marketing / WSSC | Case study |
-| **P1** | Q-23 | iPipelines: client disclosure decision; if not approved, rename the slug (currently contains the client name) and add a 301 | Marketing / Legal | Case study URL |
+| **P1** | Q-23 | Fintech case study: client disclosure decision. The slug was renamed to a neutral one in round 2; the legacy URL needs a 301 (doc 06) | Marketing / Legal | Case study URL |
 | P2 | Q-24 | Gartner forecast: supply verified wording and date, or delete the orphaned reference entry in “More QA, Not Less” | Content | Article |
 | P2 | Q-25 | Agents marketplace: definitions of Ready now / Quick launch / Custom build and what Guided Preview shows | AaaS owner | AaaS page |
 | P2 | Q-26 | “Black-owned, woman-led”: approved capitalisation and placement | Janique | About/Home |
 | P2 | Q-27 | Company repository and preview host for the handoff (README “Not yet established”) | Technical lead | Handoff |
+| P2 | Q-28 | The “Four Pillars” infographic in the agentic-QA article prints the prohibited term in the image itself; its alt text transcribes it accurately. Replace or re-export the image | Marketing | Article |
 | P2 | Q-04 | Choose CMS (headless vs. WordPress-as-headless) and owner for each content type | Dev lead | Data integration |
 | P2 | Q-09 | Site search: required at launch? (Pagefind static search recommended) | PM | Header |
 | P2 | Q-10 | Analytics and consent: GA4, Meta pixel, HubSpot tracking/chat; cookie-consent requirement and regions | Marketing / Legal | Launch |

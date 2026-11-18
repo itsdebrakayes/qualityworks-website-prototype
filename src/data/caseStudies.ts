@@ -4,6 +4,11 @@ import { localMedia } from '../lib/media';
 import { normalizeText } from '../lib/glyphs';
 import { applyCorrections } from './corrections';
 import { caseStudyAlt } from './altText';
+import redirectMap from './redirects.json';
+
+/** Public slug for a WordPress case study (neutral renames from redirects.json; legacy slug never rendered). */
+const renames = redirectMap.caseStudySlugRenames as Record<string, string>;
+export const publicSlug = (sourceSlug: string) => renames[sourceSlug] ?? sourceSlug;
 
 /**
  * Case studies = WordPress snapshot (parsed from rendered public pages; Beaver Builder stores
@@ -21,7 +26,7 @@ const m = (value: string, label: string, context: string) => ({ value, label, co
 const curated: Record<string, Curated> = {
   'ai-powered-test-case-generation-wssc': { client: 'Washington Suburban Sanitary Commission (WSSC)', industry: 'public-sector', serviceTags: ['test-automation', 'ai-service'], relatedSolution: 'qualitywatcher-ai-tools', contribution: 'Piloted AI-powered test case generation with the WSSC QA team.', metrics: [] /* R-25–R-27: figures removed pending the WSSC pilot report */ },
   'accelerating-confidence-qa-modernization-for-wisyncos-digital-ecosystem': { client: 'Wisynco Group Limited', industry: 'retail', serviceTags: ['test-automation', 'full-stack-testing'], relatedSolution: 'test-automation', contribution: 'QA modernization and automation across D365 ERP, CRM and supply chain systems.', metrics: [m('94.5%', 'Core D365 workflows automated', 'Against an original target; see source.'), m('100%', 'Functional CRM test coverage', 'As published.'), m('100%', 'QA team trained on automation', 'As published.')] },
-  'ipipelines-legacy-platform-modernization': { client: 'Financial technology firm (name not approved for disclosure)', industry: 'finance-banking', serviceTags: ['test-automation', 'api-cloud-services-testing'], relatedSolution: 'test-automation', contribution: 'Established QA practices and automation for a legacy platform modernization over 8 months.', metrics: [m('90%+', 'Automation coverage', 'As published.'), m('80%+', 'Reduction in manual tester hours', 'As published.')] },
+  'fintech-legacy-platform-modernization': { client: 'Financial technology firm (name not approved for disclosure)', industry: 'finance-banking', serviceTags: ['test-automation', 'api-cloud-services-testing'], relatedSolution: 'test-automation', contribution: 'Established QA practices and automation for a legacy platform modernization over 8 months.', metrics: [m('90%+', 'Automation coverage', 'As published.'), m('80%+', 'Reduction in manual tester hours', 'As published.')] },
   'transforming-workforce-development-through-modern-technology': { client: 'Knowledge Architects', industry: 'technology', serviceTags: ['custom-software-development', 'full-stack-testing'], relatedSolution: 'custom-software-development', contribution: 'Platform performance and quality improvements for a workforce training platform.', metrics: [m('79% → 98%', 'Application quality', 'Pass rate of test cases, as published.'), m('40%', 'Faster 3D model loading', '5s to 3s.')] },
   'leading-entertainment-platform-with-site-reliability-engineering': { client: 'Fandango', industry: 'media-entertainment', serviceTags: ['non-functional-testing', 'performance-testing'], relatedSolution: 'non-functional-testing', contribution: 'Site reliability engineering and performance testing ahead of peak presales.', metrics: [m('7×', 'Traffic headroom', '85,000+ concurrent users during the Star Wars: The Last Jedi presale.'), m('99.9%', 'Uptime', 'Subsequent releases, as published.')] },
   'social-enterprise-org': { client: 'Shared Harvest', industry: 'social-impact', serviceTags: ['custom-software-development', 'technology-advisory-partnership'], relatedSolution: 'custom-software-development', contribution: 'Designed and built a role-based volunteer matching platform.', metrics: [m('3×', 'Faster application submission', 'As published.'), m('100+', 'Projects posted in the first 6 months', 'As published.')] },
@@ -52,12 +57,16 @@ const stripTitles = (v: string) => {
 
 export const caseStudies: CaseStudy[] = (raw as any[])
   .map((r) => {
-    const c = curated[r.slug];
-    const url = `https://qualityworkscg.com/case-study/${r.slug}/`; // live source URL (evidence)
-    const fix = (field: string, v: string) => applyCorrections(`case-study:${r.slug}`, field, v ?? '');
+    const slug = publicSlug(r.slug);
+    const renamed = slug !== r.slug;
+    const c = curated[slug];
+    // Live source URL (evidence). Renamed records do not render their legacy URL (it contains a client product name);
+    // the legacy URL is kept only in redirects.json and docs/06.
+    const url = renamed ? undefined : `https://qualityworkscg.com/case-study/${r.slug}/`;
+    const fix = (field: string, v: string) => applyCorrections(`case-study:${slug}`, field, v ?? '');
     return {
-      id: `cs-${r.slug}`,
-      slug: r.slug,
+      id: `cs-${slug}`,
+      slug,
       title: r.title,
       client: c.client,
       clientDisclosureApproved: null,
@@ -69,13 +78,13 @@ export const caseStudies: CaseStudy[] = (raw as any[])
       contribution: c.contribution,
       approach: fix('approach', stripTitles(clean(r.approach))),
       outcome: fix('outcome', stripTitles(clean(r.outcome))),
-      metrics: c.metrics.map((x) => ({ ...x, metricSource: url })),
+      metrics: c.metrics.map((x) => ({ ...x, metricSource: url ?? 'Published QualityWorks case study (legacy URL recorded in the redirect map, docs/06)' })),
       date: r.date,
       image: localMedia(r.image),
-      altText: caseStudyAlt[r.slug] ?? r.alt ?? '',
+      altText: caseStudyAlt[slug] ?? r.alt ?? '',
       relatedSolution: c.relatedSolution,
       cta: { label: 'Discuss a similar challenge', href: '/contact-us/' },
-      provenance: { source: 'wordpress-migrated' as const, approval: 'published-live' as const, sourceUrl: url, retrievedAt: '2026-11-17', note: 'Client disclosure approval not verified.' },
+      provenance: { source: 'wordpress-migrated' as const, approval: 'published-live' as const, sourceUrl: url, retrievedAt: '2026-11-17', note: renamed ? 'Renamed to a neutral slug (review round 2); client and product not disclosed. Client disclosure approval not verified.' : 'Client disclosure approval not verified.' },
     } satisfies CaseStudy;
   })
   .sort((a, b) => b.date.localeCompare(a.date));

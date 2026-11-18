@@ -65,5 +65,5 @@ Release gate: 31 finding(s) across 15 type(s)
 - [ ] Editorial corrections R-01–R-39 and R-46 approved by Janique (doc 11)
 - [ ] 301 redirects configured and crawl-tested (doc 06)
 - [ ] Analytics + consent implemented; HubSpot and BambooHR tested in sandbox
-- [ ] `npm run check:terms` and `npm run qa:checks` pass on the release candidate
+- [ ] `npm run check:content` and `npm run qa:checks` pass on the release candidate
 - [ ] Human release approval recorded (QM-112 12.3); results logged in QualityWatcher (QM-112 12.2)

@@ -132,7 +132,7 @@ export const services: Service[] = [
       { title: 'CI/CD integration', text: 'Fully integrated automated API tests supporting the path from continuous delivery to continuous deployment.' },
     ],
     process: testingApproach,
-    relatedCaseStudies: ['api-test-automation-for-european-delivery-company', 'ipipelines-legacy-platform-modernization'],
+    relatedCaseStudies: ['api-test-automation-for-european-delivery-company', 'fintech-legacy-platform-modernization'],
     claims: ['C18'],
     personas: { primary: 'QA Director', secondary: 'Enterprise CTO / VP Engineering' },
     seo: { title: 'API & Cloud Services Testing | QualityWorks', description: 'Automated API and integration testing built into your CI/CD pipeline to catch broken contracts before release.' },
@@ -403,7 +403,7 @@ export const servicesByPathway = (p: Service['pathway']) => services.filter((s) 
 
 export const pathways = [
   {
-    id: 'quality' as const, index: '01', label: 'Software quality', title: 'AI-powered testing', // review R-33: renamed from “AI-powered & autonomous testing” — confirm with Janique
+    id: 'quality' as const, index: '01', label: 'Software quality', title: 'AI-powered testing', // review round 1 (doc 11, A3): pathway renamed — Janique to confirm the new service name
     text: 'Release with confidence. AI-augmented testing, regression automation and managed QA that catches defects earlier.',
     href: '/services/full-stack-testing/', cta: 'Explore testing services',
   },

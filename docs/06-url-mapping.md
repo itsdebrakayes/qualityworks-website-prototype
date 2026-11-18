@@ -57,7 +57,7 @@ summary: "Which addresses stay, which are new, and which need approved 301s."
 
 | Pattern | Count | New pattern | Redirect |
 |---|---|---|---|
-| `/case-study/{slug}/` | 17 | `/case-studies/{slug}/` | **301 required (not configured)**: one-to-one, same slug. Also update internal links in any unmigrated posts (migrated posts are rewritten at build time) |
+| `/case-study/{slug}/` | 17 | `/case-studies/{slug}/` (one slug renamed, see below) | **301 required (not configured)**: one-to-one, same slug. Also update internal links in any unmigrated posts (migrated posts are rewritten at build time) |
 | `/{post-slug}/` (blog) | 99 | unchanged (root-level article route) | none; reserved-slug check required so a post slug never collides with a page route |
 | `/blog/?_blog_categories={cat}` | used by service pages | `/blog/?category={Category}` | **301 with query mapping** (or support both parameters) |
 | `/blog/page/{n}/` | WordPress pagination | `/blog/page/{n}/` | keep |
@@ -74,3 +74,13 @@ summary: "Which addresses stay, which are new, and which need approved 301s."
 - Server-level 301s (hosting-agnostic map file, e.g. `_redirects` or nginx map); one hop only; preserve query strings except mapped ones.
 - Before launch: crawl the old site, compare with the new route list, and fail the release if any 200 URL lacks either a matching route or a 301.
 - After launch: monitor 404s for 30 days; keep the redirect map in the repo.
+
+## 5. Review round 2: neutral slug for the fintech case study (18 Nov 2026)
+The legacy slug contained a client product name. No disclosure permission is documented, so the case study now lives at a neutral slug. The legacy slug is recorded in **one place only**, `src/data/redirects.json`, which `scripts/gen-redirects.mjs` uses to write `dist/_redirects` at build time.
+
+| Old URL | New URL | Status |
+|---|---|---|
+| `/case-study/ipipelines-legacy-platform-modernization/` (live WordPress) | `/case-studies/fintech-legacy-platform-modernization/` | **301 PENDING**: rule generated in `_redirects`, not configured on any host |
+| `/case-studies/ipipelines-legacy-platform-modernization/` (round-1 prototype URL) | `/case-studies/fintech-legacy-platform-modernization/` | **301 PENDING**: as above |
+
+Redirects are **not working in the prototype**. The Artifact viewer cannot execute them and no host is configured. They must be tested on the chosen host before launch (QM-112 9.5, 11.5).

@@ -16,7 +16,7 @@ Clickable, code-first prototype of the rebuilt **qualityworkscg.com** for Janiqu
 **Moving to a company repository later:**
 1. Create an empty repository in the QualityWorks GitHub organisation (owner: technical lead, per QM-103 §2.1).
 2. Either transfer this repository to the organisation (GitHub Settings → Transfer ownership), or push it: `git remote add company <company-repo-url> && git push company main`.
-3. Protect `main`, require review, and add CI that runs `npm ci && npm run build && npm run check:terms` (and `npm run qa:checks` against a preview server).
+3. Protect `main`, require review, and add CI that runs `npm ci && npm run build && npm run check:content` (and `npm run qa:checks` against a preview server).
 4. Connect a preview host from the QM-103 shortlist (Netlify or Cloudflare Pages for this static build). Do not connect production DNS.
 
 ## Stack and architecture
@@ -42,7 +42,7 @@ npm run dev               # http://localhost:4321 with live reload
 npm run build             # REVIEW build to dist/ (+ glyph lint)
 npm run preview           # serve dist/ on http://localhost:4321
 npm run build:release     # RELEASE build to dist-release/ + release gate (currently fails by design)
-npm run check:terms       # prohibited-terminology scan of dist/
+npm run check:content       # prohibited-terminology scan of dist/
 npm run qa:checks         # Playwright + axe QA; writes qa-output/ and docs/07 (needs preview running)
 node scripts/perf-local.mjs   # local performance smoke test (needs preview running)
 npm run migrate:wordpress     # refresh article snapshot from the public WordPress REST API
@@ -106,7 +106,7 @@ Both are excluded from release builds, and `scripts/release-check.mjs` fails a r
 | Script | What it proves |
 |---|---|
 | `glyph-lint.mjs` | Every visible character is covered by the brand font |
-| `terminology-check.mjs` | No “autonomous”, “ship”, old award name or bracketed “&lt;beyond the code&gt;” on marketing pages |
+| `content-check.mjs` | No “autonomous”, “ship”, old award name or bracketed “&lt;beyond the code&gt;” on marketing pages |
 | `qa-checks.mjs` | 37 browser checks: links, headings, overflow at 360/640/768/1024/1440, axe-core, fonts, menus, mobile drawer, forms, filters, events, careers |
 | `release-check.mjs` | Release build contains no review markers and lists open release blockers |
 | `perf-local.mjs` | Local LCP/CLS/transfer smoke test (not production data) |

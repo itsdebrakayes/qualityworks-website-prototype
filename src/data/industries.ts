@@ -16,7 +16,7 @@ export const industries: Industry[] = [
       { title: 'Capability that stays in-house', text: 'At JMMB, the bank’s existing QA staff were trained in test case management and automation alongside our engineers.' },
     ],
     capabilities: ['test-automation', 'full-stack-testing', 'api-cloud-services-testing', 'digital-agile-transformation'],
-    caseStudies: ['jmmb-group-leverages-automation-best-practices', 'ipipelines-legacy-platform-modernization', 'financial-best-practices'],
+    caseStudies: ['jmmb-group-leverages-automation-best-practices', 'fintech-legacy-platform-modernization', 'financial-best-practices'],
     primaryCta: contact, personas: { primary: 'Enterprise CTO / VP Engineering', secondary: 'QA Director' },
     seo: { title: 'QA & Software Testing for Banking and Fintech | QualityWorks', description: 'Test automation, modernization QA and agile delivery for banks and fintech, with published results from JMMB and other financial institutions.' },
     contentDepth: 'full', provenance: live('finance-banking'),

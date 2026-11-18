@@ -23,9 +23,12 @@ const solution = serviceBySlug(cs.relatedSolution) ?? productBySlug(cs.relatedSo
 const more = caseStudies.filter((c) => c.slug !== cs.slug && (c.industry === cs.industry || c.serviceTags.some((t) => cs.serviceTags.includes(t)))).slice(0, 3);
 const crumbs = [{ label: 'Home', href: '/' }, { label: 'Case Studies', href: '/case-studies/' }, { label: cs.title }];
 const sections = [
-  ['The customer', cs.customer], ['The challenge', cs.challenge], ['Our solution', cs.approach], ['The result', cs.outcome],
+  // Section heading says “The client”: QualityWorks calls the organisations it works for clients (review round 2).
+  ['The client', cs.customer], ['The challenge', cs.challenge], ['Our solution', cs.approach], ['The result', cs.outcome],
 ].filter(([, v]) => v && v.length > 20) as [string, string][];
-const description = (cs.summary || cs.challenge).slice(0, 155).replace(/\s+\S*$/, '') + '…';
+// Meta description: use the summary as-is when it fits search-result length (≤160 chars); otherwise cut at a word boundary.
+const rawDescription = cs.summary || cs.challenge;
+const description = rawDescription.length <= 160 ? rawDescription : rawDescription.slice(0, 155).replace(/\s+\S*$/, '') + '…';
 ---
 <BaseLayout seo={{ title: `${cs.title} | QualityWorks Case Study`.slice(0, 90), description, ogImage: cs.image ?? undefined }} breadcrumbs={crumbs} ogType="article">
   <section class="cs-hero surface-dark">
@@ -58,7 +61,7 @@ const description = (cs.summary || cs.challenge).slice(0, 155).replace(/\s+\S*$/
             </div>
           ))}
         </dl>
-        <p class="metric-src">Results as reported in the published case study (<a href={cs.metrics[0].metricSource} target="_blank" rel="noopener">source<span class="visually-hidden">, opens current live page in a new tab</span></a>). Client disclosure approval: <strong>{cs.clientDisclosureApproved === null ? 'to be confirmed' : cs.clientDisclosureApproved ? 'approved' : 'not approved'}</strong>.</p>
+        <p class="metric-src">Results as reported in the published case study {cs.metrics[0].metricSource.startsWith('http') ? <>(<a href={cs.metrics[0].metricSource} target="_blank" rel="noopener">source<span class="visually-hidden">, opens current live page in a new tab</span></a>)</> : <>({cs.metrics[0].metricSource})</>}. Client disclosure approval: <strong>{cs.clientDisclosureApproved === null ? 'to be confirmed' : cs.clientDisclosureApproved ? 'approved' : 'not approved'}</strong>.</p>
       </div>
     </section>
   )}

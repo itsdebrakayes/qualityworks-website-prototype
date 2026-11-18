@@ -6,13 +6,13 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && node scripts/glyph-lint.mjs",
+    "build": "astro build && node scripts/gen-redirects.mjs dist && node scripts/glyph-lint.mjs",
     "preview": "astro preview",
     "migrate:wordpress": "node scripts/migrate-wordpress.mjs",
     "qa:screens": "node scripts/qa-screenshots.mjs",
     "qa:checks": "node scripts/qa-checks.mjs && node scripts/qa-report.mjs",
-    "build:release": "QW_RELEASE=true astro build --outDir dist-release && node scripts/release-check.mjs",
-    "check:terms": "node scripts/terminology-check.mjs"
+    "build:release": "QW_RELEASE=true astro build --outDir dist-release && node scripts/gen-redirects.mjs dist-release && node scripts/release-check.mjs",
+    "check:content": "node scripts/content-check.mjs"
   },
   "dependencies": {
     "astro": "5.18.2"
