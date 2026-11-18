@@ -63,24 +63,18 @@ const industryList = industries.filter((i) => i.status === 'live');
           <li>US, UK, Latin America & Caribbean<ClaimRef id="C15" /></li>
         </ul>
       </div>
-      <nav class="pathways" aria-labelledby="pathways-title">
-        <p class="pathways__title" id="pathways-title">Where would you like to start?</p>
-        <ol class="pathways__list">
-          {pathways.map((p) => (
-            <li>
-              <a class="pathway" href={p.href}>
-                <span class="pathway__index" aria-hidden="true">{p.index}</span>
-                <span class="pathway__body">
-                  <span class="pathway__label">{p.label}</span>
-                  <span class="pathway__title">{p.title}</span>
-                </span>
-                <Icon name="arrow" class="pathway__arrow" />
-              </a>
-            </li>
-          ))}
-        </ol>
-        <p class="pathways__foot">Not sure? <a href="/contact-us/">Describe the problem</a> and we’ll point you to the right team.</p>
-      </nav>
+    </div>
+    <div class="container">
+      <ul class="pathways" aria-label="Three ways we help">
+        {pathways.map((p) => (
+          <li class="pathway" data-pathway={p.id}>
+            <p class="pathway__label">{p.label}</p>
+            <h2 class="pathway__title"><a href={p.href}>{p.title}</a></h2>
+            <p class="pathway__text">{p.text}</p>
+            <span class="pathway__cta" aria-hidden="true">{p.cta}<Icon name="arrow" /></span>
+          </li>
+        ))}
+      </ul>
     </div>
   </section>
 
@@ -266,25 +260,28 @@ const industryList = industries.filter((i) => i.status === 'live');
   .home-hero::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px); background-size: 56px 56px; mask: radial-gradient(90% 80% at 70% 30%, #000, transparent 75%); -webkit-mask: radial-gradient(90% 80% at 70% 30%, #000, transparent 75%); pointer-events: none; }
   .home-hero__motif { position: absolute; width: 46rem; height: 46rem; right: -16rem; top: -18rem; border-radius: 50%; pointer-events: none; background: repeating-radial-gradient(circle, transparent 0 26px, rgba(143,198,64,0.12) 26px 27px); mask: radial-gradient(circle, #000 30%, transparent 70%); -webkit-mask: radial-gradient(circle, #000 30%, transparent 70%); }
   .home-hero__grid { position: relative; display: grid; gap: var(--space-12); align-items: center; }
-  @media (min-width: 1024px) { .home-hero__grid { grid-template-columns: 1.1fr 0.9fr; gap: var(--space-16); } }
+  
   .home-hero h1 { font-size: var(--fs-3xl); font-weight: var(--fw-bold); max-width: 12ch; margin-bottom: var(--space-6); }
-  .home-hero .lede { color: #D5DDE4; }
+  .home-hero .lede { color: #D5DDE4; max-width: 44rem; }
   .home-hero__ctas { margin-top: var(--space-8); }
   .home-hero__facts { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); list-style: none; padding: 0; margin: var(--space-10) 0 0; font-size: var(--fs-sm); color: var(--qw-slate-300); }
   .home-hero__facts li { display: inline-flex; align-items: center; gap: var(--space-2); }
   .home-hero__facts li::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--qw-green-400); }
 
-  .pathways { background: rgba(14, 24, 23, 0.72); border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius-lg); padding: var(--space-6); backdrop-filter: blur(6px); box-shadow: var(--shadow-lg); }
-  .pathways__title { font: var(--fw-bold) var(--fs-md)/1.3 var(--font-sans); color: #fff; margin-bottom: var(--space-4); }
-  .pathways__list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
-  .pathway { display: grid; grid-template-columns: auto 1fr auto; gap: var(--space-4); align-items: center; padding: var(--space-4) var(--space-5); border-radius: var(--radius-md); background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #fff; text-decoration: none; transition: background var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out); }
-  .pathway:hover { background: rgba(95,195,207,0.12); border-color: rgba(95,195,207,0.45); }
-  .pathway__index { font: var(--fw-semibold) var(--fs-md)/1 var(--font-mono); color: var(--qw-green-400); }
-  .pathway__label { display: block; font: var(--fw-medium) var(--fs-xs)/1.3 var(--font-mono); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-slate-300); }
-  .pathway__title { display: block; font-weight: var(--fw-semibold); font-size: var(--fs-base); line-height: 1.3; margin-top: 2px; }
-  .pathway :global(.pathway__arrow) { width: 20px; height: 20px; color: var(--qw-teal-300); transition: transform var(--dur-base) var(--ease-out); }
-  .pathway:hover :global(.pathway__arrow) { transform: translateX(4px); }
-  .pathways__foot { font-size: var(--fs-sm); color: var(--qw-slate-300); margin: var(--space-4) 0 0; }
+  .pathways { position: relative; list-style: none; margin: var(--space-12) 0 0; padding: 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); }
+  .pathway { position: relative; display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-6); border-radius: var(--radius-lg); background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); border-top: 3px solid var(--qw-teal-500); transition: background var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out); }
+  .pathway[data-pathway="ai"] { border-top-color: var(--qw-green-400); }
+  .pathway:hover { background: rgba(95,195,207,0.10); border-color: rgba(95,195,207,0.45); }
+  .pathway__label { margin: 0; font: var(--fw-semibold) var(--fs-xs)/1.3 var(--font-sans); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-slate-300); }
+  .pathway__title { margin: 0; font-size: var(--fs-md); line-height: 1.3; }
+  .pathway__title a { color: #fff; text-decoration: none; }
+  .pathway__title a::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+  .pathway:has(a:focus-visible) { outline: 3px solid var(--qw-green-400); outline-offset: 3px; }
+  .pathway__title a:focus-visible { outline: none; }
+  .pathway__text { margin: 0; font-size: var(--fs-sm); color: var(--color-text); }
+  .pathway__cta { margin-top: auto; padding-top: var(--space-2); display: inline-flex; align-items: center; gap: 0.4rem; font-weight: var(--fw-semibold); font-size: var(--fs-sm); color: var(--qw-teal-300); }
+  .pathway__cta :global(svg) { width: 16px; height: 16px; transition: transform var(--dur-base) var(--ease-out); }
+  .pathway:hover .pathway__cta :global(svg) { transform: translateX(3px); }
 
   /* Intro */
   .intro h2 { font-size: var(--fs-xl); font-weight: var(--fw-semibold); line-height: 1.2; }

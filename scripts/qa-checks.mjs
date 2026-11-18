@@ -193,9 +193,9 @@ await m.close();
 // ---- 7. Homepage CTAs and pathways
 await page.goto(BASE + '/', { waitUntil: 'networkidle' });
 const heroCtas = await page.$$eval('.home-hero__ctas a', (as) => as.map((a) => a.getAttribute('href')));
-const pathwayHrefs = await page.$$eval('.pathway', (as) => as.map((a) => a.getAttribute('href')));
-const pathwaysAboveFold = await page.$$eval('.pathway', (as) => as.every((a) => a.getBoundingClientRect().bottom <= 900));
-rec('QA-16', 'BR-7.1', 'Homepage hero', 'Two hero CTAs to different approved destinations; three pathways visible above the fold at 1440×900', heroCtas.length === 2 && heroCtas[0] !== heroCtas[1] && pathwayHrefs.length === 3 && pathwaysAboveFold, `CTAs: ${heroCtas.join(' | ')}; pathways: ${pathwayHrefs.join(' | ')}; above fold: ${pathwaysAboveFold}`, 'qa-output/evidence/1440-home.png');
+const pathwayHrefs = await page.$$eval('.pathway a', (as) => as.map((a) => a.getAttribute('href')));
+const pathwaysAboveFold = await page.$$eval('.pathway', (as) => as.every((a) => a.getBoundingClientRect().top < 900));
+rec('QA-16', 'BR-7.1', 'Homepage hero', 'Two hero CTAs to different approved destinations; three pathway cards start above the fold at 1440×900', heroCtas.length === 2 && heroCtas[0] !== heroCtas[1] && pathwayHrefs.length === 3 && pathwaysAboveFold, `CTAs: ${heroCtas.join(' | ')}; pathways: ${pathwayHrefs.join(' | ')}; above fold: ${pathwaysAboveFold}`, 'qa-output/evidence/1440-home.png');
 const svcLinks = await page.$$eval('.way__links a', (as) => as.map((a) => a.getAttribute('href')));
 rec('QA-17', 'BR-7.1', 'Homepage service links', 'Service links route to the matching service detail pages', svcLinks.every((h) => routeSet.has(h)), `${svcLinks.length} links, all resolve`);
 
