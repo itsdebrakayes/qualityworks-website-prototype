@@ -1,4 +1,5 @@
 ---
+import { RELEASE, REVIEW, rn } from '../lib/release';
 /**
  * BLOG ARTICLE TEMPLATE at root-level slugs (/{slug}/) — preserves existing WordPress permalinks.
  * Body HTML is migrated verbatim (sanitised); facts are not rewritten during migration.
@@ -52,7 +53,7 @@ const share = [
         <p class="article__share-title">Share this article</p>
         <ul class="article__share">{share.map((s) => <li><a href={s.href} target="_blank" rel="noopener">{s.label}<span class="visually-hidden"> (opens in a new tab)</span></a></li>)}</ul>
         {a.tags.length > 0 && <p class="article__tags">Tags: {a.tags.slice(0, 8).join(', ')}</p>}
-        <p class="article__src" data-review-note="Migration provenance">Migrated from WordPress post {a.provenance.sourceUrl} on {a.provenance.retrievedAt}. Content unchanged except sanitised markup.</p>
+        {REVIEW && <p class="article__src" data-review-note={rn('Migration provenance')}>Migrated from WordPress post {a.provenance.sourceUrl} on {a.provenance.retrievedAt}. Content unchanged except sanitised markup.</p>}
       </footer>
     </div>
   </article>

@@ -10,7 +10,9 @@
     "preview": "astro preview",
     "migrate:wordpress": "node scripts/migrate-wordpress.mjs",
     "qa:screens": "node scripts/qa-screenshots.mjs",
-    "qa:checks": "node scripts/qa-checks.mjs && node scripts/qa-report.mjs"
+    "qa:checks": "node scripts/qa-checks.mjs && node scripts/qa-report.mjs",
+    "build:release": "QW_RELEASE=true astro build --outDir dist-release && node scripts/release-check.mjs",
+    "check:terms": "node scripts/terminology-check.mjs"
   },
   "dependencies": {
     "astro": "5.18.2"

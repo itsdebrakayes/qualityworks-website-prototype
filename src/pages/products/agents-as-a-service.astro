@@ -1,4 +1,5 @@
 ---
+import { rn } from '../../lib/release';
 /**
  * AGENTS AS A SERVICE (proposed corporate page). The marketplace at agents.qualityworkscg.com
  * remains the system of record for catalog, packages, prices and checkout. This page explains
@@ -90,6 +91,13 @@ const faqs: FaqItem[] = [
   <section class="section surface-product" aria-labelledby="catalog-title">
     <div class="container">
       <SectionHeading eyebrow="Catalog preview" title="A sample of available agents" lede={`The marketplace listed ${agentCatalogFacts.totalAgentsObserved} agents across ${agentCatalogFacts.departments.length} departments on 17 Nov 2026. This preview is a snapshot; the marketplace is always current.`} id="catalog-title" />
+      <div class="legend" data-review-note={rn('Marketplace does not publish definitions for these labels — Q-21')}>
+        <p class="legend__title">How to read these labels</p>
+        <dl>
+          <div><dt><span class="badge">Ready now</span> <span class="badge">Quick launch</span> <span class="badge">Custom build</span></dt><dd>The listing label each agent carries on the marketplace (observed 17 Nov 2026). The marketplace does not publish what each label means, so treat them as indications only. Every agent still needs a setup call before QualityWorks deploys it.</dd></div>
+          <div><dt>Guided Preview</dt><dd>A preview button on each marketplace listing. It is a walkthrough of the agent, not a live deployment or a trial account.</dd></div>
+        </dl>
+      </div>
       <div class="filter-chips" role="group" aria-label="Filter agents by department">
         <button type="button" class="chip" aria-pressed="true" data-dept="all">All</button>
         {departments.map((d) => <button type="button" class="chip" aria-pressed="false" data-dept={d}>{d}</button>)}
@@ -100,7 +108,7 @@ const faqs: FaqItem[] = [
           <li class="agent" data-dept={a.category}>
             <div class="agent__head"><span class="avatar" aria-hidden="true">{a.name[0]}</span><div><h3>{a.name}</h3><p class="agent__role">{a.role}</p></div></div>
             <p class="agent__desc">{a.description}</p>
-            <p class="agent__meta"><span class="badge">{availability[a.availabilityStatus]}</span><span class="agent__dept">{a.category}</span></p>
+            <p class="agent__meta"><span class="badge" title="Marketplace listing label">{availability[a.availabilityStatus]}</span><span class="agent__dept">{a.category}</span></p>
           </li>
         ))}
       </ul>
@@ -110,9 +118,9 @@ const faqs: FaqItem[] = [
 
   <section class="section" aria-labelledby="steps-title">
     <div class="container">
-      <SectionHeading eyebrow="How it works" title="Get your AI team live in three steps" id="steps-title" />
+      <SectionHeading eyebrow="How it works" title="Three steps to an agent in your workflow" id="steps-title" />
       <ProcessSteps steps={agentCatalogFacts.steps} />
-      <p class="handoff handoff--light"><Icon name="external" /><span>Steps 1–2 happen on agents.qualityworkscg.com. Step 3 is completed by the QualityWorks team.</span></p>
+      <p class="handoff handoff--light"><Icon name="external" /><span>Steps 1–2 happen on agents.qualityworkscg.com. Step 3 is completed by the QualityWorks team after the setup call. Nothing is deployed automatically at checkout.</span></p>
     </div>
   </section>
 
@@ -141,6 +149,11 @@ const faqs: FaqItem[] = [
   .compare th[scope="row"] { width: 12rem; background: var(--qw-canvas); position: static; }
   .compare thead th:nth-child(2) { background: var(--qw-teal-50); }
   .compare__ctas { margin-top: var(--space-6); }
+  .legend { margin: 0 0 var(--space-8); padding: var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-lg); font-size: var(--fs-sm); }
+  .legend__title { font-weight: var(--fw-bold); color: var(--color-heading); }
+  .legend dl { margin: 0; display: grid; gap: var(--space-4); }
+  .legend dt { display: flex; flex-wrap: wrap; gap: var(--space-2); font-weight: var(--fw-semibold); color: var(--color-heading); margin-bottom: var(--space-1); }
+  .legend dd { margin: 0; }
   .filter-chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-6); }
   .chip { min-height: 40px; padding: 0.4rem 1rem; border-radius: var(--radius-pill); border: 1px solid var(--color-border); background: transparent; color: var(--color-text); font: var(--fw-semibold) var(--fs-sm)/1 var(--font-sans); cursor: pointer; }
   .chip:hover { border-color: var(--qw-teal-300); }

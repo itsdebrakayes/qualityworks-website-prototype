@@ -1,4 +1,5 @@
 ---
+import { RELEASE, REVIEW } from '../../lib/release';
 /**
  * CAREERS (/careers/ — legacy URL). Vacancies are owned by BambooHR; applications are handed off
  * to BambooHR. No résumé collection on the corporate site.
@@ -34,14 +35,14 @@ const workModel = { remote: 'Remote', hybrid: 'Hybrid', 'on-site': 'On-site' };
     <div class="container">
       <SectionHeading eyebrow="Open opportunities" title="Open roles" lede="Roles are listed from our BambooHR careers site. Applications are completed on BambooHR." id="roles-title" />
 
-      <fieldset class="state-switch" data-review-note="Prototype-only control">
+      {REVIEW && <fieldset class="state-switch" data-review-note="Prototype-only control">
         <legend><FixtureLabel text="Prototype control — vacancy states" /></legend>
         <div class="state-switch__opts">
           <label><input type="radio" name="jobstate" value="live" checked /> Live snapshot ({bambooHr.observed.totalCount} roles, {bambooHr.observed.at})</label>
           <label><input type="radio" name="jobstate" value="jobs" /> Fixture: roles available (incl. one expired)</label>
           <label><input type="radio" name="jobstate" value="down" /> Simulate BambooHR unavailable</label>
         </div>
-      </fieldset>
+      </fieldset>}
 
       <div aria-live="polite">
         <div data-state="live">
@@ -50,7 +51,7 @@ const workModel = { remote: 'Remote', hybrid: 'Hybrid', 'on-site': 'On-site' };
             <a class="btn btn--secondary btn--sm" href={bambooHr.careersUrl} target="_blank" rel="noopener">Check our BambooHR careers page<span class="visually-hidden"> (opens in a new tab)</span></a>
           </EmptyState>
         </div>
-        <div data-state="jobs" hidden>
+        {REVIEW && <div data-state="jobs" hidden>
           <ul class="jobs">
             {fixtureJobs.map((j) => {
               const expired = isExpired(j);
@@ -71,12 +72,12 @@ const workModel = { remote: 'Remote', hybrid: 'Hybrid', 'on-site': 'On-site' };
             })}
           </ul>
           <p id="bamboo-note" class="hint">Applications open on qualityworksconsulting.bamboohr.com. QualityWorks does not collect résumés on this website.</p>
-        </div>
-        <div data-state="down" hidden>
+        </div>}
+        {REVIEW && <div data-state="down" hidden>
           <Alert tone="warning" title="We can’t load open roles right now">
             <p>Our careers listing (BambooHR) isn’t responding. You can view roles directly on <a href={bambooHr.careersUrl} target="_blank" rel="noopener">our BambooHR careers page<span class="visually-hidden"> (opens in a new tab)</span></a>, or try again later.</p>
           </Alert>
-        </div>
+        </div>}
       </div>
     </div>
   </section>

@@ -9,10 +9,10 @@ const metric = cs.metrics[0];
 const industry = industryBySlug(cs.industry);
 ---
 <article class="card cs-card" data-industry={cs.industry} data-services={cs.serviceTags.join(' ')}>
-  {!compact && <div class="card__media">{cs.image ? <img src={cs.image} alt="" loading="lazy" width="640" height="360" /> : <div class="cs-card__ph" />}</div>}
+  {!compact && <div class="card__media">{cs.image ? <img src={cs.image} alt={cs.altText} loading="lazy" width="640" height="360" /> : <div class="cs-card__ph" />}</div>}
   <div class="card__body">
     <p class="card__meta">{industry?.name ?? cs.industry}</p>
-    <H class="card__title"><a href={`/case-study/${cs.slug}/`}>{cs.title}</a></H>
+    <H class="card__title"><a href={`/case-studies/${cs.slug}/`}>{cs.title}</a></H>
     {metric && (
       <p class="cs-card__metric"><strong><MetricValue value={metric.value} /></strong> <span>{metric.label.toLowerCase()}</span></p>
     )}

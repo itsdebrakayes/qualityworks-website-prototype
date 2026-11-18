@@ -5,7 +5,7 @@ import Alert from '../../components/Alert.astro';
 import Button from '../../components/Button.astro';
 import FixtureLabel from '../../components/FixtureLabel.astro';
 import Icon from '../../components/Icon.astro';
-import { events, eventPhase, canRegister, formatEventDate } from '../../data/events';
+import { events, eventPhase, canRegister, showsDemoRegistration, formatEventDate } from '../../data/events';
 import type { EventRecord } from '../../data/types';
 export function getStaticPaths() { return events.map((e) => ({ params: { slug: e.slug }, props: { e } })); }
 const { e } = Astro.props as { e: EventRecord };
@@ -36,7 +36,7 @@ const ld = e.startDate && e.provenance.approval !== 'fixture' ? [{ '@context': '
           <li><Icon name="calendar" /><span>{phase === 'cancelled' ? <s>{formatEventDate(e)}</s> : formatEventDate(e)}{time && <><br /><span class="muted">Starts {time}</span></>}</span></li>
           <li><Icon name={e.venueType === 'online' ? 'globe' : 'pin'} /><span>{e.venueType === 'online' ? 'Online' : e.venue ?? 'Venue to be confirmed'}</span></li>
         </ul>
-        {canRegister(e) ? <Button cta={{ label: 'Register', href: e.registrationUrl!, external: e.registrationUrl!.startsWith('http'), handoffNote: 'Registration is handled by the event organiser' }} /> : <p class="muted">{phase === 'past' ? 'Registration closed' : phase === 'cancelled' ? 'No registration — cancelled' : 'Registration not yet open'}</p>}
+        {showsDemoRegistration(e) ? <p class="demo-reg"><button type="button" class="btn" disabled aria-describedby="demo-reg-note">Register</button><span id="demo-reg-note" class="muted">Demo only: this is a fixture event and no registration is taken.</span></p> : canRegister(e) ? <Button cta={{ label: 'Register', href: e.registrationUrl!, external: e.registrationUrl!.startsWith('http'), handoffNote: 'Registration is handled by the event organiser' }} /> : <p class="muted">{phase === 'past' ? 'Registration closed' : phase === 'cancelled' ? 'No registration — cancelled' : 'Registration not yet open'}</p>}
       </aside>
     </div>
   </section>
@@ -48,5 +48,6 @@ const ld = e.startDate && e.provenance.approval !== 'fixture' ? [{ '@context': '
   .ev__card { padding: var(--space-6); border: 1px solid var(--color-border); border-radius: var(--radius-lg); align-self: start; }
   .ev__card ul { list-style: none; padding: 0; margin: 0 0 var(--space-6); display: grid; gap: var(--space-4); }
   .ev__card li { display: flex; gap: var(--space-3); }
+  .demo-reg { display: grid; gap: var(--space-2); font-size: var(--fs-sm); }
   .ev__card :global(svg) { width: 20px; height: 20px; color: var(--qw-teal-700); flex: none; }
 </style>

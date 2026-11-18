@@ -74,7 +74,7 @@ rec('QA-05', 'BR-10 SEO', 'Titles & descriptions', 'Unique <title> and meta desc
 rec('QA-06', 'BR-10 SEO', 'Structured data', 'All JSON-LD parses; canonical present', ldIssues.length === 0, ldIssues.length ? ldIssues.join('; ') : 'All JSON-LD valid JSON; canonical on every page', '');
 
 // ---- 2. Overflow at breakpoints (+ 200% zoom approximation = 640 CSS px)
-const keyRoutes = ['/', '/services/', '/services/test-automation/', '/qualitywatcher-ai-tools/', '/products/agents-as-a-service/', '/products/prism/', '/industries/public-sector/', '/case-studies/', '/case-study/jmmb-group-leverages-automation-best-practices/', '/resources/', '/more-qa-not-less-closing-the-verification-gap-in-ai-accelerated-software-delivery/', '/events/', '/contact-us/', '/careers/', '/about-us/', '/design-system/'];
+const keyRoutes = ['/', '/services/', '/services/test-automation/', '/qualitywatcher-ai-tools/', '/products/agents-as-a-service/', '/products/prism/', '/industries/public-sector/', '/case-studies/', '/case-studies/jmmb-group-leverages-automation-best-practices/', '/resources/', '/more-qa-not-less-closing-the-verification-gap-in-ai-accelerated-software-delivery/', '/events/', '/contact-us/', '/careers/', '/about-us/', '/design-system/'];
 for (const w of [360, 640, 768, 1024, 1440]) {
   const p = await browser.newPage({ viewport: { width: w, height: 900 } });
   const bad = [];
@@ -109,7 +109,7 @@ rec('QA-08', 'BR-12 A11y', '20 key pages (axe-core 4.10, WCAG 2.2 A/AA tags)', '
 const fontFindings = [];
 const cdp = await ctx.newCDPSession(page);
 await cdp.send('DOM.enable'); await cdp.send('CSS.enable');
-for (const r of ['/', '/services/test-automation/', '/qualitywatcher-ai-tools/', '/case-study/ipipelines-legacy-platform-modernization/', '/case-studies/', '/contact-us/', '/products/prism/', '/more-qa-not-less-closing-the-verification-gap-in-ai-accelerated-software-delivery/']) {
+for (const r of ['/', '/services/test-automation/', '/qualitywatcher-ai-tools/', '/case-studies/ipipelines-legacy-platform-modernization/', '/case-studies/', '/contact-us/', '/products/prism/', '/more-qa-not-less-closing-the-verification-gap-in-ai-accelerated-software-delivery/']) {
   await page.goto(BASE + r, { waitUntil: 'networkidle' });
   await page.evaluate(() => document.fonts.ready);
   const { root } = await cdp.send('DOM.getDocument', { depth: -1, pierce: false });
@@ -185,7 +185,7 @@ rec('QA-14', 'BR-5 Mobile nav', 'Mobile drawer @360px', 'Menu opens a modal draw
 await menuBtn.click();
 await m.locator('#mobile-nav [aria-controls="m-products"]').click();
 const accOpen = (await m.locator('#mobile-nav [aria-controls="m-products"]').getAttribute('aria-expanded')) === 'true' && await m.locator('#m-products').isVisible();
-await m.locator('#mobile-nav a', { hasText: 'QualityWatcher AI Tools' }).first().click();
+await m.locator('#mobile-nav a', { hasText: 'QualityWatcher AI' }).first().click();
 await m.waitForLoadState('domcontentloaded');
 rec('QA-15', 'BR-5 Mobile nav', 'Drawer accordion + navigation', 'Section expands (aria-expanded) and a link navigates', accOpen && m.url().endsWith('/qualitywatcher-ai-tools/'), `expanded:${accOpen} url:${m.url().replace(BASE, '')}`);
 await m.close();
@@ -282,8 +282,8 @@ for (const slug of ['pnsqc-2026', 'ntc-2025', 'fixture-cancelled-meetup', 'bow-g
   if (reg) evBad.push(slug);
 }
 await page.goto(`${BASE}/events/fixture-agentic-qa-webinar/`);
-const upcomingReg = await page.$$eval('main a', (as) => as.filter((a) => /register/i.test(a.textContent)).length);
-rec('QA-26', 'BR-7.11', 'Event states', 'Past, cancelled and date-TBC events never offer registration; upcoming does', evBad.length === 0 && upcomingReg === 1, `violations:${evBad.join(',') || 'none'}; upcoming fixture register links:${upcomingReg}`, '', 'Live homepage currently promotes past PNSQC 2026 as next event (audit C-03)');
+const upcomingReg = await page.$$eval('main .demo-reg button[disabled]', (b) => b.length);
+rec('QA-26', 'BR-7.11', 'Event states', 'Past, cancelled and date-TBC events never offer registration; the upcoming fixture shows a disabled, labelled demo control (no placeholder link)', evBad.length === 0 && upcomingReg === 1, `violations:${evBad.join(',') || 'none'}; upcoming fixture demo control:${upcomingReg}`, '', 'Live homepage currently promotes past PNSQC 2026 as next event (audit C-03)');
 
 // ---- 12. Careers states
 const ca = await browser.newPage({ viewport: { width: 1280, height: 900 } });

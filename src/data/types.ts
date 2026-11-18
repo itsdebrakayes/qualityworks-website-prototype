@@ -16,7 +16,7 @@ export type ApprovalState =
   | 'published-live'       // visible on the current public site; re-approval needed before reuse
   | 'pending-approval'     // proposed; awaiting stakeholder sign-off
   | 'approved'             // explicitly approved (none yet in this prototype)
-  | 'fixture'              // fictional; must never ship
+  | 'fixture'              // fictional; must never be released
   | 'not-verified';        // could not be confirmed (e.g. source inaccessible)
 
 export interface Provenance {
@@ -66,6 +66,8 @@ export interface Claim {
   sourceUrl: string;
   evidence: string;           // exact wording found at source
   approval: ApprovalState;
+  /** Explicit verification status: 'required-before-launch' claims must not be presented as verified. */
+  verification?: 'required-before-launch' | 'source-checked' | 'wording-approval-needed';
   owner?: string;
 }
 
@@ -197,6 +199,8 @@ export interface EventRecord {
   venueType: 'in-person' | 'online' | 'hybrid';
   venue?: string;
   registrationUrl?: string;
+  /** Fixture events only: shows a disabled, labelled demo registration control instead of a link. */
+  demoRegistration?: boolean;
   status: 'scheduled' | 'cancelled' | 'postponed';
   featuredImage?: string;
   imageAlt?: string;

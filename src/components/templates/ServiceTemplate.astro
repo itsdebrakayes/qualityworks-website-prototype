@@ -1,4 +1,5 @@
 ---
+import { RELEASE, REVIEW, rn } from '../../lib/release';
 /**
  * Service detail template — reused by /services/*, /engagement-models/*, /maturity-assessments/,
  * /innovation-tourism/. Sections render only when data exists, so "summary" records degrade
@@ -49,7 +50,7 @@ const jsonLd = [serviceLd(s.name, s.seo.description, s.path), ...(s.faqs?.length
   </PageHero>
 
   {s.contentDepth === 'summary' && (
-    <div class="container"><Alert tone="warning" title="Summary record — full content pending migration" class="svc-alert">
+    <div class="container" data-release-blocker={RELEASE ? 'summary-record: full service copy not migrated' : undefined}><Alert tone="warning" title="Summary record — full content pending migration" class="svc-alert">
       <p>This page exists on the live site. The prototype shows the template with a summary only. {s.provenance.note}</p>
     </Alert></div>
   )}
@@ -87,7 +88,7 @@ const jsonLd = [serviceLd(s.name, s.seo.description, s.path), ...(s.faqs?.length
   )}
 
   {s.considerations && s.considerations.length > 0 && (
-    <section class="section surface-dark" aria-labelledby="consider-title" data-review-note="Proposed buyer-specific copy (pending approval)">
+    <section class="section surface-dark" aria-labelledby="consider-title" data-review-note={rn('Proposed buyer-specific copy (pending approval)')}>
       <div class="container">
         <SectionHeading eyebrow="Buyer considerations" title="What to know before you start" id="consider-title" />
         <div class="grid grid--3">

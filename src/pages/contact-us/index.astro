@@ -1,4 +1,5 @@
 ---
+import { rn } from '../../lib/release';
 /**
  * CONTACT (/contact-us/ — legacy URL). Preserves the live field set. Submission is simulated.
  * Persona: all. Core question: "How do I reach the right person, and what happens next?"
@@ -24,7 +25,7 @@ const crumbs = [{ label: 'Home', href: '/' }, { label: 'Contact Us' }];
           <li>We reply by email to arrange a conversation.</li>
           <li>If we’re not the right fit, we’ll tell you.</li>
         </ol>
-        <p class="next__note" data-review-note="Response-time commitment intentionally omitted">We don’t state a response time until one is approved.</p>
+        <p class="next__note" data-review-note={rn('Response-time commitment intentionally omitted')}>We don’t state a response time until one is approved.</p>
         <h2 class="contact__h">Other ways to reach us</h2>
         <ul class="ways">
           <li><Icon name="mail" /><a href={`mailto:${site.email}`}>{site.email}</a></li>

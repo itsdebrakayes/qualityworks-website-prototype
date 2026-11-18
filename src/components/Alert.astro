@@ -1,10 +1,10 @@
 ---
 import Icon from './Icon.astro';
-interface Props { tone?: 'info' | 'success' | 'warning' | 'danger'; title?: string; role?: 'status' | 'alert' | 'none'; id?: string; hidden?: boolean; class?: string }
-const { tone = 'info', title, role = 'none', id, hidden, class: cls } = Astro.props;
+interface Props { tone?: 'info' | 'success' | 'warning' | 'danger'; title?: string; role?: 'status' | 'alert' | 'none'; id?: string; hidden?: boolean; class?: string; [attr: string]: any }
+const { tone = 'info', title, role = 'none', id, hidden, class: cls, ...rest } = Astro.props;
 const icon = tone === 'success' ? 'check' : tone === 'info' ? 'info' : 'alert';
 ---
-<div class:list={['alert', `alert--${tone}`, cls]} role={role === 'none' ? undefined : role} id={id} hidden={hidden} tabindex="-1">
+<div class:list={['alert', `alert--${tone}`, cls]} role={role === 'none' ? undefined : role} id={id} hidden={hidden} tabindex="-1" {...rest}>
   <Icon name={icon} />
   <div>
     {title && <p class="alert__title">{title}</p>}

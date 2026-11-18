@@ -1,4 +1,5 @@
 ---
+import { RELEASE, REVIEW } from '../lib/release';
 /**
  * Global header. Desktop mega-menu + mobile drawer, BOTH rendered from src/data/navigation.ts.
  * Behaviour (see script): disclosure buttons with aria-expanded; hover-intent open with a 280ms
@@ -18,8 +19,8 @@ const isCurrent = (href: string) => norm(href) === cur;
 ---
 <header class="site-header" data-header>
   <div class="container site-header__inner">
-    <a class="site-header__logo" href="/" aria-label="QualityWorks Consulting Group — home">
-      <img src="/brand/qualityworks-logo-color.png" alt="" width="175" height="38" />
+    <a class="site-header__logo" href="/">
+      <img src="/brand/qualityworks-logo-color.png" alt="QualityWorks Consulting Group home" width="175" height="38" />
     </a>
 
     <nav class="primary-nav" aria-label="Main">
@@ -46,7 +47,7 @@ const isCurrent = (href: string) => norm(href) === cur;
                                 <span class="mega__label">
                                   {l.label}
                                   {l.external && <><Icon name="external" class="mega__ext" /><span class="visually-hidden"> (external site, opens in a new tab)</span></>}
-                                  {l.status === 'proposed' && <span class="proposed-dot" title="Proposed: not in current live navigation"><span class="visually-hidden">(proposed page)</span></span>}
+                                  {REVIEW && l.status === 'proposed' && <span class="proposed-dot" title="Proposed: not in current live navigation"><span class="visually-hidden">(proposed page)</span></span>}
                                 </span>
                                 {l.description && <span class="mega__desc">{l.description}</span>}
                               </a>
@@ -86,7 +87,7 @@ const isCurrent = (href: string) => norm(href) === cur;
 
   <dialog class="drawer" id="mobile-nav" aria-label="Site navigation" data-drawer>
     <div class="drawer__top">
-      <a href="/" class="drawer__logo" aria-label="QualityWorks — home"><img src="/brand/qualityworks-logo-color.png" alt="" width="150" height="33" /></a>
+      <a href="/" class="drawer__logo"><img src="/brand/qualityworks-logo-color.png" alt="QualityWorks Consulting Group home" width="150" height="33" /></a>
       <button type="button" class="drawer__close" data-drawer-close><Icon name="close" /><span class="visually-hidden">Close menu</span></button>
     </div>
     <nav aria-label="Main (mobile)">
@@ -97,12 +98,13 @@ const isCurrent = (href: string) => norm(href) === cur;
               <span>{item.label}</span><Icon name="chevron" />
             </button>
             <div id={`m-${item.id}`} class="drawer__panel" hidden={!isActive(cur, item)}>
-              {item.href && <a class="drawer__overview" href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label} overview</a>}
+              {/* Overview link only when the section's landing page is not already listed by name (e.g. Results = Case Studies). */}
+              {item.href && !item.groups?.some((g) => g.links.some((l) => l.href === item.href)) && <a class="drawer__overview" href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>All {item.label.toLowerCase()}</a>}
               {item.groups?.map((g) => (
                 <div class="drawer__group">
                   <p class="drawer__heading">{g.heading}</p>
                   <ul>
-                    {g.links.filter((l) => l.href !== item.href).map((l) => (
+                    {g.links.map((l) => (
                       <li><a href={l.href} aria-current={isCurrent(l.href) ? 'page' : undefined} {...(l.external ? { target: '_blank', rel: 'noopener' } : {})}>{l.label}{l.external && <><Icon name="external" /><span class="visually-hidden"> (external site, opens in a new tab)</span></>}</a></li>
                     ))}
                   </ul>

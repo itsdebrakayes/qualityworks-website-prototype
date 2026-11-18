@@ -1,4 +1,5 @@
 ---
+import { RELEASE, REVIEW } from '../lib/release';
 /**
  * HOMEPAGE — reference implementation of the design system.
  * Primary persona: Enterprise CTO/VP Eng (A) and SMB Founder/COO (D). Secondary: QA Director (B), Public sector (C).
@@ -28,7 +29,7 @@ import { ctas, site } from '../data/site';
 import { organizationLd } from '../lib/schema';
 
 const pathwayBullets = {
-  quality: ['AI-generated test cases & automation scripts', 'Autonomous regression testing', 'Web, mobile, API & USSD coverage', 'Full-stack QA managed service', 'Test maturity assessments & roadmaps'],
+  quality: ['AI-generated test cases & automation scripts', 'AI-assisted regression testing', 'Web, mobile, API & USSD coverage', 'Full-stack QA managed service', 'Test maturity assessments & roadmaps'],
   build: ['Custom web & mobile applications', 'AI-accelerated development cycles', 'Rapid prototyping & MVP delivery', 'UX/UI design & product strategy', 'Nearshore delivery at competitive rates'],
   ai: ['Custom AI agent design & deployment', 'Generative AI integration & strategy', 'Data quality and governance', 'Technology advisory (CTO-as-a-service)'],
 };
@@ -52,7 +53,7 @@ const industryList = industries.filter((i) => i.status === 'live');
       <div class="home-hero__copy">
         <p class="eyebrow">QualityWorks Consulting Group</p>
         <h1 id="hero-title">Engineered for Excellence</h1>
-        <p class="lede">We test smarter, build faster, and deploy AI to transform how businesses operate — from autonomous testing to custom apps to intelligent agents that change what’s possible.</p>
+        <p class="lede">We test smarter, build faster, and deploy AI to transform how businesses operate — from AI-powered testing to custom apps to AI agents that take work off your team’s plate.</p>
         <div class="btn-row home-hero__ctas">
           <Button cta={ctas.contact} />
           <Button cta={ctas.exploreSolutions} />
@@ -89,7 +90,7 @@ const industryList = industries.filter((i) => i.status === 'live');
           { value: '$30M', label: 'Cost savings through automation', claim: 'C03' },
           { value: '80%', label: 'Faster time to market (avg. per client)', claim: 'C04' },
         ]}
-        footnote="Figures as published on qualityworkscg.com. Measurement context is being confirmed before launch (see claims register C01–C04)."
+        footnote="Figures as currently published on qualityworkscg.com. Measurement context for the 90%, $30M and 80% figures requires verification before launch; they have not been independently verified."
       />
     </div>
   </section>
@@ -99,7 +100,7 @@ const industryList = industries.filter((i) => i.status === 'live');
     <div class="container split">
       <div>
         <p class="eyebrow">Why QualityWorks</p>
-        <h2 id="intro-title">We go <span class="beyond">&lt;beyond the code&gt;</span> to help clients reach their most extraordinary digital goals.</h2>
+        <h2 id="intro-title">We go <em class="beyond">beyond the code</em> to help clients reach their most extraordinary digital goals.</h2>
       </div>
       <div class="intro__copy">
         <p class="lede">Founded in 2010, QualityWorks is a Black-owned, woman-led software solutions firm<ClaimRef id="C14" /> focused on helping companies build higher-quality software, create future-ready teams and accelerate delivery.</p>
@@ -151,13 +152,13 @@ const industryList = industries.filter((i) => i.status === 'live');
     <div class="container">
       <div class="products__head">
         <SectionHeading eyebrow="Products & innovations" title="Software we build for quality and AI" lede="Our products are separate from our consulting services. Some live on their own platforms — we’ll always tell you when a link takes you there." id="products-title" />
-        <div class="prism-sample" data-review-note="Sample score reproduced from the live homepage">
+        {REVIEW && <div class="prism-sample" data-review-note="Sample score reproduced from the live homepage">
           <p class="prism-sample__label mono">PRISM™ sample score</p>
           <p class="prism-sample__grade">C+</p>
           <p class="prism-sample__desc">Fair — correct in parts</p>
           <div class="prism-sample__bar" role="img" aria-label="Sample score 78 percent"><span style="width:78%"></span></div>
           <p class="prism-sample__note">Illustrative sample, as shown on the current homepage.</p>
-        </div>
+        </div>}
       </div>
       <div class="grid grid--3">
         {featuredProducts.map((p) => <ProductCard p={p} />)}
@@ -180,7 +181,7 @@ const industryList = industries.filter((i) => i.status === 'live');
         <li><img src="/brand/Clutch_TopComplianceTesting-500x540.png" alt="Clutch: Top Compliance Testing Company" width="96" height="104" loading="lazy" /></li>
         <li><img src="/brand/Clutch_TopRecoveryTesting-1-500x540.png" alt="Clutch: Top Global Recovery Testing Company" width="96" height="104" loading="lazy" /><ClaimRef id="C12" /></li>
         <li class="awards__text"><a href="/qualityworks-wins-inc-best-in-business-2025-award/">Inc. Best in Business 2025</a><ClaimRef id="C11" /></li>
-        <li class="awards__text"><a href="/qualityworks-wins-us-navy-ai-testing-challenge/">First Prize, U.S. Navy AI Autonomous Testing Challenge</a><ClaimRef id="C10" /></li>
+        <li class="awards__text awards__text--wide"><a href="/qualityworks-wins-us-navy-ai-testing-challenge/">First Prize, U.S. Navy AI Augmented Testing (AIAT) Challenge</a><ClaimRef id="C10" /><span class="awards__note">Administered by PEO MLB with Palmetto Tech Bridge</span></li>
       </ul>
       <ProofBlock />
       <p class="proof-more"><a class="link-arrow" href={site.externalPlatforms.clutch} target="_blank" rel="noopener">Read more reviews on Clutch<Icon name="external" /><span class="visually-hidden"> (opens in a new tab)</span></a></p>
@@ -240,7 +241,7 @@ const industryList = industries.filter((i) => i.status === 'live');
       </div>
       <div class="events-strip">
         <div class="section-row">
-          <SectionHeading eyebrow="Where’s Stacy?" title="Events & speaking" level="h2" lede="Stacy Kirk, CEO and Founder, speaks to professional and student groups across the United States and abroad." />
+          <SectionHeading eyebrow="Events" title="Events & speaking" subheading="Where’s Stacy?" level="h2" lede="Stacy Kirk, CEO and Founder, speaks to professional and student groups across the United States and abroad." />
         </div>
         {upcoming.length === 0 && (
           <p class="events-strip__fallback"><Icon name="info" />No confirmed upcoming events right now. Recent and to-be-confirmed appearances are below.</p>
@@ -251,7 +252,7 @@ const industryList = industries.filter((i) => i.status === 'live');
     </div>
   </section>
 
-  <CtaBand title="Tell us what you’re trying to ship." text="Testing, a new product or an AI initiative — one conversation is enough to find out whether we can help." primary={ctas.contact} secondary={ctas.caseStudies} eyebrow="Let’s talk" />
+  <CtaBand title="Tell us what you’re trying to launch." text="Testing, a new product or an AI initiative — one conversation is enough to find out whether we can help." primary={ctas.contact} secondary={ctas.caseStudies} eyebrow="Let’s talk" />
 </BaseLayout>
 
 <style>
@@ -327,7 +328,9 @@ const industryList = industries.filter((i) => i.status === 'live');
   .awards { list-style: none; padding: 0; margin: 0 0 var(--space-10); display: flex; flex-wrap: wrap; gap: var(--space-4) var(--space-8); align-items: center; }
   .awards img { width: 72px; height: auto; }
   .awards li { display: flex; align-items: center; }
-  .awards__text { max-width: 16rem; font-weight: var(--fw-semibold); font-size: var(--fs-sm); padding-left: var(--space-6); border-left: 1px solid var(--color-border); }
+  .awards__text { display: flex; flex-direction: column; align-items: flex-start !important; gap: 2px; max-width: 16rem; font-weight: var(--fw-semibold); font-size: var(--fs-sm); padding-left: var(--space-6); border-left: 1px solid var(--color-border); }
+  .awards__text--wide { max-width: 20rem; }
+  .awards__note { font-weight: var(--fw-regular); font-size: var(--fs-xs); color: var(--color-muted); }
   .proof-more { margin-top: var(--space-6); }
 
   /* Who we help */

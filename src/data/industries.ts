@@ -68,7 +68,7 @@ export const industries: Industry[] = [
     capabilities: ['maturity-assessments', 'test-automation', 'full-stack-testing', 'ai-governance'],
     products: ['qualitywatcher-ai-tools', 'prism'],
     caseStudies: ['ai-powered-test-case-generation-wssc', 'building-a-roadmap-to-continuous-improvement'],
-    evidenceNote: 'The U.S. Navy AI Autonomous Testing Challenge was a competition prize, not a contract award, and must be described that way.',
+    evidenceNote: 'The U.S. Navy AI Augmented Testing (AIAT) Challenge (administered with Palmetto Tech Bridge) was a competition prize, not a contract award, and must be described that way.',
     primaryCta: { label: 'Make a procurement inquiry', href: '/contact-us/?topic=procurement', kind: 'primary' },
     personas: { primary: 'Government / public-sector procurement and technology decision-maker', secondary: 'Enterprise CTO' },
     seo: { title: 'Software Quality for Public Agencies and Utilities | QualityWorks', description: 'Requirement-based testing, maturity assessments and AI-assisted QA for public agencies and utilities, with published work for WSSC.' },

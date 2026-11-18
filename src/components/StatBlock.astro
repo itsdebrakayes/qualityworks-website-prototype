@@ -1,12 +1,15 @@
 ---
+import { RELEASE, REVIEW } from '../lib/release';
 /** Statistics. Every stat MUST reference a claim id in the claims register. */
 import ClaimRef from './ClaimRef.astro';
 import { claimById } from '../data/claims';
 interface Props { stats: { value: string; label: string; claim: string }[]; footnote?: string }
-const { stats, footnote } = Astro.props;
+const { stats: allStats, footnote } = Astro.props;
+// Release builds drop any statistic whose claim still requires verification.
+const stats = RELEASE ? allStats.filter((s) => !claimById(s.claim)?.verification) : allStats;
 stats.forEach((s) => { if (!claimById(s.claim)) throw new Error(`Stat "${s.label}" has no registered claim`); });
 ---
-<div class="stats">
+{stats.length > 0 && <div class="stats">
   <dl class="stats__list">
     {stats.map((s) => (
       <div class="stats__item">
@@ -15,8 +18,8 @@ stats.forEach((s) => { if (!claimById(s.claim)) throw new Error(`Stat "${s.label
       </div>
     ))}
   </dl>
-  {footnote && <p class="stats__note">{footnote}</p>}
-</div>
+  {footnote && REVIEW && <p class="stats__note">{footnote}</p>}
+</div>}
 <style>
   .stats__list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); gap: 0; margin: 0; border-top: 1px solid var(--color-border); }
   .stats__item { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: var(--space-2); padding: var(--space-6) var(--space-6) var(--space-6) 0; border-bottom: 1px solid var(--color-border); }

@@ -14,7 +14,7 @@ TypeScript definitions: `src/data/types.ts`. Every record carries **`provenance 
 | `external-platform` | Owned by another platform | Agent catalog, QualityWatcher tools, BambooHR |
 | `structured-code` | Maintained in the repo | Navigation, global CTAs |
 | `proposed-copy` | New prototype copy; needs approval | Buyer considerations, some FAQs, public-sector page |
-| `fixture` | Fictional; for interaction demos only; **must never ship** | Fixture jobs, 2 fixture events, PRISM whitepaper card |
+| `fixture` | Fictional; for interaction demos only; **must never be released** | Fixture jobs, 2 fixture events, PRISM whitepaper card |
 
 `approval` is one of `published-live` (on the live site today; needs re-approval) · `pending-approval` · `approved` (none yet) · `fixture` · `not-verified`.
 

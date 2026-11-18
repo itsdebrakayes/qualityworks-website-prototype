@@ -2,7 +2,7 @@
 import Icon from './Icon.astro';
 import FixtureLabel from './FixtureLabel.astro';
 import type { EventRecord } from '../data/types';
-import { eventPhase, canRegister, formatEventDate } from '../data/events';
+import { eventPhase, canRegister, showsDemoRegistration, formatEventDate } from '../data/events';
 interface Props { e: EventRecord; headingLevel?: 'h2' | 'h3' }
 const { e, headingLevel = 'h3' } = Astro.props;
 const H = headingLevel;
@@ -21,7 +21,7 @@ const fixture = e.provenance.approval === 'fixture';
       <li><Icon name={e.venueType === 'online' ? 'globe' : 'pin'} />{e.venueType === 'online' ? 'Online' : e.venue ?? 'Venue to be confirmed'}</li>
     </ul>
     <p class="event-card__action">
-      {canRegister(e) ? <span class="badge">Registration open</span> : phase === 'past' ? <span class="muted">Registration closed</span> : phase === 'cancelled' ? <span class="muted">This event will not take place</span> : <span class="muted">Registration details to follow</span>}
+      {showsDemoRegistration(e) ? <span class="badge badge--fixture">Registration: demo only</span> : canRegister(e) ? <span class="badge">Registration open</span> : phase === 'past' ? <span class="muted">Registration closed</span> : phase === 'cancelled' ? <span class="muted">This event will not take place</span> : <span class="muted">Registration details to follow</span>}
     </p>
   </div>
 </article>

@@ -127,9 +127,7 @@ const inventory = [
         <ArticleCard a={blogPosts[0]} />
       </div>
       <div class="grid grid--3 demo-gap">
-        <EventCard e={events[0]} />
-        <EventCard e={events[3]} />
-        <EventCard e={events[4]} />
+        {[events[0], events[3], events[4]].filter(Boolean).map((e) => <EventCard e={e!} />)}
       </div>
       <div class="surface-product demo-product"><div class="grid grid--3"><ProductCard p={productBySlug('qualitywatcher-ai-tools')!} /><ProductCard p={productBySlug('agents-as-a-service')!} /><ProductCard p={productBySlug('prism')!} /></div></div>
     </div>

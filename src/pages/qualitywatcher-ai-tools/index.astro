@@ -1,4 +1,5 @@
 ---
+import { RELEASE, REVIEW, rn } from '../../lib/release';
 /**
  * QUALITYWATCHER AI TOOLS (/qualitywatcher-ai-tools/ — legacy URL preserved).
  * Product-forward presentation inside the shared system (same header/footer/type/buttons).
@@ -22,7 +23,7 @@ import { caseStudyBySlug } from '../../data/caseStudies';
 import { faqLd } from '../../lib/schema';
 import type { FaqItem } from '../../data/types';
 
-const crumbs = [{ label: 'Home', href: '/' }, { label: 'Products', href: '/products/' }, { label: 'QualityWatcher AI Tools' }];
+const crumbs = [{ label: 'Home', href: '/' }, { label: 'Products', href: '/products/' }, { label: 'QualityWatcher AI' }];
 const qwExternal = { label: 'Open QualityWatcher AI', href: 'https://www.qualitywatcher.ai/', external: true, handoffNote: 'Opens qualitywatcher.ai, the separate QualityWatcher product site' };
 const statusMeta = {
   'requires-sign-in': { label: 'Requires sign-in', cls: 'badge--warning' },
@@ -38,10 +39,10 @@ const faqs: FaqItem[] = [
 ];
 const wssc = caseStudyBySlug('ai-powered-test-case-generation-wssc');
 ---
-<BaseLayout seo={{ title: 'QualityWatcher AI Tools: AI Test Case & Automation Generation | QualityWorks', description: 'Generate test cases from any requirement format, turn them into UI automation and get automation help with QualityWatcher AI tools from QualityWorks.' }} breadcrumbs={crumbs} jsonLd={[faqLd(faqs)]}>
+<BaseLayout seo={{ title: 'QualityWatcher AI: AI Test Case & Automation Generation | QualityWorks', description: 'Generate test cases from any requirement format, turn them into UI automation and get automation help with QualityWatcher AI tools from QualityWorks.' }} breadcrumbs={crumbs} jsonLd={[faqLd(faqs)]}>
   <PageHero variant="product" eyebrow="QualityWatcher AI · Product" title="Simplify quality with AI-driven testing tools" lede="Generate real-world test cases from requirements in any format, convert them into automation scripts, and get expert automation help — with your QA team reviewing every output." breadcrumbs={crumbs} primary={qwExternal} secondary={{ label: 'Talk to an automation expert', href: '/contact-us/' }}>
     <Fragment slot="aside">
-      <figure class="mock" aria-labelledby="mock-cap">
+      <figure class="mock" aria-labelledby="mock-cap" data-release-blocker={RELEASE ? 'illustrative-mock: replace with approved product screenshots' : undefined}>
         <div class="mock__bar" aria-hidden="true"><span></span><span></span><span></span><p>Rapid Test Case Generation</p></div>
         <div class="mock__body">
           <p class="mock__label mono">Input · user story</p>
@@ -108,7 +109,7 @@ const wssc = caseStudyBySlug('ai-powered-test-case-generation-wssc');
           <li><span><strong>Human-validated:</strong> whether a test case reflects the real requirement, edge cases specific to your domain, data privacy of inputs, and whether a script is fit to run in your pipeline.</span></li>
           <li><span><strong>Where QualityWorks helps:</strong> our consultants set up review workflows and train teams — see the WSSC pilot below.</span></li>
         </ul>
-        <p class="muted small-note" data-review-note="Proposed copy — confirm with product owner">Proposed copy. The exact automated vs. human steps must be confirmed by the product owner.</p>
+        {REVIEW && <p class="muted small-note" data-review-note={rn('Proposed copy — confirm with product owner')}>Proposed copy. The exact automated vs. human steps must be confirmed by the product owner.</p>}
       </div>
     </div>
   </section>
@@ -128,7 +129,7 @@ const wssc = caseStudyBySlug('ai-powered-test-case-generation-wssc');
   <section class="section" aria-labelledby="access-title">
     <div class="container">
       <SectionHeading eyebrow="Access" title="Registered and unregistered access" id="access-title" />
-      <Alert tone="warning" title="Discrepancy to resolve before launch (P-03)">
+      <Alert tone="warning" title="Discrepancy to resolve before launch (P-03)" data-release-blocker={RELEASE ? 'unresolved: QualityWatcher access model' : undefined}>
         <p>The live page lists the tiers below, but every tool link currently redirects to a sign-in page. Keep, change or remove this section once the product owner confirms the access model.</p>
       </Alert>
       <div class="grid grid--2 tiers">

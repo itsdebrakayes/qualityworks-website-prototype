@@ -4,7 +4,7 @@ const observed = (url: string, note?: string): Provenance => ({ source: 'externa
 
 export const products: Product[] = [
   {
-    slug: 'qualitywatcher-ai-tools', path: '/qualitywatcher-ai-tools/', name: 'QualityWatcher AI Tools', accent: 'teal',
+    slug: 'qualitywatcher-ai-tools', path: '/qualitywatcher-ai-tools/', name: 'QualityWatcher AI', accent: 'teal',
     tagline: 'AI tools for test creation and automation',
     summary: 'Generate test cases from requirements in any format, convert them into UI automation, and get help from an automation expert assistant.',
     kind: 'internal-page', status: 'available', externalUrl: 'https://www.qualitywatcher.ai/',
@@ -12,8 +12,8 @@ export const products: Product[] = [
   },
   {
     slug: 'qualitywatcher-tcm', path: 'https://qualitywatcher.com/', name: 'QualityWatcher Test Management', accent: 'teal',
-    tagline: 'AI test management',
-    summary: 'Test case management platform. Listed in the live navigation as “AI Test Management”.',
+    tagline: 'Test case management',
+    summary: 'Test case management platform on qualitywatcher.com, separate from the QualityWatcher AI test-creation tools. Listed on the current site as “AI Test Management”.',
     kind: 'external-platform', status: 'external', externalUrl: 'https://qualitywatcher.com/',
     provenance: observed('https://qualitywatcher.com/', 'Page title: "QualityWatcher - Next-Gen Test Case Management Tool". Relationship to qualitywatcher.ai must be clarified (audit P-02).'),
   },

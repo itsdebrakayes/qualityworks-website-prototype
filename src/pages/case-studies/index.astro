@@ -1,4 +1,5 @@
 ---
+import { RELEASE, REVIEW } from '../../lib/release';
 /**
  * RESULTS / CASE STUDIES (/case-studies/ — legacy URL). Filterable by industry and service (combined).
  * Primary persona: Enterprise CTO (A) and Public sector (C). Core question: "Have they solved this before?"
@@ -30,11 +31,11 @@ const serviceOpts = [...new Set(caseStudies.flatMap((c) => c.serviceTags))].map(
       <h2 id="list-title" class="visually-hidden">Case study list</h2>
       <FilterBar id="cs-filter" resultLabel="case studies" filters={[{ name: 'industry', label: 'Industry', options: industryOpts }, { name: 'service', label: 'Service', options: serviceOpts }]} />
 
-      <details class="proto-states" data-review-note="Prototype-only">
+      {REVIEW && <details class="proto-states" data-review-note="Prototype-only">
         <summary><FixtureLabel text="Prototype control — data states" /></summary>
         <p>Case studies are static today. If they move to a CMS/API, the list must handle these states:</p>
         <div class="btn-row"><button type="button" class="btn btn--secondary btn--sm" data-sim="loading">Show loading state</button><button type="button" class="btn btn--secondary btn--sm" data-sim="error">Simulate data error</button></div>
-      </details>
+      </details>}
 
       <Alert tone="danger" title="Case studies couldn’t be loaded" role="alert" id="cs-error" hidden>
         <p>This is a simulated error. <button type="button" class="btn btn--sm" data-retry>Try again</button></p>

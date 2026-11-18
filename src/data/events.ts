@@ -5,7 +5,9 @@ import type { EventRecord } from './types';
  * an event whose end date has passed can never show a registration CTA.
  * Prototype "today" is the build date; production should compute on request or rebuild daily.
  */
-export const events: EventRecord[] = [
+import { RELEASE } from '../lib/release';
+
+const allEvents: EventRecord[] = [
   {
     id: 'pnsqc-2026', slug: 'pnsqc-2026', title: 'Pacific Northwest Software Quality Conference 2026',
     summary: 'Test Design Is Not Dead: It Just Looks Different Now — a fireside chat with Stacy Kirk and the Smartesting team.',
@@ -35,7 +37,7 @@ export const events: EventRecord[] = [
     id: 'fixture-webinar-upcoming', slug: 'fixture-agentic-qa-webinar', title: '[Fixture] Agentic QA in practice — webinar',
     summary: 'Illustrative upcoming online event used to demonstrate the registration state.',
     startDate: '2027-02-10T11:00:00-05:00', endDate: '2027-02-10T12:00:00-05:00', timeZone: 'America/New_York', venueType: 'online',
-    registrationUrl: '#fixture-registration', status: 'scheduled',
+    demoRegistration: true, status: 'scheduled',
     description: 'This is not a real event. It exists only to show how an upcoming online event with registration appears.',
     provenance: { source: 'fixture', approval: 'fixture' },
   },
@@ -43,11 +45,14 @@ export const events: EventRecord[] = [
     id: 'fixture-cancelled', slug: 'fixture-cancelled-meetup', title: '[Fixture] Quality engineering meetup — Kingston',
     summary: 'Illustrative cancelled event used to demonstrate the cancelled state.',
     startDate: '2027-01-20T18:00:00-05:00', endDate: '2027-01-20T20:00:00-05:00', timeZone: 'America/Jamaica', venueType: 'in-person', venue: 'Kingston, Jamaica',
-    registrationUrl: '#fixture-registration', status: 'cancelled',
+    demoRegistration: true, status: 'cancelled',
     description: 'This is not a real event. It exists only to show that cancelled events never show registration.',
     provenance: { source: 'fixture', approval: 'fixture' },
   },
 ];
+
+/** Release builds exclude fixtures and events without confirmed dates (“Date to be confirmed”). */
+export const events: EventRecord[] = RELEASE ? allEvents.filter((e) => !['fixture', 'not-verified'].includes(e.provenance.approval) && !!e.startDate) : allEvents;
 
 export type EventPhase = 'upcoming' | 'past' | 'cancelled' | 'date-tbc';
 export function eventPhase(e: EventRecord, now = new Date()): EventPhase {
@@ -57,6 +62,10 @@ export function eventPhase(e: EventRecord, now = new Date()): EventPhase {
 }
 export function canRegister(e: EventRecord, now = new Date()) {
   return eventPhase(e, now) === 'upcoming' && !!e.registrationUrl;
+}
+/** Upcoming fixture events show a disabled demo control (no placeholder links). */
+export function showsDemoRegistration(e: EventRecord, now = new Date()) {
+  return eventPhase(e, now) === 'upcoming' && !!e.demoRegistration && !e.registrationUrl;
 }
 export function formatEventDate(e: EventRecord) {
   if (!e.startDate) return 'Date to be confirmed';

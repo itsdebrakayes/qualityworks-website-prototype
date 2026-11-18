@@ -23,7 +23,7 @@ export const services: Service[] = [
     heroTitle: 'Allow automation to save your team time and money',
     heroLede: 'Deliver higher-quality results in less time by building automation planning into your quality efforts and building your team’s automation skills. Our tools, like QualityWatcher, use AI to speed up test creation.',
     primaryCta: contact('Talk to an automation expert'),
-    secondaryCta: { label: 'Read the Swagbucks case study', href: '/case-study/how-automation-saved-big-bucks-and-drove-faster-app-releases/', kind: 'secondary' },
+    secondaryCta: { label: 'Read the Swagbucks case study', href: '/case-studies/how-automation-saved-big-bucks-and-drove-faster-app-releases/', kind: 'secondary' },
     challenge: 'When every release depends on a manual regression pass, teams trade speed for confidence. Defects surface late, testers repeat the same checks each cycle, and automation that does exist is brittle or owned by one person.',
     capabilities: [
       { title: 'Mobile test automation', text: 'Full-suite automated testing for mobile apps, with frameworks that integrate open-source tools for broader coverage.' },
@@ -61,7 +61,7 @@ export const services: Service[] = [
     heroTitle: 'Full-stack testing solutions',
     heroLede: 'Ensure product quality from start to finish with testing catered to where you are in the project lifecycle — from manual testing to security testing.',
     primaryCta: contact('Book a consultation'),
-    secondaryCta: { label: 'See the CMN case study', href: '/case-study/increasing-regression-test-coverage-by-15x/', kind: 'secondary' },
+    secondaryCta: { label: 'See the CMN case study', href: '/case-studies/increasing-regression-test-coverage-by-15x/', kind: 'secondary' },
     challenge: 'Most quality gaps live between layers: UI tests pass while an API contract breaks, or functional suites are green while performance degrades under load.',
     capabilities: [
       { title: 'Test automation', text: 'We define, customize and integrate automated test frameworks into your testing pipeline.' },
@@ -182,8 +182,8 @@ export const services: Service[] = [
     heroTitle: 'Build smarter. Deliver faster. Create with confidence.',
     heroLede: 'We take your vision from concept to deployment, using AI-driven development to accelerate delivery while a continuous quality model keeps every iteration tested.',
     primaryCta: contact('Book a free consultation'),
-    secondaryCta: { label: 'See the Shared Harvest case study', href: '/case-study/social-enterprise-org/', kind: 'secondary' },
-    challenge: 'Speed and quality usually trade off in early product development. Teams either over-invest before validating the idea or ship fast and inherit defects they cannot afford to fix.',
+    secondaryCta: { label: 'See the Shared Harvest case study', href: '/case-studies/social-enterprise-org/', kind: 'secondary' },
+    challenge: 'Speed and quality usually trade off in early product development. Teams either over-invest before validating the idea or release fast and inherit defects they cannot afford to fix.',
     capabilities: [
       { title: 'AI-accelerated development', text: 'AI and automation speed up coding, testing and iteration cycles for a faster time to market.' },
       { title: 'User-driven design & validation', text: 'Test your idea early with real users to confirm product–market fit before heavy investment.' },
@@ -403,8 +403,8 @@ export const servicesByPathway = (p: Service['pathway']) => services.filter((s) 
 
 export const pathways = [
   {
-    id: 'quality' as const, index: '01', label: 'Software quality', title: 'AI-powered & autonomous testing',
-    text: 'Ship with confidence. AI-augmented testing, regression automation and managed QA that catches defects earlier.',
+    id: 'quality' as const, index: '01', label: 'Software quality', title: 'AI-powered testing', // review R-33: renamed from “AI-powered & autonomous testing” — confirm with Janique
+    text: 'Release with confidence. AI-augmented testing, regression automation and managed QA that catches defects earlier.',
     href: '/services/full-stack-testing/', cta: 'Explore testing services',
   },
   {

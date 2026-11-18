@@ -1,4 +1,5 @@
 ---
+import { RELEASE, REVIEW } from '../lib/release';
 /**
  * Contact form — preserves the live field set exactly (First Name, Last Name, Company, Job Title,
  * Email, How can we help you?, privacy acceptance). Live site uses WPForms (+ reCAPTCHA), not HubSpot.
@@ -52,16 +53,16 @@ const fields = [
       </div>
     </div>
 
-    <fieldset class="contact-form__sim" data-review-note="Prototype-only control">
+    {REVIEW && <fieldset class="contact-form__sim" data-review-note="Prototype-only control">
       <legend><FixtureLabel text="Prototype control — simulated submission" /></legend>
       <p class="hint">No data leaves this page. Choose what the simulated server returns:</p>
       <div class="sim-options">
         <label><input type="radio" name="simulate" value="success" checked /> Success</label>
         <label><input type="radio" name="simulate" value="error" /> Server error</label>
       </div>
-    </fieldset>
+    </fieldset>}
 
-    <div class="contact-form__actions">
+    <div class="contact-form__actions" data-release-blocker={RELEASE ? 'contact-form: no approved HubSpot endpoint; submission is simulated' : undefined}>
       <button class="btn" type="submit" data-submit>
         <span class="btn__label">Send message</span>
         <span class="spinner" aria-hidden="true"></span>
@@ -181,11 +182,12 @@ const fields = [
       submit.setAttribute('aria-busy', 'true'); submit.disabled = true;
       submit.querySelector('.btn__label')!.textContent = 'Sending…';
       live.textContent = 'Sending your message';
-      const outcome = (form.querySelector<HTMLInputElement>('input[name="simulate"]:checked')?.value) ?? 'success';
+      // No simulation control (release build) and no approved endpoint => never report success.
+      const outcome = form.querySelector<HTMLInputElement>('input[name="simulate"]:checked')?.value ?? 'not-configured';
       await new Promise((r) => setTimeout(r, 1200)); // simulated latency — NO network call
       submit.removeAttribute('aria-busy'); submit.disabled = false;
       submit.querySelector('.btn__label')!.textContent = 'Send message';
-      if (outcome === 'error') {
+      if (outcome !== 'success') {
         live.textContent = '';
         error.hidden = false; error.focus();
         return;

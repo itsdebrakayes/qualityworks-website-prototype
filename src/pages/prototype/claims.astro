@@ -8,8 +8,8 @@ const crumbs = [{ label: 'Home', href: '/' }, { label: 'Prototype review hub', h
   <PageHero eyebrow="Prototype · Governance" title="Claims register" lede="Every number, award and certification displayed in the prototype. Turn on “Review annotations” to see claim IDs next to each claim on the pages. Published on the live site does not mean approved for the rebuild." breadcrumbs={crumbs} compact />
   <section class="section"><div class="container">
     <div class="table-scroll"><table class="data-table">
-      <thead><tr><th scope="col">ID</th><th scope="col">Statement</th><th scope="col">Measurement context</th><th scope="col">Evidence at source</th><th scope="col">Approval</th></tr></thead>
-      <tbody>{claims.map((c) => <tr id={c.id}><th scope="row">{c.id}</th><td>{c.statement}</td><td>{c.context}</td><td>{c.evidence} <a href={c.sourceUrl} target="_blank" rel="noopener">Source<span class="visually-hidden"> (opens in a new tab)</span></a></td><td><span class="badge badge--warning">{c.approval}</span></td></tr>)}</tbody>
+      <thead><tr><th scope="col">ID</th><th scope="col">Statement</th><th scope="col">Measurement context</th><th scope="col">Evidence at source</th><th scope="col">Approval</th><th scope="col">Verification</th></tr></thead>
+      <tbody>{claims.map((c) => <tr id={c.id}><th scope="row">{c.id}</th><td>{c.statement}</td><td>{c.context}</td><td>{c.evidence} <a href={c.sourceUrl} target="_blank" rel="noopener">Source<span class="visually-hidden"> (opens in a new tab)</span></a></td><td><span class="badge badge--warning">{c.approval}</span></td><td>{c.verification ? <span class="badge badge--danger">{c.verification.replace(/-/g, ' ')}</span> : <span class="muted">Not yet assessed</span>}</td></tr>)}</tbody>
     </table></div>
   </div></section>
 </BaseLayout>

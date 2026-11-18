@@ -1,4 +1,5 @@
 ---
+import { RELEASE, REVIEW, rn } from '../../lib/release';
 /**
  * INDUSTRY / AUDIENCE template. Each record supplies its own challenge, considerations, capabilities
  * and evidence — pages are not name-swapped copies. Summary records show a migration notice.
@@ -25,13 +26,13 @@ const prods = (ind.products ?? []).map(productBySlug).filter(Boolean);
 const cases = ind.caseStudies.map(caseStudyBySlug).filter(Boolean);
 ---
 <BaseLayout seo={ind.seo} breadcrumbs={crumbs}>
-  <PageHero eyebrow={ind.status === 'proposed' ? `${ind.name} · proposed page` : ind.name} title={ind.heroTitle} lede={ind.heroLede} breadcrumbs={crumbs} primary={ind.primaryCta} secondary={{ label: 'See relevant results', href: '#evidence' }} />
+  <PageHero eyebrow={ind.status === 'proposed' && REVIEW ? `${ind.name} · proposed page` : ind.name} title={ind.heroTitle} lede={ind.heroLede} breadcrumbs={crumbs} primary={ind.primaryCta} secondary={{ label: 'See relevant results', href: '#evidence' }} />
 
   {ind.contentDepth === 'summary' && (
-    <div class="container"><Alert tone="warning" title="Summary record — full content pending migration" class="ind-alert"><p>{ind.provenance.note}</p></Alert></div>
+    <div class="container" data-release-blocker={RELEASE ? 'summary-record: industry copy not migrated' : undefined}><Alert tone="warning" title="Summary record — full content pending migration" class="ind-alert"><p>{ind.provenance.note}</p></Alert></div>
   )}
   {ind.status === 'proposed' && (
-    <div class="container"><Alert tone="info" title="Proposed page — requires QM-41 sitemap approval" class="ind-alert"><p>{ind.provenance.note}</p></Alert></div>
+    <div class="container" data-release-blocker={RELEASE ? 'proposed-route: awaiting QM-41 approval' : undefined}><Alert tone="info" title="Proposed page — requires QM-41 sitemap approval" class="ind-alert"><p>{ind.provenance.note}</p></Alert></div>
   )}
 
   <section class="section" aria-labelledby="challenge-title">
@@ -66,7 +67,7 @@ const cases = ind.caseStudies.map(caseStudyBySlug).filter(Boolean);
     <div class="container">
       <SectionHeading eyebrow="Evidence" title="Published results" id="evidence-title" />
       {cases.length ? <div class="grid grid--3">{cases.map((c) => <CaseStudyCard cs={c!} />)}</div> : <p>No published case studies for this sector yet.</p>}
-      {ind.evidenceNote && <p class="evidence-note" data-review-note="Evidence note">{ind.evidenceNote}</p>}
+      {ind.evidenceNote && <p class="evidence-note" data-review-note={rn('Evidence note')}>{ind.evidenceNote}</p>}
     </div>
   </section>
 

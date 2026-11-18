@@ -2,6 +2,8 @@ import raw from './migrated/case-studies.wp-snapshot.json';
 import type { CaseStudy } from './types';
 import { localMedia } from '../lib/media';
 import { normalizeText } from '../lib/glyphs';
+import { applyCorrections } from './corrections';
+import { caseStudyAlt } from './altText';
 
 /**
  * Case studies = WordPress snapshot (parsed from rendered public pages; Beaver Builder stores
@@ -17,9 +19,9 @@ type Curated = Pick<CaseStudy, 'client' | 'industry' | 'serviceTags' | 'relatedS
 const m = (value: string, label: string, context: string) => ({ value, label, context });
 
 const curated: Record<string, Curated> = {
-  'ai-powered-test-case-generation-wssc': { client: 'Washington Suburban Sanitary Commission (WSSC)', industry: 'public-sector', serviceTags: ['test-automation', 'ai-service'], relatedSolution: 'qualitywatcher-ai-tools', contribution: 'Piloted AI-powered test case generation with the WSSC QA team.', metrics: [m('30–80%', 'Time savings in test case creation', 'Pilot; range depends on complexity (headline states "up to 80%").'), m('67%', 'Reported efficiency', 'Survey of pilot QA engineers; sample size not stated.')] },
+  'ai-powered-test-case-generation-wssc': { client: 'Washington Suburban Sanitary Commission (WSSC)', industry: 'public-sector', serviceTags: ['test-automation', 'ai-service'], relatedSolution: 'qualitywatcher-ai-tools', contribution: 'Piloted AI-powered test case generation with the WSSC QA team.', metrics: [] /* R-25–R-27: figures removed pending the WSSC pilot report */ },
   'accelerating-confidence-qa-modernization-for-wisyncos-digital-ecosystem': { client: 'Wisynco Group Limited', industry: 'retail', serviceTags: ['test-automation', 'full-stack-testing'], relatedSolution: 'test-automation', contribution: 'QA modernization and automation across D365 ERP, CRM and supply chain systems.', metrics: [m('94.5%', 'Core D365 workflows automated', 'Against an original target; see source.'), m('100%', 'Functional CRM test coverage', 'As published.'), m('100%', 'QA team trained on automation', 'As published.')] },
-  'ipipelines-legacy-platform-modernization': { client: 'Financial technology firm (via 3CI)', industry: 'finance-banking', serviceTags: ['test-automation', 'api-cloud-services-testing'], relatedSolution: 'test-automation', contribution: 'Established QA practices and automation for a legacy platform modernization over 8 months.', metrics: [m('2 weeks → 2 days', 'Regression testing cycle', '8-month engagement.'), m('90%+', 'Automation coverage', 'As published.'), m('80%+', 'Reduction in manual tester hours', 'As published.')] },
+  'ipipelines-legacy-platform-modernization': { client: 'Financial technology firm (name not approved for disclosure)', industry: 'finance-banking', serviceTags: ['test-automation', 'api-cloud-services-testing'], relatedSolution: 'test-automation', contribution: 'Established QA practices and automation for a legacy platform modernization over 8 months.', metrics: [m('90%+', 'Automation coverage', 'As published.'), m('80%+', 'Reduction in manual tester hours', 'As published.')] },
   'transforming-workforce-development-through-modern-technology': { client: 'Knowledge Architects', industry: 'technology', serviceTags: ['custom-software-development', 'full-stack-testing'], relatedSolution: 'custom-software-development', contribution: 'Platform performance and quality improvements for a workforce training platform.', metrics: [m('79% → 98%', 'Application quality', 'Pass rate of test cases, as published.'), m('40%', 'Faster 3D model loading', '5s to 3s.')] },
   'leading-entertainment-platform-with-site-reliability-engineering': { client: 'Fandango', industry: 'media-entertainment', serviceTags: ['non-functional-testing', 'performance-testing'], relatedSolution: 'non-functional-testing', contribution: 'Site reliability engineering and performance testing ahead of peak presales.', metrics: [m('7×', 'Traffic headroom', '85,000+ concurrent users during the Star Wars: The Last Jedi presale.'), m('99.9%', 'Uptime', 'Subsequent releases, as published.')] },
   'social-enterprise-org': { client: 'Shared Harvest', industry: 'social-impact', serviceTags: ['custom-software-development', 'technology-advisory-partnership'], relatedSolution: 'custom-software-development', contribution: 'Designed and built a role-based volunteer matching platform.', metrics: [m('3×', 'Faster application submission', 'As published.'), m('100+', 'Projects posted in the first 6 months', 'As published.')] },
@@ -42,7 +44,8 @@ const firstSentences = (s: string, n = 2) => (s.match(/[^.!?]+[.!?]+/g) ?? [s]).
 export const caseStudies: CaseStudy[] = (raw as any[])
   .map((r) => {
     const c = curated[r.slug];
-    const url = `https://qualityworkscg.com/case-study/${r.slug}/`;
+    const url = `https://qualityworkscg.com/case-study/${r.slug}/`; // live source URL (evidence)
+    const fix = (field: string, v: string) => applyCorrections(`case-study:${r.slug}`, field, v ?? '');
     return {
       id: `cs-${r.slug}`,
       slug: r.slug,
@@ -51,16 +54,16 @@ export const caseStudies: CaseStudy[] = (raw as any[])
       clientDisclosureApproved: null,
       industry: c.industry,
       serviceTags: c.serviceTags,
-      summary: normalizeText(r.excerpt) || firstSentences(clean(r.challenge), 1),
-      customer: clean(r.customer),
-      challenge: clean(r.challenge),
+      summary: normalizeText(fix('excerpt', r.excerpt)) || firstSentences(clean(r.challenge), 1),
+      customer: fix('customer', clean(r.customer)),
+      challenge: fix('challenge', clean(r.challenge)),
       contribution: c.contribution,
-      approach: clean(r.approach),
-      outcome: clean(r.outcome),
+      approach: fix('approach', clean(r.approach)),
+      outcome: fix('outcome', clean(r.outcome)),
       metrics: c.metrics.map((x) => ({ ...x, metricSource: url })),
       date: r.date,
       image: localMedia(r.image),
-      altText: r.alt || '',
+      altText: caseStudyAlt[r.slug] ?? r.alt ?? '',
       relatedSolution: c.relatedSolution,
       cta: { label: 'Discuss a similar challenge', href: '/contact-us/' },
       provenance: { source: 'wordpress-migrated' as const, approval: 'published-live' as const, sourceUrl: url, retrievedAt: '2026-11-17', note: 'Client disclosure approval not verified.' },

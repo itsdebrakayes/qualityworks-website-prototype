@@ -40,6 +40,8 @@ export function normalizeHeadings(html: string, start = 2): string {
 /** External links in migrated HTML open in a new tab with an accessible notice. */
 export function normalizeLinks(html: string, isBuilt: (path: string) => boolean = () => true): string {
   return html
+    // Legacy case-study paths move to the standardised /case-studies/{slug}/ pattern.
+    .replace(/href="(?:https?:\/\/(?:www\.)?qualityworkscg\.com)?\/case-study\/([^"]+)"/gi, 'href="/case-studies/$1"')
     // Internal absolute links become root-relative so they work on any host (and in the prototype).
     .replace(/href="https?:\/\/(?:www\.)?qualityworkscg\.com(\/[^"]*)?"/gi, (m, path) => (isBuilt(path || '/') ? `href="${path || '/'}"` : m)).replace(/<a\s+([^>]*?)href="(https?:\/\/(?!(?:www\.)?qualityworkscg\.com\/(?:services|industries|case-study|engagement-models)\/)[^"]+)"([^>]*)>([\s\S]*?)<\/a>/gi, (_m, pre, href, post, text) => {
     const attrs = `${pre}${post}`.replace(/\s*(target|rel)="[^"]*"/gi, '');

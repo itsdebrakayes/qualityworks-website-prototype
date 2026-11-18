@@ -1,4 +1,5 @@
 ---
+import { rn } from '../lib/release';
 /**
  * Testimonial / proof block. Quotes are published on the live site today; each requires re-approval
  * from the person quoted before reuse (approval state shown in review mode).
@@ -9,7 +10,7 @@ const list = Astro.props.ids ? testimonials.filter((t) => Astro.props.ids!.inclu
 ---
 <div class="proof">
   {list.map((t) => (
-    <figure class="proof__item" data-review-note={`${t.id}: ${t.provenance.approval}`}>
+    <figure class="proof__item" data-review-note={rn(`${t.id}: ${t.provenance.approval}`)}>
       <blockquote><p>{t.quote}</p></blockquote>
       <figcaption><span class="proof__name">{t.name}</span><span class="proof__role">{t.role}</span></figcaption>
     </figure>

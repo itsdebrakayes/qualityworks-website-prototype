@@ -1,9 +1,10 @@
 ---
+import { RELEASE, REVIEW } from '../lib/release';
 /** Wireframe placeholder for modules awaiting product-owner content. Clearly not final design. */
 interface Props { title: string; decision: string; owner?: string }
 const { title, decision, owner = 'Product owner' } = Astro.props;
 ---
-<div class="wf" role="note">
+<div class="wf" role="note" data-release-blocker={RELEASE ? `content-missing: ${title}` : undefined}>
   <p class="wf__tag mono">Wireframe · decision needed</p>
   <p class="wf__title">{title}</p>
   <p class="wf__decision"><strong>{owner}:</strong> {decision}</p>

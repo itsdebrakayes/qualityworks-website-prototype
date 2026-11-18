@@ -63,8 +63,8 @@ export const primaryNav: NavItem[] = [
       {
         heading: 'Software quality products',
         links: [
-          { label: 'QualityWatcher AI Tools', href: '/qualitywatcher-ai-tools/', description: 'AI tools for test creation and automation' },
-          { label: 'AI Test Management (QualityWatcher)', href: 'https://qualitywatcher.com/', description: 'Test case management platform', external: true },
+          { label: 'QualityWatcher AI', href: '/qualitywatcher-ai-tools/', description: 'AI test creation and automation (qualitywatcher.ai)' },
+          { label: 'QualityWatcher Test Management', href: 'https://qualitywatcher.com/', description: 'Test case management (qualitywatcher.com)', external: true },
           { label: 'PRISM™ AI Output Quality Standard', href: '/products/prism/', description: '10-dimension framework for AI outputs', status: 'proposed' },
         ],
       },
@@ -184,7 +184,7 @@ export function isActive(currentPath: string, item: NavItem): boolean {
   return links.some((l) => !l.external && (currentPath === l.href || (l.href !== '/' && currentPath.startsWith(l.href))))
     || (item.id === 'solutions' && /^\/(services|engagement-models|maturity-assessments|innovation-tourism)\//.test(currentPath))
     || (item.id === 'products' && /^\/(products|qualitywatcher-ai-tools)\//.test(currentPath))
-    || (item.id === 'results' && /^\/case-stud(y|ies)\//.test(currentPath))
+    || (item.id === 'results' && /^\/case-studies\//.test(currentPath))
     || (item.id === 'resources' && /^\/(blog|resources|events)\//.test(currentPath));
 }
 function allNavLinksFor(item: NavItem): NavLink[] {

@@ -2,6 +2,10 @@ import raw from './migrated/articles.wp-snapshot.json';
 import type { Article } from './types';
 import { localMedia } from '../lib/media';
 import { normalizeHtml, normalizeHeadings, normalizeLinks, normalizeText } from '../lib/glyphs';
+import { applyCorrections, corrections } from './corrections';
+import { articleAlt } from './altText';
+const applyCorrectionsList = (target: string, field: string, list: string[]) =>
+  corrections.some((c) => c.target === target && c.field === field) ? applyCorrections(target, field, list.join('|')).split('|') : list;
 
 const migratedSlugs = new Set((raw as any[]).map((p) => p.slug));
 // Internal links whose target exists in this build become root-relative; links to posts that are
@@ -14,14 +18,14 @@ const builtPath = (path: string) => {
 /** WordPress posts (migrated snapshot) + clearly labelled fixtures for content types with no live data. */
 const migrated: Article[] = (raw as any[]).map((p) => ({
   ...p,
-  title: normalizeText(p.title),
-  excerpt: normalizeText(p.excerpt),
-  bodyHtml: normalizeLinks(normalizeHeadings(normalizeHtml(p.bodyHtml)), builtPath),
+  title: normalizeText(applyCorrections(`article:${p.slug}`, 'title', p.title)),
+  excerpt: normalizeText(applyCorrections(`article:${p.slug}`, 'excerpt', p.excerpt)),
+  bodyHtml: normalizeLinks(normalizeHeadings(normalizeHtml(applyCorrections(`article:${p.slug}`, 'bodyHtml', p.bodyHtml))), builtPath),
+  tags: applyCorrectionsList(`article:${p.slug}`, 'tags', p.tags),
   type: p.categories.includes('News') || /^(qualityworks-wins|announcing)/.test(p.slug) ? 'news' : 'blog',
   image: localMedia(p.image),
-  // Weak WordPress alt text (e.g. "untitled design 3") is cleared so the image is treated as
-  // decorative next to the visible title. Audit item A11Y-03.
-  imageAlt: /untitled|featured image|square|^nlp|^smb/i.test(p.imageAlt ?? '') ? '' : p.imageAlt,
+  // Alt text rewritten after viewing each image (src/data/altText.ts). Audit item A11Y-03.
+  imageAlt: articleAlt[p.slug] ?? p.imageAlt ?? '',
   provenance: { source: 'wordpress-migrated', approval: 'published-live', sourceUrl: p.source.url, retrievedAt: p.source.retrievedAt },
 }));
 
@@ -35,7 +39,8 @@ const fixtures: Article[] = [
   },
 ];
 
-export const articles: Article[] = [...migrated, ...fixtures].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+import { RELEASE } from '../lib/release';
+export const articles: Article[] = [...migrated, ...(RELEASE ? [] : fixtures)].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
 export const blogPosts = migrated;
 export const articleBySlug = (slug: string) => migrated.find((a) => a.slug === slug);
 export const contentTypes = [

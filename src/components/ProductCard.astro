@@ -1,11 +1,12 @@
 ---
+import { RELEASE, REVIEW } from '../lib/release';
 import Icon from './Icon.astro';
 import type { Product } from '../data/types';
 interface Props { p: Product; headingLevel?: 'h2' | 'h3' }
 const { p, headingLevel = 'h3' } = Astro.props;
 const H = headingLevel;
 const external = p.path.startsWith('http');
-const statusLabel = { available: 'On this site', external: 'Separate platform', 'information-only': 'Information', 'awaiting-product-owner': 'Details pending' }[p.status];
+const statusLabel = { available: 'On this site', external: 'Separate platform', 'information-only': 'Information', 'awaiting-product-owner': RELEASE ? 'Framework' : 'Details pending' }[p.status];
 ---
 <article class:list={['card', 'product-card', `product-card--${p.accent}`]}>
   <div class="card__body">
