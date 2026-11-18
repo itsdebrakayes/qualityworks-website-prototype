@@ -1,6 +1,22 @@
-/** Generates docs/07-qa-testing-summary.md from qa-output/results.json (run after npm run qa:checks). */
+/**
+ * Generates docs/07-qa-testing-summary.md from qa-output/results.json (run after npm run qa:checks).
+ *
+ * RUN BY: `npm run qa:checks` (runs scripts/qa-checks.mjs, then this script).
+ * INPUTS: qa-output/results.json (written by qa-checks.mjs) and docs/_manual-qa.md (hand-written
+ *   manual QA notes, pasted in verbatim).
+ * OUTPUT: OVERWRITES docs/07-qa-testing-summary.md (frontmatter + summary + one table row per check
+ *   + manual section + list of external destinations). That doc is also rendered at
+ *   /prototype/07-qa-testing-summary/. Never edit docs/07 by hand; edit this template or
+ *   docs/_manual-qa.md and re-run.
+ *
+ * HOW TO EXTEND: when you add a QA check, map its id to the QM-112 requirement / acceptance
+ *   criteria it exercises in QM112 below (CONTRIBUTING.md 4.9). Unmapped ids show "—".
+ */
 import { readFileSync, writeFileSync } from 'node:fs';
 const r = JSON.parse(readFileSync(new URL('../qa-output/results.json', import.meta.url)));
+// Escape a value for a markdown table cell: HTML-escape & < >, turn | (column separator) into /,
+// flatten newlines, and replace the arrow (U+2192) and almost-equal sign (U+2248), which are not in
+// the brand font's ranges, with characters that are, so the rendered doc passes glyph-lint.
 const esc = (s = '') => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\|/g, '/').replace(/\n/g, ' ').replace(/→/g, '›').replace(/≈/g, 'approx. ');
 // QM-112 v0.5 requirement / acceptance-criteria IDs exercised by each automated test.
 const QM112 = {
@@ -12,10 +28,14 @@ const QM112 = {
   'QA-23': '4.3, 4.5 / AC-IND-03', 'QA-24': '4.5 / AC-INV-04 (simulated)', 'QA-25': '5.4 / AC-RES-01', 'QA-26': '5.5 / AC-RES-04', 'QA-27': '7.2–7.4 / AC-CAR-02 (fixture states)',
   'QA-28': '2.2 / AC-SRV-02', 'QA-29': '4.1 / AC-GLO-04', 'QA-30': 'AC-OPS-04', 'QA-31': '6.4 / AC-FRM-02', 'QA-32': '4.1 / AC-GLO-03',
 };
+// Look up an id exactly, else without a numeric suffix (QA-07-360 uses the QA-07 mapping), else '—'.
 const qmRef = (id) => QM112[id] ?? QM112[id.replace(/-\d+$/, '')] ?? '—';
+// Number of results with status 'Pass', 'Fail' or 'Blocked'.
 const count = (s) => r.results.filter((x) => x.status === s).length;
+// External link list for the appendix: share/intent links and mailto: removed, first 60 shown.
 const externals = r.externalLinks.filter((u) => !u.includes('linkedin.com/sharing') && !u.includes('twitter.com/intent') && !u.startsWith('mailto')).slice(0, 60).map((u) => '- `' + u + '`').join('\n');
 const manual = readFileSync(new URL('../docs/_manual-qa.md', import.meta.url), 'utf8');
+// The whole document as one template literal; frontmatter title/summary are required by src/lib/docs.ts.
 const md = `---
 title: "07 · QA testing summary"
 summary: "Automated and manual verification results, with evidence and open issues."

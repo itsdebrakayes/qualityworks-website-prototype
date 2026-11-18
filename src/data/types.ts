@@ -164,7 +164,7 @@ export interface NavItem {
   id: string;
   /** Required. Top-level menu label. */
   label: string;
-  /** Optional. Overview page for the category; also the first link in the mobile drawer section. */
+  /** Optional. Overview page for the category (e.g. /services/); counted by isActive() in navigation.ts. */
   href?: string;                  // overview page, if one exists
   /** Optional. Link columns shown in the mega-menu panel. */
   groups?: NavGroup[];
