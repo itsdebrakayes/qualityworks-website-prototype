@@ -1,30 +1,74 @@
 ---
 import { RELEASE, REVIEW } from '../lib/release';
-/** Statistics. Every stat MUST reference a claim id in the claims register. */
+/**
+ * Statistics. Every stat MUST reference a claim id in the claims register.
+ *
+ * What: a row of headline figures (e.g. "16+ Years of quality-driven development") rendered as a description list,
+ * each with a review-mode ClaimRef badge linking to its entry in the claims register.
+ *
+ * Why: numbers are the riskiest content on a marketing site. Acceptance criterion AC-HOME-2
+ * (docs/10-acceptance-criteria.md) requires every homepage statistic to reference a claim record, and
+ * the build to fail if one does not. Review round 1 (doc 11, finding B4) flagged claims C02-C04 as
+ * needing measurement context verified before launch; docs/12-release-cleanup.md records that
+ * StatBlock drops them from the release build.
+ *
+ * Props: stats, footnote.
+ *
+ * Used by: pages/index.astro, pages/qualitywatcher-ai-tools/index.astro and pages/design-system/index.astro.
+ *
+ * Review/release behaviour:
+ * - REVIEW: every stat is shown, each with its ClaimRef badge, plus the optional footnote.
+ * - RELEASE: stats whose claim has a `verification` value are removed, ClaimRef renders nothing, and
+ *   the footnote is not rendered. If no stats remain, the whole block disappears.
+ *
+ * Accessibility: a <dl> pairs each label (dt) with its value (dd). CSS shows the value above the label
+ * (column-reverse) while the DOM keeps label-then-value, so screen readers hear "Years of quality-driven
+ * development, 16+" in a sensible order.
+ *
+ * Gotchas:
+ * - The release filter removes a stat if its claim has ANY `verification` value, including
+ *   'source-checked', not only 'required-before-launch'. Clear `verification` in src/data/claims.ts
+ *   (with recorded evidence) to make a stat release-visible.
+ * - An unknown claim id throws during the build, on purpose. Add the claim to src/data/claims.ts first.
+ */
 import ClaimRef from './ClaimRef.astro';
 import { claimById } from '../data/claims';
-interface Props { stats: { value: string; label: string; claim: string }[]; footnote?: string }
+interface Props {
+  /** Figures to show. `value` = the big number as displayed, `label` = what it measures, `claim` = claim id (e.g. 'C01'). */
+  stats: { value: string; label: string; claim: string }[];
+  /** Small review-only note under the stats (e.g. measurement caveats). Never rendered in release builds. */
+  footnote?: string
+}
 const { stats: allStats, footnote } = Astro.props;
 // Release builds drop any statistic whose claim still requires verification.
 const stats = RELEASE ? allStats.filter((s) => !claimById(s.claim)?.verification) : allStats;
+// Build-time guard (AC-HOME-2): fail loudly rather than publish a number with no claim record.
 stats.forEach((s) => { if (!claimById(s.claim)) throw new Error(`Stat "${s.label}" has no registered claim`); });
 ---
+{/* Render nothing at all when the release filter has removed every stat. */}
 {stats.length > 0 && <div class="stats">
   <dl class="stats__list">
     {stats.map((s) => (
       <div class="stats__item">
         <dt>{s.label}</dt>
+        {/* ClaimRef is a review-mode badge; it renders nothing in release builds. */}
         <dd>{s.value}<ClaimRef id={s.claim} /></dd>
       </div>
     ))}
   </dl>
+  {/* Footnote holds review commentary about the claims, so it is REVIEW-only. */}
   {footnote && REVIEW && <p class="stats__note">{footnote}</p>}
 </div>}
 <style>
+  /* Row of stats: auto-fit columns at least 12rem wide; min(100%, 12rem) prevents overflow on phones. */
   .stats__list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); gap: 0; margin: 0; border-top: 1px solid var(--color-border); }
+  /* column-reverse puts the dd (value) visually above the dt (label) without changing reading order. */
   .stats__item { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: var(--space-2); padding: var(--space-6) var(--space-6) var(--space-6) 0; border-bottom: 1px solid var(--color-border); }
+  /* From 720px the stats sit side by side, so add vertical dividers between neighbours. */
   @media (min-width: 720px) { .stats__item + .stats__item { padding-left: var(--space-6); border-left: 1px solid var(--color-border); } }
+  /* Big figure: line-height 1 and tight tracking (-0.03em) keep large numerals compact. */
   .stats dd { margin: 0; font-size: var(--fs-2xl); font-weight: var(--fw-bold); line-height: 1; letter-spacing: -0.03em; color: var(--color-heading); }
+  /* Label capped at 22ch so it wraps to two short lines under the figure. */
   .stats dt { font-size: var(--fs-sm); color: var(--color-muted); max-width: 22ch; }
   .stats__note { font-size: var(--fs-xs); color: var(--color-muted); margin: var(--space-4) 0 0; }
 </style>

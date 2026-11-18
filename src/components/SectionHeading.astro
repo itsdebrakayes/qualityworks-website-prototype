@@ -1,6 +1,46 @@
 ---
-interface Props { eyebrow?: string; title: string; subheading?: string; lede?: string; level?: 'h2' | 'h3'; align?: 'start' | 'center'; id?: string }
+/**
+ * SectionHeading: the standard heading block that opens a page section (eyebrow, title, optional
+ * subheading and lede, plus an optional slot for extra content such as a link or badge).
+ *
+ * Why: one heading grammar for every section keeps the visual hierarchy consistent (the dash-framed
+ * eyebrow is a retained brand element, see docs/02-design-direction.md) and lets pages choose the
+ * correct heading level so no level is skipped (CONTRIBUTING 3.4, enforced by QA-01).
+ * The `subheading` prop was added in review round 1 (doc 11, finding C2) so "Where's Stacy?" could
+ * become a subheading under "Events & speaking" instead of being the main heading.
+ *
+ * Props: eyebrow, title, subheading, lede, level (h2/h3), align (start/center), id. Children go in
+ * the default slot and render after the lede.
+ *
+ * Used by: components/templates/ServiceTemplate.astro and many pages (index, about-us, careers,
+ * case-studies/[slug], events, industries, industries/[slug], products, products/prism,
+ * products/agents-as-a-service, qualitywatcher-ai-tools, services, prototype, design-system).
+ *
+ * Accessibility: pass `id` and point the parent <section aria-labelledby> at it so the section gets
+ * an accessible name. The eyebrow and subheading are plain <p> elements, so they never create extra
+ * headings in the document outline.
+ *
+ * Gotchas: the wrapper is a <header> element. Inside a <section> that is fine (it is the section's
+ * header, not a page banner landmark), but do not use this component directly inside <body>.
+ */
+interface Props {
+  /** Short mono label above the title (e.g. "What we deliver"). Optional. */
+  eyebrow?: string;
+  /** The heading text. Required. */
+  title: string;
+  /** Secondary line under the title, styled as a semibold paragraph, not a heading (review round 1, C2). */
+  subheading?: string;
+  /** Introductory paragraph under the title, using the global `.lede` style. */
+  lede?: string;
+  /** Heading element to render. Pick the level that keeps the page outline unbroken. Default 'h2'. */
+  level?: 'h2' | 'h3';
+  /** Text alignment of the whole block. 'center' also centres the eyebrow rule and lede. Default 'start'. */
+  align?: 'start' | 'center';
+  /** id placed on the heading element, for the parent section's aria-labelledby. */
+  id?: string
+}
 const { eyebrow, title, subheading, lede, level = 'h2', align = 'start', id } = Astro.props;
+// Dynamic tag: Astro renders <Tag> as whatever element name the variable holds (h2 or h3).
 const Tag = level;
 ---
 <header class:list={['section-heading', `section-heading--${align}`]}>
@@ -8,13 +48,20 @@ const Tag = level;
   <Tag id={id}>{title}</Tag>
   {subheading && <p class="subheading">{subheading}</p>}
   {lede && <p class="lede">{lede}</p>}
+  {/* Optional extra content from the caller (links, badges, filters) renders below the text. */}
   <slot />
 </header>
 <style>
+  /* Block: limit line length to about 48rem for readability; generous gap before section content. */
   .section-heading { max-width: 48rem; margin-bottom: var(--space-10); }
+  /* Centred variant: centre the block itself and every child that has its own max-width or flex layout. */
   .section-heading--center { margin-inline: auto; text-align: center; }
   .section-heading--center .lede { margin-inline: auto; }
+  /* The global .eyebrow is an inline-flex row (short teal rule + label); centre its contents as well. */
   .section-heading--center .eyebrow { justify-content: center; }
+  /* Subheading: the negative top margin pulls it up toward the title so the two read as one unit. */
   .subheading { font-size: var(--fs-md); font-weight: var(--fw-semibold); color: var(--color-heading); margin: calc(var(--space-2) * -1) 0 var(--space-3); }
+  /* :global so the rule also reaches a `.lede` passed in through the slot: slotted markup belongs to
+     the caller and does not carry this component's scoped class. */
   .section-heading :global(.lede) { margin-bottom: 0; color: var(--color-muted); }
 </style>

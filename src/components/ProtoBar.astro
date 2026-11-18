@@ -1,32 +1,76 @@
 ---
-/** Prototype-only banner. Must be removed for production. Toggles review annotations (claims, proposed nav items, provenance). */
+/**
+ * Prototype-only banner. Must be removed for production. Toggles review annotations (claims, proposed
+ * nav items, provenance).
+ *
+ * What: the thin yellow strip at the very top of every review-build page. It says this is the QM-113
+ * prototype, links to the Review hub (/prototype/), and has a "Review annotations" toggle.
+ *
+ * Why: review round 1, item 5 (src/lib/release.ts) split the build into REVIEW and RELEASE modes.
+ * Reviewers need a constant reminder that the site is not live and that forms send nothing, plus a
+ * one-click way to reveal the review layer (claim ids, proposed-navigation dots, provenance outlines).
+ *
+ * Props: none.
+ *
+ * Used by: layouts/BaseLayout.astro only, as `{REVIEW && <ProtoBar />}`, so it is not rendered at all
+ * in release builds (docs/12-release-cleanup.md). scripts/release-check.mjs fails the release build if
+ * the text "Prototype · QM-113", "Review annotations" or "Review hub" is still found in the output, so
+ * keep those strings in sync with that script if you reword them.
+ *
+ * How the toggle works: it adds/removes the `review-mode` class on <html>. CSS elsewhere keys off that
+ * class: global.css shows `.claim-ref` badges and outlines every `[data-review-note]` element, and
+ * Header.astro shows gold "proposed" dots on menu links. The choice is remembered in localStorage
+ * under "qw-review"; adding `?review` to any URL forces it on (handy for sharing a link with a reviewer).
+ *
+ * Accessibility: role="region" with an aria-label makes the notice a findable landmark. The toggle is
+ * a real <button> using aria-pressed, so screen readers announce it as a toggle button with its state.
+ *
+ * Gotchas: the script assumes the [data-review-toggle] button exists (non-null assertion), which holds
+ * because the script ships with this component. Do not move the script elsewhere.
+ */
 ---
+{/* Landmark region so screen-reader users can jump to (or past) the prototype notice. */}
 <div class="proto-bar" role="region" aria-label="Prototype notice">
   <div class="container proto-bar__inner">
     <p><strong>Prototype · QM-113</strong> — for internal review only. Not the live website; forms do not send data.</p>
     <div class="proto-bar__actions">
       <a href="/prototype/">Review hub</a>
+      {/* Toggle button: aria-pressed is kept in sync by the script below. data-review-toggle is the script hook. */}
       <button type="button" class="proto-toggle" aria-pressed="false" data-review-toggle>Review annotations</button>
     </div>
   </div>
 </div>
 <style>
+  /* Bar: deliberately "sticky-note" yellow so it can never be mistaken for real site chrome.
+     Text #4A3200 on #FFF3CC is about 10.8:1. The bar overrides --focus-ring with a dark amber
+     (#7A4B00, about 6.7:1 on the bar) because the default teal ring would be weak on yellow. */
   .proto-bar { background: #FFF3CC; color: #4A3200; font-size: var(--fs-xs); border-bottom: 1px solid #E8CF84; --focus-ring: #7A4B00; }
+  /* Wraps onto two lines on phones; tight vertical padding keeps the bar short. */
   .proto-bar__inner { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.25rem var(--space-4); padding-block: 0.35rem; }
   .proto-bar p { margin: 0; }
   .proto-bar__actions { display: flex; gap: var(--space-4); align-items: center; }
   .proto-bar a { color: #4A3200; font-weight: var(--fw-semibold); }
+  /* Toggle, off state: outlined pill. The #B28A2C border is about 2.9:1 on the bar; the bold text label
+     (about 10.8:1) is what identifies the control. min-height 30px keeps a comfortable tap target in
+     the compact bar. */
   .proto-toggle { font: inherit; font-weight: var(--fw-semibold); color: #4A3200; background: transparent; border: 1.5px solid #B28A2C; border-radius: var(--radius-pill); padding: 0.2rem 0.7rem; cursor: pointer; min-height: 30px; }
+  /* Toggle, on state: inverted (dark fill, yellow text) so the pressed state is visible without relying on colour hue alone. */
   .proto-toggle[aria-pressed="true"] { background: #4A3200; color: #FFF3CC; border-color: #4A3200; }
 </style>
 <script>
+  // Review-annotations toggle. Runs once per page load in review builds.
   const btn = document.querySelector<HTMLButtonElement>('[data-review-toggle]')!;
+  // Single place that changes state: the <html> class drives all annotation CSS, aria-pressed drives
+  // what assistive tech announces. Keeping both in one function means they can never disagree.
   const apply = (on: boolean) => { document.documentElement.classList.toggle('review-mode', on); btn.setAttribute('aria-pressed', String(on)); };
   let initial = false;
+  // localStorage can throw (privacy mode, sandboxed iframe viewers), so failures fall back to "off".
   try { initial = localStorage.getItem('qw-review') === '1'; } catch {}
+  // ?review in the URL always wins, so a reviewer can share a link that opens with annotations on.
   if (new URLSearchParams(location.search).has('review')) initial = true;
   apply(initial);
   btn.addEventListener('click', () => {
+    // Read the current state from the DOM rather than a variable, so it is always the truth.
     const on = !document.documentElement.classList.contains('review-mode');
     apply(on);
     try { localStorage.setItem('qw-review', on ? '1' : '0'); } catch {}

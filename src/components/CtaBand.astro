@@ -1,16 +1,54 @@
 ---
+/**
+ * CtaBand: the dark "next step" band near the bottom of a page, with an eyebrow, an h2, optional
+ * supporting text and one or two buttons.
+ *
+ * Why: every page should end with a clear next action (contact, see case studies, open a product).
+ * One component keeps that closing pattern and its CTA styling identical across the site.
+ *
+ * Props: title, text, primary, secondary, eyebrow.
+ *
+ * Used by: components/templates/ServiceTemplate.astro and pages [slug] (article), about-us,
+ * case-studies, case-studies/[slug], design-system, engagement-models, index, industries,
+ * industries/[slug], products, products/prism, products/agents-as-a-service, qualitywatcher-ai-tools,
+ * resources and services.
+ *
+ * Accessibility: the section is named by its h2 through aria-labelledby. It always uses the
+ * `surface-dark` theme class, which switches text, link and focus-ring colours to on-dark values.
+ * External CTAs get the "(opens in a new tab)" text and hand-off description from Button.
+ *
+ * Gotchas:
+ * - The heading id is the fixed string "cta-band-title". Use at most ONE CtaBand per page, or the ids
+ *   will collide and aria-labelledby will point at the wrong heading.
+ * - The title is an h2, so the band must sit at section level (not inside an h2 section's content).
+ * - `primary` is always rendered as primary and `secondary` always as secondary, whatever `kind`
+ *   the Cta data carries.
+ */
 import Button from './Button.astro';
 import type { Cta } from '../data/types';
-interface Props { title: string; text?: string; primary: Cta; secondary?: Cta; eyebrow?: string }
+interface Props {
+  /** Band heading (h2). Keep it short; it is capped at 26 characters per line. */
+  title: string;
+  /** Supporting sentence under the heading. Optional. */
+  text?: string;
+  /** Main action; always styled as the primary button. Required. */
+  primary: Cta;
+  /** Second action; always styled as the secondary (outline) button. */
+  secondary?: Cta;
+  /** Small mono label above the heading. Default 'Next step'. */
+  eyebrow?: string
+}
 const { title, text, primary, secondary, eyebrow = 'Next step' } = Astro.props;
 ---
 <section class="cta-band surface-dark" aria-labelledby="cta-band-title">
   <div class="container cta-band__inner">
     <div>
       <p class="eyebrow">{eyebrow}</p>
+      {/* Fixed id: see the one-per-page gotcha in the header. */}
       <h2 id="cta-band-title">{title}</h2>
       {text && <p class="cta-band__text">{text}</p>}
     </div>
+    {/* kind is overridden so the band always shows one primary and at most one secondary button. */}
     <div class="btn-row">
       <Button cta={{ ...primary, kind: 'primary' }} />
       {secondary && <Button cta={{ ...secondary, kind: 'secondary' }} />}
@@ -18,10 +56,17 @@ const { title, text, primary, secondary, eyebrow = 'Next step' } = Astro.props;
   </div>
 </section>
 <style>
+  /* Band: diagonal gradient from corporate ink (#16202B) to a deep teal-ink (#123C44). overflow hidden
+     clips the decorative ring motif below. */
   .cta-band { position: relative; overflow: hidden; padding-block: var(--space-16); background: linear-gradient(120deg, var(--qw-ink-900) 0%, #123C44 100%); }
+  /* Brand gear-ring motif in logo green (#8FC640) at 14% alpha, a 30rem circle tucked off the bottom-right
+     corner. pointer-events none so it never blocks clicks on the buttons. */
   .cta-band::after { content: ""; position: absolute; right: -8rem; bottom: -14rem; width: 30rem; height: 30rem; border-radius: 50%; background: repeating-radial-gradient(circle, transparent 0 20px, rgba(143,198,64,0.14) 20px 21px); pointer-events: none; }
+  /* z-index 1 keeps the copy and buttons above the ::after motif. */
   .cta-band__inner { position: relative; z-index: 1; display: grid; gap: var(--space-8); align-items: end; }
+  /* From 900px, text and buttons sit side by side; the button column takes only the width it needs. */
   @media (min-width: 900px) { .cta-band__inner { grid-template-columns: 1.5fr auto; } }
   .cta-band h2 { font-size: var(--fs-xl); max-width: 26ch; margin-bottom: var(--space-3); }
+  /* Muted on-dark text (slate-300 on ink is about 6.7:1, doc 02), capped at 46ch for readability. */
   .cta-band__text { color: var(--color-muted); max-width: 46ch; margin: 0; }
 </style>

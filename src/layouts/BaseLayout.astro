@@ -3,6 +3,43 @@ import { RELEASE, REVIEW } from '../lib/release';
 /**
  * Base layout: SEO head, structured data, skip link, prototype bar, header, footer.
  * Every page passes `seo` (unique title + description) and optional `breadcrumbs` and `jsonLd`.
+ *
+ * What: the HTML document shell shared by every page: <head> (title, description, canonical, robots,
+ * Open Graph/Twitter tags, favicon, font preload, JSON-LD), then skip link, ProtoBar (review builds),
+ * Header, <main> with the page content, Footer, and two small site-wide scripts.
+ *
+ * Why: SEO and accessibility basics must be identical on every page (docs/05-seo-aeo.md, CONTRIBUTING
+ * 3.4). Centralising them means a page cannot forget its canonical URL, skip link or landmark structure.
+ * Canonical and og:url are built on the LIVE domain (site.legacyOrigin) plus the preserved path,
+ * because the production site keeps every indexed URL (docs/06-url-mapping.md).
+ *
+ * Props: seo, breadcrumbs, jsonLd, ogType, showBreadcrumbs, bodyClass. Slots: default (page content)
+ * and "head" (extra <head> tags, used by pages/[slug].astro).
+ *
+ * Used by: every page in src/pages (directly, or through components/LegalStub.astro and
+ * components/templates/ServiceTemplate.astro).
+ *
+ * Accessibility:
+ * - The skip link is the first focusable element and jumps to <main id="main">. main has tabindex="-1"
+ *   so browsers reliably move focus there; its focus outline is suppressed below (it is not a control).
+ * - <html lang="en">, a single <main>, and header/footer landmarks from Header and Footer.
+ *
+ * Review/release behaviour (src/lib/release.ts):
+ * - REVIEW: robots is always "noindex, nofollow" (the prototype must never be indexed) and ProtoBar renders.
+ * - RELEASE: robots follows the page (`seo.noindex`), ProtoBar is not rendered.
+ * - Both builds also emit <meta name="qw:production-robots">, recording the directive the page should
+ *   have in production, so reviewers can check it even while the prototype is noindexed.
+ * - scripts/release-check.mjs fails a release build that still contains the review robots tag.
+ * - `RELEASE` is imported but not used in this file.
+ *
+ * Gotchas:
+ * - Breadcrumb JSON-LD is only emitted when there are 2+ crumbs. Pass the SAME array you give PageHero.
+ * - `showBreadcrumbs` renders a trail at the top of <main>; most pages instead show breadcrumbs inside
+ *   PageHero. Do not use both, or the trail appears twice. No page uses showBreadcrumbs or bodyClass today.
+ * - The font preload URL must match the Red Hat Display latin file in src/fonts.css; if the font file
+ *   changes, update both or the preload is wasted and the font loads late.
+ * - The "PROTOTYPE: never index" note in <head> is written as an HTML comment, so unlike the JSX-style
+ *   comments in this file it IS shipped in the page source that visitors can view.
  */
 import '../styles/global.css';
 import Header from '../components/Header.astro';
@@ -13,36 +50,51 @@ import type { Seo } from '../data/types';
 import { site } from '../data/site';
 
 interface Props {
+  /** Required. Unique <title> and meta description, plus optional noindex flag and og:image path. */
   seo: Seo;
+  /** Trail from Home to this page. Used for BreadcrumbList JSON-LD (2+ items) and, with showBreadcrumbs, a visible trail. */
   breadcrumbs?: { label: string; href?: string }[];
+  /** Extra JSON-LD objects (Service, FAQPage, Article, Event...), usually built with helpers in src/lib/schema.ts. */
   jsonLd?: Record<string, unknown>[];
+  /** Open Graph type. 'article' for blog posts and case studies; default 'website'. */
   ogType?: 'website' | 'article';
+  /** Render the visible breadcrumb trail at the top of <main> (for pages without a PageHero trail). Default false. */
   showBreadcrumbs?: boolean;
+  /** Optional class on <body> for page-level styling hooks. */
   bodyClass?: string;
 }
 const { seo, breadcrumbs, jsonLd = [], ogType = 'website', showBreadcrumbs = false, bodyClass } = Astro.props;
+// Current path, used for the canonical URL and for the Header's active-section markers.
 const path = Astro.url.pathname;
 // Production canonical = existing domain + preserved path (see docs/06-url-mapping.md).
 const canonical = new URL(path, site.legacyOrigin).toString();
+// og:image must be absolute; falls back to the colour logo when the page has no image of its own.
 const ogImage = new URL(seo.ogImage ?? '/brand/qualityworks-logo-color.png', site.legacyOrigin).toString();
 
+// BreadcrumbList JSON-LD from the same data as the visible trail (Breadcrumbs.astro). Only for 2+ crumbs;
+// the last crumb (current page) has no href, so it is emitted without an `item` URL.
 const crumbLd = breadcrumbs && breadcrumbs.length > 1 ? {
   '@context': 'https://schema.org', '@type': 'BreadcrumbList',
   itemListElement: breadcrumbs.map((b, i) => ({ '@type': 'ListItem', position: i + 1, name: b.label, ...(b.href ? { item: new URL(b.href, site.legacyOrigin).toString() } : {}) })),
 } : null;
+// All JSON-LD for the page: breadcrumbs first, then whatever the page passed in.
 const ld = [...(crumbLd ? [crumbLd] : []), ...jsonLd];
 ---
 <!doctype html>
 <html lang="en">
   <head>
+    {/* Basic document metadata. */}
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{seo.title}</title>
     <meta name="description" content={seo.description} />
     <link rel="canonical" href={canonical} />
     <!-- PROTOTYPE: never index. Production directive for this template is recorded below. -->
+    {/* REVIEW builds: always noindex. RELEASE builds: follow the page's seo.noindex. */}
     <meta name="robots" content={REVIEW ? 'noindex, nofollow' : (seo.noindex ? 'noindex, follow' : 'index, follow')} />
+    {/* Records the intended production directive (not read by search engines; for reviewers and QA). */}
     <meta name="qw:production-robots" content={seo.noindex ? 'noindex, follow' : 'index, follow, max-snippet:-1, max-image-preview:large'} />
+    {/* Social sharing metadata (Open Graph and Twitter/X cards). */}
     <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content={site.name} />
     <meta property="og:title" content={seo.title} />
@@ -51,21 +103,30 @@ const ld = [...(crumbLd ? [crumbLd] : []), ...jsonLd];
     <meta property="og:image" content={ogImage} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@qualityworkscg" />
+    {/* theme-color = ink-900 (#16202B), matching the header so mobile browser chrome blends in. */}
     <meta name="theme-color" content="#16202B" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
+    {/* Preload the Red Hat Display latin variable font (see src/fonts.css) so headings do not swap late. */}
     <link rel="preload" href="/fonts/8vIQ7wUr0m80wwYf0QCXZzYzUoTg_T6h.woff2" as="font" type="font/woff2" crossorigin />
+    {/* Page-specific <head> additions, e.g. article meta tags in pages/[slug].astro. */}
     <slot name="head" />
+    {/* One JSON-LD script element per object. set:html avoids HTML-escaping the JSON. */}
     {ld.map((obj) => <script type="application/ld+json" set:html={JSON.stringify(obj)} />)}
   </head>
   <body class={bodyClass}>
+    {/* Skip link: first focusable element; hidden off-screen until focused (global.css .skip-link). */}
     <a class="skip-link" href="#main">Skip to main content</a>
+    {/* Prototype notice bar: review builds only (removed from release, docs/12-release-cleanup.md). */}
     {REVIEW && <ProtoBar />}
     <Header currentPath={path} />
+    {/* tabindex="-1" lets the skip link move focus into main without adding main to the Tab order. */}
     <main id="main" tabindex="-1">
       {showBreadcrumbs && breadcrumbs && <div class="container crumb-wrap"><Breadcrumbs items={breadcrumbs} /></div>}
       <slot />
     </main>
     <Footer />
+    {/* is:inline: shipped exactly as written and run immediately, before first paint, so the scroll reset
+        happens as early as possible. It is plain JS (no TypeScript, no bundling). */}
     <script is:inline>
       // Every page opens at the top (unless the link targets an anchor). Embedded viewers and
       // browser scroll restoration were opening pages at the previous scroll position.
@@ -82,6 +143,7 @@ const ld = [...(crumbLd ? [crumbLd] : []), ...jsonLd];
         window.addEventListener('pageshow', function (e) { if (e.persisted) toTop(); });
       })();
     </script>
+    {/* Bundled module script (processed by Astro/Vite), deferred until the document is parsed. */}
     <script>
       // Restrained reveal-on-scroll. Content is visible without JS and with reduced motion.
       const els = document.querySelectorAll('.reveal');
@@ -90,10 +152,13 @@ const ld = [...(crumbLd ? [crumbLd] : []), ...jsonLd];
         els.forEach((el) => io.observe(el));
       } else els.forEach((el) => el.classList.add('is-visible'));
     </script>
+    {/* Without JavaScript the reveal animation never runs, so force .reveal content visible. */}
     <noscript><style>.reveal { opacity: 1 !important; transform: none !important; }</style></noscript>
   </body>
 </html>
 <style>
+  /* main receives focus only programmatically (skip link), so no outline; it is not an interactive control. */
   main:focus { outline: none; }
+  /* Spacing for the optional showBreadcrumbs trail. */
   .crumb-wrap { padding-top: var(--space-6); }
 </style>

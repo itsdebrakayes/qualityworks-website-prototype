@@ -4,6 +4,44 @@ import { RELEASE, REVIEW, rn } from '../../lib/release';
  * Service detail template — reused by /services/*, /engagement-models/*, /maturity-assessments/,
  * /innovation-tourism/. Sections render only when data exists, so "summary" records degrade
  * gracefully without layout changes.
+ *
+ * What: a complete PAGE (it wraps BaseLayout) built from one `Service` record in src/data/services.ts.
+ * Section order: hero with an "At a glance" card -> summary-record warning (if any) -> the challenge
+ * -> capabilities -> how we deliver (process) -> buyer considerations -> related results (case
+ * studies and products) -> FAQ -> related services and industries -> closing CtaBand.
+ *
+ * Why: the live site has many near-identical service pages (doc 02 lists "near-identical industry and
+ * service templates" among what dates the old site). One data-driven template gives them a consistent,
+ * problem-first structure (`buyerProblem` leads the hero aside and the challenge heading) and means
+ * editors change content in services.ts, never markup. Recipe: CONTRIBUTING 4.1.
+ *
+ * Props: service.
+ *
+ * Used by: pages/services/[slug].astro, pages/engagement-models/[slug].astro,
+ * pages/maturity-assessments.astro and pages/innovation-tourism.astro (each is a thin route).
+ *
+ * SEO: title/description come from `service.seo`; BaseLayout emits BreadcrumbList from `crumbs`; this
+ * file adds Service JSON-LD and, only when FAQs exist (and are therefore rendered), FAQPage JSON-LD
+ * (lib/schema.ts: structured data only for visible content).
+ *
+ * Accessibility: PageHero renders the only h1. Every section has an h2 (via SectionHeading or the
+ * challenge heading) named by aria-labelledby, and cards inside use h3, so no level is skipped (QA-01).
+ *
+ * Review/release behaviour:
+ * - Claim badges in the hero aside (ClaimRef) are review-only and render nothing in release builds.
+ * - The considerations section is proposed copy: it carries a review note via rn() in review builds.
+ * - Summary-only records (`contentDepth: 'summary'`) show a warning Alert in both builds; in release
+ *   builds its wrapper also carries `data-release-blocker`, so the release gate fails until the full
+ *   copy is migrated.
+ * - `REVIEW` is imported but not used in this file.
+ *
+ * Gotchas:
+ * - Section heading ids ("challenge-title", "caps-title", ...) are fixed strings; render one template per page.
+ * - Related slugs that do not resolve (typo, deleted record) are silently dropped by filter(Boolean).
+ *   The `!` non-null assertions in the markup exist because filter(Boolean) does not narrow the type.
+ * - Related case studies are capped at 3; sibling services at 3 and only `contentDepth: 'full'` ones.
+ * - The capabilities section alternates to `surface-alt` only when the challenge section is present,
+ *   so two adjacent sections never share a background.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../PageHero.astro';
@@ -23,38 +61,52 @@ import { services } from '../../data/services';
 import { industryBySlug } from '../../data/industries';
 import { faqLd, serviceLd } from '../../lib/schema';
 import type { Service } from '../../data/types';
-interface Props { service: Service }
+interface Props {
+  /** The service record to render (src/data/services.ts). Callers look it up by slug or getStaticPaths. */
+  service: Service
+}
 const { service: s } = Astro.props;
 
+// Breadcrumb parent depends on the record kind: engagement models have their own overview page.
 const parentCrumb = s.kind === 'engagement-model' ? { label: 'Engagement models', href: '/engagement-models/' } : { label: 'Solutions', href: '/services/' };
+// One crumbs array feeds both the visible trail (PageHero) and the BreadcrumbList JSON-LD (BaseLayout).
 const crumbs = [{ label: 'Home', href: '/' }, parentCrumb, { label: s.name }];
+// Resolve related slugs to records. filter(Boolean) drops unknown slugs; case studies are capped at 3.
 const related = (s.relatedCaseStudies ?? []).map(caseStudyBySlug).filter(Boolean).slice(0, 3);
 const relProducts = (s.relatedProducts ?? []).map(productBySlug).filter(Boolean);
 const relIndustries = (s.relatedIndustries ?? []).map(industryBySlug).filter(Boolean);
+// "Keep exploring": up to 3 other fully written services from the same mega-menu group.
 const siblings = services.filter((x) => x.group === s.group && x.slug !== s.slug && x.contentDepth === 'full').slice(0, 3);
+// Page JSON-LD: always a Service; FAQPage only when this record has FAQs (they are rendered below).
 const jsonLd = [serviceLd(s.name, s.seo.description, s.path), ...(s.faqs?.length ? [faqLd(s.faqs)] : [])];
 ---
 <BaseLayout seo={s.seo} breadcrumbs={crumbs} jsonLd={jsonLd}>
+  {/* Hero: eyebrow = the mega-menu group, h1 = heroTitle, CTAs from the record. */}
   <PageHero eyebrow={s.group} title={s.heroTitle} lede={s.heroLede} breadcrumbs={crumbs} primary={s.primaryCta} secondary={s.secondaryCta}>
+    {/* "At a glance" card in the hero aside column: problem, audience and type, plus review-only claim badges. */}
     <Fragment slot="aside">
       <div class="svc-glance">
         <p class="svc-glance__label mono">At a glance</p>
         <dl>
           <div><dt>Problem it solves</dt><dd>{s.buyerProblem}</dd></div>
           <div><dt>Best for</dt><dd>{s.personas.primary}{s.personas.secondary && <>; {s.personas.secondary}</>}</dd></div>
+          {/* Kind -> human label. Keep in step with the Service["kind"] union in src/data/types.ts. */}
           <div><dt>Type</dt><dd>{{ service: 'Consulting service', 'engagement-model': 'Engagement model', assessment: 'Assessment', program: 'Program' }[s.kind]}</dd></div>
         </dl>
+        {/* Review-only claim badges for the claims this page displays (render nothing in release builds). */}
         {s.claims?.length ? <p class="svc-glance__claims">{s.claims.map((c) => <ClaimRef id={c} />)}</p> : null}
       </div>
     </Fragment>
   </PageHero>
 
+  {/* Summary records: honest "content pending" warning; a release blocker in release builds. */}
   {s.contentDepth === 'summary' && (
     <div class="container" data-release-blocker={RELEASE ? 'summary-record: full service copy not migrated' : undefined}><Alert tone="warning" title="Summary record — full content pending migration" class="svc-alert">
       <p>This page exists on the live site. The prototype shows the template with a summary only. {s.provenance.note}</p>
     </Alert></div>
   )}
 
+  {/* The challenge: the buyer problem as the h2, expanded by the `challenge` text. Optional. */}
   {s.challenge && (
     <section class="section" aria-labelledby="challenge-title">
       <div class="container split">
@@ -64,6 +116,8 @@ const jsonLd = [serviceLd(s.name, s.seo.description, s.path), ...(s.faqs?.length
     </section>
   )}
 
+  {/* Capabilities: always rendered. Engagement models get a different title because they describe a way
+      of working rather than a capability list. */}
   <section class:list={['section', { 'surface-alt': !!s.challenge }]} aria-labelledby="caps-title">
     <div class="container">
       <SectionHeading eyebrow="What we deliver" title={s.kind === 'engagement-model' ? 'How this model works' : `${s.name} capabilities`} id="caps-title" />
@@ -78,6 +132,7 @@ const jsonLd = [serviceLd(s.name, s.seo.description, s.path), ...(s.faqs?.length
     </div>
   </section>
 
+  {/* How we deliver: numbered steps from `process`. Optional. */}
   {s.process && (
     <section class="section" aria-labelledby="process-title">
       <div class="container">
@@ -87,6 +142,7 @@ const jsonLd = [serviceLd(s.name, s.seo.description, s.path), ...(s.faqs?.length
     </section>
   )}
 
+  {/* Buyer considerations: proposed copy (pending approval), shown on the dark surface. Optional. */}
   {s.considerations && s.considerations.length > 0 && (
     <section class="section surface-dark" aria-labelledby="consider-title" data-review-note={rn('Proposed buyer-specific copy (pending approval)')}>
       <div class="container">
@@ -100,6 +156,7 @@ const jsonLd = [serviceLd(s.name, s.seo.description, s.path), ...(s.faqs?.length
     </section>
   )}
 
+  {/* Proof: related case studies and/or related products. Rendered when either list is non-empty. */}
   {(related.length > 0 || relProducts.length > 0) && (
     <section class="section" aria-labelledby="proof-title">
       <div class="container">
@@ -115,6 +172,7 @@ const jsonLd = [serviceLd(s.name, s.seo.description, s.path), ...(s.faqs?.length
     </section>
   )}
 
+  {/* FAQ: native accordion. Its presence must match the FAQPage JSON-LD built in the frontmatter. */}
   {s.faqs && s.faqs.length > 0 && (
     <section class="section surface-alt" aria-labelledby="faq-title">
       <div class="container container--narrow">
@@ -124,6 +182,7 @@ const jsonLd = [serviceLd(s.name, s.seo.description, s.path), ...(s.faqs?.length
     </section>
   )}
 
+  {/* Keep exploring: sibling services plus a dot-separated list of related industry links. */}
   {(siblings.length > 0 || relIndustries.length > 0) && (
     <section class="section" aria-labelledby="more-title">
       <div class="container">
@@ -134,23 +193,31 @@ const jsonLd = [serviceLd(s.name, s.seo.description, s.path), ...(s.faqs?.length
     </section>
   )}
 
+  {/* Closing call to action; secondary always points to the case-study list. */}
   <CtaBand title={`Talk to us about ${s.name.toLowerCase()}.`} text="Tell us where you are today. We’ll recommend a starting point — or tell you if you don’t need us." primary={s.primaryCta} secondary={{ label: 'See case studies', href: '/case-studies/' }} />
 </BaseLayout>
 <style>
+  /* "At a glance" card: white panel in the hero aside. Small mono slate label, teal uppercase terms (dt),
+     ink values (dd). It stays white even on dark hero variants. */
   .svc-glance { background: #fff; border: 1px solid var(--qw-line); border-radius: var(--radius-lg); padding: var(--space-6); box-shadow: var(--shadow-md); }
   .svc-glance__label { font-size: var(--fs-xs); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-slate-500); }
   .svc-glance dl { margin: 0; display: grid; gap: var(--space-4); }
   .svc-glance dt { font-size: var(--fs-xs); font-weight: var(--fw-bold); text-transform: uppercase; letter-spacing: 0.06em; color: var(--qw-teal-700); }
   .svc-glance dd { margin: 0.2rem 0 0; color: var(--qw-ink-900); font-weight: var(--fw-medium); }
+  /* Summary warning spacing. :global because the element is rendered by Alert.astro, so it does not carry
+     this component's scope attribute. */
   :global(.svc-alert) { margin-top: var(--space-8); }
+  /* Capability tiles: 2.25rem check-mark column + text column. */
   .cap { display: grid; grid-template-columns: 2.25rem 1fr; gap: var(--space-4); padding: var(--space-6); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
   .cap__mark { width: 2.25rem; height: 2.25rem; border-radius: var(--radius-md); background: var(--qw-teal-50); color: var(--qw-teal-700); display: grid; place-items: center; }
   .cap__mark :global(svg) { width: 20px; height: 20px; }
   .cap h3 { font-size: var(--fs-md); margin-bottom: var(--space-2); }
   .cap p { margin: 0; color: var(--color-muted); }
+  /* Considerations sit on surface-dark, so the audience heading uses logo green (accent on dark). */
   .consider { padding: var(--space-6); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); }
   .consider h3 { font-size: var(--fs-md); color: var(--qw-green-400); }
   .consider p { margin: 0; }
+  /* Related-products block and industry links spacing. */
   .rel-products { margin-top: var(--space-12); }
   .rel-title { font-size: var(--fs-md); }
   .ind-links { margin-top: var(--space-6); font-weight: var(--fw-semibold); }

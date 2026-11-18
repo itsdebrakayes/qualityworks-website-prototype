@@ -2,21 +2,80 @@
 /**
  * Single button/link grammar for all CTAs. External destinations get a visible marker and an
  * accessible description of the hand-off so visitors know they are leaving the corporate site.
+ *
+ * What: renders EITHER a link (<a class="btn">) when there is an href, OR a real <button> when there
+ * is no href or the control is disabled. Content comes from a `cta` object (src/data/types.ts `Cta`)
+ * or from the loose `href` / `label` / `variant` props, or from the default slot.
+ *
+ * Why: CTAs are data-driven (services, products, navigation all carry `Cta` records). One component
+ * guarantees that every CTA uses the same pill styles (doc 02 keeps the live site's pill buttons but
+ * with the 5.45:1 teal), and that every external CTA gets target=_blank, rel=noopener, an external
+ * icon, "(opens in a new tab)" text and, when the data has a `handoffNote`, an aria-describedby
+ * description of where it leads (CONTRIBUTING 3.4: "the Button component does this for you").
+ *
+ * Props: cta, href, label, variant, size, type, class, arrow, disabled, plus any other attribute
+ * (forwarded to the <a> or <button>). Values from `cta` win over the loose props.
+ *
+ * Used by: CtaBand, Header (desktop and drawer CTA), PageHero, and pages 404, about-us,
+ * case-studies/[slug], design-system, events/[slug], index, products/agents-as-a-service,
+ * qualitywatcher-ai-tools and thank-you.
+ *
+ * Accessibility:
+ * - A disabled CTA is rendered as a <button disabled>, because links cannot be disabled.
+ *   aria-disabled is also set for assistive tech that reads it.
+ * - The arrow and external icons are decorative; the "(opens in a new tab)" text is visually hidden.
+ *
+ * Gotchas:
+ * - "External" is `cta.external` when a cta is given; otherwise any href starting with http(s) counts
+ *   as external. Absolute links to our own domain will therefore open in a new tab unless you pass a
+ *   cta with `external: false`.
+ * - The hand-off description id uses Math.random, so ids differ between builds. Do not target it in
+ *   tests or CSS.
+ * - `data-external="true"` is a marker only; no script reads it today.
+ * - Styles live in global.css (`.btn`, `.btn--secondary`, `.btn--ghost`, `.btn--sm`), not in this file.
  */
 import Icon from './Icon.astro';
 import type { Cta } from '../data/types';
-interface Props { cta?: Cta; href?: string; label?: string; variant?: 'primary' | 'secondary' | 'ghost'; size?: 'sm' | 'md'; type?: 'button' | 'submit'; class?: string; arrow?: boolean; disabled?: boolean; [k: string]: any }
+interface Props {
+  /** Data-driven CTA (label, href, external, kind, handoffNote). Its fields override the loose props below. */
+  cta?: Cta;
+  /** Destination when no `cta` is given. No href = renders a <button>. */
+  href?: string;
+  /** Visible text when no `cta` is given. Falls back to the default slot. */
+  label?: string;
+  /** Visual style. Order of precedence: this prop, then `cta.kind`, then 'primary'. */
+  variant?: 'primary' | 'secondary' | 'ghost';
+  /** 'sm' adds the compact `.btn--sm` size. Default 'md'. */
+  size?: 'sm' | 'md';
+  /** <button> type when rendered as a button. Default 'button' (never accidentally submits a form). */
+  type?: 'button' | 'submit';
+  /** Extra class names. */
+  class?: string;
+  /** Show the trailing arrow on internal, non-ghost links. Default true. */
+  arrow?: boolean;
+  /** Render as a disabled <button> even if an href exists. */
+  disabled?: boolean;
+  /** Any other attribute (aria-*, data-*, id) is forwarded to the rendered element. */
+  [k: string]: any
+}
+// Loose props are renamed (h, l, v) so the resolved values below can use the clean names.
 const { cta, href: h, label: l, variant: v, size = 'md', type, class: cls, arrow = true, disabled, ...rest } = Astro.props;
 const href = cta?.href ?? h;
 const label = cta?.label ?? l;
 const variant = v ?? cta?.kind ?? 'primary';
+// Explicit data flag first; otherwise infer from an absolute http(s) URL.
 const external = cta?.external ?? (href ? /^https?:\/\//.test(href) : false);
+// Primary is the base `.btn` style, so it needs no modifier class. Falsy entries are dropped by class:list.
 const classes = ['btn', variant !== 'primary' && `btn--${variant}`, size === 'sm' && 'btn--sm', cls];
+// Only external CTAs with a hand-off note get a description element. A short random suffix keeps ids
+// unique when several such buttons appear on one page.
 const descId = external && cta?.handoffNote ? `handoff-${Math.random().toString(36).slice(2, 8)}` : undefined;
 ---
+{/* Link branch (has href and not disabled) vs button branch (no href, or disabled). */}
 {href && !disabled ? (
   <a class:list={classes} href={href} {...(external ? { target: '_blank', rel: 'noopener', 'data-external': 'true' } : {})} aria-describedby={descId} {...rest}>
     <span>{label ?? <slot />}</span>
+    {/* Trailing icon: external marker for external links; otherwise an arrow unless ghost or arrow=false. */}
     {external ? <Icon name="external" /> : arrow && variant !== 'ghost' ? <Icon name="arrow" class="icon-arrow" /> : null}
     {external && <span class="visually-hidden"> (opens in a new tab)</span>}
   </a>
@@ -25,4 +84,5 @@ const descId = external && cta?.handoffNote ? `handoff-${Math.random().toString(
     <span>{label ?? <slot />}</span>
   </button>
 )}
+{/* Hidden hand-off description referenced by the link's aria-describedby (e.g. "Opens qualitywatcher.ai, ..."). */}
 {descId && <span id={descId} class="visually-hidden">{cta?.handoffNote}</span>}

@@ -1,9 +1,56 @@
 ---
+/**
+ * Alert: a tinted message box with an icon, optional bold title and free content (default slot).
+ *
+ * Why: the prototype has many honest "status" messages: content pending migration, simulated
+ * integrations, loading failures, prototype-only routes. One component gives them a consistent look,
+ * consistent icons per tone, and a correct choice of ARIA live behaviour.
+ *
+ * Props: tone, title, role, id, hidden, class, plus any other attribute (passed straight through).
+ *
+ * Used by: components/LegalStub.astro, components/templates/ServiceTemplate.astro (summary-record
+ * warning), and pages careers, case-studies (load error, role="alert"), design-system, events/[slug],
+ * industries/[slug], products/prism and qualitywatcher-ai-tools.
+ *
+ * Accessibility:
+ * - `role` decides how screen readers learn about the box:
+ *   'none' (default) = ordinary content, read in page order;
+ *   'status' = polite live region, for non-urgent updates;
+ *   'alert'  = assertive live region, ONLY for errors that appear after a user action.
+ *   A live region must already be in the DOM (e.g. rendered `hidden`) before its content changes, or
+ *   some screen readers will not announce it.
+ * - tabindex="-1" on every alert lets scripts move focus to it (e.g. after a failed load) without
+ *   adding it to the Tab order.
+ * - The tone icon is decorative (aria-hidden); the title/body text must carry the meaning, never colour.
+ *
+ * Review/release: pages attach `data-release-blocker` to an Alert through the rest-attribute spread
+ * (e.g. pages/qualitywatcher-ai-tools/index.astro), so the release gate can find unresolved notices.
+ *
+ * Gotchas: warning and danger share the same "alert" icon; only info and success have their own.
+ */
 import Icon from './Icon.astro';
-interface Props { tone?: 'info' | 'success' | 'warning' | 'danger'; title?: string; role?: 'status' | 'alert' | 'none'; id?: string; hidden?: boolean; class?: string; [attr: string]: any }
+interface Props {
+  /** Colour and icon: 'info' (default), 'success', 'warning' or 'danger'. */
+  tone?: 'info' | 'success' | 'warning' | 'danger';
+  /** Bold first line. Optional. */
+  title?: string;
+  /** Live-region behaviour (see header). 'none' renders no role attribute. Default 'none'. */
+  role?: 'status' | 'alert' | 'none';
+  /** id so scripts or aria attributes can reference the alert. */
+  id?: string;
+  /** Start hidden; a script reveals it. */
+  hidden?: boolean;
+  /** Extra class names, usually for page-specific spacing. */
+  class?: string;
+  /** Any other attribute (data-*, aria-*) is forwarded to the wrapper element. */
+  [attr: string]: any
+}
+// `class` is renamed to `cls` (reserved word); everything not named lands in `rest` and is spread on the wrapper.
 const { tone = 'info', title, role = 'none', id, hidden, class: cls, ...rest } = Astro.props;
+// Icon per tone: tick for success, "i" for info, and the exclamation circle for warning and danger.
 const icon = tone === 'success' ? 'check' : tone === 'info' ? 'info' : 'alert';
 ---
+{/* role is omitted entirely for 'none' (an explicit role="none" would strip the div's semantics for no gain). */}
 <div class:list={['alert', `alert--${tone}`, cls]} role={role === 'none' ? undefined : role} id={id} hidden={hidden} tabindex="-1" {...rest}>
   <Icon name={icon} />
   <div>
@@ -12,9 +59,14 @@ const icon = tone === 'success' ? 'check' : tone === 'info' ? 'info' : 'alert';
   </div>
 </div>
 <style>
+  /* Layout: fixed 1.4rem icon column + flexible text column. Text is always dark ink on the pale tint,
+     so contrast does not depend on the tone colour. */
   .alert { display: grid; grid-template-columns: 1.4rem 1fr; gap: var(--space-3); padding: var(--space-4) var(--space-5); border-radius: var(--radius-md); border: 1px solid; font-size: var(--fs-sm); color: var(--qw-ink-900); }
+  /* display:grid above would override the browser's [hidden] rule, so restore it explicitly. */
   .alert[hidden] { display: none; }
   .alert :global(svg) { width: 1.4rem; height: 1.4rem; }
+  /* Tones: pale background, slightly darker border, and a saturated icon colour. Border hex values are
+     hand-picked mid-tints of each tone (there are no tokens for them yet). */
   .alert--info { background: var(--qw-info-bg); border-color: var(--qw-teal-100); }
   .alert--info :global(svg) { color: var(--qw-teal-700); }
   .alert--success { background: var(--qw-success-bg); border-color: #BFE0C5; }
@@ -24,7 +76,10 @@ const icon = tone === 'success' ? 'check' : tone === 'info' ? 'info' : 'alert';
   .alert--danger { background: var(--qw-danger-bg); border-color: #F4C2BD; }
   .alert--danger :global(svg) { color: var(--qw-danger); }
   .alert__title { font-weight: var(--fw-bold); margin: 0 0 0.25rem; }
+  /* Remove the trailing paragraph margin so padding stays even at the bottom. */
   .alert__body :global(p:last-child) { margin-bottom: 0; }
+  /* Focus: scripts focus the alert programmatically. No ring for that (it would look like a bug to mouse
+     users), but keyboard users still get the standard 3px ring through :focus-visible. */
   .alert:focus { outline: none; }
   .alert:focus-visible { outline: 3px solid var(--focus-ring); }
 </style>

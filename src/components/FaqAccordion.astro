@@ -4,31 +4,68 @@ import { rn } from '../lib/release';
  * FAQ accordion: native <details>/<summary> — keyboard and screen-reader support built in,
  * content is in the DOM (crawlable) and works without JavaScript. FAQPage JSON-LD is emitted
  * by the page only when the visible FAQ is shown (see lib/schema.ts).
+ *
+ * What: a list of question/answer pairs; each question is a heading inside a clickable summary, and
+ * the first item starts open.
+ *
+ * Why: answer-first content helps both visitors and answer engines (docs/05-seo-aeo.md). Native
+ * disclosure elements give expand/collapse with Enter/Space, correct expanded state for screen readers,
+ * and no JavaScript to maintain. ServiceTemplate adds `faqLd(s.faqs)` to the page JSON-LD only when it
+ * also renders this component, so structured data never describes FAQs a visitor cannot see.
+ *
+ * Props: items, headingLevel.
+ *
+ * Used by: components/templates/ServiceTemplate.astro, pages/products/agents-as-a-service.astro,
+ * pages/qualitywatcher-ai-tools/index.astro and pages/design-system/index.astro.
+ *
+ * Review/release behaviour: items with provenance get `data-review-note="<source> / <approval>"` via
+ * rn(), outlined in review mode; in release builds the attribute is not rendered.
+ *
+ * Accessibility: the question heading lives inside <summary> so questions appear in the page's heading
+ * list. The plus/minus icon is pure CSS and aria-hidden; the open state is announced natively.
+ *
+ * Gotchas: answers are rendered as plain text in a single <p> (no HTML). Opening the first item is a
+ * design choice so the pattern is obvious; remove `open={i === 0}` to start all closed.
  */
 import type { FaqItem } from '../data/types';
-interface Props { items: FaqItem[]; headingLevel?: 'h3' | 'h4' }
+interface Props {
+  /** Questions and answers. `provenance` (optional) feeds the review-mode note. */
+  items: FaqItem[];
+  /** Heading tag for each question: 'h3' (default) under an h2 section, 'h4' if nested deeper. */
+  headingLevel?: 'h3' | 'h4'
+}
 const { items, headingLevel = 'h3' } = Astro.props;
+// Dynamic heading tag (h3/h4).
 const H = headingLevel;
 ---
 <div class="faq">
   {items.map((f, i) => (
     <details class="faq__item" open={i === 0} data-review-note={rn(f.provenance ? `${f.provenance.source} / ${f.provenance.approval}` : undefined)}>
+      {/* Summary = the clickable row: question heading plus the decorative plus/minus circle. */}
       <summary><H class="faq__q">{f.q}</H><span class="faq__icon" aria-hidden="true"></span></summary>
       <div class="faq__a"><p>{f.a}</p></div>
     </details>
   ))}
 </div>
 <style>
+  /* Rules between items: top border on the list, bottom border on each item. */
   .faq { border-top: 1px solid var(--color-border); }
   .faq__item { border-bottom: 1px solid var(--color-border); }
+  /* Summary row: removes the default disclosure triangle (list-style none for most browsers) and keeps a
+     48px minimum touch target. */
   summary { list-style: none; display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); padding: var(--space-5) 0; cursor: pointer; min-height: 48px; }
+  /* Safari/older WebKit draw the triangle with this pseudo-element instead of list-style. */
   summary::-webkit-details-marker { display: none; }
   .faq__q { font-size: var(--fs-md); margin: 0; letter-spacing: -0.01em; }
+  /* Plus/minus icon: a 2rem circle with two 11px bars drawn by ::before (horizontal) and ::after (vertical). */
   .faq__icon { flex: none; width: 2rem; height: 2rem; border-radius: 50%; border: 1.5px solid var(--color-border); position: relative; transition: transform var(--dur-base) var(--ease-out), background var(--dur-base); }
   .faq__icon::before, .faq__icon::after { content: ""; position: absolute; left: 50%; top: 50%; width: 11px; height: 2px; background: var(--color-heading); transform: translate(-50%, -50%); }
+  /* Closed: the ::after bar is rotated 90deg to make a plus. */
   .faq__icon::after { transform: translate(-50%, -50%) rotate(90deg); transition: transform var(--dur-base) var(--ease-out); }
+  /* Open: the vertical bar rotates flat onto the horizontal one, leaving a minus. */
   details[open] .faq__icon::after { transform: translate(-50%, -50%) rotate(0deg); }
   summary:hover .faq__icon { background: var(--qw-teal-50); }
+  /* Answer: right padding keeps text clear of the icon column; max-width limits line length. */
   .faq__a { padding: 0 var(--space-12) var(--space-6) 0; color: var(--color-text); max-width: 60rem; }
   .faq__a p { margin: 0; }
 </style>

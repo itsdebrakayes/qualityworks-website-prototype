@@ -7,12 +7,62 @@ import { RELEASE, REVIEW } from '../lib/release';
  * PROTOTYPE: submission is SIMULATED. No network request is made and nothing is stored.
  * A labelled fixture control chooses the simulated outcome (success / server error).
  * Production: POST to the approved endpoint (HubSpot Forms API or equivalent) after QM-112 sign-off.
+ *
+ * Why: the form is the main lead-capture path, so its behaviour is specified by acceptance criteria
+ * AC-FORM-1 to AC-FORM-3 (docs/10-acceptance-criteria.md; QA-18 to QA-22): an error summary that
+ * receives focus, per-field messages linked with aria-describedby, a busy state, a focused success
+ * panel, and a role="alert" error that keeps the entered values. docs/12-release-cleanup.md lists the
+ * missing endpoint as a release blocker (HubSpot form IDs + sandbox test, QM-112 6.4); spam protection
+ * is an open tool choice (QM-112 6.3, docs/13-integrations-platform.md).
+ *
+ * Props: idPrefix, compact.
+ *
+ * Used by: pages/contact-us/index.astro (listed in the design-system inventory as well).
+ *
+ * Accessibility:
+ * - `novalidate` turns off browser bubbles so all errors use the same accessible pattern: an error
+ *   summary (role="alert", focused) with links to each field, plus a message under each field linked
+ *   through aria-describedby, and aria-invalid on the field.
+ * - Errors appear on blur only after a first submit attempt or once the field has a value, and clear as
+ *   soon as the field becomes valid, so people are not scolded while still typing.
+ * - Required fields: visible asterisk (aria-hidden) explained by the note at the top, plus `required`
+ *   and aria-required for assistive tech.
+ * - autocomplete tokens on every personal-data field (WCAG 1.3.5) and inputmode="email" on Email.
+ * - A visually hidden role="status" region announces "Sending your message"; afterwards focus moves to
+ *   the success panel or the error alert, so the result is always announced.
+ *
+ * Review/release behaviour:
+ * - REVIEW: a fixture-labelled fieldset lets reviewers choose the simulated outcome (success / error).
+ * - RELEASE: that fieldset is not rendered, so the outcome is "not-configured" and the form ALWAYS shows
+ *   the error panel. It can never claim a message was sent when nothing was (docs/12). The actions row
+ *   carries `data-release-blocker`, which fails scripts/release-check.mjs until a real endpoint exists.
+ *
+ * Inquiry context: `?topic=` in the URL (e.g. /contact-us/?topic=procurement from the public-sector
+ * industry CTA, ?topic=smb-ai from the small-business one, see src/data/industries.ts) shows a context
+ * line and fills the hidden `inquiryContext` field. Unknown topics are ignored.
+ *
+ * Gotchas:
+ * - Several forms can live on one page: give each a different `idPrefix`; the script initialises every
+ *   [data-contact-form] root independently.
+ * - validateField() finds the error element from the FIRST id in a field's aria-describedby. Keep the
+ *   error id first if you add more describedby ids.
+ * - Only fields with a rule in `messages` are validated. The message textarea is optional and unvalidated.
+ * - The `compact` prop adds a `contact-form--compact` class, but no CSS targets it yet.
+ * - The success panel copy says "(Simulated — nothing was sent.)". Remove it only with a real endpoint.
  */
 import Icon from './Icon.astro';
 import FixtureLabel from './FixtureLabel.astro';
-interface Props { idPrefix?: string; compact?: boolean }
+interface Props {
+  /** Prefix for every id in the form. Must be unique per form on a page. Default 'cf'. */
+  idPrefix?: string;
+  /** Adds the `contact-form--compact` class (no styles attached yet). Default false. */
+  compact?: boolean
+}
 const { idPrefix = 'cf', compact = false } = Astro.props;
+// Prefix every id so two forms on one page never share ids (labels, describedby and errors must be unique).
 const id = (s: string) => `${idPrefix}-${s}`;
+// Text inputs, in the live form's order. `half` = shares a row with its neighbour from 560px up.
+// `autocomplete` tokens let browsers autofill and satisfy WCAG 1.3.5 (identify input purpose).
 const fields = [
   { name: 'firstName', label: 'First name', type: 'text', autocomplete: 'given-name', required: true, half: true },
   { name: 'lastName', label: 'Last name', type: 'text', autocomplete: 'family-name', required: true, half: true },
@@ -21,17 +71,26 @@ const fields = [
   { name: 'email', label: 'Work email', type: 'email', autocomplete: 'email', required: true, half: false },
 ];
 ---
+{/* Root: data-contact-form is the hook the script uses to initialise each form instance. */}
 <div class:list={['contact-form', { 'contact-form--compact': compact }]} data-contact-form>
+  {/* Error summary: hidden until a submit fails validation; then filled with links to each invalid field,
+      shown and focused. role="alert" makes screen readers announce it immediately. */}
   <div class="contact-form__summary" id={id('summary')} role="alert" tabindex="-1" hidden data-summary>
     <p class="contact-form__summary-title"><Icon name="alert" /> <span data-summary-title>Please fix the following:</span></p>
     <ul data-summary-list></ul>
   </div>
 
+  {/* novalidate: our own accessible validation replaces browser bubbles. aria-describedby links the form
+      to the "required fields" note. */}
   <form novalidate id={id('form')} aria-describedby={id('req-note')} data-form>
+    {/* Context line, shown only when ?topic= matches a known inquiry type (see script). */}
     <p class="contact-form__context" data-context hidden></p>
     <p id={id('req-note')} class="hint">Fields marked <span class="req" aria-hidden="true">*</span><span class="visually-hidden">with an asterisk</span> are required.</p>
+    {/* Hidden field that carries the ?topic= value with the submission. */}
     <input type="hidden" name="inquiryContext" data-context-input />
     <div class="contact-form__grid">
+      {/* Text inputs from the `fields` array. Each has a label, an input, and an error paragraph whose id is
+          the FIRST entry in the input's aria-describedby (the script relies on that order). */}
       {fields.map((f) => (
         <div class:list={['field', { 'field--half': f.half }]}>
           <label for={id(f.name)}>{f.label} {f.required && <span class="req" aria-hidden="true">*</span>}</label>
@@ -39,11 +98,14 @@ const fields = [
           <p class="field-error" id={id(`${f.name}-error`)} hidden><Icon name="alert" /><span></span></p>
         </div>
       ))}
+      {/* Optional free-text message (no validation rule); maxlength 2000 caps very long submissions. */}
       <div class="field field--full">
         <label for={id('message')}>How can we help you?</label>
         <textarea class="textarea" id={id('message')} name="message" rows="5" maxlength="2000" aria-describedby={id('message-hint')}></textarea>
         <p class="hint" id={id('message-hint')}>Optional. Tell us about your project, timeline or the problem you are trying to solve.</p>
       </div>
+      {/* Privacy acceptance: required checkbox with its own error message. The policy link opens in a new
+          tab, so the half-completed form stays in place. */}
       <div class="field field--full">
         <div class="checkbox">
           <input type="checkbox" id={id('privacy')} name="privacy" required aria-required="true" aria-describedby={id('privacy-error')} />
@@ -53,6 +115,8 @@ const fields = [
       </div>
     </div>
 
+    {/* REVIEW-only simulation control, clearly labelled as a fixture. Not rendered in release builds, which
+        makes the outcome "not-configured" (always an error, never a false success). */}
     {REVIEW && <fieldset class="contact-form__sim" data-review-note="Prototype-only control">
       <legend><FixtureLabel text="Prototype control — simulated submission" /></legend>
       <p class="hint">No data leaves this page. Choose what the simulated server returns:</p>
@@ -62,19 +126,26 @@ const fields = [
       </div>
     </fieldset>}
 
+    {/* Release blocker: in release builds this marks the missing CRM endpoint for scripts/release-check.mjs. */}
     <div class="contact-form__actions" data-release-blocker={RELEASE ? 'contact-form: no approved HubSpot endpoint; submission is simulated' : undefined}>
+      {/* aria-busy and disabled are set by the script while "sending"; the spinner shows only when busy. */}
       <button class="btn" type="submit" data-submit>
         <span class="btn__label">Send message</span>
         <span class="spinner" aria-hidden="true"></span>
       </button>
+      {/* Visually hidden polite status region for "Sending your message". */}
       <p class="visually-hidden" role="status" aria-live="polite" data-live></p>
     </div>
   </form>
 
+  {/* Server-error panel: role="alert", focused by the script. The form stays visible with the visitor's
+      answers so they can retry (AC-FORM-3). */}
   <div class="contact-form__result contact-form__result--error" id={id('submit-error')} role="alert" tabindex="-1" hidden data-result-error>
     <p class="contact-form__result-title"><Icon name="alert" /> We couldn’t send your message</p>
     <p>Something went wrong on our side (simulated). Your answers are still in the form. Try again, or email <a href="mailto:support@qualityworkscg.com">support@qualityworkscg.com</a>.</p>
   </div>
+  {/* Success panel: replaces the form and receives focus. Name and email are filled in by the script as
+      text (never HTML). */}
   <div class="contact-form__result contact-form__result--success" id={id('success')} tabindex="-1" hidden data-result-success>
     <p class="contact-form__result-title"><Icon name="check" /> Thank you, <span data-success-name></span>. Your message is on its way.</p>
     <p>A member of the QualityWorks team will reply to <strong data-success-email></strong>. <em>(Simulated — nothing was sent.)</em></p>
@@ -83,30 +154,45 @@ const fields = [
 </div>
 
 <style>
+  /* Card: always a white surface (even on dark sections), so it re-maps the colour tokens to on-light values.
+     clamp() scales the padding from 1.25rem on phones to 2.25rem on desktop. */
   .contact-form { background: #fff; color: var(--qw-slate-700); border: 1px solid var(--qw-line); border-radius: var(--radius-lg); padding: clamp(1.25rem, 3vw, 2.25rem); box-shadow: var(--shadow-md); --color-heading: var(--qw-ink-900); --color-muted: var(--qw-slate-500); --focus-ring: var(--qw-teal-700); --color-link: var(--qw-teal-700); }
+  /* Fields: one column on phones; two columns from 560px, where non-half fields span both columns. */
   .contact-form__grid { display: grid; gap: var(--space-5); grid-template-columns: 1fr; }
   @media (min-width: 560px) { .contact-form__grid { grid-template-columns: 1fr 1fr; } .field--full, .field:not(.field--half) { grid-column: 1 / -1; } }
+  /* Hint spacing: the top "required fields" note gets space below; hints inside a field sit tight under it. */
   .contact-form .hint { margin-bottom: var(--space-5); }
   .field .hint { margin: 0; }
+  /* Error summary: 2px danger border on a pale danger background; title in danger red. */
   .contact-form__summary { border: 2px solid var(--qw-danger); background: var(--qw-danger-bg); border-radius: var(--radius-md); padding: var(--space-4) var(--space-5); margin-bottom: var(--space-6); color: var(--qw-ink-900); }
+  /* display: none restores hiding for [hidden], in case a display value is ever added above. */
   .contact-form__summary[hidden] { display: none; }
   .contact-form__summary-title { display: flex; align-items: center; gap: var(--space-2); font-weight: var(--fw-bold); margin-bottom: var(--space-2); color: var(--qw-danger); }
   .contact-form__summary-title :global(svg) { width: 20px; height: 20px; }
   .contact-form__summary ul { margin: 0; }
   .contact-form__summary a { color: var(--qw-danger); font-weight: var(--fw-semibold); }
+  /* Context line from ?topic=, on a teal tint. */
   .contact-form__context { background: var(--qw-teal-50); border-radius: var(--radius-sm); padding: var(--space-2) var(--space-3); font-size: var(--fs-sm); }
+  /* Simulation fieldset: dashed amber "prototype" styling, matching the fixture badge. */
   .contact-form__sim { margin: var(--space-6) 0 0; padding: var(--space-4); border: 1px dashed #C99A2E; border-radius: var(--radius-md); background: #FFFCF2; }
   .contact-form__sim legend { padding: 0 var(--space-2); }
+  /* Fixture badge re-coloured to dark amber #7A4B00 on #FFF8E1 (about 7:1). :global because the badge is
+     rendered by FixtureLabel, outside this component's scope. */
   .contact-form :global(.badge--fixture) { background: #FFF8E1; color: #7A4B00; border-color: #C99A2E; }
   .contact-form__sim .hint { margin: 0 0 var(--space-2); }
   .sim-options { display: flex; gap: var(--space-5); font-size: var(--fs-sm); }
+  /* Radio labels at least 32px tall for easier tapping. */
   .sim-options label { display: inline-flex; gap: 0.4rem; align-items: center; min-height: 32px; }
   .contact-form__actions { margin-top: var(--space-6); }
+  /* Submit: min-width 12rem so the button does not shrink when the label changes to "Sending…". */
   .contact-form__actions .btn { min-width: 12rem; position: relative; }
+  /* Spinner: hidden until the submit button has aria-busy="true"; 40% white track with a solid white arc.
+     The global reduced-motion rule effectively stops the spin for visitors who ask for less motion. */
   .spinner { display: none; width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
   [data-submit][aria-busy="true"] .spinner { display: inline-block; }
   [data-submit][aria-busy="true"] { opacity: 0.85; cursor: progress; }
   @keyframes spin { to { transform: rotate(360deg); } }
+  /* Result panels (error / success). */
   .contact-form__result { border-radius: var(--radius-md); padding: var(--space-5); margin-top: var(--space-6); }
   .contact-form__result[hidden] { display: none; }
   .contact-form__result--error { background: var(--qw-danger-bg); border: 1px solid #F4C2BD; }
@@ -115,11 +201,16 @@ const fields = [
   .contact-form__result-title :global(svg) { width: 22px; height: 22px; flex: none; }
   .contact-form__result--error .contact-form__result-title :global(svg) { color: var(--qw-danger); }
   .contact-form__result--success .contact-form__result-title :global(svg) { color: var(--qw-success); }
+  /* Panels are focused by script only (tabindex -1); no outline, as they are not interactive controls. */
   .contact-form__result:focus { outline: none; }
 </style>
 
 <script>
+  // Pragmatic email check: something@something.tld (tld of 2+ chars), no spaces. The real endpoint must
+  // validate again on the server.
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  // Validation rules keyed by input `name`. Each returns an error message, or null when valid. The
+  // wording tells people how to fix the problem (AC-FORM-2 quotes the email message exactly).
   const messages: Record<string, (v: string, el: HTMLInputElement) => string | null> = {
     firstName: (v) => (v.trim() ? null : 'Enter your first name'),
     lastName: (v) => (v.trim() ? null : 'Enter your last name'),
@@ -128,8 +219,11 @@ const fields = [
     email: (v) => (!v.trim() ? 'Enter your email address' : EMAIL_RE.test(v.trim()) ? null : 'Enter an email address in the format name@company.com'),
     privacy: (_v, el) => (el.checked ? null : 'You must accept the privacy policy before we can contact you'),
   };
+  // Allowed ?topic= values and their display labels. Anything else is ignored. "careers" is defined
+  // but no page links to it today.
   const contextLabels: Record<string, string> = { procurement: 'Procurement inquiry', 'smb-ai': 'Help choosing an AI approach', careers: 'Careers question' };
 
+  // One independent controller per form root, so several forms can coexist on a page.
   document.querySelectorAll<HTMLElement>('[data-contact-form]').forEach((root) => {
     const form = root.querySelector<HTMLFormElement>('[data-form]')!;
     const summary = root.querySelector<HTMLElement>('[data-summary]')!;
@@ -138,6 +232,7 @@ const fields = [
     const live = form.querySelector<HTMLElement>('[data-live]')!;
     const success = root.querySelector<HTMLElement>('[data-result-success]')!;
     const error = root.querySelector<HTMLElement>('[data-result-error]')!;
+    // Becomes true on the first submit; from then on, blur validates even empty fields.
     let attempted = false;
 
     // Context from ?topic= (e.g. procurement inquiry from the public-sector page)
@@ -148,6 +243,8 @@ const fields = [
       form.querySelector<HTMLInputElement>('[data-context-input]')!.value = topic;
     }
 
+    // Validate one field: set aria-invalid, show/hide its error paragraph and set the message text.
+    // The error element is the FIRST id in aria-describedby (see the markup).
     const validateField = (el: HTMLInputElement) => {
       const rule = messages[el.name]; if (!rule) return null;
       const msg = rule(el.value, el);
@@ -156,20 +253,26 @@ const fields = [
       err.hidden = !msg; err.querySelector('span')!.textContent = msg ?? '';
       return msg;
     };
+    // Live validation: on blur once the visitor has tried to submit (or typed something); while typing
+    // only to CLEAR an existing error, never to raise a new one mid-word.
     form.querySelectorAll<HTMLInputElement>('input[name]').forEach((el) => {
       if (!messages[el.name]) return;
       el.addEventListener('blur', () => { if (attempted || el.value) validateField(el); });
       el.addEventListener(el.type === 'checkbox' ? 'change' : 'input', () => { if (el.getAttribute('aria-invalid') === 'true') validateField(el); });
     });
 
+    // Submit: validate everything, then either show the error summary or run the simulated send.
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       attempted = true;
+      // Hide any earlier server error so a retry starts clean.
       error.hidden = true;
       const errors: { id: string; msg: string }[] = [];
       form.querySelectorAll<HTMLInputElement>('input[name]').forEach((el) => {
         const msg = validateField(el); if (msg) errors.push({ id: el.id, msg });
       });
+      // Build the summary: one link per problem. Each link's click handler focuses the field directly,
+      // because following a #id anchor does not reliably move keyboard focus. Then show and focus the summary.
       if (errors.length) {
         summaryList.innerHTML = '';
         errors.forEach(({ id, msg }) => { const li = document.createElement('li'); const a = document.createElement('a'); a.href = `#${id}`; a.textContent = msg; a.addEventListener('click', (ev) => { ev.preventDefault(); document.getElementById(id)!.focus(); }); li.append(a); summaryList.append(li); });
@@ -192,6 +295,8 @@ const fields = [
         error.hidden = false; error.focus();
         return;
       }
+      // Success: show the visitor's own name and email as text (textContent, never innerHTML), hide the
+      // form and move focus to the success panel.
       const data = new FormData(form);
       success.querySelector('[data-success-name]')!.textContent = String(data.get('firstName'));
       success.querySelector('[data-success-email]')!.textContent = String(data.get('email'));
@@ -199,6 +304,7 @@ const fields = [
       live.textContent = '';
     });
 
+    // "Send another message": reset everything and put focus back in the first field.
     root.querySelector('[data-reset]')?.addEventListener('click', () => {
       form.reset(); attempted = false;
       form.querySelectorAll('[aria-invalid]').forEach((el) => el.setAttribute('aria-invalid', 'false'));

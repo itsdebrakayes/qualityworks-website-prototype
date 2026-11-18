@@ -1,36 +1,85 @@
 ---
+/**
+ * EventCard: teaser for one event or speaking engagement (status badge, title, summary, date, venue,
+ * registration state).
+ *
+ * Why: event information goes stale quickly, so the card derives everything time-sensitive from the
+ * data at build time instead of storing it. Acceptance criterion AC-EV-1 (docs/10-acceptance-criteria.md,
+ * QA-26) requires past events to read "Past event" and never show a registration link. Review round 1
+ * (doc 11, finding C7) replaced the placeholder "#fixture-registration" link on fixture events with a
+ * labelled, non-link "demo only" badge.
+ *
+ * Props: e, headingLevel.
+ *
+ * Used by: pages/events/index.astro, pages/index.astro (events band), pages/resources/index.astro and
+ * pages/design-system/index.astro.
+ *
+ * Accessibility:
+ * - Single stretched title link (global.css); the card holds no other links, so the registration line
+ *   is plain text/badges, never a nested link.
+ * - Status is given as text ("Past event", "Cancelled"), never by colour alone.
+ * - A cancelled event's date is struck through with <s>, and the action line also says
+ *   "This event will not take place", so the meaning does not depend on the strike-through.
+ * - Calendar and venue icons are decorative.
+ *
+ * Gotchas:
+ * - Phase is computed at BUILD time (eventPhase uses "now" when the site is built). A static build
+ *   does not update by itself when an event passes; rebuild to refresh statuses.
+ * - `data-phase` is not read by any script today; it is a hook for styling or future filtering.
+ * - The order of checks in the action line matters: demo registration, then real registration, then
+ *   past, then cancelled, then "details to follow". See src/data/events.ts for each helper's rules.
+ */
 import Icon from './Icon.astro';
 import FixtureLabel from './FixtureLabel.astro';
 import type { EventRecord } from '../data/types';
 import { eventPhase, canRegister, showsDemoRegistration, formatEventDate } from '../data/events';
-interface Props { e: EventRecord; headingLevel?: 'h2' | 'h3' }
+interface Props {
+  /** The event record (src/data/events.ts). */
+  e: EventRecord;
+  /** Heading tag for the title, chosen to keep the page outline unbroken. Default 'h3'. */
+  headingLevel?: 'h2' | 'h3'
+}
 const { e, headingLevel = 'h3' } = Astro.props;
+// Dynamic heading tag (h2/h3).
 const H = headingLevel;
+// 'upcoming' | 'past' | 'cancelled' | 'date-tbc', derived from status and dates (src/data/events.ts).
 const phase = eventPhase(e);
+// Phase -> [visible label, badge colour class]. `as const` keeps the tuple types exact for destructuring.
 const statusMap = { upcoming: ['Upcoming', 'badge--success'], past: ['Past event', 'badge--neutral'], cancelled: ['Cancelled', 'badge--danger'], 'date-tbc': ['Date to be confirmed', 'badge--warning'] } as const;
 const [statusLabel, statusClass] = statusMap[phase];
+// Fictional events are always labelled (see FixtureLabel.astro).
 const fixture = e.provenance.approval === 'fixture';
 ---
+{/* event-card--past / --cancelled get a muted background (see CSS). data-phase is a styling/filter hook. */}
 <article class:list={['card', 'event-card', `event-card--${phase}`]} data-phase={phase}>
   <div class="card__body">
+    {/* Status badge plus, for fictional events, a short "Fixture" label. */}
     <p class="event-card__status"><span class:list={['badge', statusClass]}>{statusLabel}</span>{fixture && <FixtureLabel text="Fixture" />}</p>
+    {/* The single card link, stretched over the whole card by global.css. */}
     <H class="card__title"><a href={`/events/${e.slug}/`}>{e.title}</a></H>
     <p class="event-card__summary">{e.summary}</p>
+    {/* Key facts: date (struck through when cancelled) and venue (or "Online"). */}
     <ul class="event-card__facts">
       <li><Icon name="calendar" />{phase === 'cancelled' ? <s>{formatEventDate(e)}</s> : formatEventDate(e)}</li>
       <li><Icon name={e.venueType === 'online' ? 'globe' : 'pin'} />{e.venueType === 'online' ? 'Online' : e.venue ?? 'Venue to be confirmed'}</li>
     </ul>
+    {/* Registration state as text only (no links inside the card): demo-only fixture, open, closed,
+        cancelled, or details to follow. The real registration link lives on the event detail page. */}
     <p class="event-card__action">
       {showsDemoRegistration(e) ? <span class="badge badge--fixture">Registration: demo only</span> : canRegister(e) ? <span class="badge">Registration open</span> : phase === 'past' ? <span class="muted">Registration closed</span> : phase === 'cancelled' ? <span class="muted">This event will not take place</span> : <span class="muted">Registration details to follow</span>}
     </p>
   </div>
 </article>
 <style>
+  /* Status row: z-index 2 lifts the badges above the stretched title link overlay (z-index 1). */
   .event-card__status { display: flex; flex-wrap: wrap; gap: var(--space-2); position: relative; z-index: 2; }
   .event-card__summary { font-size: var(--fs-sm); color: var(--color-muted); }
   .event-card__facts { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.35rem; font-size: var(--fs-sm); }
   .event-card__facts li { display: flex; gap: 0.5rem; align-items: center; }
+  /* Fact icons: fixed 18px, teal, and flex:none so long venue names never squash them. */
   .event-card__facts :global(svg) { width: 18px; height: 18px; color: var(--qw-teal-700); flex: none; }
+  /* margin-top:auto pins the registration line to the bottom of the card so it aligns across a row. */
   .event-card__action { margin-top: auto !important; padding-top: var(--space-2); font-size: var(--fs-sm); }
+  /* Past and cancelled events recede onto the canvas grey so upcoming events stand out. */
   .event-card--past, .event-card--cancelled { background: var(--qw-canvas); }
 </style>

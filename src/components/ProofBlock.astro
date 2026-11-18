@@ -3,23 +3,52 @@ import { rn } from '../lib/release';
 /**
  * Testimonial / proof block. Quotes are published on the live site today; each requires re-approval
  * from the person quoted before reuse (approval state shown in review mode).
+ *
+ * What: a responsive grid of quote cards (quote, name, role) drawn from src/data/testimonials.ts.
+ *
+ * Why: social proof is reused from the live site rather than rewritten, so wording stays exactly as
+ * the person approved it. Each quote carries provenance so reviewers can see that re-approval is
+ * still outstanding.
+ *
+ * Props: ids (optional subset of testimonial ids).
+ *
+ * Used by: pages/index.astro, pages/about-us/index.astro and pages/design-system/index.astro.
+ *
+ * Review/release behaviour: each <figure> gets `data-review-note="<id>: <approval>"` through rn(), so
+ * in review mode it is outlined and labelled (global.css). In release builds rn() returns undefined
+ * and the attribute is not rendered at all.
+ *
+ * Accessibility: <figure> + <blockquote> + <figcaption> is the semantic pattern for an attributed quote,
+ * so the attribution is programmatically tied to the quote.
+ *
+ * Gotchas: when `ids` is given, quotes appear in the order of src/data/testimonials.ts, NOT the order
+ * of the `ids` array. Reorder the data file to change the display order.
  */
 import { testimonials } from '../data/testimonials';
-interface Props { ids?: string[] }
+interface Props {
+  /** Testimonial ids to show. Omit to show every testimonial. */
+  ids?: string[]
+}
+// Filter keeps data-file order (see Gotchas). The `!` is safe: this branch only runs when ids is set.
 const list = Astro.props.ids ? testimonials.filter((t) => Astro.props.ids!.includes(t.id)) : testimonials;
 ---
 <div class="proof">
   {list.map((t) => (
     <figure class="proof__item" data-review-note={rn(`${t.id}: ${t.provenance.approval}`)}>
       <blockquote><p>{t.quote}</p></blockquote>
+      {/* Name and role as separate lines; figcaption ties them to the quote. */}
       <figcaption><span class="proof__name">{t.name}</span><span class="proof__role">{t.role}</span></figcaption>
     </figure>
   ))}
 </div>
 <style>
+  /* Grid: cards at least 20rem wide; min(100%, 20rem) avoids overflow on 360px phones. */
   .proof { display: grid; gap: var(--space-6); grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); }
+  /* Card: space-between pins the attribution to the bottom so names align across cards of different quote lengths. */
   .proof__item { margin: 0; display: flex; flex-direction: column; justify-content: space-between; gap: var(--space-6); padding: var(--space-8) var(--space-6) var(--space-6); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); position: relative; }
+  /* Short 28px x 3px teal accent bar at the top-left of each card (the extra top padding makes room for it). */
   .proof__item::before { content: ""; position: absolute; top: var(--space-6); left: var(--space-6); width: 28px; height: 3px; background: var(--qw-teal-500); }
+  /* Element selectors are safe here: Astro scopes them to this component's markup only. */
   blockquote { margin: var(--space-4) 0 0; font-size: var(--fs-base); line-height: 1.6; color: var(--color-heading); }
   blockquote p { margin: 0; }
   figcaption { display: grid; gap: 2px; font-size: var(--fs-sm); }

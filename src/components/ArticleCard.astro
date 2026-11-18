@@ -1,26 +1,76 @@
 ---
+/**
+ * ArticleCard: one card in a list of blog posts, news, whitepapers, guides or event recaps.
+ *
+ * Why: every listing of written content (blog index, resources hub, homepage "latest thinking",
+ * related reading under an article) needs the same card so type, date and title read identically
+ * everywhere. Records come from src/data/articles.ts (migrated WordPress posts plus a few fixtures).
+ *
+ * Props: `a` (the Article record) and `headingLevel` (h2 or h3, so the card fits the page outline).
+ *
+ * Used by: pages/index.astro, pages/blog/index.astro, pages/resources/index.astro,
+ * pages/[slug].astro (article detail) and pages/design-system/index.astro.
+ *
+ * Accessibility:
+ * - The title link is the ONLY link in the card. global.css stretches it over the whole card
+ *   (`.card__title a::after`, z-index 1), so the full card is clickable without nesting links.
+ * - The image alt comes from the record (`imageAlt`, written per image in review round 1, item 4).
+ * - The date is wrapped in <time datetime> so machines get the ISO date and people get "Nov 18, 2026".
+ *
+ * Review/release: no REVIEW/RELEASE logic here. Fixture records always show <FixtureLabel>, in every
+ * build; the release build excludes fixture articles at the data layer instead (docs/12-release-cleanup.md).
+ *
+ * Gotchas:
+ * - `data-type` and `data-categories` are read by the client-side filters (src/lib/filters.ts via
+ *   pages/blog/index.astro and pages/resources/index.astro). Categories are joined with "|" because
+ *   category names can contain spaces; the filter splits on "|". Change both sides together.
+ * - Keep `typeLabel` in sync with the `Article['type']` union in src/data/types.ts, or new types will
+ *   render an empty label.
+ */
 import type { Article } from '../data/types';
 import FixtureLabel from './FixtureLabel.astro';
-interface Props { a: Article; headingLevel?: 'h2' | 'h3' }
+interface Props {
+  /** The article/resource record to display (src/data/articles.ts). */
+  a: Article;
+  /** Heading tag for the title. Use 'h2' when the card list sits directly under the page h1. Default 'h3'. */
+  headingLevel?: 'h2' | 'h3'
+}
 const { a, headingLevel = 'h3' } = Astro.props;
+// Astro renders a capitalised variable holding a tag name as that element, so <H> becomes <h2>/<h3>.
 const H = headingLevel;
+// Non-article resources (e.g. an external whitepaper) carry their own href; posts keep their
+// legacy root-level WordPress slug (/slug/), which docs/06-url-mapping.md requires us to preserve.
 const href = a.href ?? `/${a.slug}/`;
+// Human-readable label per content type. Blog posts are shown as "Article" (friendlier than "Blog").
 const typeLabel = { blog: 'Article', news: 'News', whitepaper: 'Whitepaper', guide: 'Guide', 'event-recap': 'Event recap' }[a.type];
+// `publishedAt` is a date-only string. Parsing it at noon UTC and formatting in UTC means the shown
+// day never shifts by one for visitors (or build machines) east or west of Greenwich.
 const date = new Date(a.publishedAt + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+// Fictional demo records must always be labelled as such (see FixtureLabel.astro).
 const fixture = a.provenance.approval === 'fixture';
 ---
+{/* data-type and data-categories are filter hooks for src/lib/filters.ts; do not rename. */}
 <article class="card article-card" data-type={a.type} data-categories={a.categories.join('|')}>
+  {/* Media: the real image when one exists, otherwise a branded placeholder showing the content type. */}
   <div class="card__media">{a.image ? <img src={a.image} alt={a.imageAlt} loading="lazy" width="640" height="360" /> : <div class="article-card__ph"><span>{typeLabel}</span></div>}</div>
   <div class="card__body">
     <p class="card__meta"><span>{typeLabel}</span> · <time datetime={a.publishedAt}>{date}</time></p>
+    {/* The single card link; global.css stretches it to cover the whole card. */}
     <H class="card__title"><a href={href}>{a.title}</a></H>
     <p class="article-card__excerpt">{a.excerpt}</p>
     {fixture && <p><FixtureLabel /></p>}
   </div>
 </article>
 <style>
+  /* Excerpt: clamp to 3 lines so cards in a grid row keep similar heights. The -webkit- prefixed
+     line-clamp trio is the cross-browser way to do this today. */
   .article-card__excerpt { font-size: var(--fs-sm); color: var(--color-muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  /* Placeholder media: dark ink surface with fine concentric rings in brand teal (#289DAD = rgb 40,157,173)
+     at 15% alpha, echoing the gear ring of the QualityWorks "Q". Rings are 1px lines every 19px. */
   .article-card__ph { height: 100%; display: grid; place-items: center; background: repeating-radial-gradient(circle at 80% 20%, transparent 0 18px, rgba(40,157,173,0.15) 18px 19px), var(--qw-ink-900); }
+  /* Placeholder label: mono, uppercase, light teal for contrast on the dark ink background. */
   .article-card__ph span { font: var(--fw-medium) var(--fs-xs)/1 var(--font-mono); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-teal-300); }
+  /* Lift the fixture badge above the stretched title link overlay (z-index 1 in global.css) so the
+     overlay never paints over it and the "this is fictional" warning is always fully visible. */
   .article-card :global(.badge--fixture) { position: relative; z-index: 2; }
 </style>

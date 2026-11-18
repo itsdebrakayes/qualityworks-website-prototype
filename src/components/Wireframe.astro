@@ -1,23 +1,60 @@
 ---
 import { RELEASE, REVIEW } from '../lib/release';
-/** Wireframe placeholder for modules awaiting product-owner content. Clearly not final design. */
-interface Props { title: string; decision: string; owner?: string }
+/**
+ * Wireframe placeholder for modules awaiting product-owner content. Clearly not final design.
+ *
+ * What: a dashed, hatched box saying "Wireframe · decision needed", with the module title, who must
+ * decide, and what they must decide. Extra explanation can go in the default slot.
+ *
+ * Why: some modules (for example the PRISM dimension list and the About us leadership profiles) cannot be written until
+ * an owner supplies content or makes a decision. Showing a deliberately rough wireframe, instead of
+ * invented copy, keeps the prototype honest and makes the open decision visible to reviewers.
+ *
+ * Props: title, decision, owner.
+ *
+ * Used by: pages/about-us/index.astro, pages/products/prism.astro and pages/design-system/index.astro.
+ *
+ * Review/release behaviour: the wireframe renders in BOTH builds (a missing module is a real gap, not a
+ * review annotation). In the release build it carries `data-release-blocker="content-missing: <title>"`,
+ * which scripts/release-check.mjs reports as a BLOCKER, so the release gate fails until the module is
+ * replaced with real content (docs/12-release-cleanup.md).
+ *
+ * Accessibility: role="note" marks it as an aside to the main content. The grey "text lines" are
+ * decorative and aria-hidden.
+ *
+ * Gotchas: `REVIEW` is imported but not used in this file.
+ */
+interface Props {
+  /** Name of the missing module, e.g. "Leadership profiles". Also used in the release-blocker reason. */
+  title: string;
+  /** The decision or content that is needed, in one or two sentences. */
+  decision: string;
+  /** Who must make the decision. Default 'Product owner'. */
+  owner?: string
+}
 const { title, decision, owner = 'Product owner' } = Astro.props;
 ---
+{/* data-release-blocker only exists in release builds, where the release gate counts it as a blocker. */}
 <div class="wf" role="note" data-release-blocker={RELEASE ? `content-missing: ${title}` : undefined}>
   <p class="wf__tag mono">Wireframe · decision needed</p>
   <p class="wf__title">{title}</p>
   <p class="wf__decision"><strong>{owner}:</strong> {decision}</p>
+  {/* Fake text lines that make the box read as a wireframe at a glance. */}
   <div class="wf__lines" aria-hidden="true"><span></span><span></span><span></span></div>
   <slot />
 </div>
 <style>
+  /* Box: dashed border plus faint 45-degree hatching (12px stripes of slate #9AA7B4 at 7% alpha), the
+     classic wireframe look, so nobody mistakes it for finished design. */
   .wf { border: 2px dashed #B9C4CC; border-radius: var(--radius-lg); padding: var(--space-6); background: repeating-linear-gradient(-45deg, transparent 0 12px, rgba(154,167,180,0.07) 12px 24px); }
+  /* On dark surfaces use a translucent white border instead of the light grey. */
   .surface-product .wf, .surface-dark .wf { border-color: rgba(255,255,255,0.25); }
+  /* Tag in warning amber (light) or gold (dark) so the "decision needed" status stands out. */
   .wf__tag { font-size: var(--fs-xs); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-warning); margin-bottom: var(--space-2); }
   .surface-product .wf__tag, .surface-dark .wf__tag { color: var(--qw-gold-400); }
   .wf__title { font-weight: var(--fw-bold); font-size: var(--fs-md); color: var(--color-heading); margin-bottom: var(--space-2); }
   .wf__decision { font-size: var(--fs-sm); color: var(--color-text); }
+  /* Placeholder lines: full, 85% and 60% width bars. */
   .wf__lines { display: grid; gap: 0.5rem; margin-top: var(--space-4); }
   .wf__lines span { height: 0.6rem; border-radius: 4px; background: rgba(154,167,180,0.3); }
   .wf__lines span:nth-child(2) { width: 85%; } .wf__lines span:nth-child(3) { width: 60%; }

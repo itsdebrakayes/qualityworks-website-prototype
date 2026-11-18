@@ -1,22 +1,57 @@
 ---
+/**
+ * ServiceCard: teaser card for one service or engagement model (icon, name, buyer problem, summary).
+ *
+ * Why: the solutions pages are organised around the buyer's problem first (persona-led page map,
+ * docs/03-page-map-personas.md), so each card leads with `buyerProblem` before the marketing summary.
+ * One card is reused wherever services are listed so wording and layout stay in step with the data.
+ *
+ * Props: service, headingLevel, showProblem.
+ *
+ * Used by: pages/services/index.astro, pages/engagement-models/index.astro, pages/industries/[slug].astro,
+ * components/templates/ServiceTemplate.astro ("Keep exploring" siblings) and pages/design-system/index.astro.
+ *
+ * Accessibility:
+ * - The title link is the card's only link; global.css stretches it over the whole card.
+ * - The problem line has a visually hidden "Problem it solves:" prefix so screen-reader users get the
+ *   context that sighted users get from the teal side rule.
+ * - The "Explore service ->" footer is aria-hidden: it is a visual cue only (the whole card is already
+ *   the link), and reading it would just repeat the link.
+ *
+ * Gotchas: the card links to `service.path`, the preserved legacy URL, not a URL built from the slug.
+ */
 import Icon from './Icon.astro';
 import type { Service } from '../data/types';
-interface Props { service: Service; headingLevel?: 'h3' | 'h4'; showProblem?: boolean }
+interface Props {
+  /** The service record (src/data/services.ts). Its `icon` must be a key in Icon.astro. */
+  service: Service;
+  /** Heading tag for the name: 'h3' (default) under an h2 section, 'h4' when nested under an h3 group. */
+  headingLevel?: 'h3' | 'h4';
+  /** Show the buyer-problem line. Default true; set false where space is tight. */
+  showProblem?: boolean
+}
+// Renamed to `s` for brevity in the template.
 const { service: s, headingLevel = 'h3', showProblem = true } = Astro.props;
+// Dynamic heading tag (h3/h4).
 const H = headingLevel;
 ---
 <article class="card service-card">
   <div class="card__body">
     <span class="service-card__icon"><Icon name={s.icon} /></span>
+    {/* The single card link, stretched over the whole card by global.css. */}
     <H class="card__title"><a href={s.path}>{s.name}</a></H>
     {showProblem && <p class="service-card__problem"><span class="visually-hidden">Problem it solves: </span>{s.buyerProblem}</p>}
     <p class="service-card__summary">{s.cardSummary}</p>
+    {/* Visual "read more" cue only; hidden from assistive tech because it duplicates the title link. */}
     <span class="card__footer link-arrow" aria-hidden="true">Explore {s.kind === 'engagement-model' ? 'model' : 'service'}<Icon name="arrow" /></span>
   </div>
 </article>
 <style>
+  /* Icon tile: 2.75rem (44px) teal-tinted square with the icon in interactive teal. */
   .service-card__icon { display: inline-grid; place-items: center; width: 2.75rem; height: 2.75rem; border-radius: var(--radius-md); background: var(--qw-teal-50); color: var(--qw-teal-700); }
+  /* On dark surfaces: a translucent teal-300 tint (rgb 95,195,207 = #5FC3CF) and light teal icon, ~8:1 on ink. */
   .surface-dark .service-card__icon, .surface-product .service-card__icon { background: rgba(95,195,207,0.12); color: var(--qw-teal-300); }
+  /* Buyer problem: heading colour plus a 3px teal rule, so it reads as the card's key message. */
   .service-card__problem { font-size: var(--fs-sm); color: var(--color-heading); font-weight: var(--fw-medium); border-left: 3px solid var(--qw-teal-500); padding-left: var(--space-3); }
   .service-card__summary { font-size: var(--fs-sm); color: var(--color-muted); }
 </style>

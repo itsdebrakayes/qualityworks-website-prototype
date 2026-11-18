@@ -1,13 +1,43 @@
 ---
+/**
+ * LegalStub: a complete placeholder PAGE (not a fragment) for legal routes such as the privacy policy
+ * and terms and conditions.
+ *
+ * Why: the legal text must be migrated verbatim from the live site, and possibly reviewed by counsel,
+ * so the prototype must not paraphrase or reproduce it. The route still has to exist because the
+ * footer and the contact form's privacy checkbox link to it and every live URL is preserved
+ * (docs/06-url-mapping.md). This stub keeps the URL working and points reviewers to the live version.
+ *
+ * Props: `title` (page name) and `path` (the preserved URL path, also used to build the live link).
+ *
+ * Used by: pages/privacy-policy/index.astro and pages/terms-conditions/index.astro.
+ *
+ * Accessibility: PageHero supplies the single <h1>. The live-site link opens in a new tab and says so
+ * with visually hidden text.
+ *
+ * Review/release: no REVIEW/RELEASE switch here. The "Prototype route" alert is real page content in
+ * both builds, so these pages are not launch-ready until the legal text is migrated.
+ *
+ * Gotchas: because this component wraps BaseLayout itself, a page using it must not wrap it in
+ * BaseLayout again (that would produce two <html> documents). `path` must start with "/" and end
+ * with "/" to match the live URL style.
+ */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from './PageHero.astro';
 import Alert from './Alert.astro';
-interface Props { title: string; path: string }
+interface Props {
+  /** Page title, e.g. "Privacy Policy". Used for the <title>, meta description, breadcrumb and h1. */
+  title: string;
+  /** Preserved URL path, e.g. "/privacy-policy/". Appended to the live domain for the "current version" link. */
+  path: string
+}
 const { title, path } = Astro.props;
+// Same array feeds the visible trail (PageHero) and the BreadcrumbList JSON-LD (BaseLayout).
 const crumbs = [{ label: 'Home', href: '/' }, { label: title }];
 ---
 <BaseLayout seo={{ title: `${title} | QualityWorks`, description: `${title} for qualityworkscg.com.` }} breadcrumbs={crumbs}>
   <PageHero title={title} breadcrumbs={crumbs} compact />
+  {/* Explains why the legal text is absent and links to the authoritative live version. */}
   <section class="section"><div class="container container--narrow">
     <Alert tone="info" title="Prototype route">
       <p>Legal text is not reproduced in the prototype. It must be migrated verbatim (and reviewed by counsel if the site’s data processing changes — e.g. a new form provider). Current version: <a href={`https://qualityworkscg.com${path}`} target="_blank" rel="noopener">qualityworkscg.com{path}<span class="visually-hidden"> (opens in a new tab)</span></a>.</p>

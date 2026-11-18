@@ -2,16 +2,41 @@
 /**
  * Renders a metric value. The "→" character (U+2192) is NOT in Red Hat Display's Latin subset and
  * would render in a fallback font, so "A → B" is drawn with an SVG arrow + accessible "to".
+ *
+ * What: prints a metric such as "90%+" unchanged, or turns "79% → 98%" into "79%", an inline SVG
+ * arrow, and "98%", with a visually hidden " to " between them.
+ *
+ * Why: acceptance criterion AC-TYPE-1 (docs/10-acceptance-criteria.md, checked by QA-9 and
+ * scripts/glyph-lint.mjs) requires every rendered glyph to come from the brand fonts.
+ * CONTRIBUTING 3.4 says to use MetricValue for "A → B". src/lib/glyphs.ts applies the same idea to
+ * migrated HTML strings; this component is the version for metric values in templates.
+ *
+ * Props: value.
+ *
+ * Used by: components/CaseStudyCard.astro and pages/case-studies/[slug].astro.
+ *
+ * Accessibility: the arrow SVG is aria-hidden and not focusable; screen readers hear "79% to 98%".
+ *
+ * Gotchas: splits on EVERY arrow, so "A → B → C" also works. Only the U+2192 arrow is handled; other
+ * arrow characters ("->", "⟶") pass through unchanged and may still fail the glyph lint.
  */
-interface Props { value: string }
+interface Props {
+  /** Metric text as stored in the data, e.g. "40%" or "2 weeks → 2 days". */
+  value: string
+}
+// Split on the arrow and trim, so spacing around the arrow in the data does not matter.
 const parts = Astro.props.value.split('→').map((s) => s.trim());
 ---
+{/* No arrow: output the plain text with no wrapper. With arrows: an inline-flex span of parts joined by
+    an SVG arrow plus hidden " to " text. */}
 {parts.length === 1 ? <>{parts[0]}</> : (
   <span class="mv">{parts.map((p, i) => (
     <>{i > 0 && <><svg class="mv__arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="visually-hidden"> to </span></>}<span>{p}</span></>
   ))}</span>
 )}
 <style>
+  /* Wraps onto two lines on narrow cards; gap in em so spacing scales with the metric's font size. */
   .mv { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 0.2em 0.3em; }
+  /* Arrow sized relative to the text (0.8em); flex none stops it from being squashed. */
   .mv__arrow { width: 0.8em; height: 0.8em; flex: none; }
 </style>

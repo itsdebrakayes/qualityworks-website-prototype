@@ -1,8 +1,47 @@
 ---
-/** Inline SVG icon set (stroke icons, 24px grid). Decorative unless `label` is given. */
-interface Props { name: string; label?: string; class?: string; size?: number }
+/**
+ * Inline SVG icon set (stroke icons, 24px grid). Decorative unless `label` is given.
+ *
+ * What: renders one named icon as an inline <svg>. All icons are hand-drawn paths on a 24x24 grid
+ * using `currentColor` strokes, so they inherit the surrounding text colour and need no theming.
+ *
+ * Why: inline SVG avoids an icon font (which would add a font request and glyph-substitution risk,
+ * see the glyph rules in CONTRIBUTING 3.4) and avoids extra image requests. Keeping every path in one
+ * map means the whole set is visible and reviewable in one place.
+ *
+ * Props: name, label, class, size.
+ *
+ * Used by: Alert, Breadcrumbs, Button, ContactForm, EmptyState, EventCard, Footer, Header, ProductCard,
+ * ServiceCard, templates/ServiceTemplate, and pages ([slug], careers, contact-us, events/[slug], index,
+ * industries, products, products/agents-as-a-service, prototype, qualitywatcher-ai-tools, services).
+ * Service records name their icon in `Service.icon` (src/data/services.ts).
+ *
+ * Accessibility: without `label` the icon is aria-hidden (decorative), which is right when visible text
+ * sits next to it. With `label` it becomes role="img" with that accessible name; use this only for
+ * icon-only meaning. focusable="false" stops old Internet Explorer/Edge from adding SVGs to the tab order.
+ *
+ * Gotchas:
+ * - An unknown `name` silently falls back to the "info" icon. Check the spelling against `paths`.
+ * - Paths are injected with set:html. They are trusted constants in this file; never pass user or
+ *   CMS content into `paths`.
+ * - To add an icon: draw it on a 24x24 grid with 1.75 stroke and round caps/joins, add one entry to
+ *   `paths` (inner SVG markup only, no <svg> wrapper).
+ */
+interface Props {
+  /** Key in the `paths` map below (e.g. 'arrow', 'external', 'check'). Unknown names render 'info'. */
+  name: string;
+  /** Accessible name. Omit for decorative icons (the default); provide for icons that carry meaning alone. */
+  label?: string;
+  /** Extra class names added after the built-in `icon icon-<name>` classes. */
+  class?: string;
+  /** Width/height attribute in px. Default 24. CSS from the parent usually overrides the rendered size. */
+  size?: number
+}
+// `class` is a reserved word in JavaScript, so it is renamed to `cls` while destructuring.
 const { name, label, class: cls, size } = Astro.props;
+// Inner SVG markup per icon, all on the same 24x24 viewBox.
 const paths: Record<string, string> = {
+  // interface glyphs
   arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
   external: '<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
   chevron: '<path d="M6 9l6 6 6-6"/>',
@@ -38,8 +77,12 @@ const paths: Record<string, string> = {
   shield: '<path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.4-7.5 9.5-4.3-1.1-7.5-4.9-7.5-9.5V6L12 3z"/><path d="M9 12l2 2 4-4"/>',
   access: '<circle cx="12" cy="4.5" r="1.8"/><path d="M5 8.5l7 1.5 7-1.5M12 10v5l-3 6M12 15l3 6"/>',
   doc: '<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/>',
+  // social
   linkedin: '<rect x="3.5" y="3.5" width="17" height="17" rx="2"/><path d="M8 10.5V17M8 7.5h.01M12 17v-3.8a2.3 2.3 0 0 1 4.6 0V17M12 10.5V17"/>',
 };
+// Fall back to a neutral icon rather than rendering an empty <svg> for a typo'd name.
 const d = paths[name] ?? paths.info;
 ---
+{/* aria-hidden when decorative; role="img" + aria-label when a label is given. Stroke uses currentColor so the
+    icon takes the text colour of its parent. */}
 <svg class:list={['icon', `icon-${name}`, cls]} viewBox="0 0 24 24" width={size ?? 24} height={size ?? 24} fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden={label ? undefined : 'true'} role={label ? 'img' : undefined} aria-label={label} focusable="false" set:html={d} />

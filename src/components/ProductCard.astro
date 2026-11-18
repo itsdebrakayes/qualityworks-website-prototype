@@ -1,24 +1,68 @@
 ---
 import { RELEASE, REVIEW } from '../lib/release';
+/**
+ * ProductCard: teaser for one QualityWorks product or framework (status badge, name, tagline,
+ * summary, and a "Learn more" or "Visit <domain>" cue).
+ *
+ * Why: some products live on this site, others are separate platforms (for example
+ * qualitywatcher.com or postured.io). The card states which is which, with a
+ * status badge and an explicit "Visit <domain>" cue, so visitors are never surprised by leaving the
+ * corporate site.
+ *
+ * Props: p, headingLevel.
+ *
+ * Used by: pages/products/index.astro, pages/index.astro (products band), pages/industries/[slug].astro,
+ * components/templates/ServiceTemplate.astro ("Related products") and pages/design-system/index.astro.
+ *
+ * Review/release behaviour: a product whose status is 'awaiting-product-owner' is labelled
+ * "Details pending" in review builds (honest for reviewers) and "Framework" in release builds (a
+ * neutral public label). `REVIEW` is imported but not used in this file.
+ *
+ * Accessibility:
+ * - Single stretched title link (global.css). External products open in a new tab and the link text
+ *   includes visually hidden "(external site, opens in a new tab)".
+ * - The footer cue is aria-hidden: it repeats the link visually and would be redundant when read.
+ *
+ * Gotchas:
+ * - A product counts as external when `p.path` starts with "http"; `p.kind` and `p.externalUrl` are
+ *   not consulted here.
+ * - The footer builds `new URL(p.path)` for external products, so an external path must be a valid
+ *   absolute URL or the build throws.
+ * - Only 'green', 'gold' and 'slate' accents have modifier rules below; 'teal' (and any other value)
+ *   uses the default brand-teal top border.
+ */
 import Icon from './Icon.astro';
 import type { Product } from '../data/types';
-interface Props { p: Product; headingLevel?: 'h2' | 'h3' }
+interface Props {
+  /** The product record (src/data/products.ts). */
+  p: Product;
+  /** Heading tag for the name, chosen to keep the page outline unbroken. Default 'h3'. */
+  headingLevel?: 'h2' | 'h3'
+}
 const { p, headingLevel = 'h3' } = Astro.props;
+// Dynamic heading tag (h2/h3).
 const H = headingLevel;
+// External = an absolute URL to another platform (see Gotchas).
 const external = p.path.startsWith('http');
+// Status -> badge text. Only 'awaiting-product-owner' differs between review and release builds.
 const statusLabel = { available: 'On this site', external: 'Separate platform', 'information-only': 'Information', 'awaiting-product-owner': RELEASE ? 'Framework' : 'Details pending' }[p.status];
 ---
+{/* product-card--<accent> sets the --accent custom property used for the coloured top border. */}
 <article class:list={['card', 'product-card', `product-card--${p.accent}`]}>
   <div class="card__body">
     <p class="product-card__top"><span class="badge">{statusLabel}</span></p>
+    {/* The single card link. External products open in a new tab and say so to screen readers. */}
     <H class="card__title"><a href={p.path} {...(external ? { target: '_blank', rel: 'noopener' } : {})}>{p.name}{external && <span class="visually-hidden"> (external site, opens in a new tab)</span>}</a></H>
     <p class="product-card__tagline">{p.tagline}</p>
     <p class="product-card__summary">{p.summary}</p>
+    {/* Visual cue only (aria-hidden). External cards name the destination domain, without "www.". */}
     <span class="card__footer link-arrow" aria-hidden="true">{external ? `Visit ${new URL(p.path).hostname.replace('www.', '')}` : 'Learn more'}<Icon name={external ? 'external' : 'arrow'} /></span>
   </div>
 </article>
 <style>
+  /* 4px coloured top border; colour comes from --accent, defaulting to brand teal. */
   .product-card { border-top: 4px solid var(--accent, var(--qw-teal-500)); }
+  /* Accent modifiers, chosen per product in src/data/products.ts (`accent`). */
   .product-card--green { --accent: var(--qw-green-400); }
   .product-card--gold { --accent: var(--qw-gold-400); }
   .product-card--slate { --accent: var(--qw-slate-300); }

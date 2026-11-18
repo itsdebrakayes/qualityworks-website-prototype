@@ -2,28 +2,80 @@
 /**
  * Filter bar: labelled selects (combinable), clear button, live result count.
  * Works as progressive enhancement — without JS every item is listed.
+ *
+ * What: the markup half of the list-filtering pattern. It renders one labelled <select> per filter,
+ * a "Clear filters" button and a polite live region for the result count. It contains NO script:
+ * the behaviour lives in src/lib/filters.ts (`initFilters`), which each page calls with this bar's id.
+ *
+ * Why: case studies and articles must be filterable by industry, service or category, with state kept
+ * in the URL so a filtered view can be shared and restored on reload (acceptance criteria AC-CS-1 and
+ * AC-CS-2 in docs/10-acceptance-criteria.md). Native selects were chosen because they are keyboard and
+ * screen-reader accessible with no custom widget code.
+ *
+ * Props: filters, resultLabel, id.
+ *
+ * Used by: pages/case-studies/index.astro (id "cs-filter": industry + service) and
+ * pages/blog/index.astro (id "blog-filter": category). pages/resources/index.astro hand-writes the same
+ * markup and classes instead of using this component, because it needs a different control layout.
+ *
+ * Accessibility:
+ * - <form role="search"> with an aria-label ("Filter case studies") makes a named search landmark.
+ * - Every select has a real <label for>.
+ * - The count paragraph is aria-live="polite": filters.ts writes "Showing 4 case studies (1 filter
+ *   applied)" there, so changes are announced without moving focus.
+ * - "Clear filters" starts disabled and filters.ts enables it only when a filter is active.
+ *
+ * Gotchas (script contract with src/lib/filters.ts, do not rename these hooks):
+ * - `data-filter="<name>"` on each select: the name becomes the URL query key (?industry=...) and the
+ *   key passed to the page's `match()` function.
+ * - `data-filter-clear` on the clear button and `data-filter-count` on the live region.
+ * - `data-filter-bar` is a marker only; no script reads it today. Scripts find the bar by `id`.
+ * - Option values must match the data-* values on the result cards exactly (for example
+ *   CaseStudyCard `data-industry`), or nothing will match.
  */
-interface Props { filters: { name: string; label: string; options: { value: string; label: string; count?: number }[] }[]; resultLabel: string; id: string }
+interface Props {
+  /**
+   * One entry per select. `name` = URL/query key and data-filter value; `label` = visible label;
+   * `options` = choices, where `count` (optional) is shown in brackets after the label.
+   * An "All" option with an empty value is always added first.
+   */
+  filters: { name: string; label: string; options: { value: string; label: string; count?: number }[] }[];
+  /** Plural noun for the filtered items, used in the landmark name ("Filter case studies"). */
+  resultLabel: string;
+  /** Unique id for the form; also prefixes each select id. Pass the same id to initFilters({ bar: '#id' }). */
+  id: string
+}
 const { filters, resultLabel, id } = Astro.props;
 ---
+{/* onsubmit="return false": pressing Enter must not submit the form and reload the page. Filtering is
+    applied live on change by src/lib/filters.ts. */}
 <form class="filter-bar" id={id} role="search" aria-label={`Filter ${resultLabel}`} data-filter-bar onsubmit="return false">
   {filters.map((f) => (
     <div class="field filter-bar__field">
       <label for={`${id}-${f.name}`}>{f.label}</label>
+      {/* data-filter is the hook filters.ts uses to read this select and to name its URL parameter. */}
       <select class="select" id={`${id}-${f.name}`} name={f.name} data-filter={f.name}>
+        {/* Empty value means "no filter" for this dimension. */}
         <option value="">All</option>
         {f.options.map((o) => <option value={o.value}>{o.label}{o.count !== undefined ? ` (${o.count})` : ''}</option>)}
       </select>
     </div>
   ))}
   <div class="filter-bar__actions">
+    {/* Disabled until at least one filter is active; filters.ts toggles this. */}
     <button type="button" class="btn btn--ghost btn--sm" data-filter-clear disabled>Clear filters</button>
   </div>
+  {/* Polite live region: filters.ts writes the result count here after every change. */}
   <p class="filter-bar__count" aria-live="polite" data-filter-count></p>
 </form>
 <style>
+  /* Bar: auto-fit columns at least 14rem wide (min(100%, 14rem) prevents overflow on narrow phones);
+     align-items:end lines the button up with the selects, whose labels sit above them. */
   .filter-bar { display: grid; gap: var(--space-4); align-items: end; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); padding: var(--space-5); background: var(--qw-canvas); border: 1px solid var(--qw-line); border-radius: var(--radius-lg); margin-bottom: var(--space-8); }
+  /* min-height 48px matches the select height so the clear button centres against the controls. */
   .filter-bar__actions { display: flex; align-items: center; min-height: 48px; }
+  /* Result count spans the full width under the controls. */
   .filter-bar__count { grid-column: 1 / -1; margin: 0; font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--qw-ink-900); }
+  /* Dim the disabled clear button so its inactive state is visible (disabled controls are exempt from contrast rules). */
   .filter-bar :global(.btn[disabled]) { opacity: 0.45; }
 </style>

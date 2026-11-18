@@ -1,18 +1,62 @@
 ---
+/**
+ * CaseStudyCard: one case-study teaser (image, industry, title, lead metric, client).
+ *
+ * Why: case studies are the main proof on the site and appear in many places (results list, homepage,
+ * industry pages, service pages, related studies). One card keeps the presentation and the URL scheme
+ * consistent. Links use `/case-studies/{slug}/`, standardised in review round 1 (doc 11, finding C5);
+ * the legacy `/case-study/{slug}/` URLs are recorded as 301s in docs/06-url-mapping.md.
+ *
+ * Props: cs, headingLevel, compact.
+ *
+ * Used by: pages/case-studies/index.astro (filterable list), pages/case-studies/[slug].astro (related),
+ * pages/index.astro, pages/industries/[slug].astro, pages/qualitywatcher-ai-tools/index.astro,
+ * components/templates/ServiceTemplate.astro and pages/design-system/index.astro.
+ *
+ * Accessibility:
+ * - Single stretched link on the title (global.css makes it cover the card), no nested links.
+ * - Image alt comes from `cs.altText`, written after viewing each image (review round 1, D1);
+ *   case-study card images no longer use empty alt.
+ * - Metrics such as "2 weeks → 2 days" go through MetricValue, which draws the arrow as an SVG and
+ *   reads it as "to" (the brand font has no arrow glyph).
+ *
+ * Gotchas:
+ * - `data-industry` and `data-services` are filter hooks read by the match() function in
+ *   pages/case-studies/index.astro. `data-services` is SPACE-separated (service slugs contain no spaces),
+ *   unlike ArticleCard's "|"-separated categories.
+ * - Only the FIRST metric (`cs.metrics[0]`) is shown; order metrics in the data with the headline first.
+ * - The client line shows `cs.client` exactly as stored. This card does not check
+ *   `clientDisclosureApproved`; an anonymous descriptor (e.g. the fintech study's "Financial technology
+ *   firm (name not approved for disclosure)") must be written into `client` in src/data/caseStudies.ts.
+ */
 import type { CaseStudy } from '../data/types';
 import { industryBySlug } from '../data/industries';
 import MetricValue from './MetricValue.astro';
-interface Props { cs: CaseStudy; headingLevel?: 'h2' | 'h3'; compact?: boolean }
+interface Props {
+  /** The case-study record (src/data/caseStudies.ts). */
+  cs: CaseStudy;
+  /** Heading tag for the title, chosen to keep the page outline unbroken. Default 'h3'. */
+  headingLevel?: 'h2' | 'h3';
+  /** Hide the image block for tight spaces. No caller uses it today. */
+  compact?: boolean
+}
 const { cs, headingLevel = 'h3', compact } = Astro.props;
+// Dynamic heading tag (h2/h3).
 const H = headingLevel;
+// Headline metric only; the detail page lists all metrics with their source and context.
 const metric = cs.metrics[0];
+// Resolve the industry slug to its display name; fall back to the raw slug if it is not registered.
 const industry = industryBySlug(cs.industry);
 ---
+{/* data-industry / data-services are read by the case-study filter script; keep the formats described above. */}
 <article class="card cs-card" data-industry={cs.industry} data-services={cs.serviceTags.join(' ')}>
+  {/* Media: real image, or a neutral gradient placeholder when the study has no image. */}
   {!compact && <div class="card__media">{cs.image ? <img src={cs.image} alt={cs.altText} loading="lazy" width="640" height="360" /> : <div class="cs-card__ph" />}</div>}
   <div class="card__body">
     <p class="card__meta">{industry?.name ?? cs.industry}</p>
+    {/* The single card link, stretched over the whole card by global.css. */}
     <H class="card__title"><a href={`/case-studies/${cs.slug}/`}>{cs.title}</a></H>
+    {/* Headline metric: value in bold, label lower-cased so it reads as a phrase ("90%+ automation coverage"). */}
     {metric && (
       <p class="cs-card__metric"><strong><MetricValue value={metric.value} /></strong> <span>{metric.label.toLowerCase()}</span></p>
     )}
@@ -20,10 +64,16 @@ const industry = industryBySlug(cs.industry);
   </div>
 </article>
 <style>
+  /* Metric row: baseline-aligned so the large value and small label share a text baseline; wraps on narrow cards. */
   .cs-card__metric { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0.25rem 0.5rem; margin: 0; }
+  /* Value in interactive teal (#1B7480, 5.45:1 on white); slight negative tracking tightens large numerals. */
   .cs-card__metric strong { font-size: var(--fs-lg); color: var(--qw-teal-700); letter-spacing: -0.01em; }
+  /* On dark surfaces teal-700 would be too dark, so the value switches to logo green (8:1 on ink). */
   .surface-dark .cs-card__metric strong { color: var(--qw-green-400); }
   .cs-card__metric span { font-size: var(--fs-sm); color: var(--color-text); }
+  /* Client line: margin-top:auto pushes it to the bottom of the flex card body, so client names line up
+     across cards of different text lengths in the same row. */
   .cs-card__client { font-size: var(--fs-xs); color: var(--color-muted); margin-top: auto !important; padding-top: var(--space-2); }
+  /* Image placeholder: soft teal-to-canvas gradient, filling the 16:9 media box. */
   .cs-card__ph { width: 100%; height: 100%; background: linear-gradient(135deg, var(--qw-teal-50), var(--qw-canvas)); }
 </style>

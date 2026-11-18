@@ -1,10 +1,35 @@
 ---
-interface Props { steps: { title: string; text: string }[] }
+/**
+ * ProcessSteps: a numbered row of steps ("01 Discover", "02 Plan", ...) describing how an engagement
+ * or product works.
+ *
+ * Why: several pages explain a sequence (how a service is delivered, how an agent is hired, how a
+ * tool is used). One component keeps the numbering, rule and type treatment identical everywhere.
+ *
+ * Props: `steps`, an ordered list of { title, text }.
+ *
+ * Used by: components/templates/ServiceTemplate.astro ("How we deliver", from `Service.process`),
+ * pages/products/agents-as-a-service.astro, pages/qualitywatcher-ai-tools/index.astro and
+ * pages/design-system/index.astro.
+ *
+ * Accessibility: it is a real <ol>, so assistive tech already announces "list, N items" and each
+ * position. The visible "01", "02" numbers are therefore aria-hidden to avoid reading the number twice.
+ *
+ * Gotchas:
+ * - Step titles are hard-coded <h3>. Always place this component under an <h2> (usually a
+ *   SectionHeading) or the page will skip a heading level (QA-01).
+ * - `counter-reset: s` in the CSS is not used by any rule; numbers come from the markup.
+ */
+interface Props {
+  /** Steps in order. `title` becomes an h3; `text` is a short paragraph. */
+  steps: { title: string; text: string }[]
+}
 const { steps } = Astro.props;
 ---
 <ol class="steps">
   {steps.map((s, i) => (
     <li class="steps__item">
+      {/* Zero-padded visual number ("01"); hidden from screen readers because the <ol> already conveys order. */}
       <span class="steps__index" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
       <h3 class="steps__title">{s.title}</h3>
       <p>{s.text}</p>
@@ -12,9 +37,14 @@ const { steps } = Astro.props;
   ))}
 </ol>
 <style>
+  /* Grid of steps: as many 14rem+ columns as fit, so 3-5 steps sit in one row on desktop and stack on phones.
+     min(100%, 14rem) stops a column from overflowing a narrow screen. */
   .steps { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-6); grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); counter-reset: s; }
+  /* Each step sits under a 2px neutral rule... */
   .steps__item { position: relative; padding-top: var(--space-6); border-top: 2px solid var(--color-border); }
+  /* ...with a short 3rem accent segment drawn over the start of that rule (top:-2px overlaps the border). */
   .steps__item::before { content: ""; position: absolute; top: -2px; left: 0; width: 3rem; height: 2px; background: var(--qw-teal-500); }
+  /* On dark/product surfaces the accent switches to logo green, which is the accent-on-dark colour (doc 02). */
   .surface-dark .steps__item::before, .surface-product .steps__item::before { background: var(--qw-green-400); }
   .steps__index { font: var(--fw-medium) var(--fs-sm)/1 var(--font-mono); color: var(--color-muted); }
   .steps__title { font-size: var(--fs-md); margin: var(--space-3) 0 var(--space-2); }

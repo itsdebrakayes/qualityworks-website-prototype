@@ -1,6 +1,34 @@
 ---
-/** Loading placeholder for dynamic lists. Announced politely via the parent region's aria-busy. */
-interface Props { count?: number; id?: string; hidden?: boolean }
+/**
+ * Loading placeholder for dynamic lists. Announced politely via the parent region's aria-busy.
+ *
+ * What: a grid of grey "shimmer" cards shaped like real cards (media block plus three text lines).
+ *
+ * Why: lists that load or reload client-side need a loading state that holds the layout, so the page
+ * does not jump when results appear. The prototype demonstrates this on the case-study list, where a
+ * simulated reload shows the skeleton for 1.5 s (pages/case-studies/index.astro).
+ *
+ * Props: count, id, hidden.
+ *
+ * Used by: pages/case-studies/index.astro (id "cs-loading", toggled by the page script) and
+ * pages/design-system/index.astro (component inventory).
+ *
+ * Accessibility: the whole grid is aria-hidden, because grey boxes mean nothing to a screen reader.
+ * The loading state is communicated by the PARENT: the results region gets aria-busy="true" and the
+ * page announces "Loading..." through the filter bar's polite live region. The shimmer animation is
+ * effectively disabled under prefers-reduced-motion by the global reduced-motion rule in global.css.
+ *
+ * Gotchas: the page script shows/hides this with the `hidden` property, so keep the
+ * `.skeleton-grid[hidden]` rule below (see the CSS comment).
+ */
+interface Props {
+  /** Number of placeholder cards to draw. Match the number of real cards in a row. Default 3. */
+  count?: number;
+  /** id used by page scripts to find and toggle the skeleton. */
+  id?: string;
+  /** Start hidden; scripts reveal it while loading. */
+  hidden?: boolean
+}
 const { count = 3, id, hidden } = Astro.props;
 ---
 <div class="skeleton-grid grid grid--3" id={id} hidden={hidden} aria-hidden="true">
@@ -9,10 +37,16 @@ const { count = 3, id, hidden } = Astro.props;
   ))}
 </div>
 <style>
+  /* `.grid` sets display:grid, which beats the browser's default [hidden] { display:none }. This rule
+     restores hiding so the `hidden` attribute works. */
   .skeleton-grid[hidden] { display: none; }
+  /* Shimmer: a light band (#F3F6F7) between two greys (#E7ECEE). The gradient is twice the element width
+     and its position is animated from 0 to -200%, so the band sweeps across every 1.4 s. */
   .sk { background: linear-gradient(90deg, #E7ECEE 0%, #F3F6F7 50%, #E7ECEE 100%); background-size: 200% 100%; border-radius: 6px; animation: shimmer 1.4s infinite linear; }
+  /* Media block keeps the same 16:9 ratio as real card images so nothing shifts when content arrives. */
   .sk-media { aspect-ratio: 16/9; border-radius: 0; }
   .sk-line { height: 0.9rem; margin-bottom: 0.6rem; }
+  /* Varied line widths (40 / 90 / 70%) mimic meta, title and excerpt lines. */
   .w40 { width: 40%; } .w70 { width: 70%; } .w90 { width: 90%; }
   @keyframes shimmer { to { background-position: -200% 0; } }
 </style>

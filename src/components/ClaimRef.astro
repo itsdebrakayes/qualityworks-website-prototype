@@ -1,9 +1,38 @@
 ---
 import { RELEASE } from '../lib/release';
-/** Review-mode annotation linking a displayed claim to the claims register. Hidden unless review mode is on. */
+/**
+ * Review-mode annotation linking a displayed claim to the claims register. Hidden unless review mode is on.
+ *
+ * What: a tiny superscript badge (e.g. "C01") placed right after a statistic, award or other factual
+ * claim. It links to that claim's entry on /prototype/claims/ and its tooltip (title attribute) shows
+ * the claim's approval state, verification status and measurement context.
+ *
+ * Why: every number and award on the site must be traceable to a source and an approval state
+ * (src/data/claims.ts; review round 1, section B in docs/11-review-resolution.md). The badge lets a
+ * reviewer check any figure in one click without cluttering the page for everyone else.
+ *
+ * Props: id (claim id).
+ *
+ * Used by: components/StatBlock.astro, components/templates/ServiceTemplate.astro, pages/index.astro,
+ * pages/about-us/index.astro, pages/industries/[slug].astro and pages/products/prism.astro.
+ *
+ * Review/release behaviour:
+ * - REVIEW build: the link is in the HTML but hidden by global.css (`.claim-ref { display: none }`)
+ *   until the ProtoBar "Review annotations" toggle adds `review-mode` to <html>.
+ * - RELEASE build: nothing is rendered. scripts/release-check.mjs fails if `class="claim-ref"` is found.
+ *
+ * Gotchas: an unknown id throws and fails the build, on purpose: a claim that is not registered must
+ * not be displayed. The badge styling lives in global.css, not in this file.
+ */
 import { claimById } from '../data/claims';
-interface Props { id: string }
+interface Props {
+  /** Claim id from src/data/claims.ts, e.g. 'C01'. Must exist or the build fails. */
+  id: string
+}
 const c = claimById(Astro.props.id);
+// Validated even in release builds (before the RELEASE check below), so a bad id is caught in every build.
 if (!c) throw new Error(`Unknown claim id ${Astro.props.id}`);
 ---
+{/* Review-only badge. The title attribute is a quick-look tooltip for reviewers; the full record is on the
+    claims page. While hidden with display:none the link is also out of the Tab order. */}
 {!RELEASE && <a class="claim-ref" href={`/prototype/claims/#${c.id}`} title={`${c.id}: ${c.approval}${c.verification ? ' / ' + c.verification : ''} — ${c.context}`}>{c.id}</a>}

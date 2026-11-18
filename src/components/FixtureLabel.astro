@@ -1,6 +1,35 @@
 ---
-/** Always-visible label for fictional/illustrative content. Never hidden by review mode. */
-interface Props { text?: string }
+/**
+ * Always-visible label for fictional/illustrative content. Never hidden by review mode.
+ *
+ * What: a small dashed amber badge with a warning triangle and the text "Illustrative fixture — not
+ * real QualityWorks data" (or a shorter custom text).
+ *
+ * Why: the prototype needs some fictional records (fixtures, `approval: 'fixture'` in
+ * src/data/types.ts) to demonstrate interactions such as event registration states, vacancies and
+ * form outcomes. Anyone who sees a fixture, reviewer or not, must be told it is not real, so this
+ * label is NOT tied to the review-annotations toggle.
+ *
+ * Props: text.
+ *
+ * Used by: components/ArticleCard.astro, components/EventCard.astro (text "Fixture"),
+ * components/ContactForm.astro (the simulated-submission control), pages/careers/index.astro,
+ * pages/case-studies/index.astro, pages/events/[slug].astro and pages/design-system/index.astro.
+ *
+ * Review/release behaviour: none in this file. Fixture records are excluded from the release build at
+ * the data layer (docs/12-release-cleanup.md), so the label should never appear in a release.
+ *
+ * Accessibility: the triangle is aria-hidden; the text alone carries the meaning.
+ *
+ * Gotchas: the badge styles (`.badge`, `.badge--fixture`, dark-surface variant) live in global.css.
+ * Inside cards, the parent component must lift the badge above the stretched card link (see
+ * ArticleCard's z-index rule).
+ */
+interface Props {
+  /** Badge text. Default 'Illustrative fixture — not real QualityWorks data'. Keep it explicit that the content is not real. */
+  text?: string
+}
 const { text = 'Illustrative fixture — not real QualityWorks data' } = Astro.props;
 ---
+{/* Inline 12px warning triangle drawn with currentColor (decorative), followed by the label text. */}
 <span class="badge badge--fixture"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M8 1.5l6.5 12h-13z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8 6.5v3M8 11.5h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>{text}</span>

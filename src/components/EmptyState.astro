@@ -1,18 +1,55 @@
 ---
+/**
+ * EmptyState: a friendly "nothing here" panel (icon, title, explanation, optional action) shown when a
+ * list has no items or a filter combination matches nothing.
+ *
+ * Why: an empty grid with no explanation looks broken. Acceptance criteria AC-CS-2 and AC-HOME-3
+ * (docs/10-acceptance-criteria.md) require an explicit empty state with a way forward, such as a
+ * "Clear filters" button or a fallback message when there are no upcoming events.
+ *
+ * Props: title, icon, id, hidden. The default slot holds the explanation and any action buttons.
+ *
+ * Used by: pages/case-studies/index.astro, pages/blog/index.astro and pages/resources/index.astro
+ * (filter "no matches", toggled by src/lib/filters.ts), plus pages/index.astro, pages/events/index.astro,
+ * pages/careers/index.astro and pages/design-system/index.astro.
+ *
+ * Accessibility: the panel itself is not a live region. On filtered lists the change is announced by
+ * the FilterBar's polite count ("Showing 0 case studies"); the panel is the visual explanation.
+ * The icon is decorative (Icon without a label).
+ *
+ * Gotchas: scripts show/hide it through the `hidden` property; keep the `.empty[hidden]` rule below
+ * so that keeps working if a display value is ever added. The title is a <p>, not a heading, so it
+ * never disturbs the heading outline.
+ */
 import Icon from './Icon.astro';
-interface Props { title: string; icon?: string; id?: string; hidden?: boolean }
+interface Props {
+  /** Short statement of what is empty, e.g. "No case studies match these filters". */
+  title: string;
+  /** Icon name from Icon.astro. Default 'search'. */
+  icon?: string;
+  /** id so a script (e.g. initFilters `empty` option) can find and toggle the panel. */
+  id?: string;
+  /** Start hidden; a script reveals it when the list is empty. */
+  hidden?: boolean
+}
 const { title, icon = 'search', id, hidden } = Astro.props;
 ---
 <div class="empty" id={id} hidden={hidden}>
   <span class="empty__icon"><Icon name={icon} /></span>
   <p class="empty__title">{title}</p>
+  {/* Caller content: explanation text and, usually, a recovery action such as "Clear filters". */}
   <div class="empty__body"><slot /></div>
 </div>
 <style>
+  /* Dashed border signals "placeholder area" rather than a content card. */
   .empty { text-align: center; padding: var(--space-12) var(--space-6); border: 1.5px dashed var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); }
+  /* Defensive: guarantees the hidden attribute wins even if a page or global rule gives .empty a display value. */
   .empty[hidden] { display: none; }
+  /* 3rem teal-tinted circle behind the icon. */
   .empty__icon { display: inline-grid; place-items: center; width: 3rem; height: 3rem; border-radius: 50%; background: var(--qw-teal-50); color: var(--qw-teal-700); margin-bottom: var(--space-4); }
   .empty__title { font-weight: var(--fw-bold); font-size: var(--fs-md); color: var(--color-heading); margin-bottom: var(--space-2); }
+  /* Explanation capped at 36rem and centred for comfortable reading. */
   .empty__body { color: var(--color-muted); max-width: 36rem; margin-inline: auto; }
+  /* Space above any button passed in through the slot (:global because slotted markup is not scoped here). */
   .empty__body :global(.btn) { margin-top: var(--space-4); }
 </style>

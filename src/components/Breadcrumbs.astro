@@ -1,25 +1,61 @@
 ---
-/** Visible breadcrumb trail. BreadcrumbList JSON-LD is emitted by BaseLayout from the same data. */
+/**
+ * Visible breadcrumb trail ("Home > Solutions > Test automation"). BreadcrumbList JSON-LD is emitted
+ * by BaseLayout from the same data.
+ *
+ * Why: inner pages need a clear "where am I" cue and a quick way up the hierarchy. Using one array
+ * for both the visible trail and the structured data (see BaseLayout `crumbLd`) guarantees that what
+ * search engines read always matches what visitors see (docs/05-seo-aeo.md).
+ *
+ * Props: `items`, ordered from the root ("Home") to the current page.
+ *
+ * Used by: PageHero.astro (most inner pages pass `breadcrumbs` to the hero), layouts/BaseLayout.astro
+ * (when `showBreadcrumbs` is set), and directly by pages/[slug].astro, pages/case-studies/[slug].astro,
+ * pages/contact-us/index.astro, pages/design-system/index.astro and pages/prototype/[doc].astro.
+ *
+ * Accessibility:
+ * - <nav aria-label="Breadcrumb"> gives a named landmark; the trail is an ordered list.
+ * - The last item is always rendered as plain text with aria-current="page" (never a link to the
+ *   page you are already on), even if the caller supplied an href for it.
+ * - The chevron separators come from Icon without a label, so they are aria-hidden and not read out.
+ * - A long current-page title is truncated with an ellipsis VISUALLY only; the full text stays in
+ *   the DOM, so screen readers still announce all of it.
+ *
+ * Gotchas: an intermediate item without `href` also renders as aria-current text. Always give every
+ * item except the last an href, or the trail will announce two "current page" items.
+ */
 import Icon from './Icon.astro';
-interface Props { items: { label: string; href?: string }[] }
+interface Props {
+  /** Trail from root to current page. `href` is used for every item except the last; omit it on the last item. */
+  items: { label: string; href?: string }[]
+}
 const { items } = Astro.props;
 ---
 <nav class="breadcrumbs" aria-label="Breadcrumb">
   <ol>
     {items.map((it, i) => (
       <li>
+        {/* Separator before every item except the first; decorative (Icon is aria-hidden without a label). */}
         {i > 0 && <Icon name="chevron-right" />}
+        {/* Ancestors are links; the final item is the current page and is never linked. */}
         {it.href && i < items.length - 1 ? <a href={it.href}>{it.label}</a> : <span aria-current="page">{it.label}</span>}
       </li>
     ))}
   </ol>
 </nav>
 <style>
+  /* Trail: a wrapping flex row so long trails break onto a second line on phones instead of overflowing. */
   .breadcrumbs ol { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.5rem; list-style: none; padding: 0; margin: 0 0 var(--space-6); font-size: var(--fs-sm); }
   .breadcrumbs li { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--color-muted); }
+  /* Separator chevrons: small and faded so they read as punctuation, not content. */
   .breadcrumbs :global(svg) { width: 14px; height: 14px; opacity: 0.6; }
+  /* Ancestor links: body colour (not link teal) to keep the trail quiet; underline on hover for affordance. */
   .breadcrumbs a { color: var(--color-text); text-decoration: none; }
   .breadcrumbs a:hover { text-decoration: underline; }
+  /* Current item: min-width 0 lets this flex item shrink below its content width (flex items default to
+     min-width:auto, which would force the row wider than the screen). flex-basis 10rem decides when it
+     wraps to its own line instead. */
   .breadcrumbs li:last-child { min-width: 0; flex: 1 1 10rem; }
+  /* Long page titles are cut at 40 characters' width with an ellipsis (visual only, see header). */
   .breadcrumbs [aria-current] { color: var(--color-muted); display: block; max-width: 40ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 </style>
