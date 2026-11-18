@@ -4,9 +4,33 @@ import type { EventRecord } from './types';
  * Events. Status is DERIVED at render time from dates (upcoming / past) unless cancelled —
  * an event whose end date has passed can never show a registration CTA.
  * Prototype "today" is the build date; production should compute on request or rebuild daily.
+ *
+ * EXPORTS AND CONSUMERS
+ *   events                 records for this build (release builds drop some, see below). Used by
+ *                          /events/, /events/[slug]/, /resources/, the homepage (non-fixtures only)
+ *                          and the design-system page.
+ *   EventPhase, eventPhase derived state. Used by EventCard, /events/, /events/[slug]/ and the homepage.
+ *   canRegister, showsDemoRegistration, formatEventDate   used by EventCard and /events/[slug]/.
+ *   eventBySlug            lookup by slug (not currently imported elsewhere).
+ *
+ * HOW TO ADD AN EVENT: copy a record; give ISO start/end datetimes WITH a UTC offset and the IANA
+ *   timeZone of the venue; leave both dates '' if they are not confirmed (the event then shows
+ *   "Date to be confirmed" and is excluded from release builds). Add `registrationUrl` only for a
+ *   real registration page. Fixture events must use the "[Fixture]" title prefix, provenance
+ *   { source: 'fixture', approval: 'fixture' } and `demoRegistration` instead of a link.
+ *
+ * VERIFICATION: QA-26 (scripts/qa-checks.mjs) checks that past, cancelled and date-TBC events
+ *   offer no registration link and the upcoming fixture shows a disabled demo control.
+ *
+ * GOTCHA: `now` defaults to the moment the page is built, so phases are frozen into static HTML.
  */
 import { RELEASE } from '../lib/release';
 
+// Real events: PNSQC 2026 (from the live homepage; dates verified on pnsqc.org), BOW Growth
+// Conference 2026 (from the live homepage; date could not be verified, so 'not-verified' and shown
+// as "Date to be confirmed") and NTC 2025 (from a migrated blog announcement; illustrative dates,
+// 'not-verified'). Then two clearly labelled fixtures that exist only to demonstrate the upcoming
+// and cancelled states. See each record's provenance.note for details.
 const allEvents: EventRecord[] = [
   {
     id: 'pnsqc-2026', slug: 'pnsqc-2026', title: 'Pacific Northwest Software Quality Conference 2026',
@@ -52,21 +76,45 @@ const allEvents: EventRecord[] = [
 ];
 
 /** Release builds exclude fixtures and events without confirmed dates (“Date to be confirmed”). */
+// Review builds keep every record. Release builds keep only events that are neither fixtures nor
+// 'not-verified' AND have a start date, so "Date to be confirmed" never reaches a release page
+// (scripts/release-check.mjs treats that text as a release marker).
 export const events: EventRecord[] = RELEASE ? allEvents.filter((e) => !['fixture', 'not-verified'].includes(e.provenance.approval) && !!e.startDate) : allEvents;
 
+/**
+ * Display state derived from the record: 'cancelled' (status says so), 'date-tbc' (start or end
+ * date missing), 'past' (end date before now) or 'upcoming'.
+ */
 export type EventPhase = 'upcoming' | 'past' | 'cancelled' | 'date-tbc';
+/**
+ * @param e   event record.
+ * @param now reference time; defaults to the current time (the build time for static pages).
+ * @returns the EventPhase. Cancelled wins over dates; an event is 'past' only after its END date.
+ */
 export function eventPhase(e: EventRecord, now = new Date()): EventPhase {
   if (e.status === 'cancelled') return 'cancelled';
   if (!e.startDate || !e.endDate) return 'date-tbc';
   return new Date(e.endDate) < now ? 'past' : 'upcoming';
 }
+/**
+ * True only for an upcoming event that has a real registration URL. Past, cancelled and date-TBC
+ * events never show a registration link (docs/04 §6).
+ */
 export function canRegister(e: EventRecord, now = new Date()) {
   return eventPhase(e, now) === 'upcoming' && !!e.registrationUrl;
 }
-/** Upcoming fixture events show a disabled demo control (no placeholder links). */
+/**
+ * Upcoming fixture events show a disabled demo control (no placeholder links).
+ * True when the event is upcoming, flagged `demoRegistration` and has no real `registrationUrl`.
+ */
 export function showsDemoRegistration(e: EventRecord, now = new Date()) {
   return eventPhase(e, now) === 'upcoming' && !!e.demoRegistration && !e.registrationUrl;
 }
+/**
+ * Human-readable date range in the event's own time zone, e.g. "Oct 12, 2026 – Oct 14, 2026", or a
+ * single date when start and end fall on the same day. Returns "Date to be confirmed" when there is no
+ * start date.
+ */
 export function formatEventDate(e: EventRecord) {
   if (!e.startDate) return 'Date to be confirmed';
   const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', year: 'numeric', timeZone: e.timeZone };
@@ -74,4 +122,5 @@ export function formatEventDate(e: EventRecord) {
   const en = new Date(e.endDate).toLocaleDateString('en-US', opts);
   return s === en ? s : `${s} – ${en}`;
 }
+/** Find an event (among those in this build) by slug; undefined when not found. */
 export const eventBySlug = (slug: string) => events.find((e) => e.slug === slug);

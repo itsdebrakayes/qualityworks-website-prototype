@@ -1,7 +1,42 @@
+/**
+ * PRODUCTS, QUALITYWATCHER AI TOOLS AND THE AGENT CATALOG SNAPSHOT.
+ *
+ * WHAT: three related data sets for the "Products & Innovations" area:
+ *   - products        the product/framework cards (QualityWatcher AI, QualityWatcher Test
+ *                     Management, Agents as a Service, PRISM™, Posture).
+ *   - qwTools         the four tool cards on /qualitywatcher-ai-tools/, with the probed CTA status.
+ *   - agentSnapshot   8 public agent records from agents.qualityworkscg.com, plus agentCatalogFacts.
+ *
+ * WHY: several of these products live on other platforms. Recording where each one lives (and what
+ *   was actually observed there) lets pages hand visitors off honestly instead of duplicating data
+ *   that would drift. See docs/04-content-schemas.md §2–3.
+ *
+ * EXPORTS AND CONSUMERS
+ *   products          homepage and /products/.
+ *   productBySlug     ServiceTemplate, /industries/[slug]/, /case-studies/[slug]/, design-system page.
+ *   qwTools           /qualitywatcher-ai-tools/ (a tool whose CTA returned 404 renders no CTA).
+ *   agentSnapshot, agentCatalogFacts   /products/agents-as-a-service/.
+ *
+ * HOW TO EXTEND
+ *   - New product: copy a record; set `kind`/`status` to say where it lives, `path` to its internal
+ *     page or external URL, and an `accent` that ProductCard supports. Add it to navigation.ts.
+ *   - Agent data must come from the marketplace (ideally an approved API at build time), never be
+ *     typed from memory. Keep integrations empty and prices undisplayed unless that decision changes.
+ *
+ * GOTCHA: every 'observed' value is a dated snapshot (2026-11-17) and must be re-confirmed by the
+ *   product owner before launch.
+ */
 import type { Product, QwTool, AgentRecord, Provenance } from './types';
 
+// Provenance for data observed on an external platform on 2026-11-17 ('published-live' = public
+// today; re-approval still needed before reuse).
 const observed = (url: string, note?: string): Provenance => ({ source: 'external-platform', approval: 'published-live', sourceUrl: url, retrievedAt: '2026-11-17', note });
 
+/**
+ * Product cards. QualityWatcher AI and PRISM™ copy is from the live corporate site; QualityWatcher
+ * Test Management, Agents as a Service and Posture were observed on their own platforms.
+ * PRISM is 'awaiting-product-owner': no whitepaper asset or product page was found.
+ */
 export const products: Product[] = [
   {
     slug: 'qualitywatcher-ai-tools', path: '/qualitywatcher-ai-tools/', name: 'QualityWatcher AI', accent: 'teal',
@@ -40,6 +75,7 @@ export const products: Product[] = [
   },
 ];
 
+/** Find a product by slug; undefined when not found. */
 export const productBySlug = (slug: string) => products.find((p) => p.slug === slug);
 
 /** QualityWatcher AI tools — CTAs probed on 2026-11-17. Status must be re-confirmed by the product owner before launch. */
@@ -56,7 +92,13 @@ export const qwTools: QwTool[] = [
  * either read these from an approved marketplace API or link out without duplicating prices.
  * The prototype UI deliberately does NOT display prices (see docs/04-content-schemas.md §Agents).
  */
+// Marketplace URL: every agent CTA points here (docs/04 §3 requires ctaDestination on this host).
 const mkt = 'https://agents.qualityworkscg.com/';
+/**
+ * Build one AgentRecord from the values visible on a public catalog card. Fields the card does not
+ * show are filled with honest defaults: integrations [] (unknown), setupFee null, businessFunction =
+ * category, pricingInterval 'monthly'. `price` is stored for traceability but never displayed.
+ */
 const agent = (id: string, name: string, role: string, category: string, description: string, availabilityStatus: AgentRecord['availabilityStatus'], price: number): AgentRecord => ({
   id, name, role, category, description, businessFunction: category, availabilityStatus,
   integrations: [], // NOT published on the catalog card — unknown; do not invent
@@ -64,6 +106,10 @@ const agent = (id: string, name: string, role: string, category: string, descrip
   ctaLabel: 'View on marketplace', ctaDestination: mkt, lastUpdated: '2026-11-17',
   provenance: observed(mkt, 'Snapshot from public catalog; integrations and setup fee not shown per agent.'),
 });
+/**
+ * Snapshot of 8 public agent records (of the 23 observed on the marketplace, see agentCatalogFacts),
+ * covering the Partnerships / Customer Success, PR & Marketing and Sales departments.
+ */
 export const agentSnapshot: AgentRecord[] = [
   agent('kai-customer-service', 'Kai', 'AI Customer Service Agent', 'Partnerships / Customer Success', 'Handles common support questions quickly while keeping human review in control.', 'quick-launch', 399),
   agent('nia-receptionist', 'Nia', 'AI Receptionist', 'Partnerships / Customer Success', 'Greets prospects, captures details, books appointments, and routes urgent requests.', 'custom-build', 349),
@@ -74,6 +120,11 @@ export const agentSnapshot: AgentRecord[] = [
   agent('jordan-follow-up', 'Jordan', 'Sales Follow-Up Agent', 'Sales', 'Keeps prospects moving with timely, useful next steps.', 'quick-launch', 199),
   agent('elliot-meeting-reviewer', 'Elliot', 'Meeting Reviewer', 'Sales', 'Finds decisions, risks, and next steps hiding inside call notes.', 'ready-now', 199),
 ];
+/**
+ * Facts about the marketplace as a whole (observed 2026-11-17): number of agents seen, the full
+ * department list (its length is quoted in the catalog-preview intro; the filter chips are built from the
+ * snapshot's own categories instead) and the three "How it works" steps, with provenance.
+ */
 export const agentCatalogFacts = {
   totalAgentsObserved: 23,
   departments: ['Partnerships / Customer Success', 'PR & Marketing', 'Sales', 'Operations', 'Accounting', 'Admin / Executive Support'],

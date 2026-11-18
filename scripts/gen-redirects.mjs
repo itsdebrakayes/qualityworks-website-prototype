@@ -11,10 +11,24 @@
  * until they are tested on the chosen host (QM-112 9.5 / 11.5).
  *
  * Usage: node scripts/gen-redirects.mjs [outDir]   (default: dist)
+ *
+ * RUN BY: `npm run build` (outDir dist) and `npm run build:release` (outDir dist-release), right
+ *   after `astro build`.
+ * INPUTS: src/data/migrated/case-studies.wp-snapshot.json (every legacy case-study slug) and
+ *   src/data/redirects.json → caseStudySlugRenames (legacy slug → neutral public slug).
+ * OUTPUT: overwrites `<outDir>/_redirects`, one rule per line in the form "from  to  301", headed by
+ *   a "# … PENDING" comment line. Throws (non-zero exit) if outDir does not exist.
+ *
+ * HOW TO EXTEND: to redirect another legacy URL pattern, push more `from  to  301` lines inside the
+ *   loop (or after it). Keep rules one hop (old URL straight to final URL), never chains.
+ *
+ * GOTCHA: paths are resolved relative to the current working directory for outDir but relative to
+ *   this script for the JSON inputs; npm scripts run from the project root, so both line up.
  */
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 
 const outDir = process.argv[2] ?? 'dist';
+// Read a JSON file given relative to this script's own location (not the working directory).
 const read = (p) => JSON.parse(readFileSync(new URL(p, import.meta.url), 'utf8'));
 // Every WordPress case study, keyed by its original slug.
 const caseStudies = read('../src/data/migrated/case-studies.wp-snapshot.json');

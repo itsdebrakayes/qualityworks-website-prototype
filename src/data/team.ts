@@ -1,6 +1,18 @@
+/**
+ * LEADERSHIP PROFILES shown on /about-us/ (src/pages/about-us/index.astro imports `leadership`).
+ *
+ * WHY so short: only people whose bio and photo are already public on the live site are included.
+ *   Adding anyone else needs an approved bio and photo from the content owner (docs/04 §8).
+ *
+ * HOW TO EXTEND: copy the record; supply id, name, role, approved bio, a photo under public/brand/
+ *   with descriptive photoAlt, and provenance pointing at the approved source.
+ */
 import type { Person } from './types';
 
-/** Only leadership verifiable on the public site is included. Other profiles: awaiting approved bios/photos. */
+/**
+ * Only leadership verifiable on the public site is included. Other profiles: awaiting approved bios/photos.
+ * Current record: the CEO profile, copied from the live About page (retrieved 2026-11-17, re-approval needed).
+ */
 export const leadership: Person[] = [
   {
     id: 'stacy-kirk', name: 'Stacy Kirk', role: 'CEO and Founder',

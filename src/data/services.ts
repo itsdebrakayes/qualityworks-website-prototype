@@ -1,12 +1,53 @@
+/**
+ * SERVICES: every service, engagement model, assessment and program page, plus the three homepage
+ * buyer pathways.
+ *
+ * WHAT: one `Service` record per page, rendered by components/templates/ServiceTemplate.astro.
+ *   Copy is structured from the live pages (provenance 'live-site-copy', retrieved 2026-11-17);
+ *   FAQ items marked 'proposed-copy' are new wording awaiting approval.
+ *
+ * ROUTING (by `path` prefix)
+ *   /services/…           src/pages/services/[slug].astro (one route per record under /services/)
+ *   /engagement-models/…  src/pages/engagement-models/[slug].astro
+ *   /maturity-assessments/ and /innovation-tourism/  their own page files, which look the record up
+ *                         with serviceBySlug().
+ *
+ * EXPORTS AND CONSUMERS
+ *   services           all records. Used by the two [slug] routes above, /services/,
+ *                      /engagement-models/ and ServiceTemplate (sibling services in the same group).
+ *   serviceBySlug      /industries/[slug]/ ("Services that apply"), the case-study list and detail
+ *                      pages (service tags), /maturity-assessments/, /innovation-tourism/, design system.
+ *   servicesByPathway  homepage pathway sections.
+ *   pathways           the three homepage pathway cards; also used on /services/.
+ *
+ * HOW TO ADD A SERVICE (CONTRIBUTING.md §4.1): copy a record in the right pathway section; set slug,
+ *   path (keep the legacy WordPress URL), group (must equal a navigation group heading), pathway,
+ *   kind and icon (a name from components/Icon.astro). Write cardSummary, buyerProblem, heroTitle,
+ *   heroLede and at least one capability. Add FAQs/considerations only as approved or clearly
+ *   marked proposed copy. Then add the link to navigation.ts.
+ *
+ * GOTCHAS
+ *   - `contentDepth: 'summary'` records show a visible migration notice and are left out of
+ *     homepage pathway lists and "related services".
+ *   - Related slugs (case studies, products, industries) that do not exist are silently dropped.
+ *   - Claim ids in `claims` must exist in claims.ts or ClaimRef fails the build.
+ *   - Do not add unverifiable statistics: see the digital-agile-transformation provenance note.
+ */
 import type { Service, Provenance } from './types';
 
+// Provenance for copy taken from the live page at `path` on qualityworkscg.com (retrieved 2026-11-17).
+// 'published-live' = on the site today; re-approval needed before reuse. `note` records caveats.
 const live = (path: string, note?: string): Provenance => ({
   source: 'live-site-copy', approval: 'published-live', sourceUrl: `https://qualityworkscg.com${path}`, retrievedAt: '2026-11-17', note,
 });
 
+// Primary CTA to the contact page with a service-specific label (default 'Talk to an expert').
 const contact = (label = 'Talk to an expert') => ({ label, href: '/contact-us/', kind: 'primary' as const });
 
-/** Shared delivery approach used on the live testing pages (Assess → Strategize → Enable → Optimize). */
+/**
+ * Shared delivery approach used on the live testing pages (Assess → Strategize → Enable → Optimize).
+ * Reused as the `process` of several testing services and the orphan pages below.
+ */
 const testingApproach = [
   { title: 'Assess', text: 'Evaluate your organization’s test maturity to formulate the best customized test approach based in reality.' },
   { title: 'Strategize', text: 'Solidify your test approach with high-level test plans and strategies incorporating diverse perspectives.' },
@@ -14,8 +55,10 @@ const testingApproach = [
   { title: 'Optimize', text: 'Create a roadmap using continuous feedback loops and other agile best practices, and implement measures for optimizing system performance and security.' },
 ];
 
+/** Every service-type page record, grouped by pathway (see the divider comments). */
 export const services: Service[] = [
   // ───────────────────────────── IMPROVE SOFTWARE QUALITY ─────────────────────────────
+  // pathway 'quality': testing services, the Managed AI Test Squad program and Maturity Assessments.
   {
     slug: 'test-automation', path: '/services/test-automation/', name: 'Test Automation', kind: 'service', pathway: 'quality', group: 'Improve Software Quality', icon: 'automation',
     cardSummary: 'Custom web and mobile automation frameworks, integrated with your pipeline, with your team trained to own them.',
@@ -175,6 +218,7 @@ export const services: Service[] = [
     contentDepth: 'summary', provenance: live('/maturity-assessments/', 'Live page includes an interactive self-assessment ("#assessment"). It must be preserved or explicitly retired — see audit item F-05.'),
   },
   // ───────────────────────────── BUILD OR MODERNIZE ─────────────────────────────
+  // pathway 'build': development, advisory, transformation, the three engagement models, Innovation Tourism.
   {
     slug: 'custom-software-development', path: '/services/custom-software-development/', name: 'Custom Software Development', kind: 'service', pathway: 'build', group: 'Build or Modernize a Digital Product', icon: 'code',
     cardSummary: 'AI-accelerated web and mobile products, from discovery and prototype to launch.',
@@ -307,6 +351,8 @@ export const services: Service[] = [
     contentDepth: 'summary', provenance: live('/innovation-tourism/', 'Program details not verified in this prototype.'),
   },
   // ───────────────────────────── AI ─────────────────────────────
+  // pathway 'ai': AI & agentic solutions, Data Quality and AI Governance (a summary record; the live
+  // page is not in the live navigation). The orphan testing pages after it belong to pathway 'quality'.
   {
     slug: 'ai-service', path: '/services/ai-service/', name: 'AI & Agentic Business Solutions', kind: 'service', pathway: 'ai', group: 'Deploy, Integrate, or Govern AI', icon: 'agent',
     cardSummary: 'Custom AI agents, process automation and generative AI strategy, designed around your workflows.',
@@ -377,6 +423,8 @@ export const services: Service[] = [
     contentDepth: 'summary', provenance: live('/services/ai-governance/', 'Orphan page: in sitemap, not in navigation.'),
   },
   // Orphan testing pages present in the live sitemap but not in navigation (kept, routed via Non-Functional Testing).
+  // Each is generated from a [name, hero title (first letter capitalised), summary, icon] tuple as a
+  // 'summary' record that reuses testingApproach; only performance-testing has a related case study.
   ...(['performance-testing', 'security-testing', 'accessibility', 'user-experience-testing'] as const).map((slug): Service => {
     const meta = {
       'performance-testing': ['Performance Testing', 'Performance testing solutions', 'Find bottlenecks before your users do, with load and scalability testing.', 'gauge'],
@@ -398,9 +446,16 @@ export const services: Service[] = [
   }),
 ];
 
+/** Find a service record by slug; undefined when not found. */
 export const serviceBySlug = (slug: string) => services.find((s) => s.slug === slug);
+/** All records in one buyer pathway, in file order. */
 export const servicesByPathway = (p: Service['pathway']) => services.filter((s) => s.pathway === p);
 
+/**
+ * The three homepage buyer pathways (also on /services/): id (a Pathway), display index, label,
+ * title, one-line text, and the landing page + CTA text for each. The first pathway's title was
+ * renamed in review round 1 and awaits confirmation (see its inline note).
+ */
 export const pathways = [
   {
     id: 'quality' as const, index: '01', label: 'Software quality', title: 'AI-powered testing', // review round 1 (doc 11, A3): pathway renamed — Janique to confirm the new service name

@@ -1,10 +1,44 @@
+/**
+ * INDUSTRIES AND AUDIENCES: one Industry record per /industries/{slug}/ page.
+ *
+ * WHAT: sector pages from the live site (Finance & Banking, Healthcare, Social Impact in full; five
+ *   more as summary records) plus two PROPOSED audience pages (Public Sector & Utilities, Small &
+ *   Mid-Size Businesses) that do not exist on the live site.
+ *
+ * EXPORTS AND CONSUMERS
+ *   industries     all records. Used by /industries/ (split into live sectors and proposed
+ *                  audiences), /industries/[slug]/ (one page per record) and the homepage.
+ *   industryBySlug lookup used by CaseStudyCard, ServiceTemplate and the case-study list/detail pages
+ *                  (to label a case study's `industry` slug).
+ *
+ * HOW TO EXTEND
+ *   - New sector: copy a full record, set `status: 'live'` only if the page exists on the live site,
+ *     use live(slug) provenance for copied copy or proposed(note) for new copy, and add the link to
+ *     navigation.ts ("Who We Help").
+ *   - Upgrading a summary record: move it out of the tuple list into a full object with real
+ *     considerations and `contentDepth: 'full'`.
+ *   - `capabilities`, `products` and `caseStudies` hold slugs from services.ts, products.ts and
+ *     caseStudies.ts (public slugs). Unknown slugs are silently skipped by the page, so check them.
+ *
+ * GOTCHAS
+ *   - Proposed pages need QM-41 sitemap approval; the page shows a "proposed page" label in review
+ *     builds and carries a data-release-blocker in release builds. Summary records also carry a
+ *     release blocker until their copy is migrated.
+ *   - `slug` values are also used as CaseStudy.industry values and as filter values on /case-studies/.
+ */
 import type { Industry, Provenance } from './types';
 
+// Provenance for copy taken from the live industry page /industries/{slug}/ (retrieved 2026-11-17);
+// 'published-live' = on the site today, re-approval needed before reuse.
 const live = (slug: string, note?: string): Provenance => ({ source: 'live-site-copy', approval: 'published-live', sourceUrl: `https://qualityworkscg.com/industries/${slug}/`, retrievedAt: '2026-11-17', note });
+// Provenance for new copy written for the prototype: awaiting content-owner approval.
 const proposed = (note: string): Provenance => ({ source: 'proposed-copy', approval: 'pending-approval', note });
+// Default primary CTA shared by the sector pages.
 const contact = { label: 'Talk to an industry expert', href: '/contact-us/', kind: 'primary' as const };
 
+/** Every industry/audience page record, in display order. */
 export const industries: Industry[] = [
+  // ── Live sectors with full structured copy (from the live industry pages)
   {
     slug: 'finance-banking', path: '/industries/finance-banking/', name: 'Finance & Banking', status: 'live',
     heroTitle: 'Making quality work for banking and fintech',
@@ -54,6 +88,7 @@ export const industries: Industry[] = [
     seo: { title: 'Technology Partner for Nonprofits and Social Impact | QualityWorks', description: 'Advisory, custom software and QA for mission-driven organizations, including Shared Harvest and Children’s Miracle Network Hospitals.' },
     contentDepth: 'full', provenance: live('social-impact'),
   },
+  // ── PROPOSED audience pages: new prototype copy, not in the live navigation (pending QM-41 approval)
   {
     slug: 'public-sector', path: '/industries/public-sector/', name: 'Public Sector & Utilities', status: 'proposed',
     heroTitle: 'Quality engineering for public agencies and utilities',
@@ -92,6 +127,10 @@ export const industries: Industry[] = [
     seo: { title: 'AI and Software for Small Businesses | QualityWorks', description: 'Decide between a ready-made AI agent, custom software or advice first. Practical AI adoption for small and mid-size businesses.' },
     contentDepth: 'full', provenance: proposed('New audience page for Personas D and E. Needs QM-41 approval.'),
   },
+  // ── Live sectors kept as SUMMARY records: [slug, name, challenge text from the live page, service
+  // slugs, case-study slugs]. Each tuple becomes a record with no considerations, the challenge
+  // reused as hero lede, a generated SEO title/description (challenge cut at 120 characters) and
+  // contentDepth 'summary', which shows a migration notice on the page.
   ...([
     ['insurance', 'Insurance', 'Insurance institutions need to function with a very high level of accuracy while meeting customer needs consistently to keep clients’ confidence and trust.', ['maturity-assessments', 'full-stack-testing'], ['insurance-faster-to-market']],
     ['logistics', 'Logistics', 'Logistics-driven businesses balance tight timelines and supply chain challenges, and need technology that meets complex needs and works consistently.', ['api-cloud-services-testing', 'test-automation'], ['api-test-automation-for-european-delivery-company']],
@@ -108,4 +147,5 @@ export const industries: Industry[] = [
   })),
 ];
 
+/** Find an industry/audience record by slug; undefined when not found. */
 export const industryBySlug = (slug: string) => industries.find((i) => i.slug === slug);

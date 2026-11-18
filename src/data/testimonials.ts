@@ -1,4 +1,17 @@
+/**
+ * TESTIMONIALS: client quotes published on the live homepage carousel, stored verbatim.
+ *
+ * USED BY: components/ProofBlock.astro (each quote shows its id and approval state as a review note
+ *   in review builds).
+ *
+ * RULES: quotes are never edited, shortened or invented. Each needs re-approval from the quoted person
+ *   before reuse (see the provenance note). New testimonials need a real, approved source.
+ *
+ * SHAPE: { id ('T1', 'T2', …), name, role (title and company as published), quote, provenance }.
+ *   There is no Testimonial interface in types.ts; the shape is inferred from these records.
+ */
 import type { Provenance } from './types';
+// Provenance for a quote copied from `url` on the live site (retrieved 2026-11-17).
 const p = (url: string): Provenance => ({ source: 'live-site-copy', approval: 'published-live', sourceUrl: url, retrievedAt: '2026-11-17', note: 'Re-approval from the quoted person required before reuse.' });
 /** Testimonials published on the live homepage carousel (verbatim). */
 export const testimonials = [

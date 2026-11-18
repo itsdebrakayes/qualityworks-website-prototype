@@ -22,13 +22,29 @@
  *   source    — data/component source; any hit FAILS the check
  *
  * Usage: npm run build && node scripts/content-check.mjs [dist]
+ *        (also available as `npm run check:content`, which scans the default dist/)
+ *
+ * ARGUMENTS: argv[2] = build directory relative to the project root (default "dist"); pass
+ *   "dist-release" to scan a release build.
+ * OUTPUT: a report on stdout (up to 50 hits per failing scope, 8 for the review scope) and exit code
+ *   1 if any marketing or source hit exists, else 0. Nothing is written to disk.
+ *
+ * HOW TO ADD A RULE: append { id, re, why } to RULES. Use a global (`g`) regex (matchAll requires
+ *   it), `\b` word boundaries for whole words, and `i` unless case matters. If a legitimate use must
+ *   stay, add an ALLOW entry with the reason instead of weakening the rule.
+ *
+ * GOTCHA: source files are scanned as raw text, so comments in src/**\/*.ts and *.astro are scanned
+ *   too: do not quote a prohibited phrase in a comment (only corrections.ts and src/data/migrated/ are exempt).
  */
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 const ROOT = new URL('..', import.meta.url).pathname;
+// DIST: built site to scan (argv[2] or dist/), resolved from the project root.
 const DIST = join(ROOT, process.argv[2] ?? 'dist');
 
+// The rules encode the review findings: each `id` appears in the report and in the review docs
+// (docs/11, docs/14). `why` is printed next to each hit.
 /** Each rule: id, regex, and a short reason (shown in the report). */
 const RULES = [
   // Round 1 terminology
@@ -52,6 +68,7 @@ const RULES = [
   { id: 'free-consultation', re: /free consultation/gi, why: 'QM-112 2.5: no free-consultation promises without approval' },
 ];
 
+// ALLOW entries are blanked out of the text before RULES run, so they can never produce a hit.
 /** Text deliberately allowed (context explains why). */
 const ALLOW = [
   { re: /Hazmat shipping documentation/gi, why: 'Physical logistics term in a migrated industry-ideas article' },
@@ -63,7 +80,14 @@ const ALLOW = [
 /** Every Unicode space character (incl. U+00A0 no-break and U+202F narrow no-break), written as escapes. */
 const UNICODE_SPACES = new RegExp('[\\s\\u00a0\\u1680\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000\\ufeff]+', 'g');
 
-/** Convert every Unicode space to ' ', decode common entities, collapse whitespace. */
+/**
+ * Convert every Unicode space to ' ', decode common entities, collapse whitespace.
+ * Order matters: &nbsp; forms first, then numeric entities (decimal and hex, which may themselves
+ * produce no-break spaces), then the named entities, and finally every Unicode space run becomes a
+ * single ASCII space.
+ * @param {string} s
+ * @returns {string}
+ */
 function normalise(s) {
   return s
     .replace(/&nbsp;|&#160;|&#xa0;/gi, ' ')
@@ -73,7 +97,15 @@ function normalise(s) {
     .replace(UNICODE_SPACES, ' ');
 }
 
-/** From one HTML file, return the three text channels we care about. */
+/**
+ * From one HTML file, return the three text channels we care about.
+ * @param {string} html raw HTML of a built page.
+ * @returns {{text: string, attributes: string, jsonLd: string}} each channel normalised with normalise().
+ *   - jsonLd: contents of every application/ld+json script, joined.
+ *   - attributes: values of content/alt/title/aria-label/placeholder/value attributes (scripts and
+ *     styles removed first), joined with " | " so matches cannot run across two attributes.
+ *   - text: everything outside tags (scripts and styles removed), i.e. visible text.
+ */
 function channels(html) {
   const jsonLd = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => m[1]).join(' ');
   const body = html.replace(/<(script|style)[\s\S]*?<\/\1>/g, ' ');
@@ -82,6 +114,13 @@ function channels(html) {
   return { text: normalise(text), attributes: normalise(attrs), jsonLd: normalise(jsonLd) };
 }
 
+/**
+ * Run every rule over one piece of content and push a hit per match.
+ * @param {string} label   where the content came from (route + channel, or a source file path).
+ * @param {'marketing'|'review'|'source'} scope  report bucket (decides pass/fail).
+ * @param {string} content normalised text.
+ * @param {object[]} hits  accumulator; each hit gets ~45 characters of context either side.
+ */
 function scan(label, scope, content, hits) {
   let c = content;
   for (const a of ALLOW) c = c.replace(a.re, ' ');
@@ -90,6 +129,7 @@ function scan(label, scope, content, hits) {
   }
 }
 
+/** Recursively collect file paths under `dir` for which `pred(path)` is true. */
 const walk = (dir, pred, out = []) => {
   for (const f of readdirSync(dir)) {
     const p = join(dir, f);
@@ -102,11 +142,13 @@ const hits = [];
 // 1) Built pages
 for (const file of walk(DIST, (p) => p.endsWith('.html'))) {
   const route = '/' + relative(DIST, file).replace(/index\.html$/, '');
+  // Review-only routes quote the findings on purpose, so they are reported but do not fail the check.
   const scope = /^\/(prototype|design-system)\//.test(route) ? 'review' : 'marketing';
   const ch = channels(readFileSync(file, 'utf8'));
   for (const [name, content] of Object.entries(ch)) scan(`${route} [${name}]`, scope, content, hits);
 }
 // 2) Source data and templates
+// .ts and .astro files under src/, except the raw snapshots and corrections.ts (which quotes old wording).
 const srcFiles = walk(join(ROOT, 'src'), (p) => /\.(ts|astro)$/.test(p) && !p.includes('/migrated/') && !p.endsWith('corrections.ts'));
 for (const file of srcFiles) scan(relative(ROOT, file), 'source', normalise(readFileSync(file, 'utf8')), hits);
 
@@ -118,4 +160,5 @@ for (const scope of ['marketing', 'source', 'review']) {
   for (const h of list.slice(0, scope === 'review' ? 8 : 50)) console.log(`  [${h.rule}] ${h.where}\n      …${h.context}…`);
 }
 console.log(`\nRules checked: ${RULES.length}. Pages scanned in ${relative(ROOT, DIST)}/, plus ${srcFiles.length} source files.`);
+// Fail only on marketing and source hits; review hits are informational.
 process.exit(by('marketing').length + by('source').length ? 1 : 0);

@@ -1,4 +1,25 @@
-/* Self-hosted from Google Fonts (SIL Open Font License). Red Hat Display = existing corporate typeface. */
+/* Self-hosted from Google Fonts (SIL Open Font License). Red Hat Display = existing corporate typeface.
+
+   WHAT: the @font-face rules for the brand fonts. Red Hat Display (variable: italic 400-700,
+   normal 300-900) is the text face; Red Hat Mono (400-600) is used only for code (see the
+   font-code token in tokens.css). The woff2 files live in public/fonts/.
+
+   WHY SELF-HOSTED: no request to a third-party font CDN, and the exact files (and therefore the
+   exact character coverage) are under version control.
+
+   SUBSETS: each face comes in two files, "latin" and "latin-ext", each with a unicode-range
+   descriptor so the browser downloads a file only when the page uses a character in its range.
+
+   USED BY: imported by src/styles/global.css. scripts/glyph-lint.mjs READS THIS FILE: it collects
+   the ranges of the normal-style Red Hat Display rules and fails the build if any visible
+   character on a built page falls outside them (it would otherwise render in a fallback font).
+
+   GOTCHAS
+     - Editing a unicode-range here changes what glyph-lint allows. Only widen it if the font file
+       really contains those glyphs.
+     - glyph-lint matches the exact text layout of the declarations (family on its own line,
+       then style, then the range). Keep the format if you add or update a rule.
+     - font-display: swap shows fallback text until the font loads, avoiding invisible text. */
 /* latin-ext */
 @font-face {
   font-family: 'Red Hat Display';

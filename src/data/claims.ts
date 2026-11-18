@@ -8,7 +8,32 @@ import type { Claim } from './types';
  * All entries below were found on the live public site on 2026-11-17. Being published is NOT the
  * same as being approved for the rebuild: every claim needs the measurement context confirmed
  * by its owner (approval: 'published-live').
+ *
+ * WHY: CONTRIBUTING.md rule 3 makes this the single source for every number, award and
+ *   certification, so reviewers can trace each one to its source and its measurement context.
+ *
+ * EXPORTS AND CONSUMERS
+ *   claims     the register. Rendered in full at /prototype/claims/ (src/pages/prototype/claims.astro,
+ *              review builds only).
+ *   claimById  lookup used by components/StatBlock.astro (throws if a stat has no claim) and
+ *              components/ClaimRef.astro (throws on an unknown id), so a typo fails the build.
+ *
+ * RELEASE BEHAVIOUR: StatBlock drops, in release builds, every stat whose claim has a
+ *   `verification` value set; ClaimRef annotations exist only in review builds.
+ *
+ * HOW TO ADD A CLAIM (CONTRIBUTING.md §4.4)
+ *   Append a record with the next unused id (CNN, never reuse or renumber): statement as displayed,
+ *   value, context (who/what/when, sample, baseline, or what is unknown), sourceUrl, evidence (the
+ *   exact wording found at the source) and approval. Set `verification: 'required-before-launch'`
+ *   when the measurement is not verified. Then reference it with <StatBlock> or <ClaimRef id="…" />.
+ *
+ * GOTCHAS
+ *   - Do not change a statement to sound stronger than its evidence; the register exists to stop that.
+ *   - The `context` text is shown to reviewers; keep it factual and dated ("checked 2026-11-18").
  */
+// C01–C19: all found on the live public site (homepage, About, service/industry pages, QualityWatcher AI Tools, case
+// studies, news posts), retrieved 2026-11-17 with some labels re-checked 2026-11-18. All are
+// 'published-live' (not yet approved for the rebuild). Ids are permanent.
 export const claims: Claim[] = [
   { id: 'C01', statement: '16+ years of quality-driven development', value: '16+', context: 'Years since founding (2010).', sourceUrl: 'https://qualityworkscg.com/', evidence: 'Homepage counter "16+ Years of quality-driven development"; About: "Founded in 2010".', approval: 'published-live' },
   { id: 'C02', statement: '90% increase in quality releases (avg. per client)', value: '90%', context: 'Average per client (label attached to this metric on the live homepage — checked 2026-11-18). Sample, period and definition of "quality release" not stated. MEASUREMENT CONTEXT REQUIRES VERIFICATION BEFORE LAUNCH; not independently verified.', sourceUrl: 'https://qualityworkscg.com/', evidence: 'Homepage counter (data-number="90").', approval: 'published-live', verification: 'required-before-launch' },
@@ -31,4 +56,5 @@ export const claims: Claim[] = [
   { id: 'C19', statement: 'HIPAA compliance training and monthly cybersecurity training for teams', value: 'Training', context: 'Applies to healthcare engagements; confirm scope and records.', sourceUrl: 'https://qualityworkscg.com/industries/healthcare/', evidence: '"We provide diverse teams with significant HIPAA compliance training along with monthly cybersecurity training"', approval: 'published-live' },
 ];
 
+/** Find a claim by id (e.g. 'C05'); undefined when the id is not registered. */
 export const claimById = (id: string) => claims.find((c) => c.id === id);

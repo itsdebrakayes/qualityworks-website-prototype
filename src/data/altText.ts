@@ -2,7 +2,26 @@
  * ALT TEXT (review round 1, item 4). Written after viewing each image on 2026-11-18; replaces weak
  * WordPress alt text ("untitled design 3", "Contact QualityWorks Image", "Medical Graphic").
  * Images that contain words carry those words. Copy needs marketing approval with the rest of the content.
+ *
+ * WHAT: hand-written alt text for the featured image of every migrated case study and article,
+ *   keyed by slug. Audit item A11Y-03 (cited in articles.ts) flagged the WordPress alt text as weak.
+ *
+ * EXPORTS AND CONSUMERS
+ *   caseStudyAlt  read by src/data/caseStudies.ts (`altText: caseStudyAlt[slug] ?? r.alt ?? ''`).
+ *   articleAlt    read by src/data/articles.ts (`imageAlt: articleAlt[p.slug] ?? p.imageAlt ?? ''`).
+ *   When a slug has no entry here, the WordPress alt text (possibly empty) is used instead.
+ *
+ * HOW TO EXTEND: after adding a case study or article, look at its image and add one entry:
+ *   describe what is shown (people, setting, action) in one sentence, and transcribe any words
+ *   printed in the image. No "image of" prefix.
+ *
+ * GOTCHAS
+ *   - Case-study keys are PUBLIC slugs (after the neutral renames in redirects.json), not the
+ *     WordPress slugs. Article keys are the WordPress post slugs (unchanged on the site).
+ *   - A misspelt key fails silently (the fallback alt text is used), so copy slugs exactly.
+ *   - This file is scanned by scripts/content-check.mjs like any other source file.
  */
+/** Case-study featured-image alt text, keyed by public case-study slug (17 records, one per migrated case study). */
 export const caseStudyAlt: Record<string, string> = {
   'accelerating-confidence-qa-modernization-for-wisyncos-digital-ecosystem': 'Warehouse staff in yellow uniforms packing boxes on a distribution floor',
   'address-quality-gaps': 'Software developer smiling at her desk in front of two monitors showing code',
@@ -23,6 +42,7 @@ export const caseStudyAlt: Record<string, string> = {
   'transforming-workforce-development-through-modern-technology': 'Two transit maintenance workers in safety gear reviewing a tablet in a rail depot',
 };
 
+/** Article featured-image alt text, keyed by WordPress post slug (one per migrated post). */
 export const articleAlt: Record<string, string> = {
   'more-qa-not-less-closing-the-verification-gap-in-ai-accelerated-software-delivery': 'Cover of the QualityWorks whitepaper “More QA, Not Less: Closing the Verification Gap in AI-Accelerated Software Delivery”',
   'top-7-black-technology-companies-to-watch-in-2026': 'Black technology leaders collaborating around a digital display',

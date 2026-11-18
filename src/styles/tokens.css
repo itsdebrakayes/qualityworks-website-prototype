@@ -3,9 +3,38 @@
    Derived from: live corporate CSS (bb-theme skin / child theme), logo artwork,
    agents.qualityworkscg.com and qualitywatcher.ai computed styles (audited 2026-11-17).
    See docs/02-design-direction.md for provenance of every value.
+
+   WHAT: the single source of design values (CONTRIBUTING.md rule 3). Three layers:
+     1. Brand primitives, prefixed qw (raw colours, named by hue and lightness step).
+     2. Semantic tokens, prefixed color (what a colour is FOR: text, link, surface, border).
+        Components use these, never raw hex values.
+     3. Scales: type sizes (fs), weights (fw), line heights (lh), spacing (space), radius,
+        shadow, motion durations (dur) and z-index layers (z).
+   At the bottom, surface theme classes re-map the semantic tokens for dark/product/tint/alt
+   sections, so a component styled with semantic tokens works on every surface unchanged.
+
+   USED BY: imported first by src/styles/global.css (loaded by BaseLayout on every page); read by
+   every component's scoped styles. The design-system page (src/pages/design-system/index.astro)
+   PARSES this file at build time to render the token tables.
+
+   HOW TO EXTEND: add a primitive in the right group, then point a semantic token at it; check
+   contrast against its background (WCAG 2.2 AA: 4.5:1 for body text, 3:1 for large text and UI
+   parts) and record the ratio in a trailing comment and in docs/02 section 4.
+
+   GOTCHAS (because the design-system page parses this file with a regex):
+     - The token table is read from the first root rule up to the FIRST media query in the file.
+       Keep every token inside that root rule, and never mention the media-query keyword (at-sign
+       plus "media") anywhere above the reduced-motion block, or the table comes out empty.
+     - A one-line comment directly after a declaration becomes that token's "note" on the
+       design-system page. Group explanations inside the root rule are therefore written as
+       comments spanning two or more lines, which the parser ignores.
+     - Inside the root rule, never write a custom-property name immediately followed by a colon
+       in a comment: the parser would read it as a token.
    ========================================================================== */
 :root {
   /* Brand — corporate */
+  /* Logo teal and logo green are exact matches to the logo artwork. The darker teal-700 is the
+     accessible interactive colour; ratios in trailing comments are from docs/02 section 4. */
   --qw-teal-50: #E9F6F7;    /* tint of logo teal; replaces legacy #ECF7F6 */
   --qw-teal-100: #CDEBEE;
   --qw-teal-300: #5FC3CF;   /* accent text/links on dark surfaces (8:1 on ink) */
@@ -18,6 +47,8 @@
   --qw-gold-400: #F4B942;   /* legacy accent; highlights, event status */
 
   /* Neutrals */
+  /* Ink tones are dark backgrounds (950 for product surfaces, 900 for dark corporate sections),
+     slate tones are text colours; the line tokens are hairline borders for light and dark surfaces. */
   --qw-ink-950: #0E1817;    /* product surfaces (from Agents as a Service #0B1413, warmed to brand) */
   --qw-ink-900: #16202B;    /* dark corporate sections */
   --qw-ink-800: #222B37;    /* legacy dark (#222B37) */
@@ -31,6 +62,8 @@
   --qw-white: #FFFFFF;
 
   /* Feedback */
+  /* Alert, badge and form-error colours, each a foreground plus a pale background. Info has no
+     separate foreground and reuses the brand teal tint as its background. */
   --qw-danger: #B42318;
   --qw-danger-bg: #FDECEA;
   --qw-warning: #B45309;
@@ -40,6 +73,8 @@
   --qw-info-bg: var(--qw-teal-50);
 
   /* Semantic */
+  /* Role-based aliases: components read these, and the surface classes at the bottom of this file
+     re-map them, so the same component works on light and dark sections. Defaults are the light theme. */
   --color-text: var(--qw-slate-700);
   --color-heading: var(--qw-ink-900);
   --color-muted: var(--qw-slate-500);
@@ -59,6 +94,10 @@
   /* Labels/eyebrows now use the corporate face (closer to the live site); monospace is kept for code only. */
   --font-mono: var(--font-sans);
   --font-code: 'Red Hat Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  /* Type scale (rem; px at the default 16px root in trailing comments). The four large steps are
+     fluid: clamp(minimum, preferred that grows with viewport width, maximum), so headings scale
+     smoothly between phone and desktop without breakpoints. Line heights: tight for display headings,
+     snug for other headings, body for running text. Tracking is letter-spacing. */
   --fs-xs: 0.8125rem;   /* 13 */
   --fs-sm: 0.9375rem;   /* 15 */
   --fs-base: 1.0625rem; /* 17 */
@@ -79,6 +118,8 @@
   --tracking-label: 0.12em;
 
   /* Spacing (4px base) */
+  /* Each space step is a multiple of 4px (space-4 is 1rem = 16px). Section padding and the page
+     gutter are fluid clamps; the container width is the 1216px content measure from docs/02. */
   --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem;
   --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem;
   --space-12: 3rem; --space-16: 4rem; --space-20: 5rem; --space-24: 6rem;
@@ -88,33 +129,51 @@
   --container-narrow: 46rem;
 
   /* Shape */
+  /* Corner radii: small for inputs and badges, medium for form fields and images, large for cards
+     (16px everywhere per docs/02). */
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
   --radius-pill: 999px;   /* buttons stay pill-shaped: retained from legacy + product sites */
 
   /* Elevation */
+  /* Shadows are tinted with ink-900 (rgb 22, 32, 43) rather than pure black so they read as part of
+     the palette. docs/02: hover elevation is used on cards only. */
   --shadow-sm: 0 1px 2px rgba(22, 32, 43, 0.06), 0 1px 1px rgba(22, 32, 43, 0.04);
   --shadow-md: 0 6px 20px -8px rgba(22, 32, 43, 0.18), 0 2px 6px rgba(22, 32, 43, 0.06);
   --shadow-lg: 0 24px 48px -20px rgba(22, 32, 43, 0.35);
 
   /* Motion */
+  /* One easing curve (fast start, gentle stop) and three durations. All durations drop to 0 under
+     prefers-reduced-motion (see the block after this rule). */
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --dur-fast: 120ms;
   --dur-base: 200ms;
   --dur-slow: 320ms;
 
   /* Layers */
+  /* Intended stacking order, higher on top: header 50, banner 60, mobile drawer 80. Only the header
+     value is referenced today (Header.astro); the skip link in global.css uses 100 to stay on top. */
   --z-header: 50;
   --z-drawer: 80;
   --z-banner: 60;
 }
 
+/* Reduced motion: users who ask the OS for less motion get instant transitions. global.css adds a
+   matching rule that shortens any remaining animations and transitions. */
 @media (prefers-reduced-motion: reduce) {
   :root { --dur-fast: 0ms; --dur-base: 0ms; --dur-slow: 0ms; }
 }
 
-/* Surface themes: any section can opt into a surface. Components read semantic tokens. */
+/* Surface themes: any section can opt into a surface. Components read semantic tokens.
+   surface-dark    dark corporate sections (ink-900 background).
+   surface-product the darker product band (ink-950 and green-tinted card colours), used on
+                   QualityWatcher, Agents as a Service, PRISM and the homepage products band.
+   surface-tint    pale teal background with white cards.
+   surface-alt     light grey canvas background.
+   On dark surfaces, links switch to teal-300 and the accent and focus ring switch to logo green,
+   which keep their contrast on ink (ratios in the primitive comments above). The literal text colour
+   and product card colours below have no primitive token of their own. */
 .surface-dark, .surface-product {
   --color-text: #D5DDE4;
   --color-heading: var(--qw-white);

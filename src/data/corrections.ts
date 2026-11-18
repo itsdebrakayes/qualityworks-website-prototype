@@ -5,20 +5,70 @@
  * targeted corrections are applied at build time and every one is listed in
  * docs/11-review-resolution.md for Janique's approval. A correction whose `find` text no longer
  * matches FAILS THE BUILD, so stale corrections cannot silently stop applying.
+ *
+ * Round 2 corrections (R-50 onwards) are listed in docs/14-review-round-2.md.
+ *
+ * EXPORTS AND CONSUMERS
+ *   Correction            the record type (below).
+ *   corrections           the ordered list. articles.ts also reads it to decide whether a list field
+ *                         (tags) needs correcting at all.
+ *   applyCorrections()    called by src/data/articles.ts (title, excerpt, bodyHtml, tags) and
+ *                         src/data/caseStudies.ts (excerpt, customer, challenge, approach, outcome)
+ *                         while the build loads data.
+ *   appliedCorrectionIds  ids applied so far in this build (not currently imported elsewhere).
+ *
+ * HOW TO ADD A CORRECTION (CONTRIBUTING.md §4.3)
+ *   Append { id, target, field, find, replace, reason, note } with the next unused R-NN id (never
+ *   reuse an id; a superseded correction is deleted and noted in a comment, as with R-04). Use a plain
+ *   string `find` when possible; it replaces every occurrence. Then add the correction to the current
+ *   review-resolution doc for approval.
+ *
+ * GOTCHAS
+ *   - Order matters: corrections for the same target+field run in array order, each on the output of
+ *     the previous one. A later `find` must match the text AFTER earlier corrections.
+ *   - Every space in `find` (string or RegExp source) is turned into "one or more whitespace or
+ *     no-break space", so do not use a literal space inside a RegExp character class.
+ *   - A RegExp `find` keeps its own flags: without `g` only the first match is replaced.
+ *   - scripts/content-check.mjs deliberately skips this file, because `find` quotes the old,
+ *     prohibited wording.
  */
+/** One logged edit to migrated WordPress text (each is pending content-owner approval). */
 export interface Correction {
+  /** Required. Permanent id `R-NN`; never reused. Cited in the review-resolution docs. */
   id: string;
+  /** Required. Record to correct: `article:{WordPress slug}` or `case-study:{public slug}`. */
   target: string;          // 'article:{slug}' | 'case-study:{slug}'
+  /**
+   * Required. Field to correct. Articles: title, excerpt, bodyHtml, tags. Case studies: excerpt,
+   * customer, challenge, approach, outcome. (Tags are corrected on the "|"-joined list.)
+   */
   field: string;           // title | excerpt | bodyHtml | customer | challenge | approach | outcome
+  /**
+   * Required. Text to find. A string is matched literally (regex characters escaped) and every
+   * occurrence is replaced. A RegExp is used as written, with its own flags. In both cases spaces
+   * match any run of whitespace including no-break spaces.
+   */
   find: string | RegExp;
+  /** Required. Replacement text (may be ''). For RegExp finds, $1-style group references work. */
   replace: string;
+  /** Required. Category of the correction, used for grouping in the review docs. */
   reason: 'terminology' | 'award-name' | 'unverified-statistic' | 'client-disclosure' | 'product-claim';
+  /** Required (may be ''). Why the change was made, for reviewers. */
   note: string;
 }
 
+// Correct award name, from the news post body (R-01, R-02, R-32).
 const NAVY = 'U.S. Navy AI Augmented Testing (AIAT) Challenge';
+// RegExp source (string) for the WordPress link around the word "Gartner". Embedded in the R-22..R-24
+// patterns so the whole linked citation can be matched.
 const GARTNER_LINK = /<a href="https:\/\/www\.gartner\.com[^"]*"[^>]*>Gartner<\/a>/.source;
 
+/**
+ * All corrections, in application order. Groups (see the divider comments): award name and AI
+ * terminology (R-01–R-09), "ship" wording (R-10–R-21), unverified Gartner statistic (R-22–R-24),
+ * WSSC figures (R-25–R-27), fintech case study (R-28–R-31), follow-up fixes in further fields
+ * (R-32–R-39), review round 2 (R-50–R-56). All are pending Janique's approval (docs/11 and docs/14).
+ */
 export const corrections: Correction[] = [
   // ── Award name (source: the news post body names the "Artificial Intelligence Augmented Testing (AIAT) Prize Challenge")
   { id: 'R-01', target: 'article:qualityworks-wins-us-navy-ai-testing-challenge', field: 'title', find: 'U.S. Navy AI Autonomous Testing Challenge', replace: NAVY, reason: 'award-name', note: 'Published title used an incorrect challenge name. URL slug unchanged.' },
@@ -56,6 +106,7 @@ export const corrections: Correction[] = [
   { id: 'R-29', target: 'case-study:fintech-legacy-platform-modernization', field: 'outcome', find: /The regression testing cycle was dramatically reduced from two weeks to just two days, resulting in an/, replace: 'The engagement resulted in an', reason: 'unverified-statistic', note: '“two weeks to two days” removed.' },
   { id: 'R-30', target: 'case-study:fintech-legacy-platform-modernization', field: 'outcome', find: /^85% Reduction in Testing Time 90% Automation Coverage 80%\+ Work Effort Savings\s*/, replace: '', reason: 'unverified-statistic', note: 'Headline figure strip removed with the derived “85% reduction in testing time”.' },
   { id: 'R-31', target: 'case-study:fintech-legacy-platform-modernization', field: 'customer', find: /QualityWorks partnered with 3CI(?:’|&#8217;|')s client, a leading/, replace: 'QualityWorks partnered with a leading', reason: 'client-disclosure', note: 'Partner/client relationship not disclosed without approval.' },
+  // ── Round 1 follow-ups: the same issues as above, fixed in further fields (excerpts, tags, approach, challenge, outcome)
   { id: 'R-32', target: 'article:qualityworks-wins-us-navy-ai-testing-challenge', field: 'excerpt', find: 'U.S. Navy AI Autonomous Testing Challenge', replace: NAVY, reason: 'award-name', note: 'Excerpt shown on article cards.' },
   { id: 'R-33', target: 'article:qualityworks-wins-us-navy-ai-testing-challenge', field: 'excerpt', find: 'its AI autonomous testing platform', replace: 'its AI-powered testing platform', reason: 'terminology', note: 'Excerpt shown on article cards.' },
   { id: 'R-34', target: 'article:qa-is-changing-why-agentic-qa-may-become-the-next-big-shift-in-software-quality', field: 'excerpt', find: 'Everyone wants to ship.', replace: 'Everyone wants to launch.', reason: 'terminology', note: 'Excerpt shown on article cards.' },
@@ -74,19 +125,32 @@ export const corrections: Correction[] = [
   { id: 'R-55', target: 'article:qualityworks-wins-us-navy-ai-testing-challenge', field: 'bodyHtml', find: 'cutting-edge solutions', replace: 'new solutions', reason: 'product-claim', note: '' },
 ];
 
+// Ids of corrections that have been applied during this build (filled by applyCorrections).
 const used = new Set<string>();
-/** Apply all corrections for target+field. Throws if a correction no longer matches. */
+/**
+ * Apply all corrections for target+field. Throws if a correction no longer matches.
+ * @param target `article:{slug}` or `case-study:{public slug}`.
+ * @param field  field name (see Correction.field).
+ * @param value  original text (null/undefined is treated as '').
+ * @returns the corrected text; unchanged when no correction targets this target+field.
+ * @throws Error naming the correction id when its `find` does not match the current text.
+ */
 export function applyCorrections(target: string, field: string, value: string): string {
   let out = value ?? '';
   for (const c of corrections) {
     if (c.target !== target || c.field !== field) continue;
     // Spaces in a pattern match any whitespace, incl. non-breaking spaces used by WordPress.
+    // Strings: escape every regex metacharacter so the text is matched literally.
     const src = typeof c.find === 'string' ? c.find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : c.find.source;
+    // Strings get the `g` flag (replace all); RegExps keep their own flags.
     const re = new RegExp(src.replace(/ /g, '[\\s\\u00a0]+'), typeof c.find === 'string' ? 'g' : c.find.flags);
+    // Test with a non-global copy: .test() on a /g regex is stateful (lastIndex) and could miss a
+    // match. No match means the source text changed: fail the build loudly.
     if (!new RegExp(re.source, re.flags.replace('g', '')).test(out)) throw new Error(`Correction ${c.id} (${target} ${field}) no longer matches its source text`);
     out = out.replace(re, c.replace);
     used.add(c.id);
   }
   return out;
 }
+/** @returns the Set of correction ids applied so far in this build (diagnostic helper). */
 export const appliedCorrectionIds = () => used;
