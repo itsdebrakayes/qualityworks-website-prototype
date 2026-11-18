@@ -1,5 +1,5 @@
 ---
-import { RELEASE, REVIEW } from '../lib/release';
+import { REVIEW } from '../lib/release';
 /**
  * Global header. Desktop mega-menu + mobile drawer, BOTH rendered from src/data/navigation.ts.
  * Behaviour (see script): disclosure buttons with aria-expanded; hover-intent open with a 280ms
@@ -28,8 +28,7 @@ import { RELEASE, REVIEW } from '../lib/release';
  *
  * Review/release behaviour: links whose nav data has `status: 'proposed'` get a gold dot, rendered only
  * in REVIEW builds and only visible while review annotations are on (ProtoBar toggle). The release
- * build renders no dot (docs/12-release-cleanup.md, "Header proposed dots"). `RELEASE` is imported but
- * not used in this file.
+ * build renders no dot (docs/12-release-cleanup.md, "Header proposed dots").
  *
  * Gotchas:
  * - Menus need JavaScript: desktop panels are rendered with `hidden` and the drawer is a closed
@@ -400,9 +399,15 @@ const isCurrent = (href: string) => norm(href) === cur;
   // "close" listener below does all the clean-up.
   const shut = () => drawer.close();
   closeBtn.addEventListener('click', shut);
-  // A click whose target is the <dialog> itself landed on the backdrop. Note: clicks on any empty area
-  // of the drawer not covered by a child element (e.g. the gap above the CTA) also target the dialog.
-  drawer.addEventListener('click', (e) => { if (e.target === drawer) shut(); }); // backdrop
+  // Backdrop click: the event target is the <dialog> both for the backdrop and for the drawer's own
+  // padding, so also require the pointer to be OUTSIDE the drawer's box. Keyboard "clicks" have
+  // clientX/Y of 0 and never target the dialog itself, so they are unaffected.
+  drawer.addEventListener('click', (e) => {
+    if (e.target !== drawer) return;
+    const r = drawer.getBoundingClientRect();
+    const inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+    if (!inside) shut();
+  });
   // Undo the open-state changes and return focus to the Menu button (AC-NAV-3).
   drawer.addEventListener('close', () => {
     openBtn.setAttribute('aria-expanded', 'false');

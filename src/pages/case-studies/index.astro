@@ -26,11 +26,9 @@ import { RELEASE, REVIEW } from '../../lib/release';
  *   - Filter state is mirrored in the URL (?industry=...&service=...) via src/lib/filters.ts.
  *   - Option labels fall back to the raw slug when industryBySlug/serviceBySlug finds no record, which is
  *     a visible sign that a case study is tagged with an unknown slug.
- *   - In RELEASE builds the [data-sim] buttons are not rendered, but the script still calls
- *     `document.querySelector('[data-sim="loading"]')!.addEventListener(...)`. That throws, and the lines
- *     after it (error simulation, Retry, and the empty state's "Clear filters" button) never run.
- *     Filtering itself still works because initFilters() runs first. Needs a code fix (guard the lookups);
- *     not changed here because this pass was comments-only.
+ *   - In RELEASE builds the [data-sim] buttons are not rendered, so the script looks them up with
+ *     optional chaining (`?.addEventListener`). Never use a non-null `!` on a review-only element: the
+ *     throw would stop the lines after it (including the empty state's "Clear filters").
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
@@ -107,11 +105,11 @@ const serviceOpts = [...new Set(caseStudies.flatMap((c) => c.serviceTags))].map(
   const showLoading = () => { error.hidden = true; results.hidden = true; loading.hidden = false; results.setAttribute('aria-busy', 'true'); api.announce('Loading case studies…');
     setTimeout(() => { loading.hidden = true; results.hidden = false; results.setAttribute('aria-busy', 'false'); api.apply(); }, 1500); };
   // Prototype buttons. These elements exist only in REVIEW builds (see the RELEASE gotcha in the header).
-  document.querySelector('[data-sim="loading"]')!.addEventListener('click', showLoading);
+  document.querySelector('[data-sim="loading"]')?.addEventListener('click', showLoading);
   // Simulated error: hide results and the empty state, show the alert and move focus to it so it is announced.
-  document.querySelector('[data-sim="error"]')!.addEventListener('click', () => { results.hidden = true; document.getElementById('cs-empty')!.hidden = true; error.hidden = false; error.focus(); api.announce(''); });
+  document.querySelector('[data-sim="error"]')?.addEventListener('click', () => { results.hidden = true; document.getElementById('cs-empty')!.hidden = true; error.hidden = false; error.focus(); api.announce(''); });
   // "Try again" in the error alert replays the loading simulation.
-  document.querySelector('[data-retry]')!.addEventListener('click', showLoading);
+  document.querySelector('[data-retry]')?.addEventListener('click', showLoading);
   // Empty state's "Clear filters" reuses the shared controller's clear().
   document.querySelector('[data-empty-clear]')!.addEventListener('click', () => api.clear());
 </script>

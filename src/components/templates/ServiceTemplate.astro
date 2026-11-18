@@ -1,5 +1,5 @@
 ---
-import { RELEASE, REVIEW, rn } from '../../lib/release';
+import { RELEASE, rn } from '../../lib/release';
 /**
  * Service detail template — reused by /services/*, /engagement-models/*, /maturity-assessments/,
  * /innovation-tourism/. Sections render only when data exists, so "summary" records degrade
@@ -33,7 +33,6 @@ import { RELEASE, REVIEW, rn } from '../../lib/release';
  * - Summary-only records (`contentDepth: 'summary'`) show a warning Alert in both builds; in release
  *   builds its wrapper also carries `data-release-blocker`, so the release gate fails until the full
  *   copy is migrated.
- * - `REVIEW` is imported but not used in this file.
  *
  * Gotchas:
  * - Section heading ids ("challenge-title", "caps-title", ...) are fixed strings; render one template per page.
@@ -71,14 +70,15 @@ const { service: s } = Astro.props;
 const parentCrumb = s.kind === 'engagement-model' ? { label: 'Engagement models', href: '/engagement-models/' } : { label: 'Solutions', href: '/services/' };
 // One crumbs array feeds both the visible trail (PageHero) and the BreadcrumbList JSON-LD (BaseLayout).
 const crumbs = [{ label: 'Home', href: '/' }, parentCrumb, { label: s.name }];
-// Resolve related slugs to records. filter(Boolean) drops unknown slugs; case studies are capped at 3.
+// Resolve related slugs to records (unknown slugs already failed the build in src/data/integrity.ts;
+// filter(Boolean) only narrows the types). Case studies are capped at 3.
 const related = (s.relatedCaseStudies ?? []).map(caseStudyBySlug).filter(Boolean).slice(0, 3);
 const relProducts = (s.relatedProducts ?? []).map(productBySlug).filter(Boolean);
 const relIndustries = (s.relatedIndustries ?? []).map(industryBySlug).filter(Boolean);
 // "Keep exploring": up to 3 other fully written services from the same mega-menu group.
 const siblings = services.filter((x) => x.group === s.group && x.slug !== s.slug && x.contentDepth === 'full').slice(0, 3);
 // Page JSON-LD: always a Service; FAQPage only when this record has FAQs (they are rendered below).
-const jsonLd = [serviceLd(s.name, s.seo.description, s.path), ...(s.faqs?.length ? [faqLd(s.faqs)] : [])];
+const jsonLd = [serviceLd(s.name, s.seo.description, s.path), ...(s.faqs?.length ? [faqLd(s.faqs)] : [])].filter((x) => x !== null);
 ---
 <BaseLayout seo={s.seo} breadcrumbs={crumbs} jsonLd={jsonLd}>
   {/* Hero: eyebrow = the mega-menu group, h1 = heroTitle, CTAs from the record. */}

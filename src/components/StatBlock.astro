@@ -18,7 +18,7 @@ import { RELEASE, REVIEW } from '../lib/release';
  *
  * Review/release behaviour:
  * - REVIEW: every stat is shown, each with its ClaimRef badge, plus the optional footnote.
- * - RELEASE: stats whose claim has a `verification` value are removed, ClaimRef renders nothing, and
+ * - RELEASE: stats whose claim is 'required-before-launch' or 'wording-approval-needed' are removed, ClaimRef renders nothing, and
  *   the footnote is not rendered. If no stats remain, the whole block disappears.
  *
  * Accessibility: a <dl> pairs each label (dt) with its value (dd). CSS shows the value above the label
@@ -26,9 +26,8 @@ import { RELEASE, REVIEW } from '../lib/release';
  * development, 16+" in a sensible order.
  *
  * Gotchas:
- * - The release filter removes a stat if its claim has ANY `verification` value, including
- *   'source-checked', not only 'required-before-launch'. Clear `verification` in src/data/claims.ts
- *   (with recorded evidence) to make a stat release-visible.
+ * - To make a stat release-visible, set its claim's `verification` to 'source-checked' (or clear it) in
+ *   src/data/claims.ts, with the evidence recorded. No claim is 'source-checked' today.
  * - An unknown claim id throws during the build, on purpose. Add the claim to src/data/claims.ts first.
  */
 import ClaimRef from './ClaimRef.astro';
@@ -41,7 +40,9 @@ interface Props {
 }
 const { stats: allStats, footnote } = Astro.props;
 // Release builds drop any statistic whose claim still requires verification.
-const stats = RELEASE ? allStats.filter((s) => !claimById(s.claim)?.verification) : allStats;
+// 'source-checked' claims are publishable; only unresolved states are removed.
+const BLOCKING = ['required-before-launch', 'wording-approval-needed'];
+const stats = RELEASE ? allStats.filter((s) => !BLOCKING.includes(claimById(s.claim)?.verification ?? '')) : allStats;
 // Build-time guard (AC-HOME-2): fail loudly rather than publish a number with no claim record.
 stats.forEach((s) => { if (!claimById(s.claim)) throw new Error(`Stat "${s.label}" has no registered claim`); });
 ---

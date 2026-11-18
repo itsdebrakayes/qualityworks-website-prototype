@@ -1,7 +1,7 @@
 {
- "runAt": "2026-11-18T19:10:53.193Z",
+ "runAt": "2026-11-18T23:33:12.328Z",
  "base": "http://localhost:4321",
- "routes": 99,
+ "routes": 100,
  "externalLinks": [
   "https://agents.qualityworkscg.com/",
   "https://apnews.com/article/small-business-artificial-intelligence-productivity-f6fa7b2a1ce0a9f2e5b8b48670b3098a",
@@ -39,7 +39,6 @@
   "https://qualityworkscg.com/case-study/how-automation-saved-big-bucks-and-drove-faster-app-releases/",
   "https://qualityworkscg.com/case-study/increasing-regression-test-coverage-by-15x/",
   "https://qualityworkscg.com/case-study/insurance-faster-to-market/",
-  "https://qualityworkscg.com/case-study/ipipelines-legacy-platform-modernization/",
   "https://qualityworkscg.com/case-study/jmmb-group-leverages-automation-best-practices/",
   "https://qualityworkscg.com/case-study/leading-entertainment-platform-with-site-reliability-engineering/",
   "https://qualityworkscg.com/case-study/mobile-game-development-creating-legacy/",
@@ -131,9 +130,9 @@
   {
    "id": "QA-01",
    "ac": "BR-10 SEO",
-   "area": "All 99 routes",
+   "area": "All 100 routes",
    "expected": "Exactly one H1 per page and no skipped heading levels",
-   "actual": "99 pages: 1 H1 each, no level skips",
+   "actual": "100 pages: 1 H1 each, no level skips",
    "status": "Pass",
    "evidence": "qa-output/results.json",
    "issue": ""
@@ -163,7 +162,7 @@
    "ac": "BR-13 External hand-off",
    "area": "External links",
    "expected": "Every external link opens in a new tab with rel=noopener",
-   "actual": "123 unique external URLs, all target=_blank rel=noopener",
+   "actual": "122 unique external URLs, all target=_blank rel=noopener",
    "status": "Pass",
    "evidence": "",
    "issue": ""
@@ -203,7 +202,7 @@
    "ac": "BR-11 Responsive",
    "area": "All routes @360px",
    "expected": "No horizontal scrolling",
-   "actual": "99 routes, no horizontal overflow",
+   "actual": "100 routes, no horizontal overflow",
    "status": "Pass",
    "evidence": "qa-output/evidence/360-*.png",
    "issue": ""
@@ -213,7 +212,7 @@
    "ac": "BR-11 Responsive",
    "area": "All routes @640px (approx. 200% zoom of 1280)",
    "expected": "No horizontal scrolling",
-   "actual": "99 routes, no horizontal overflow",
+   "actual": "100 routes, no horizontal overflow",
    "status": "Pass",
    "evidence": "qa-output/evidence/640-*.png",
    "issue": ""
@@ -223,7 +222,7 @@
    "ac": "BR-11 Responsive",
    "area": "All routes @768px",
    "expected": "No horizontal scrolling",
-   "actual": "99 routes, no horizontal overflow",
+   "actual": "100 routes, no horizontal overflow",
    "status": "Pass",
    "evidence": "qa-output/evidence/768-*.png",
    "issue": ""
@@ -233,7 +232,7 @@
    "ac": "BR-11 Responsive",
    "area": "All routes @1024px",
    "expected": "No horizontal scrolling",
-   "actual": "99 routes, no horizontal overflow",
+   "actual": "100 routes, no horizontal overflow",
    "status": "Pass",
    "evidence": "qa-output/evidence/1024-*.png",
    "issue": ""
@@ -243,7 +242,7 @@
    "ac": "BR-11 Responsive",
    "area": "All routes @1440px",
    "expected": "No horizontal scrolling",
-   "actual": "99 routes, no horizontal overflow",
+   "actual": "100 routes, no horizontal overflow",
    "status": "Pass",
    "evidence": "qa-output/evidence/1440-*.png",
    "issue": ""
@@ -303,7 +302,7 @@
    "ac": "BR-5 Header",
    "area": "Active page indication",
    "expected": "Current section highlighted; current link has aria-current=page",
-   "actual": "active: Solutions (current section); aria-current link: Test Automation    Frameworks, CI integration and team upskilling",
+   "actual": "active: Solutions (current section); aria-current link: Test Automation     Frameworks, CI integration and team upskilling",
    "status": "Pass",
    "evidence": "",
    "issue": ""

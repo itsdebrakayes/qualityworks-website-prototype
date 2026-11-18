@@ -28,8 +28,8 @@ import { rn } from '../../lib/release';
  *   - Integrations are unknown per agent (empty arrays); never invent them.
  *   - The department chip filter is a small local script, not src/lib/filters.ts: no URL state, no empty
  *     state (every department chip comes from the snapshot, so it always has at least one agent).
- *   - Two of the four FAQs are proposed copy pending approval but are still emitted as FAQPage JSON-LD.
- *     src/lib/schema.ts says FAQPage is for factual answers, so review before launch.
+ *   - Two of the four FAQs are proposed copy pending approval. They render on the page, but faqLd()
+ *     emits only approved / published-live answers, so the FAQPage JSON-LD holds two questions.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
@@ -57,7 +57,7 @@ const faqs: FaqItem[] = [
   { q: 'Which tools do the agents integrate with?', a: 'Integrations are confirmed per agent during onboarding. The public catalog does not list integrations per agent, so we don’t list them here.', provenance: { source: 'proposed-copy', approval: 'pending-approval', note: 'Product owner to supply integration list if one exists.' } },
 ];
 ---
-<BaseLayout seo={{ title: 'Agents as a Service: AI Agents for Business Teams | QualityWorks', description: 'Named AI agents for sales, support, marketing, admin, finance and operations, configured for your tools by QualityWorks. Compare with custom AI consulting.' }} breadcrumbs={crumbs} jsonLd={[faqLd(faqs)]}>
+<BaseLayout seo={{ title: 'Agents as a Service: AI Agents for Business Teams | QualityWorks', description: 'Named AI agents for sales, support, marketing, admin, finance and operations, configured for your tools by QualityWorks. Compare with custom AI consulting.' }} breadcrumbs={crumbs} jsonLd={[faqLd(faqs)].filter((x) => x !== null)}>
   <PageHero variant="product" eyebrow="QualityWorks AI Agents as a Service" title="Hire your AI workforce in days, not months" lede="Buy named AI agents for sales, support, marketing, admin, finance and operations. QualityWorks configures them for your tools so your team can stop losing time to repeat work." breadcrumbs={crumbs} primary={ctas.agentsMarketplace} secondary={{ label: 'Not sure? Talk to us first', href: '/contact-us/?topic=smb-ai' }}>
     {/* Hand-off note under the hero CTAs: buying happens on the separate marketplace. */}
     <p class="handoff"><Icon name="info" /><span>Packages, prices and checkout are on the separate marketplace at <strong>agents.qualityworkscg.com</strong>.</span></p>

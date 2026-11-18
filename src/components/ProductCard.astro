@@ -1,5 +1,5 @@
 ---
-import { RELEASE, REVIEW } from '../lib/release';
+import { RELEASE } from '../lib/release';
 /**
  * ProductCard: teaser for one QualityWorks product or framework (status badge, name, tagline,
  * summary, and a "Learn more" or "Visit <domain>" cue).
@@ -16,7 +16,7 @@ import { RELEASE, REVIEW } from '../lib/release';
  *
  * Review/release behaviour: a product whose status is 'awaiting-product-owner' is labelled
  * "Details pending" in review builds (honest for reviewers) and "Framework" in release builds (a
- * neutral public label). `REVIEW` is imported but not used in this file.
+ * neutral public label).
  *
  * Accessibility:
  * - Single stretched title link (global.css). External products open in a new tab and the link text

@@ -34,8 +34,9 @@ import { RELEASE, REVIEW, rn } from '../../lib/release';
  *     (today: Schema to API Automation). Never link visitors to a known 404.
  *   - `qwExternal` is defined locally; it is not `ctas.qualityWatcherDemo` from site.ts (different label).
  *     Change both if the QualityWatcher hand-off wording changes.
- *   - Three of the four FAQs are proposed copy pending approval, yet all four are emitted as FAQPage
- *     JSON-LD. src/lib/schema.ts says FAQPage is for factual answers, so review the schema before launch.
+ *   - Three of the four FAQs are proposed copy pending approval. They render on the page, but faqLd()
+ *     emits only approved / published-live answers, so the FAQPage JSON-LD holds one question until
+ *     the others are approved.
  *   - The access tiers repeat the live page; every tool link currently redirects to sign-in (P-03).
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -74,7 +75,7 @@ const faqs: FaqItem[] = [
 // WSSC AI test-case-generation pilot: the case study that backs this page. Rendered only if the slug exists.
 const wssc = caseStudyBySlug('ai-powered-test-case-generation-wssc');
 ---
-<BaseLayout seo={{ title: 'QualityWatcher AI: AI Test Case & Automation Generation | QualityWorks', description: 'Generate test cases from any requirement format, turn them into UI automation and get automation help with QualityWatcher AI tools from QualityWorks.' }} breadcrumbs={crumbs} jsonLd={[faqLd(faqs)]}>
+<BaseLayout seo={{ title: 'QualityWatcher AI: AI Test Case & Automation Generation | QualityWorks', description: 'Generate test cases from any requirement format, turn them into UI automation and get automation help with QualityWatcher AI tools from QualityWorks.' }} breadcrumbs={crumbs} jsonLd={[faqLd(faqs)].filter((x) => x !== null)}>
   <PageHero variant="product" eyebrow="QualityWatcher AI · Product" title="Simplify quality with AI-driven testing tools" lede="Generate real-world test cases from requirements in any format, convert them into automation scripts, and get expert automation help — with your QA team reviewing every output." breadcrumbs={crumbs} primary={qwExternal} secondary={{ label: 'Talk to an automation expert', href: '/contact-us/' }}>
     {/* Hero aside: illustrative mock of the tool (release blocker in RELEASE builds). Rows are sample text only. */}
     <Fragment slot="aside">

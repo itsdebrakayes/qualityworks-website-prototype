@@ -33,8 +33,8 @@
  * GOTCHAS
  *   - Types are erased at build time. Nothing here validates data at runtime: rules such as
  *     "≤ 140 chars" or "must reference an existing slug" are conventions checked by review and QA,
- *     not by the compiler. Unknown related slugs are silently dropped by the templates
- *     (`.map(bySlug).filter(Boolean)`), so check spelling.
+ *     not by the compiler, except cross-references: src/data/integrity.ts fails the build when a
+ *     record names an unknown service, industry, product or case-study slug.
  *   - `approval: 'approved'` must only be set when the content owner has actually approved the
  *     record. Approval comes from people (see CONTRIBUTING.md §5), never from code.
  */

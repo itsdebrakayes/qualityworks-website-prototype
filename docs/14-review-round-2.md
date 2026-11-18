@@ -53,10 +53,10 @@ All six corrections are in `src/data/corrections.ts` (the migrated-content corre
 
 | Channel | Scope | Result |
 |---|---|---|
-| Visible text of every page (desktop markup; the mobile drawer is in the same HTML) | 97 pages | 0 marketing hits for all 16 rules |
-| Attributes (meta description, OG/Twitter, alt, title, aria-label, placeholder, value) | 97 pages | 0 marketing hits |
-| JSON-LD structured data | 97 pages | 0 marketing hits |
-| Source data + templates (`src/**/*.ts`, `src/**/*.astro`) | 81 files | 0 hits |
+| Visible text of every page (desktop markup; the mobile drawer is in the same HTML) | 101 pages | 0 marketing hits for all 16 rules |
+| Attributes (meta description, OG/Twitter, alt, title, aria-label, placeholder, value) | 101 pages | 0 marketing hits |
+| JSON-LD structured data | 101 pages | 0 marketing hits |
+| Source data + templates (`src/**/*.ts`, `src/**/*.astro`) | 82 files | 0 hits |
 | Release build (`dist-release/`) | release pages | 0 hits |
 | Review docs (`/prototype/*`) | 16 pages | Hits are quotations of the findings in docs 01, 02, 08, 11 and 14 (informational) |
 | Navigation labels | header, drawer, footer | Same data source; covered by the page scan |
@@ -75,5 +75,24 @@ All six corrections are in `src/data/corrections.ts` (the migrated-content corre
 ## F. Final QA (brief §6)
 See doc 07 for the regenerated automated results, and §G for the rendered-page check. Review hub, claim annotations, accessibility evidence, traceability matrix (doc 08), release gate (doc 12) and the sandbox-blocked indicators (QA-31, QA-32) are unchanged and still present.
 
+Final run (18 Nov 2026, after the documentation pass and code fixes below):
+
+| Check | Result |
+|---|---|
+| `npm run build` | 101 pages; 18 redirect rules written (pending host); glyph lint clean; data integrity check clean |
+| `npm run check:content` | Marketing 0 · source 0 · review docs informational only |
+| `npm run qa:checks` (Playwright + axe) | 37 checks: 35 pass, 0 fail, 2 blocked (QA-31 HubSpot, QA-32 screen reader: no access in this environment) |
+| `npm run build:release` | Fails by design: 31 launch blockers across 15 types (doc 12). No new blockers |
+| Release `/case-studies/` | Empty state “Clear filters” works; no script errors |
+
+**Code fixes made during the round-2 documentation review** (found by reading every file, none changes approved copy):
+- `/case-studies/` release build: the review-only simulation buttons were looked up with a non-null assertion, which threw and disabled “Clear filters”. Now guarded.
+- FAQPage JSON-LD now carries only `published-live` or `approved` answers. Pending answers still show on the page but are no longer sent to search engines as accepted answers (QualityWatcher AI: 1 of 4; Agents as a Service: 2 of 4).
+- A `<!-- PROTOTYPE -->` HTML comment that was visible in page source is now a build-time comment.
+- New `src/data/integrity.ts`: the build fails if any record references an unknown service, industry, product or case-study slug (previously dropped silently).
+- Migrated article links to renamed case-study slugs now point straight at the new slug (via `src/data/redirects.json`).
+- CtaBand heading ids are unique per instance; the mobile drawer no longer closes on a click inside its own padding; the release stat filter keeps `source-checked` claims; unused imports removed.
+- Codebase documentation: detailed README and CONTRIBUTING; every component, page, data module, script and stylesheet has a header comment and inline comments. A strip-comments comparison confirmed the commenting pass changed no code, and a normalised comparison of the built HTML confirmed no rendered change.
+
 ## G. Rendered-page check
-Recorded in doc 07's manual log as MQ-21 to MQ-24.
+Desktop (1440 px) and mobile (390 px) screenshots and text assertions for the fintech case study, WSSC case study, About Us and the US Navy post: corrected wording present, no horizontal scroll. Recorded in doc 07's manual log as MQ-21 to MQ-24.

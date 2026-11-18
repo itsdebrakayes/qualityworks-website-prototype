@@ -32,6 +32,9 @@
  *     U+2260, and an invisible U+FE0F). Edit them in a UTF-8-aware editor and do not "clean up"
  *     what looks like an empty spot in the emoji regex.
  */
+import redirectMap from '../data/redirects.json';
+/** Case-study slug renames (old source slug → public slug). Single source: src/data/redirects.json. */
+const slugRenames: Record<string, string> = redirectMap.caseStudySlugRenames;
 /** Superscript digit (U+2070, U+00B9, U+00B2, U+00B3, U+2074 to U+2079) to its ASCII digit. */
 const SUP: Record<string, string> = { '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9' };
 /**
@@ -132,8 +135,10 @@ export function normalizeHeadings(html: string, start = 2): string {
  */
 export function normalizeLinks(html: string, isBuilt: (path: string) => boolean = () => true): string {
   return html
-    // Legacy case-study paths move to the standardised /case-studies/{slug}/ pattern.
-    .replace(/href="(?:https?:\/\/(?:www\.)?qualityworkscg\.com)?\/case-study\/([^"]+)"/gi, 'href="/case-studies/$1"')
+    // Legacy case-study paths move to the standardised /case-studies/{slug}/ pattern, and renamed slugs
+    // (src/data/redirects.json, e.g. the neutral fintech slug) go straight to their new name so
+    // migrated links never depend on a redirect hop.
+    .replace(/href="(?:https?:\/\/(?:www\.)?qualityworkscg\.com)?\/case-stud(?:y|ies)\/([^"/#?]+)\/?([#?][^"]*)?"/gi, (_m, slug: string, rest = '') => `href="/case-studies/${slugRenames[slug] ?? slug}/${rest}"`)
     // Internal absolute links become root-relative so they work on any host (and in the prototype).
     // The second regex below (on the same line) captures: pre-href attributes, the absolute href
     // (negative lookahead skips the live-site sections listed above), post-href attributes and the

@@ -1,8 +1,8 @@
 import type { NavItem, NavLink } from './types';
 
 /**
- * GLOBAL NAVIGATION — single source of truth for the desktop mega-menu, the mobile drawer,
- * the footer sitemap and the XML sitemap. Do not hardcode navigation anywhere else.
+ * GLOBAL NAVIGATION — single source of truth for the desktop mega-menu, the mobile drawer and
+ * the footer links (and, later, the XML sitemap; see NOTE below). Do not hardcode navigation anywhere else.
  *
  * Top-level categories follow QM-112 (7 categories incl. Home via logo).
  * Labels and group structure mirror the CURRENT live header (audited 2026-11-17) because the

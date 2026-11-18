@@ -46,7 +46,7 @@ A clickable, code-first prototype of the rebuilt **qualityworkscg.com**, built f
 | What it is *not* | Not a production site. Not connected to HubSpot, BambooHR, analytics or a CMS. No real form submissions |
 | Review history | Round 1 corrections: `docs/11-review-resolution.md`. Round 2: `docs/14-review-round-2.md` |
 
-The site has **97 pages**:
+The **review build** (`npm run build`) has **101 pages**. The **release output** (`npm run build:release`) keeps 80 HTML pages, because it drops the review-only routes (`/prototype/*`, `/design-system/`) and event records marked `fixture` or `not-verified`. The review build contains:
 - the homepage, solutions (services) and engagement models;
 - 3 product pages and a products overview;
 - 10 industry/audience pages and 17 case studies;
@@ -170,6 +170,7 @@ qualityworks-prototype/
     │   ├── corrections.ts       logged edits applied to migrated content at build time
     │   ├── altText.ts           written alt text for case-study and article images
     │   ├── redirects.json       legacy slug → public slug renames (only home of legacy slugs)
+    │   ├── integrity.ts         build-time cross-reference check (unknown related slugs fail the build)
     │   └── migrated/            raw WordPress snapshots (never edited by hand)
     ├── lib/
     │   ├── release.ts           RELEASE / REVIEW flags and rn() helper
@@ -228,7 +229,7 @@ flowchart LR
 
 | Step | Tool | What it does | Fails when |
 |---|---|---|---|
-| 1 | `astro build` | Renders every route from the data modules into `dist/` | Type/template error, or a **correction no longer matches** its source text |
+| 1 | `astro build` | Renders every route from the data modules into `dist/` | Type/template error, a **correction no longer matches** its source text, or `src/data/integrity.ts` finds a record pointing at an **unknown slug** |
 | 2 | `scripts/gen-redirects.mjs dist` | Writes `dist/_redirects` (18 rules) | Output folder missing |
 | 3 | `scripts/glyph-lint.mjs` | Checks every visible character is in the brand font's character set | A character would render in a fallback font |
 
@@ -452,6 +453,7 @@ All of these are also readable inside the site at `/prototype/`.
 |---|---|
 | Build fails with `Correction R-NN … no longer matches its source text` | A migrated snapshot changed or a correction's `find` is wrong. Update the correction (spaces match any whitespace) |
 | Build fails in glyph-lint with `U+2192 "→"` | The text has a character the brand font lacks. Use `MetricValue` for arrows or rephrase (CONTRIBUTING §3.4) |
+| Build fails with `Data integrity check failed` | A record lists a slug that does not exist (typo or renamed record). The message names the record and field; fix the slug |
 | `check:content` reports a marketing hit | Fix the copy, or add a correction for migrated content; never allow-list without a documented reason |
 | QA fails to connect | Start `npx astro preview --port 4321` first, or set `QA_BASE` |
 | QA errors `Cannot find module 'playwright'` | Playwright must be installed on the machine (not in package.json) |

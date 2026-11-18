@@ -58,11 +58,18 @@ export const organizationLd = () => ({
  *   different wording: the markup must match what users see).
  * @returns schema.org FAQPage object with one Question/Answer per item (answer text is plain text).
  */
-export const faqLd = (items: FaqItem[]) => ({
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: items.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
-});
+export const faqLd = (items: FaqItem[]) => {
+  // Only answers that are already public ('published-live') or explicitly 'approved' are emitted.
+  // Proposed or pending answers still render on the page (labelled), but search engines must not
+  // receive unapproved wording as structured "accepted answers" (review round 2, docs/14 §F).
+  const publishable = items.filter((f) => !f.provenance || f.provenance.approval === 'published-live' || f.provenance.approval === 'approved');
+  if (!publishable.length) return null;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: publishable.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  };
+};
 
 /**
  * Article node for a migrated post.

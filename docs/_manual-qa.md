@@ -29,3 +29,7 @@ Visual review of full-page screenshots at 360 / 768 / 1024 / 1440 px for 16 key 
 | MQ-18 | Mobile drawer @360 | “Case Studies” and “Resource Hub” listed by name; no duplicate overview links | Pass (QA-14 + visual) |
 | MQ-19 | Release build | Review markers absent outside the declared blockers | Pass (release gate) |
 | MQ-20 | Browsers | Only Chromium tested; Safari, Firefox and Edge **not tested** | Open |
+| MQ-21 | Fintech case study (desktop 1440 + mobile 390) | New neutral slug renders; hero summary matches the approved round-2 text; heading reads “The client”; client shown as “Financial technology firm (name not approved for disclosure)”; no horizontal scroll | Pass (visual + text assertion, 18 Nov 2026) |
+| MQ-22 | WSSC case study (desktop + mobile) | “The client” heading; tool sentence reads “generated draft test cases from requirement documents for QA engineers to review” | Pass (visual + text assertion) |
+| MQ-23 | About Us (desktop + mobile) | Mission line reads “for our clients” | Pass (text assertion) |
+| MQ-24 | US Navy AI testing challenge post (desktop + mobile) | “self-healing selectors”, neutral integrations sentence without “40+”, “new solutions” | Pass (text assertion) |

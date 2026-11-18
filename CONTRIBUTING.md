@@ -100,7 +100,7 @@ flowchart LR
    In `.astro` files the header goes inside the frontmatter (`---`) as a `/** … */` block.
 2. **Props.** Every component `interface Props` field has a short `/** … */` comment.
 3. **Inline comments explain *why*, not *what*.** Write `// Hover intent: 200 ms before switching menus so diagonal pointer paths don't swap panels`, not `// set timeout`.
-4. **Template comments** inside `.astro` markup use `{/* … */}` (never `<!-- -->`, which ships to visitors).
+4. **Template comments** inside `.astro` markup use `{/* … */}` (never `<!-- -->`, which is sent to visitors).
 5. **CSS.** Comment each logical group and any non-obvious value (contrast ratios, magic numbers).
 6. **Review references.** When code exists because of a review finding or requirement, cite it, e.g. `// QM-112 5.5` or `// review round 2 (doc 11)`.
 7. Comments must stay true. Update them in the same commit as the code.
@@ -120,7 +120,8 @@ flowchart LR
 ### 4.1 Add or edit a service page
 1. Open `src/data/services.ts` and copy an existing `Service` record.
 2. Set `slug`, `path` (keep the legacy WordPress URL if one exists), `group` (must match a navigation group heading) and `pathway`.
-3. Write `cardSummary`, `buyerProblem`, `heroTitle`, `heroLede`, and `capabilities` (≥ 1). Add `process`, `faqs` and `considerations` only with approved or clearly marked proposed copy (`provenance`).
+3. Write `cardSummary`, `buyerProblem`, `heroTitle`, `heroLede`, and `capabilities` (≥ 1). Add `process`, `faqs` and `considerations` only with approved or clearly marked proposed copy (`provenance`). FAQ answers with `approval: 'pending-approval'` render on the page but are left out of the FAQPage JSON-LD by `faqLd()` until approved.
+   Related slugs (`relatedCaseStudies`, `relatedProducts`, `relatedIndustries`) are checked by `src/data/integrity.ts`; a typo fails the build with the record and field named.
 4. Link it in `src/data/navigation.ts` (it will appear in the header, mobile drawer and footer automatically).
 5. `src/pages/services/[slug].astro` renders every service whose `path` starts with `/services/`. Other paths need a small page file like `src/pages/maturity-assessments.astro`.
 6. `npm run build`, then check the page at 360 px and 1440 px.

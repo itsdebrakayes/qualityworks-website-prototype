@@ -27,9 +27,9 @@ TypeScript definitions: `src/data/types.ts`. Every record carries **`provenance 
 | `name`, `kind` (`service`/`engagement-model`/`assessment`/`program`), `pathway` (`quality`/`build`/`ai`), `group` | Yes | `group` must match a nav group heading |
 | `cardSummary` (at most  140 chars), `buyerProblem` (at most  100), `heroTitle`, `heroLede` | Yes | Answer-first; no unverifiable superlatives |
 | `primaryCta` | Yes | Internal route or `external:true` + `handoffNote` |
-| `secondaryCta`, `challenge`, `process[]`, `considerations[]`, `faqs[]` | – | FAQ answers must be factual; FAQPage schema only when shown |
+| `secondaryCta`, `challenge`, `process[]`, `considerations[]`, `faqs[]` | – | FAQ answers must be factual. `faqLd()` emits FAQPage JSON-LD only for answers whose provenance is `published-live` or `approved`; pending answers render on the page but stay out of the markup |
 | `capabilities[]` | Yes | at least  1 |
-| `relatedCaseStudies[]`, `relatedProducts[]`, `relatedIndustries[]` | – | Must reference existing slugs (build fails otherwise) |
+| `relatedCaseStudies[]`, `relatedProducts[]`, `relatedIndustries[]` | – | Must reference existing slugs. `src/data/integrity.ts` fails the build on an unknown slug (also checks industry `capabilities`/`products`/`caseStudies` and case-study `industry`/`serviceTags`) |
 | `claims[]` | – | Claim IDs from the register |
 | `personas {primary, secondary}`, `seo {title, description}` | Yes | Unique title/description |
 | `contentDepth` | Yes | `summary` triggers a visible migration notice |
@@ -42,7 +42,7 @@ QwTool: `id, name, description, ctaLabel, ctaHref, observedStatus (requires-sign
 `id, name, role, category, description, businessFunction, availabilityStatus (ready-now/quick-launch/custom-build/unknown), integrations[], pricingInterval, price, setupFee, ctaLabel, ctaDestination, lastUpdated, provenance`.
 - The prototype holds an **8-record snapshot** of public records (17 Nov 2026). `integrations` are empty because the catalog does not publish them. Values are **not invented**.
 - **Prices are stored but deliberately not displayed** on the corporate site. Two sources of price would drift. Production should either read an approved marketplace API at build time or link out (recommended).
-- Validation: `ctaDestination` must be on `agents.qualityworkscg.com`; `lastUpdated` within 7 days or the record is hidden.
+- Validation: `ctaDestination` must be on `agents.qualityworkscg.com`. **Proposed for production (not implemented in the prototype):** hide a record whose `lastUpdated` is more than 7 days old once records come from a live marketplace feed. The prototype snapshot is static and dated 17 Nov 2026.
 
 ## 4. Case studies (`CaseStudy`)
 `id, slug, title, client, clientDisclosureApproved (true/false/null), industry, serviceTags[], summary, customer, challenge, contribution, approach, outcome, metrics[{value, label, metricSource, context}], date, image, altText, relatedSolution, cta, provenance`.
@@ -75,7 +75,7 @@ QwTool: `id, name, description, ctaLabel, ctaHref, observedStatus (requires-sign
 
 ## 11. Glyph normalisation rules (typography QA)
 Applied in `src/lib/glyphs.ts` to migrated text (snapshot files stay raw for traceability). **Needs content-owner sign-off:**
-superscript digits become `<sup>` digits · ` › ` becomes an SVG arrow + “to” · the approximately-equal sign (U+2248) becomes “approximately” · the not-equal sign (U+2260) becomes “is not” · decorative emoji are removed.
+superscript digits become `<sup>` digits · the right arrow (U+2192) becomes an SVG arrow + visually hidden “to” · the approximately-equal sign (U+2248) becomes “approximately” · the not-equal sign (U+2260) becomes “is not” · decorative emoji are removed.
 
 ## 12. Mock-data boundary summary
 | Data | Real / snapshot | Fictional |

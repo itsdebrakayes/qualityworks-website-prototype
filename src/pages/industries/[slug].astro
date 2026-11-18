@@ -30,8 +30,8 @@ import { RELEASE, REVIEW, rn } from '../../lib/release';
  *   - ClaimRef badges (C19 healthcare training, C13 WBE/MBE/WOSB certifications) only render in review builds.
  *   - The evidence note carries `data-review-note` (review builds only).
  * Gotchas:
- *   - Unknown service/product/case-study slugs in a record are silently dropped by `.filter(Boolean)`, so
- *     a typo makes a card disappear rather than failing the build. Check the page after editing data.
+ *   - Unknown service/product/case-study slugs fail the build (src/data/integrity.ts); `.filter(Boolean)`
+ *     below only narrows the types.
  *   - The ClaimRef placement is matched on the record slug plus the consideration title prefix
  *     ("Compliance", "Procurement"). Renaming those titles in industries.ts removes the annotation.
  *   - The CtaBand title special-cases public-sector; every other record gets "Talk to our {name} team."

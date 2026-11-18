@@ -18,8 +18,7 @@
  * External CTAs get the "(opens in a new tab)" text and hand-off description from Button.
  *
  * Gotchas:
- * - The heading id is the fixed string "cta-band-title". Use at most ONE CtaBand per page, or the ids
- *   will collide and aria-labelledby will point at the wrong heading.
+ * - The heading id is generated per instance (cta-band-xxxxxx), so several bands on one page stay valid.
  * - The title is an h2, so the band must sit at section level (not inside an h2 section's content).
  * - `primary` is always rendered as primary and `secondary` always as secondary, whatever `kind`
  *   the Cta data carries.
@@ -39,13 +38,14 @@ interface Props {
   eyebrow?: string
 }
 const { title, text, primary, secondary, eyebrow = 'Next step' } = Astro.props;
+// Unique heading id per instance so aria-labelledby never points at another band's heading.
+const headingId = `cta-band-${Math.random().toString(36).slice(2, 8)}`;
 ---
-<section class="cta-band surface-dark" aria-labelledby="cta-band-title">
+<section class="cta-band surface-dark" aria-labelledby={headingId}>
   <div class="container cta-band__inner">
     <div>
       <p class="eyebrow">{eyebrow}</p>
-      {/* Fixed id: see the one-per-page gotcha in the header. */}
-      <h2 id="cta-band-title">{title}</h2>
+      <h2 id={headingId}>{title}</h2>
       {text && <p class="cta-band__text">{text}</p>}
     </div>
     {/* kind is overridden so the band always shows one primary and at most one secondary button. */}
