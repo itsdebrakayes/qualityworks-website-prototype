@@ -8,15 +8,15 @@ Clickable, code-first prototype of the rebuilt **qualityworkscg.com** for Janiqu
 
 | Item | Status |
 |---|---|
-| Corporate repository | **Not yet established.** No QualityWorks repository URL has been provided or confirmed. |
-| Branch | **Not yet established.** The work exists as a local Git repository (branch `main`) in the Claude Code session container that produced it, with no remote. |
-| Review copy | Private Claude Artifact (link held by the project owner), built from `dist/` with relative links. |
-| Exported source | `handoff/qm-113-prototype-source.zip` (output of `git archive HEAD`, history-free snapshot). |
+| Repository | **https://github.com/itsdebrakayes/qualityworks-website-prototype** (private, personal account of the prototype author) |
+| Branch | `main`: full commit history of the prototype |
+| Review copy | Private Claude Artifact (link held by the project owner), built from `dist/` with relative links |
+| Corporate repository | **Not yet established.** No QualityWorks organisation repository has been created or confirmed |
 
-**Handoff steps once a company repository exists:**
+**Moving to a company repository later:**
 1. Create an empty repository in the QualityWorks GitHub organisation (owner: technical lead, per QM-103 §2.1).
-2. Either unzip `qm-113-prototype-source.zip` and `git init`, or, from the original working copy, run `git remote add origin <company-repo-url>` and then `git push -u origin main` to keep the commit history.
-3. Protect `main`, require review, and add CI that runs `npm ci && npm run build && npm run check:terms && npm run qa:checks` (see QA below).
+2. Either transfer this repository to the organisation (GitHub Settings → Transfer ownership), or push it: `git remote add company <company-repo-url> && git push company main`.
+3. Protect `main`, require review, and add CI that runs `npm ci && npm run build && npm run check:terms` (and `npm run qa:checks` against a preview server).
 4. Connect a preview host from the QM-103 shortlist (Netlify or Cloudflare Pages for this static build). Do not connect production DNS.
 
 ## Stack and architecture
