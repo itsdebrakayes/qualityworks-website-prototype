@@ -36,7 +36,7 @@ export function initFilters(o: Opts) {
     if (push) {
       const url = new URL(location.href);
       [...selects.map((s) => s.dataset.filter!), ...chipGroups.map((g) => g.dataset.chipFilter!)].forEach((k) => (f[k] ? url.searchParams.set(k, f[k]) : url.searchParams.delete(k)));
-      history.replaceState(null, '', url);
+      try { history.replaceState(null, '', url); } catch { /* sandboxed viewers may refuse */ }
     }
   }
   function clear() {

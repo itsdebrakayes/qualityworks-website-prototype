@@ -65,6 +65,22 @@ const ld = [...(crumbLd ? [crumbLd] : []), ...jsonLd];
       <slot />
     </main>
     <Footer />
+    <script is:inline>
+      // Every page opens at the top (unless the link targets an anchor). Embedded viewers and
+      // browser scroll restoration were opening pages at the previous scroll position.
+      (function () {
+        try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch (e) {}
+        var toTop = function () {
+          if (location.hash && document.getElementById(location.hash.slice(1))) return;
+          window.scrollTo(0, 0);
+          // Also scrolls any embedding page's scroll container back to this page's top.
+          try { document.body.scrollIntoView({ block: 'start', behavior: 'instant' }); } catch (e) { document.body.scrollIntoView(true); }
+        };
+        toTop();
+        window.addEventListener('load', toTop, { once: true });
+        window.addEventListener('pageshow', function (e) { if (e.persisted) toTop(); });
+      })();
+    </script>
     <script>
       // Restrained reveal-on-scroll. Content is visible without JS and with reduced motion.
       const els = document.querySelectorAll('.reveal');
