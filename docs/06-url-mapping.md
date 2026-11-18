@@ -5,7 +5,7 @@ summary: "Which addresses stay, which are new, and which need approved 301s."
 
 # URL mapping and redirect strategy
 
-**Principle:** preserve every indexed URL. The prototype keeps the WordPress path structure: trailing slash, `/services/…`, `/industries/…`, `/case-study/{slug}/` and root-level blog slugs. **All 42 live page URLs, all 17 case-study URLs and the 12 migrated post URLs resolve unchanged in the prototype build** (verified against `dist/`). No redirect is required for the proposed information architecture.
+**Principle:** preserve every indexed URL. The prototype keeps the WordPress path structure: trailing slash, `/services/…`, `/industries/…`, `/case-study/{slug}/` and root-level blog slugs. **All 42 live page URLs and the 12 migrated post URLs resolve unchanged in the prototype build** (verified against `dist/`). **Review round 1 (18 Nov 2026):** case-study detail pages were standardised from `/case-study/{slug}/` to **`/case-studies/{slug}/`** (matching the listing page), so the 17 legacy case-study URLs **require permanent 301 redirects at launch**. These are recorded below and **not configured**: the prototype has no server.
 
 ## 1. Pages (42 / 42 unchanged)
 
@@ -57,7 +57,7 @@ summary: "Which addresses stay, which are new, and which need approved 301s."
 
 | Pattern | Count | New pattern | Redirect |
 |---|---|---|---|
-| `/case-study/{slug}/` | 17 | unchanged | none |
+| `/case-study/{slug}/` | 17 | `/case-studies/{slug}/` | **301 required (not configured)**: one-to-one, same slug. Also update internal links in any unmigrated posts (migrated posts are rewritten at build time) |
 | `/{post-slug}/` (blog) | 99 | unchanged (root-level article route) | none; reserved-slug check required so a post slug never collides with a page route |
 | `/blog/?_blog_categories={cat}` | used by service pages | `/blog/?category={Category}` | **301 with query mapping** (or support both parameters) |
 | `/blog/page/{n}/` | WordPress pagination | `/blog/page/{n}/` | keep |

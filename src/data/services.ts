@@ -181,7 +181,7 @@ export const services: Service[] = [
     buyerProblem: 'You need a product built quickly without accumulating quality debt.',
     heroTitle: 'Build smarter. Deliver faster. Create with confidence.',
     heroLede: 'We take your vision from concept to deployment, using AI-driven development to accelerate delivery while a continuous quality model keeps every iteration tested.',
-    primaryCta: contact('Book a free consultation'),
+    primaryCta: contact('Book a consultation'),
     secondaryCta: { label: 'See the Shared Harvest case study', href: '/case-studies/social-enterprise-org/', kind: 'secondary' },
     challenge: 'Speed and quality usually trade off in early product development. Teams either over-invest before validating the idea or release fast and inherit defects they cannot afford to fix.',
     capabilities: [
@@ -216,7 +216,7 @@ export const services: Service[] = [
     buyerProblem: 'Technology decisions are being made without senior technical leadership.',
     heroTitle: 'Make smarter tech decisions. Lead with confidence.',
     heroLede: 'Expert technology advisory and long-term partnership — whether you are building from scratch, scaling fast or modernizing.',
-    primaryCta: contact('Book a free consultation'),
+    primaryCta: contact('Book a consultation'),
     capabilities: [
       { title: 'Fractional CTO services', text: 'Seasoned technical leadership without the full-time cost.' },
       { title: 'Product strategy & MVP advisory', text: 'Expert input on launching new digital products with lean, market-validated approaches.' },

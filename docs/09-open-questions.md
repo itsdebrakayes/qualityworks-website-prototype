@@ -19,13 +19,20 @@ summary: "Prioritised decisions needed from stakeholders before development."
 
 | Priority | ID | Question | Owner | Blocks |
 |---|---|---|---|---|
-| **P1** | Q-01 | Provide access to **QM-112 v0.5, QM-41, QM-103, QM-113** (re-authenticate the Google Drive connector; share Jira) so AC IDs and sitemap labels can be reconciled | PM | Traceability, nav labels |
+| **P1** | Q-01 | Provide access to **QM-41** and **QM-113** (Jira). QM-112 v0.5 and QM-103 were read on 18 Nov 2026 | PM | Nav labels |
 | **P1** | Q-02 | Approve or correct claims **C01–C04** (90%, $30M, 80%, 16+): definition, sample, period | Leadership | Homepage stats |
 | **P1** | Q-03 | Form backend: keep **WPForms** behaviour, move to **HubSpot Forms**, or other? Who receives leads? reCAPTCHA vs. alternative? | Marketing / IT | Contact integration |
 | **P1** | Q-05 | Client disclosure approval for each of the 17 named case-study clients and 3 testimonial authors | Marketing / Legal | Case studies, testimonials |
 | **P1** | Q-06 | QualityWatcher AI tools: current access model (sign-in only? free tier?), Schema-to-API status, approved screenshots | QW product owner | QW page |
 | **P1** | Q-07 | Public-sector evidence: WBE/MBE/WOSB certificates (issuer, number, expiry), NAICS codes, contract vehicles, capability statement PDF. Confirm how to describe the U.S. Navy challenge prize | Leadership / BD | Public-sector page |
 | **P1** | Q-08 | Correct phone numbers (A-06, A-07) | Operations | Header/footer/contact |
+| **P1** | Q-21 | Review round 1 approvals: service rename “AI-powered testing”; corrected award name in the published Navy post title; article wording edits R-03–R-20; PRISM topic “AI-Augmented Testing”; “Book a consultation” | Janique | Release |
+| **P1** | Q-22 | WSSC pilot report (methodology, sample) if any WSSC figure should be reinstated | Marketing / WSSC | Case study |
+| **P1** | Q-23 | iPipelines: client disclosure decision; if not approved, rename the slug (currently contains the client name) and add a 301 | Marketing / Legal | Case study URL |
+| P2 | Q-24 | Gartner forecast: supply verified wording and date, or delete the orphaned reference entry in “More QA, Not Less” | Content | Article |
+| P2 | Q-25 | Agents marketplace: definitions of Ready now / Quick launch / Custom build and what Guided Preview shows | AaaS owner | AaaS page |
+| P2 | Q-26 | “Black-owned, woman-led”: approved capitalisation and placement | Janique | About/Home |
+| P2 | Q-27 | Company repository and preview host for the handoff (README “Not yet established”) | Technical lead | Handoff |
 | P2 | Q-04 | Choose CMS (headless vs. WordPress-as-headless) and owner for each content type | Dev lead | Data integration |
 | P2 | Q-09 | Site search: required at launch? (Pagefind static search recommended) | PM | Header |
 | P2 | Q-10 | Analytics and consent: GA4, Meta pixel, HubSpot tracking/chat; cookie-consent requirement and regions | Marketing / Legal | Launch |

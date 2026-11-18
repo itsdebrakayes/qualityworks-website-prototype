@@ -1,0 +1,116 @@
+{
+ "runAt": "2026-11-18T19:03:24.868Z",
+ "base": "http://localhost:4321",
+ "viewport": "390x844",
+ "note": "Local preview server; not production, not field data",
+ "results": [
+  {
+   "profile": "unthrottled",
+   "route": "/",
+   "lcpMs": 148,
+   "cls": 0,
+   "dclMs": 93,
+   "kb": 100,
+   "requests": 6
+  },
+  {
+   "profile": "unthrottled",
+   "route": "/services/test-automation/",
+   "lcpMs": 68,
+   "cls": 0,
+   "dclMs": 51,
+   "kb": 63,
+   "requests": 4
+  },
+  {
+   "profile": "unthrottled",
+   "route": "/qualitywatcher-ai-tools/",
+   "lcpMs": 112,
+   "cls": 0,
+   "dclMs": 55,
+   "kb": 63,
+   "requests": 4
+  },
+  {
+   "profile": "unthrottled",
+   "route": "/case-studies/",
+   "lcpMs": 80,
+   "cls": 0,
+   "dclMs": 86,
+   "kb": 692,
+   "requests": 13
+  },
+  {
+   "profile": "unthrottled",
+   "route": "/contact-us/",
+   "lcpMs": 108,
+   "cls": 0,
+   "dclMs": 58,
+   "kb": 61,
+   "requests": 5
+  },
+  {
+   "profile": "unthrottled",
+   "route": "/more-qa-not-less-closing-the-verification-gap-in-ai-accelerated-software-delivery/",
+   "lcpMs": 72,
+   "cls": 0,
+   "dclMs": 62,
+   "kb": 150,
+   "requests": 5
+  },
+  {
+   "profile": "slow-4g-4x-cpu",
+   "route": "/",
+   "lcpMs": 780,
+   "cls": 0,
+   "dclMs": 736,
+   "kb": 100,
+   "requests": 6
+  },
+  {
+   "profile": "slow-4g-4x-cpu",
+   "route": "/services/test-automation/",
+   "lcpMs": 608,
+   "cls": 0.002,
+   "dclMs": 606,
+   "kb": 63,
+   "requests": 4
+  },
+  {
+   "profile": "slow-4g-4x-cpu",
+   "route": "/qualitywatcher-ai-tools/",
+   "lcpMs": 736,
+   "cls": 0,
+   "dclMs": 694,
+   "kb": 63,
+   "requests": 4
+  },
+  {
+   "profile": "slow-4g-4x-cpu",
+   "route": "/case-studies/",
+   "lcpMs": 616,
+   "cls": 0.001,
+   "dclMs": 732,
+   "kb": 333,
+   "requests": 9
+  },
+  {
+   "profile": "slow-4g-4x-cpu",
+   "route": "/contact-us/",
+   "lcpMs": 708,
+   "cls": 0,
+   "dclMs": 675,
+   "kb": 61,
+   "requests": 5
+  },
+  {
+   "profile": "slow-4g-4x-cpu",
+   "route": "/more-qa-not-less-closing-the-verification-gap-in-ai-accelerated-software-delivery/",
+   "lcpMs": 688,
+   "cls": 0.001,
+   "dclMs": 684,
+   "kb": 150,
+   "requests": 5
+  }
+ ]
+}

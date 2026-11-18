@@ -17,3 +17,15 @@ Visual review of full-page screenshots at 360 / 768 / 1024 / 1440 px for 16 key 
 | MQ-11 | Fictional content | Every `fixture` record renders `FixtureLabel` or a “[Fixture]” title; simulated controls are labelled | Pass (code review + screenshots) |
 | MQ-12 | Claims | Every statistic renders a claim reference (build fails without one); review mode shows IDs | Pass |
 | MQ-13 | Integrations | No real HubSpot, WPForms, BambooHR or marketplace integration is presented as tested | Pass (labelled as simulated or Blocked) |
+
+### Review round 1 (18 Nov 2026)
+
+| ID | Page/component | Finding | Status |
+|---|---|---|---|
+| MQ-14 | WSSC case study | Survey figure (“67% … 50%+”) still present after the brief's corrections | Fixed (R-39); grep confirms 0 |
+| MQ-15 | All case-study detail pages | Migration defect: sections were cut at 1,400 characters (mid-word), and the old site's related-links titles were appended to “The result” | Fixed (R-47): parser cap removed, trailing titles stripped; all 17 stories end on a complete sentence or list item |
+| MQ-16 | Homepage awards row | AIAT award label wraps to 2 lines with an administrator note; alignment differs from the single-line Inc. item | Accepted (readable at all widths) |
+| MQ-17 | Agents as a Service | Labels legend renders on the dark product surface with sufficient contrast; the filter still works | Pass (visual) |
+| MQ-18 | Mobile drawer @360 | “Case Studies” and “Resource Hub” listed by name; no duplicate overview links | Pass (QA-14 + visual) |
+| MQ-19 | Release build | Review markers absent outside the declared blockers | Pass (release gate) |
+| MQ-20 | Browsers | Only Chromium tested; Safari, Firefox and Edge **not tested** | Open |

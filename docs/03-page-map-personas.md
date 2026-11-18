@@ -5,7 +5,7 @@ summary: "Sitemap aligned to the QM-112 categories, per-page persona/CTA/data ta
 
 # Page map, personas and journeys
 
-> **QM-41 could not be accessed.** The map below uses the 7 QM-112 categories quoted in the brief and the **live header structure** as the closest available evidence. Every route not in today's navigation is marked **(proposed)** and needs QM-41 confirmation. No competing top-level structure has been introduced.
+> **QM-41 could not be accessed.** (QM-112 v0.5 was read on 18 Nov 2026 and confirms the 7 categories.) The map below uses the 7 QM-112 categories quoted in the brief and the **live header structure** as the closest available evidence. Every route not in today's navigation is marked **(proposed)** and needs QM-41 confirmation. No competing top-level structure has been introduced.
 
 ## 1. Page map
 
@@ -32,8 +32,8 @@ Home  /
 |     + Data Quality                    /services/data-quality/
 |     + AI Governance                   /services/ai-governance/           (in nav: proposed)
 + Products & Innovations  /products/                                        (proposed overview)
-|  + QualityWatcher AI Tools  /qualitywatcher-ai-tools/
-|  + AI Test Management       (external)  qualitywatcher.com
+|  + QualityWatcher AI  /qualitywatcher-ai-tools/
+|  + QualityWatcher Test Management  (external)  qualitywatcher.com
 |  + Agents as a Service      /products/agents-as-a-service/  (external)  agents.qualityworkscg.com  (proposed)
 |  + PRISM™                   /products/prism/                                              (proposed)
 |  + Cyber Risk Management    (external)  postured.io
@@ -41,7 +41,7 @@ Home  /
 |  + Finance & Banking · Insurance · Healthcare · Logistics · Media & Entertainment · Retail · Technology · Social Impact
 |  + Public Sector & Utilities  /industries/public-sector/    (proposed — Persona C)
 |  + Small & Mid-Size Businesses /industries/small-business/  (proposed — Personas D/E)
-+ Results  /case-studies/   ›  /case-study/{slug}/  (17)
++ Results  /case-studies/   ›  /case-studies/{slug}/  (17; legacy /case-study/ needs 301s)
 + Resources  /resources/                                    (proposed hub)
 |  + Blog  /blog/   ›  /{post-slug}/  (99)
 |  + Events & Speaking  /events/  ›  /events/{slug}/        (proposed)
@@ -59,7 +59,7 @@ Prototype only: /prototype/ (review hub, docs) · /design-system/
 | Home | A Enterprise CTO; D SMB Founder | B QA Director; C Public sector | What does QualityWorks do, and which part is for me? | Approved stats (C01–C04), awards (C10–C12), 3 case studies | Talk to an expert to `/contact-us/`; secondary: Explore solutions | Pathways, services, products, case studies, articles, events, claims |
 | Solutions overview | A | B, D | Which service fits my problem? | Links to case studies | Talk to an expert | Services (grouped), problem-to-service guide |
 | Service detail | B (testing) / D (build, AI) / A | varies (record `personas`) | Can they solve this problem, and how? | Related case studies, claims | Service-specific (e.g. Talk to an automation expert) | Service record, case studies, products, FAQ |
-| QualityWatcher AI Tools | B QA Director | Automation engineer, A | What does it automate, how do I access it, where do humans review? | C07–C09, WSSC case study | Open QualityWatcher AI (external) | QW tools + observed status, FAQ |
+| QualityWatcher AI | B QA Director | Automation engineer, A | What does it automate, how do I access it, where do humans review? | C07–C09, WSSC case study | Open QualityWatcher AI (external) | QW tools + observed status, FAQ |
 | Agents as a Service | D SMB Founder | E Ops/Marketing | Is a ready-made agent right for us? How do I buy one? | Marketplace catalog snapshot | Browse the marketplace (external) | Agent catalog API (fields in doc 04) |
 | PRISM™ | A / AI lead | B, C | How do we know AI outputs are good enough? | Whitepaper, sample scorecard (missing) | Ask about PRISM | Product-owner content (missing) |
 | Products overview | B, D | A | Which product is which and where does it live? | — | Product links | Products |
