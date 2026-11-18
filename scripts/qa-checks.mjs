@@ -35,7 +35,7 @@ page.on('pageerror', (e) => consoleErrors.push(e.message));
 
 // ---- 1. Per-page static checks (headings, titles, alt, links, JSON-LD)
 const titles = new Map(); const descs = new Map();
-const brokenLinks = []; const headingIssues = []; const altIssues = []; const extIssues = []; const ldIssues = [];
+const brokenLinks = []; const placeholderLinks = []; const legacyCaseLinks = []; const headingIssues = []; const altIssues = []; const extIssues = []; const ldIssues = [];
 const externalLinks = new Set();
 for (const r of routes) {
   await page.goto(BASE + r, { waitUntil: 'domcontentloaded' });
@@ -56,6 +56,8 @@ for (const r of routes) {
   descs.set(info.desc, [...(descs.get(info.desc) ?? []), r]);
   for (const l of info.links) {
     const h = l.href;
+    if (h === '#' || h.trim() === '' || /^javascript:/i.test(h)) { placeholderLinks.push(`${r} → "${h}" (${l.text.slice(0, 40)})`); continue; }
+    if (/^\/case-study\//.test(h)) legacyCaseLinks.push(`${r} → ${h}`);
     if (/^(mailto|tel):/.test(h) || h.startsWith('#')) continue;
     if (/^https?:/.test(h)) { externalLinks.add(h); if (l.target !== '_blank' || !l.rel.includes('noopener')) extIssues.push(`${r} → ${h}`); continue; }
     const path = h.split('#')[0].split('?')[0];
@@ -68,6 +70,7 @@ const dupTitles = [...titles].filter(([, v]) => v.length > 1);
 const dupDescs = [...descs].filter(([k, v]) => v.length > 1 && k);
 rec('QA-01', 'BR-10 SEO', `All ${routes.length} routes`, 'Exactly one H1 per page and no skipped heading levels', headingIssues.length === 0, headingIssues.length ? headingIssues.join('; ') : `${routes.length} pages: 1 H1 each, no level skips`, 'qa-output/results.json', headingIssues.length ? 'See list' : '');
 rec('QA-02', 'BR-11/13 Links', 'All internal links', 'Every internal href resolves to a built route or asset', brokenLinks.length === 0, brokenLinks.length ? `${brokenLinks.length} broken: ${brokenLinks.slice(0, 6).join('; ')}` : 'No broken internal links', 'qa-output/results.json');
+rec('QA-02B', 'QM-112 1.4 / AC-INV-02', 'All links and CTAs', 'No placeholder destinations ("#", empty, javascript:) and no legacy /case-study/ links', placeholderLinks.length === 0 && legacyCaseLinks.length === 0, `placeholder links: ${placeholderLinks.length}${placeholderLinks.length ? ' ' + placeholderLinks.slice(0, 4).join('; ') : ''}; legacy case-study links: ${legacyCaseLinks.length}`, 'qa-output/results.json');
 rec('QA-03', 'BR-13 External hand-off', 'External links', 'Every external link opens in a new tab with rel=noopener', extIssues.length === 0, extIssues.length ? extIssues.slice(0, 5).join('; ') : `${externalLinks.size} unique external URLs, all target=_blank rel=noopener`, '');
 rec('QA-04', 'BR-12 A11y', 'Images', 'Every <img> has an alt attribute (empty for decorative)', altIssues.length === 0, altIssues.length ? altIssues.join('; ') : 'All images have alt', '');
 rec('QA-05', 'BR-10 SEO', 'Titles & descriptions', 'Unique <title> and meta description per page', dupTitles.length === 0 && dupDescs.length === 0, `Duplicate titles: ${dupTitles.length}; duplicate descriptions: ${dupDescs.length}${dupDescs.length ? ' (' + dupDescs.map(([, v]) => v.join(',')).join(' | ') + ')' : ''}`, '');
@@ -175,13 +178,15 @@ await m.screenshot({ path: join(OUT, 'evidence', 'nav-mobile-drawer-open.png') }
 const drawerHrefs = await m.evaluate(() => [...document.querySelectorAll('#mobile-nav a[href]')].map((a) => a.getAttribute('href')));
 const desktopHrefs = await m.evaluate(() => [...document.querySelectorAll('.primary-nav a[href]')].map((a) => a.getAttribute('href')));
 const missing = [...new Set(desktopHrefs)].filter((h) => !drawerHrefs.includes(h));
+const drawerTexts = await m.evaluate(() => [...document.querySelectorAll('#mobile-nav a')].map((a) => a.textContent.trim()));
+const namedOk = ['Case Studies', 'Resource Hub'].every((t) => drawerTexts.some((x) => x.startsWith(t)));
 // focus containment: tab many times, focus must stay in dialog
 for (let i = 0; i < 60; i++) await m.keyboard.press('Tab');
 const contained = await m.evaluate(() => !!document.activeElement?.closest('#mobile-nav') || document.activeElement === document.body);
 await m.keyboard.press('Escape');
 const closed = !(await m.locator('#mobile-nav').evaluate((d) => d.open));
 const focusBack = await m.evaluate(() => document.activeElement?.hasAttribute('data-drawer-open'));
-rec('QA-14', 'BR-5 Mobile nav', 'Mobile drawer @360px', 'Menu opens a modal drawer; focus moves in; all desktop destinations present; focus contained; Esc closes and returns focus to Menu', drawerOpen && focusInDrawer && missing.length === 0 && contained && closed && focusBack, `open:${drawerOpen} focus-in:${focusInDrawer} missing-destinations:${missing.length} contained:${contained} esc-close:${closed} focus-return:${focusBack}`, 'qa-output/evidence/nav-mobile-drawer-open.png');
+rec('QA-14', 'BR-5 Mobile nav', 'Mobile drawer @360px', 'Menu opens a modal drawer; focus moves in; all desktop destinations present, incl. Case Studies and Resource Hub by name; focus contained; Esc closes and returns focus to Menu', drawerOpen && focusInDrawer && missing.length === 0 && namedOk && contained && closed && focusBack, `open:${drawerOpen} focus-in:${focusInDrawer} missing-destinations:${missing.length} 'Case Studies'+'Resource Hub' listed:${namedOk} contained:${contained} esc-close:${closed} focus-return:${focusBack}`, 'qa-output/evidence/nav-mobile-drawer-open.png');
 await menuBtn.click();
 await m.locator('#mobile-nav [aria-controls="m-products"]').click();
 const accOpen = (await m.locator('#mobile-nav [aria-controls="m-products"]').getAttribute('aria-expanded')) === 'true' && await m.locator('#m-products').isVisible();

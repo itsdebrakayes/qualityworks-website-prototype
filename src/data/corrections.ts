@@ -63,6 +63,7 @@ export const corrections: Correction[] = [
   { id: 'R-36', target: 'article:more-qa-not-less-closing-the-verification-gap-in-ai-accelerated-software-delivery', field: 'excerpt', find: /Gartner forecasts that 90% of enterprise software engineers will use AI code assistants by…/, replace: 'Stack Overflow’s 2025 survey found 84% of developers already use or plan to use AI tools…', reason: 'unverified-statistic', note: 'Card excerpt repeated the removed Gartner forecast.' },
   { id: 'R-37', target: 'case-study:ai-powered-test-case-generation-wssc', field: 'approach', find: / and cutting creation time by up to 80%\./, replace: '.', reason: 'unverified-statistic', note: '“up to 80%” removed from the solution narrative.' },
   { id: 'R-38', target: 'case-study:ipipelines-legacy-platform-modernization', field: 'challenge', find: /, which took up to two weeks per cycle and consumed critical team resources\./, replace: ', which consumed critical team resources.', reason: 'unverified-statistic', note: 'Baseline half of the removed “2 weeks to 2 days” comparison.' },
+  { id: 'R-39', target: 'case-study:ai-powered-test-case-generation-wssc', field: 'outcome', find: /, with 67% of testers anticipating 50%\+ time savings from those features\./, replace: '.', reason: 'unverified-statistic', note: 'Survey figures from the same pilot removed pending the WSSC report.' },
 ];
 
 const used = new Set<string>();

@@ -1,5 +1,5 @@
 {
- "runAt": "2026-11-17T19:03:14.354Z",
+ "runAt": "2026-11-18T19:01:01.626Z",
  "base": "http://localhost:4321",
  "routes": 96,
  "externalLinks": [
@@ -35,7 +35,6 @@
   "https://qualityworkscg.com/about-us/",
   "https://qualityworkscg.com/case-study/accelerating-confidence-qa-modernization-for-wisyncos-digital-ecosystem/",
   "https://qualityworkscg.com/case-study/address-quality-gaps/",
-  "https://qualityworkscg.com/case-study/ai-powered-test-case-generation-wssc/",
   "https://qualityworkscg.com/case-study/financial-best-practices/",
   "https://qualityworkscg.com/case-study/how-automation-saved-big-bucks-and-drove-faster-app-releases/",
   "https://qualityworkscg.com/case-study/increasing-regression-test-coverage-by-15x/",
@@ -70,7 +69,7 @@
   "https://twitter.com/intent/tweet?url=https%3A%2F%2Fqualityworkscg.com%2Fmore-qa-not-less-closing-the-verification-gap-in-ai-accelerated-software-delivery%2F&text=More%20QA%2C%20Not%20Less%3A%20Closing%20the%20Verification%20Gap%20in%20AI-Accelerated%20Software%20Delivery",
   "https://twitter.com/intent/tweet?url=https%3A%2F%2Fqualityworkscg.com%2Fqa-is-changing-why-agentic-qa-may-become-the-next-big-shift-in-software-quality%2F&text=QA%20is%20changing%3A%20Why%20agentic%20QA%20is%20becoming%20the%20next%20big%20shift%20in%20software%20quality",
   "https://twitter.com/intent/tweet?url=https%3A%2F%2Fqualityworkscg.com%2Fqualityworks-wins-inc-best-in-business-2025-award%2F&text=QualityWorks%20Wins%20Inc.%20Best%20in%20Business%202025%20Award",
-  "https://twitter.com/intent/tweet?url=https%3A%2F%2Fqualityworkscg.com%2Fqualityworks-wins-us-navy-ai-testing-challenge%2F&text=QualityWorks%20Wins%20First%20Prize%20in%20U.S.%20Navy%20AI%20Autonomous%20Testing%20Challenge",
+  "https://twitter.com/intent/tweet?url=https%3A%2F%2Fqualityworkscg.com%2Fqualityworks-wins-us-navy-ai-testing-challenge%2F&text=QualityWorks%20Wins%20First%20Prize%20in%20U.S.%20Navy%20AI%20Augmented%20Testing%20(AIAT)%20Challenge",
   "https://twitter.com/intent/tweet?url=https%3A%2F%2Fqualityworkscg.com%2Ftechnology-partner-red-flags-what-nonprofits-need-to-know%2F&text=Technology%20Partner%20Red%20Flags%3A%20What%20Nonprofits%20Need%20to%20Know",
   "https://twitter.com/intent/tweet?url=https%3A%2F%2Fqualityworkscg.com%2Ftop-7-black-technology-companies-to-watch-in-2026%2F&text=Top%207%20Black%20Technology%20Companies%20to%20Watch%20in%202026",
   "https://twitter.com/intent/tweet?url=https%3A%2F%2Fqualityworkscg.com%2Funpopular-qa-opinions-that-are-just-facts%2F&text=Unpopular%20QA%20Opinions%20That%20Are%20Actually%20Just%20Facts",
@@ -150,11 +149,21 @@
    "issue": ""
   },
   {
+   "id": "QA-02B",
+   "ac": "QM-112 1.4 / AC-INV-02",
+   "area": "All links and CTAs",
+   "expected": "No placeholder destinations (\"#\", empty, javascript:) and no legacy /case-study/ links",
+   "actual": "placeholder links: 0; legacy case-study links: 0",
+   "status": "Pass",
+   "evidence": "qa-output/results.json",
+   "issue": ""
+  },
+  {
    "id": "QA-03",
    "ac": "BR-13 External hand-off",
    "area": "External links",
    "expected": "Every external link opens in a new tab with rel=noopener",
-   "actual": "124 unique external URLs, all target=_blank rel=noopener",
+   "actual": "123 unique external URLs, all target=_blank rel=noopener",
    "status": "Pass",
    "evidence": "",
    "issue": ""
@@ -164,8 +173,8 @@
    "ac": "BR-12 A11y",
    "area": "Images",
    "expected": "Every <img> has an alt attribute (empty for decorative)",
-   "actual": "All images have alt",
-   "status": "Pass",
+   "actual": "/prototype/07-qa-testing-summary/: 1",
+   "status": "Fail",
    "evidence": "",
    "issue": ""
   },
@@ -202,7 +211,7 @@
   {
    "id": "QA-07-640",
    "ac": "BR-11 Responsive",
-   "area": "All routes @640px (≈200% zoom of 1280)",
+   "area": "All routes @640px (approx. 200% zoom of 1280)",
    "expected": "No horizontal scrolling",
    "actual": "96 routes, no horizontal overflow",
    "status": "Pass",
@@ -303,8 +312,8 @@
    "id": "QA-14",
    "ac": "BR-5 Mobile nav",
    "area": "Mobile drawer @360px",
-   "expected": "Menu opens a modal drawer; focus moves in; all desktop destinations present; focus contained; Esc closes and returns focus to Menu",
-   "actual": "open:true focus-in:true missing-destinations:0 contained:true esc-close:true focus-return:true",
+   "expected": "Menu opens a modal drawer; focus moves in; all desktop destinations present, incl. Case Studies and Resource Hub by name; focus contained; Esc closes and returns focus to Menu",
+   "actual": "open:true focus-in:true missing-destinations:0 'Case Studies'+'Resource Hub' listed:true contained:true esc-close:true focus-return:true",
    "status": "Pass",
    "evidence": "qa-output/evidence/nav-mobile-drawer-open.png",
    "issue": ""
@@ -323,7 +332,7 @@
    "id": "QA-16",
    "ac": "BR-7.1",
    "area": "Homepage hero",
-   "expected": "Two hero CTAs to different approved destinations; three pathways visible above the fold at 1440×900",
+   "expected": "Two hero CTAs to different approved destinations; three pathway cards start above the fold at 1440×900",
    "actual": "CTAs: /contact-us/ | /services/; pathways: /services/full-stack-testing/ | /services/custom-software-development/ | /services/ai-service/; above fold: true",
    "status": "Pass",
    "evidence": "qa-output/evidence/1440-home.png",
@@ -423,8 +432,8 @@
    "id": "QA-26",
    "ac": "BR-7.11",
    "area": "Event states",
-   "expected": "Past, cancelled and date-TBC events never offer registration; upcoming does",
-   "actual": "violations:none; upcoming fixture register links:1",
+   "expected": "Past, cancelled and date-TBC events never offer registration; the upcoming fixture shows a disabled, labelled demo control (no placeholder link)",
+   "actual": "violations:none; upcoming fixture demo control:1",
    "status": "Pass",
    "evidence": "",
    "issue": "Live homepage currently promotes past PNSQC 2026 as next event (audit C-03)"

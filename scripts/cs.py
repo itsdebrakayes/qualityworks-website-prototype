@@ -16,7 +16,7 @@ for fn in sorted(os.listdir(d)):
     if re.match(r'^(Read More|Related|Get In Touch|Let.s Talk|Other Case Studies|Ready to)',l): cur=None
     if cur: sec[cur].append(l)
   # dedupe tab labels: keep longest occurrence
-  res={k:' '.join(v)[:1400] for k,v in sec.items()}
+  res={k:' '.join(v) for k,v in sec.items()}
   p=api.get(slug,{}); img=''
   try: img=p['_embedded']['wp:featuredmedia'][0]['source_url']; alt=p['_embedded']['wp:featuredmedia'][0].get('alt_text','')
   except Exception: alt=''

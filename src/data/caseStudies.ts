@@ -41,6 +41,15 @@ const curated: Record<string, Curated> = {
 const clean = (s?: string) => normalizeText(s ?? '').replace(/\s*Want to work with us\?[\s\S]*$/, '').replace(/^\s*–?\s*Case Study\s*–\s*/, '').replace(/\s+/g, ' ').trim();
 const firstSentences = (s: string, n = 2) => (s.match(/[^.!?]+[.!?]+/g) ?? [s]).slice(0, n).join(' ').trim();
 
+// Migration fix: the rendered-page parser captured the old site's related-links strip (other case-study
+// titles) at the end of some sections. Strip any trailing run of known case-study titles.
+const allTitles = (raw as any[]).map((r) => normalizeText(r.title)).sort((a, b) => b.length - a.length);
+const stripTitles = (v: string) => {
+  let out = v.trim(), changed = true;
+  while (changed) { changed = false; for (const t of allTitles) if (out.endsWith(t)) { out = out.slice(0, -t.length).trim(); changed = true; } }
+  return out;
+};
+
 export const caseStudies: CaseStudy[] = (raw as any[])
   .map((r) => {
     const c = curated[r.slug];
@@ -58,8 +67,8 @@ export const caseStudies: CaseStudy[] = (raw as any[])
       customer: fix('customer', clean(r.customer)),
       challenge: fix('challenge', clean(r.challenge)),
       contribution: c.contribution,
-      approach: fix('approach', clean(r.approach)),
-      outcome: fix('outcome', clean(r.outcome)),
+      approach: fix('approach', stripTitles(clean(r.approach))),
+      outcome: fix('outcome', stripTitles(clean(r.outcome))),
       metrics: c.metrics.map((x) => ({ ...x, metricSource: url })),
       date: r.date,
       image: localMedia(r.image),
