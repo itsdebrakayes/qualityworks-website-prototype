@@ -156,7 +156,7 @@ const fields = [
 <style>
   /* Card: always a white surface (even on dark sections), so it re-maps the colour tokens to on-light values.
      clamp() scales the padding from 1.25rem on phones to 2.25rem on desktop. */
-  .contact-form { background: #fff; color: var(--qw-slate-700); border: 1px solid var(--qw-line); border-radius: var(--radius-lg); padding: clamp(1.25rem, 3vw, 2.25rem); box-shadow: var(--shadow-md); --color-heading: var(--qw-ink-900); --color-muted: var(--qw-slate-500); --focus-ring: var(--qw-teal-700); --color-link: var(--qw-teal-700); }
+  .contact-form { background: #fff; color: var(--qw-slate-800); border: 1px solid var(--qw-line); border-radius: var(--radius-lg); padding: clamp(1.25rem, 3vw, 2.25rem); box-shadow: var(--shadow-md); --color-heading: var(--qw-slate-900); --color-muted: var(--qw-muted); --focus-ring: var(--qw-teal-700); --color-link: var(--qw-teal-700); }
   /* Fields: one column on phones; two columns from 560px, where non-half fields span both columns. */
   .contact-form__grid { display: grid; gap: var(--space-5); grid-template-columns: 1fr; }
   @media (min-width: 560px) { .contact-form__grid { grid-template-columns: 1fr 1fr; } .field--full, .field:not(.field--half) { grid-column: 1 / -1; } }
@@ -164,7 +164,7 @@ const fields = [
   .contact-form .hint { margin-bottom: var(--space-5); }
   .field .hint { margin: 0; }
   /* Error summary: 2px danger border on a pale danger background; title in danger red. */
-  .contact-form__summary { border: 2px solid var(--qw-danger); background: var(--qw-danger-bg); border-radius: var(--radius-md); padding: var(--space-4) var(--space-5); margin-bottom: var(--space-6); color: var(--qw-ink-900); }
+  .contact-form__summary { border: 2px solid var(--qw-danger); background: var(--qw-danger-bg); border-radius: var(--radius-md); padding: var(--space-4) var(--space-5); margin-bottom: var(--space-6); color: var(--qw-slate-900); }
   /* display: none restores hiding for [hidden], in case a display value is ever added above. */
   .contact-form__summary[hidden] { display: none; }
   .contact-form__summary-title { display: flex; align-items: center; gap: var(--space-2); font-weight: var(--fw-bold); margin-bottom: var(--space-2); color: var(--qw-danger); }
@@ -172,10 +172,12 @@ const fields = [
   .contact-form__summary ul { margin: 0; }
   .contact-form__summary a { color: var(--qw-danger); font-weight: var(--fw-semibold); }
   /* Context line from ?topic=, on a teal tint. */
-  .contact-form__context { background: var(--qw-teal-50); border-radius: var(--radius-sm); padding: var(--space-2) var(--space-3); font-size: var(--fs-sm); }
+  .contact-form__context { background: var(--qw-mint-50); border-radius: var(--radius-sm); padding: var(--space-2) var(--space-3); font-size: var(--fs-sm); }
   /* Simulation fieldset: dashed amber "prototype" styling, matching the fixture badge. */
   .contact-form__sim { margin: var(--space-6) 0 0; padding: var(--space-4); border: 1px dashed #C99A2E; border-radius: var(--radius-md); background: #FFFCF2; }
-  .contact-form__sim legend { padding: 0 var(--space-2); }
+  /* max-width + wrapping badge: the label must fit a 360px screen (the display face is wider than body text). */
+  .contact-form__sim legend { padding: 0 var(--space-2); max-width: 100%; }
+  .contact-form__sim legend :global(.badge) { white-space: normal; }
   /* Fixture badge re-coloured to dark amber #7A4B00 on #FFF8E1 (about 7:1). :global because the badge is
      rendered by FixtureLabel, outside this component's scope. */
   .contact-form :global(.badge--fixture) { background: #FFF8E1; color: #7A4B00; border-color: #C99A2E; }
@@ -197,7 +199,7 @@ const fields = [
   .contact-form__result[hidden] { display: none; }
   .contact-form__result--error { background: var(--qw-danger-bg); border: 1px solid #F4C2BD; }
   .contact-form__result--success { background: var(--qw-success-bg); border: 1px solid #BFE0C5; margin-top: 0; }
-  .contact-form__result-title { display: flex; gap: var(--space-2); align-items: center; font-weight: var(--fw-bold); font-size: var(--fs-md); color: var(--qw-ink-900); }
+  .contact-form__result-title { display: flex; gap: var(--space-2); align-items: center; font-weight: var(--fw-bold); font-size: var(--fs-md); color: var(--qw-slate-900); }
   .contact-form__result-title :global(svg) { width: 22px; height: 22px; flex: none; }
   .contact-form__result--error .contact-form__result-title :global(svg) { color: var(--qw-danger); }
   .contact-form__result--success .contact-form__result-title :global(svg) { color: var(--qw-success); }

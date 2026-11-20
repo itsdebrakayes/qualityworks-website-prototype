@@ -174,24 +174,24 @@ const faqs: FaqItem[] = [
 <style>
   /* Hand-off notes: teal-300 icon on the dark hero, teal-700 (--light modifier) on the white steps section. */
   .handoff { display: flex; gap: var(--space-2); align-items: flex-start; font-size: var(--fs-sm); color: var(--color-muted); margin-top: var(--space-6); }
-  .handoff :global(svg) { width: 18px; height: 18px; flex: none; margin-top: 2px; color: var(--qw-teal-300); }
+  .handoff :global(svg) { width: 18px; height: 18px; flex: none; margin-top: 2px; color: var(--qw-teal-500); }
   .handoff--light :global(svg) { color: var(--qw-teal-700); }
   /* Org chart in the hero aside. Closed rows show only the department; the open row gets a translucent
-     teal-300 (#5FC3CF) border and fill. */
+     teal-300 (var(--qw-teal-500)) border and fill. */
   .orgchart { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius-lg); padding: var(--space-5); }
-  .orgchart__label { font-size: var(--fs-xs); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-green-400); }
+  .orgchart__label { font-size: var(--fs-xs); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-green-500); }
   .orgchart ul { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-2); }
   .orgchart__row { display: grid; gap: var(--space-2); padding: var(--space-3) var(--space-4); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-md); font-size: var(--fs-sm); }
   .orgchart__dept { font-weight: var(--fw-semibold); color: #fff; }
   .orgchart__agent { display: flex; gap: var(--space-3); align-items: center; color: var(--color-text); }
   .orgchart__row:not(.is-open) .orgchart__agent { display: none; }
-  .orgchart__row.is-open { border-color: rgba(95,195,207,0.45); background: rgba(95,195,207,0.06); }
+  .orgchart__row.is-open { border-color: color-mix(in srgb, var(--qw-teal-500) 45%, transparent); background: color-mix(in srgb, var(--qw-teal-500) 6%, transparent); }
   /* Letter avatar (first letter of the agent name), logo teal to logo green gradient. Decorative: aria-hidden. */
-  .avatar { flex: none; width: 2.25rem; height: 2.25rem; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(135deg, var(--qw-teal-500), var(--qw-green-400)); color: var(--qw-ink-950); font-weight: var(--fw-bold); }
+  .avatar { flex: none; width: 2.25rem; height: 2.25rem; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(135deg, var(--qw-teal-500), var(--qw-green-500)); color: var(--qw-slate-950); font-weight: var(--fw-bold); }
   /* Comparison table: row headers are not sticky (global.css makes .data-table th sticky); the Agents column
      header gets a light teal tint to mark the product being described. */
-  .compare th[scope="row"] { width: 12rem; background: var(--qw-canvas); position: static; }
-  .compare thead th:nth-child(2) { background: var(--qw-teal-50); }
+  .compare th[scope="row"] { width: 12rem; background: var(--qw-mint-50); position: static; }
+  .compare thead th:nth-child(2) { background: var(--qw-mint-50); }
   .compare__ctas { margin-top: var(--space-6); }
   /* Label legend above the catalog. */
   .legend { margin: 0 0 var(--space-8); padding: var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-lg); font-size: var(--fs-sm); }
@@ -201,9 +201,9 @@ const faqs: FaqItem[] = [
   .legend dd { margin: 0; }
   /* Department chips for the dark product surface; pressed state = teal-300 fill with ink text. */
   .filter-chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-6); }
-  .chip { min-height: 40px; padding: 0.4rem 1rem; border-radius: var(--radius-pill); border: 1px solid var(--color-border); background: transparent; color: var(--color-text); font: var(--fw-semibold) var(--fs-sm)/1 var(--font-sans); cursor: pointer; }
-  .chip:hover { border-color: var(--qw-teal-300); }
-  .chip[aria-pressed="true"] { background: var(--qw-teal-300); color: var(--qw-ink-950); border-color: var(--qw-teal-300); }
+  .chip { min-height: 40px; padding: 0.4rem 1rem; border-radius: var(--radius-pill); border: 1px solid var(--color-border); background: transparent; color: var(--color-text); font: var(--fw-semibold) var(--fs-sm)/1 var(--font-display); cursor: pointer; }
+  .chip:hover { border-color: var(--qw-teal-500); }
+  .chip[aria-pressed="true"] { background: var(--qw-teal-500); color: var(--qw-slate-950); border-color: var(--qw-teal-500); }
   /* Agent cards: auto-fill grid with a 16rem minimum. The explicit [hidden] rule is needed because
      display: flex would otherwise override the hidden attribute set by the filter script. */
   .agents { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr)); }
@@ -211,7 +211,7 @@ const faqs: FaqItem[] = [
   .agent[hidden] { display: none; }
   .agent__head { display: flex; gap: var(--space-3); align-items: center; }
   .agent h3 { font-size: var(--fs-base); margin: 0; }
-  .agent__role { margin: 0; font-size: var(--fs-xs); font-family: var(--font-mono); letter-spacing: 0.04em; text-transform: uppercase; color: var(--qw-teal-300); }
+  .agent__role { margin: 0; font-size: var(--fs-xs); font-family: var(--font-mono); letter-spacing: 0.04em; text-transform: uppercase; color: var(--qw-teal-500); }
   .agent__desc { font-size: var(--fs-sm); margin: 0; }
   .agent__meta { margin: auto 0 0; display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; font-size: var(--fs-xs); color: var(--color-muted); }
   .catalog-note { margin-top: var(--space-8); }

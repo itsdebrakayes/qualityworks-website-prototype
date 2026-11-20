@@ -33,6 +33,6 @@ These are **examples of the required specificity** for the backlog that follows 
 - **AC-JOB-1** (QA-27) Given the BambooHR list returns zero jobs, then the careers page shows “No open roles right now” and a link to the BambooHR careers page; given the request fails or times out (5s), then a warning with a direct BambooHR link is shown; there is no file upload on the site.
 
 ## Typography and accessibility
-- **AC-TYPE-1** (QA-9) Given any page, then every rendered glyph uses Red Hat Display or Red Hat Mono (verified with CDP `getPlatformFontsForNode`); content containing unsupported characters is normalised per doc 04 §11.
+- **AC-TYPE-1** (QA-9) Given any page, then every rendered glyph uses Montserrat or Lato (the brand fonts; code samples excepted) (verified with CDP `getPlatformFontsForNode`); content containing unsupported characters is normalised per doc 04 §11.
 - **AC-A11Y-1** (QA-8) Given any template, then axe-core reports zero WCAG 2.2 A/AA violations, and a manual screen-reader pass of the six persona journeys is recorded before release.
 - **AC-RESP-1** (QA-7) Given widths 360, 640, 768, 1024 and 1440 px, then no page scrolls horizontally.

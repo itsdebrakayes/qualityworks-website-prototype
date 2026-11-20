@@ -34,7 +34,7 @@ export const site = {
   name: 'QualityWorks Consulting Group',
   shortName: 'QualityWorks',
   legacyOrigin: 'https://qualityworkscg.com',
-  tagline: 'Engineered for Excellence',
+  tagline: 'Engineered for Excellence.',
   // Footer statement, verbatim from the live footer.
   footerStatement: 'We enable the delivery of transformative digital solutions through innovations in testing and agile project delivery.',
   founded: 2010,

@@ -106,16 +106,16 @@ const grades = ['A+', 'A', 'B', 'C', 'D', 'F'];
   <CtaBand title="Evaluating AI outputs in production?" text="Talk to the team behind PRISM™ about your use case." primary={{ label: 'Ask about PRISM', href: '/contact-us/' }} secondary={{ label: 'AI & agentic solutions', href: '/services/ai-service/' }} />
 </BaseLayout>
 <style>
-  /* Grading-scale panel in the dark product hero: faint gold (gold-400, #F4B942) border and tint. */
-  .grade { border: 1px solid rgba(244,185,66,0.4); border-radius: var(--radius-lg); padding: var(--space-6); background: rgba(244,185,66,0.05); }
-  .grade__label { font-size: var(--fs-xs); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-gold-400); }
+  /* Grading-scale panel in the dark product hero: faint gold (gold-400, var(--qw-caution)) border and tint. */
+  .grade { border: 1px solid color-mix(in srgb, var(--qw-caution) 40%, transparent); border-radius: var(--radius-lg); padding: var(--space-6); background: color-mix(in srgb, var(--qw-caution) 5%, transparent); }
+  .grade__label { font-size: var(--fs-xs); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-caution); }
   /* Six equal columns, one per grade. */
   .grade__scale { list-style: none; padding: 0; margin: var(--space-4) 0; display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
   .grade__scale li { text-align: center; padding: var(--space-3) 0; font-weight: var(--fw-bold); font-size: var(--fs-md); color: #fff; border-radius: var(--radius-sm); background: rgba(255,255,255,0.06); }
-  /* Position-based tints: A+ and A in logo green (#8FC640), C in gold, F in a soft red. B and D keep the
+  /* Position-based tints: A+ and A in logo green (var(--qw-green-500)), C in gold, F in a soft red. B and D keep the
      neutral tint. Tied to the order of the `grades` array in the frontmatter. */
-  .grade__scale li:nth-child(1), .grade__scale li:nth-child(2) { background: rgba(143,198,64,0.25); }
-  .grade__scale li:nth-child(4) { background: rgba(244,185,66,0.25); }
+  .grade__scale li:nth-child(1), .grade__scale li:nth-child(2) { background: color-mix(in srgb, var(--qw-green-500) 25%, transparent); }
+  .grade__scale li:nth-child(4) { background: color-mix(in srgb, var(--qw-caution) 25%, transparent); }
   .grade__scale li:nth-child(6) { background: rgba(255,120,100,0.22); }
   .grade__note { font-size: var(--fs-sm); margin: 0; }
   /* :global because the class is passed into the Alert component, outside this file's style scope. */

@@ -127,21 +127,21 @@ const description = rawDescription.length <= 160 ? rawDescription : rawDescripti
   <CtaBand title="Discuss a similar challenge with our team." primary={cs.cta} secondary={{ label: 'All case studies', href: '/case-studies/' }} />
 </BaseLayout>
 <style>
-  /* Hero: teal glow (logo teal #289DAD at 25%) from the top-right corner over ink-900. Image column from 1024px. */
-  .cs-hero { padding-block: var(--space-10) var(--space-16); background: radial-gradient(60% 80% at 100% 0%, rgba(40,157,173,0.25), transparent 60%), var(--qw-ink-900); }
+  /* Hero: teal glow (logo teal var(--qw-teal-500) at 25%) from the top-right corner over ink-900. Image column from 1024px. */
+  .cs-hero { padding-block: var(--space-10) var(--space-16); background: radial-gradient(60% 80% at 100% 0%, color-mix(in srgb, var(--qw-teal-500) 25%, transparent), transparent 60%), var(--qw-slate-900); }
   .cs-hero__grid { display: grid; gap: var(--space-10); align-items: center; }
   @media (min-width: 1024px) { .cs-hero__grid { grid-template-columns: 1.2fr 0.8fr; } }
   .cs-hero h1 { font-size: var(--fs-2xl); }
   .cs-hero__media img { border-radius: var(--radius-lg); aspect-ratio: 4/3; object-fit: cover; width: 100%; }
   /* Facts list: mono uppercase labels in logo green, which is an accent meant for dark surfaces like this one. */
   .cs-facts { display: grid; gap: var(--space-3); margin: var(--space-8) 0 0; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }
-  .cs-facts dt { font: var(--fw-medium) var(--fs-xs)/1.3 var(--font-mono); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-green-400); }
+  .cs-facts dt { font: var(--fw-medium) var(--fs-xs)/1.3 var(--font-mono); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-green-500); }
   .cs-facts dd { margin: 0.2rem 0 0; color: #fff; }
   /* Metric cards. The markup order is dt (label) then dd (value) for valid <dl> structure; CSS `order` shows
      the big value first, then the label, then the context. */
   .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: var(--space-6); margin: 0; }
   .metric { display: flex; flex-direction: column; padding: var(--space-6); border: 1px solid var(--color-border); border-radius: var(--radius-lg); border-top: 4px solid var(--qw-teal-500); }
-  .metric dt { order: 2; font-weight: var(--fw-semibold); color: var(--qw-ink-900); }
+  .metric dt { order: 2; font-weight: var(--fw-semibold); color: var(--qw-slate-900); }
   .metric__value { order: 1; margin: 0 0 var(--space-2); font-size: var(--fs-2xl); font-weight: var(--fw-bold); line-height: 1.05; color: var(--qw-teal-700); letter-spacing: -0.02em; }
   .metric__ctx { order: 3; margin: var(--space-2) 0 0; font-size: var(--fs-xs); color: var(--color-muted); }
   .metric-src { font-size: var(--fs-xs); color: var(--color-muted); margin: var(--space-4) 0 0; }
@@ -150,7 +150,7 @@ const description = rawDescription.length <= 160 ? rawDescription : rawDescripti
   .cs-body { display: grid; gap: var(--space-10); }
   @media (min-width: 960px) { .cs-body { grid-template-columns: 18rem 1fr; gap: var(--space-16); } .cs-aside { position: sticky; top: 7rem; align-self: start; } }
   .cs-aside { padding: var(--space-6); background: #fff; border: 1px solid var(--qw-line); border-radius: var(--radius-lg); }
-  .cs-aside__text { font-weight: var(--fw-medium); color: var(--qw-ink-900); }
+  .cs-aside__text { font-weight: var(--fw-medium); color: var(--qw-slate-900); }
   .cs-story { max-width: 44rem; font-size: 1.0625rem; line-height: 1.75; }
   .cs-story h2 { font-size: var(--fs-xl); margin-top: var(--space-10); }
   .cs-story h2:first-child { margin-top: 0; }

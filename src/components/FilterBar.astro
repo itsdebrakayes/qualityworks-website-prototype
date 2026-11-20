@@ -71,11 +71,11 @@ const { filters, resultLabel, id } = Astro.props;
 <style>
   /* Bar: auto-fit columns at least 14rem wide (min(100%, 14rem) prevents overflow on narrow phones);
      align-items:end lines the button up with the selects, whose labels sit above them. */
-  .filter-bar { display: grid; gap: var(--space-4); align-items: end; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); padding: var(--space-5); background: var(--qw-canvas); border: 1px solid var(--qw-line); border-radius: var(--radius-lg); margin-bottom: var(--space-8); }
+  .filter-bar { display: grid; gap: var(--space-4); align-items: end; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); padding: var(--space-5); background: var(--qw-mint-50); border: 1px solid var(--qw-line); border-radius: var(--radius-lg); margin-bottom: var(--space-8); }
   /* min-height 48px matches the select height so the clear button centres against the controls. */
   .filter-bar__actions { display: flex; align-items: center; min-height: 48px; }
   /* Result count spans the full width under the controls. */
-  .filter-bar__count { grid-column: 1 / -1; margin: 0; font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--qw-ink-900); }
+  .filter-bar__count { grid-column: 1 / -1; margin: 0; font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--qw-slate-900); }
   /* Dim the disabled clear button so its inactive state is visible (disabled controls are exempt from contrast rules). */
   .filter-bar :global(.btn[disabled]) { opacity: 0.45; }
 </style>

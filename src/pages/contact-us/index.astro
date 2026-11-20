@@ -29,6 +29,9 @@ import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import ContactForm from '../../components/ContactForm.astro';
 import Icon from '../../components/Icon.astro';
 import { site } from '../../data/site';
+import { peopleImage, peopleSrc, peopleSrcset } from '../../data/peopleImagery';
+// Contact header photograph (visual revision, docs/15).
+const contactImage = peopleImage('contact-team');
 const crumbs = [{ label: 'Home', href: '/' }, { label: 'Contact Us' }];
 ---
 <BaseLayout seo={{ title: 'Contact QualityWorks | Talk to a Software Quality & AI Expert', description: 'Get in touch with QualityWorks about software testing, custom development or AI solutions. Offices in Los Angeles and Kingston, Jamaica.' }} breadcrumbs={crumbs}>
@@ -40,6 +43,14 @@ const crumbs = [{ label: 'Home', href: '/' }, { label: 'Contact Us' }];
         <p class="eyebrow">Contact us</p>
         <h1>Got questions? Let’s talk.</h1>
         <p class="lede">We have the expertise you need to solve the problems you don’t want to handle on your own. Tell us what you’re working on.</p>
+        {/* The page's single brand-gradient moment (guide: once per layout). */}
+        <span class="brand-rule contact__rule" aria-hidden="true"></span>
+        {/* People photograph (visual revision, docs/15). Desktop only: on phones the form stays close to the
+            top of the page, because completing it is the visitor's task here. */}
+        <figure class="contact__photo">
+          <img src={peopleSrc(contactImage)} srcset={peopleSrcset(contactImage)} sizes="30rem" alt={contactImage.alt}
+            width="1600" height="1067" loading="eager" decoding="async" style={`object-position: ${contactImage.focus}`} />
+        </figure>
         {/* Sets expectations without committing to a response time (see the review note below). */}
         <h2 class="contact__h">What happens next</h2>
         <ol class="next">
@@ -65,8 +76,14 @@ const crumbs = [{ label: 'Home', href: '/' }, { label: 'Contact Us' }];
   </section>
 </BaseLayout>
 <style>
-  /* Hero surface: a soft teal glow (logo teal #289DAD at 22% opacity) in the top-left corner over ink-900. */
-  .contact { padding-block: var(--space-10) var(--space-20); background: radial-gradient(60% 70% at 0% 0%, rgba(40,157,173,0.22), transparent 60%), var(--qw-ink-900); }
+  /* Hero surface: solid slate-900 (visual revision: no gradient backgrounds; the brand gradient is used
+     once, as the rule under the intro). */
+  .contact { padding-block: var(--space-10) var(--space-20); background: var(--qw-slate-900); }
+  .contact__rule { margin-top: var(--space-8); }
+  /* Photo: hidden below 1024px (form first on phones and tablets); 16:10 crop with rounded corners. */
+  .contact__photo { display: none; margin: var(--space-8) 0 0; border-radius: var(--radius-lg); overflow: hidden; aspect-ratio: 16 / 10; }
+  .contact__photo img { width: 100%; height: 100%; object-fit: cover; }
+  @media (min-width: 1024px) { .contact__photo { display: block; } }
   /* Two-column layout from 1024px; the form column is slightly wider because it carries more content. */
   .contact__grid { display: grid; gap: var(--space-12); }
   @media (min-width: 1024px) { .contact__grid { grid-template-columns: 0.9fr 1.1fr; gap: var(--space-16); align-items: start; } }
@@ -78,5 +95,5 @@ const crumbs = [{ label: 'Home', href: '/' }, { label: 'Contact Us' }];
   /* Contact-channel list: icon + text rows. margin-top: 3px nudges the 20px icon onto the first text line. */
   .ways { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-4); }
   .ways li { display: flex; gap: var(--space-3); align-items: flex-start; }
-  .ways :global(svg) { width: 20px; height: 20px; color: var(--qw-teal-300); flex: none; margin-top: 3px; }
+  .ways :global(svg) { width: 20px; height: 20px; color: var(--qw-teal-500); flex: none; margin-top: 3px; }
 </style>

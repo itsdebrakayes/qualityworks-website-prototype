@@ -46,7 +46,7 @@ const { title, icon = 'search', id, hidden } = Astro.props;
   /* Defensive: guarantees the hidden attribute wins even if a page or global rule gives .empty a display value. */
   .empty[hidden] { display: none; }
   /* 3rem teal-tinted circle behind the icon. */
-  .empty__icon { display: inline-grid; place-items: center; width: 3rem; height: 3rem; border-radius: 50%; background: var(--qw-teal-50); color: var(--qw-teal-700); margin-bottom: var(--space-4); }
+  .empty__icon { display: inline-grid; place-items: center; width: 3rem; height: 3rem; border-radius: 50%; background: var(--qw-mint-50); color: var(--qw-teal-700); margin-bottom: var(--space-4); }
   .empty__title { font-weight: var(--fw-bold); font-size: var(--fs-md); color: var(--color-heading); margin-bottom: var(--space-2); }
   /* Explanation capped at 36rem and centred for comfortable reading. */
   .empty__body { color: var(--color-muted); max-width: 36rem; margin-inline: auto; }

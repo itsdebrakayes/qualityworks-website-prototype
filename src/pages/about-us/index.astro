@@ -27,6 +27,8 @@
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
+// People photograph for the header (visual revision, docs/15).
+import { peopleImage } from '../../data/peopleImagery';
 import SectionHeading from '../../components/SectionHeading.astro';
 import ProofBlock from '../../components/ProofBlock.astro';
 import CtaBand from '../../components/CtaBand.astro';
@@ -49,7 +51,7 @@ const values = [
 const ceo = leadership[0];
 ---
 <BaseLayout seo={{ title: 'About QualityWorks | The Quality-Driven Innovation Company', description: 'Founded in 2010, QualityWorks is a Black-owned, woman-led software solutions firm helping companies build higher-quality software, future-ready teams and faster delivery.' }} breadcrumbs={crumbs}>
-  <PageHero eyebrow="About us" title="The quality-driven innovation company" lede="We go beyond the code and beyond testing to help our clients achieve their most extraordinary digital goals." breadcrumbs={crumbs} primary={{ label: 'Work with us', href: '/contact-us/' }} secondary={{ label: 'Explore careers', href: '/careers/' }} />
+  <PageHero image={peopleImage('about-team')} eyebrow="About us" title="The quality-driven innovation company" lede="We go beyond the code and beyond testing to help our clients achieve their most extraordinary digital goals." breadcrumbs={crumbs} primary={{ label: 'Work with us', href: '/contact-us/' }} secondary={{ label: 'Explore careers', href: '/careers/' }} />
 
   {/* Our story: company description with claim annotations for ownership (C14) and regions (C15). */}
   <section class="section" aria-labelledby="story-title">

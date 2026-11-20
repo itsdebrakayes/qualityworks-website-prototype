@@ -38,6 +38,7 @@ import { RELEASE, REVIEW, rn } from '../../lib/release';
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
+import { peopleImage } from '../../data/peopleImagery';
 import SectionHeading from '../../components/SectionHeading.astro';
 import ServiceCard from '../../components/ServiceCard.astro';
 import ProductCard from '../../components/ProductCard.astro';
@@ -60,7 +61,7 @@ const cases = ind.caseStudies.map(caseStudyBySlug).filter(Boolean);
 ---
 <BaseLayout seo={ind.seo} breadcrumbs={crumbs}>
   {/* Hero: secondary CTA jumps to the #evidence section further down this page. */}
-  <PageHero eyebrow={ind.status === 'proposed' && REVIEW ? `${ind.name} · proposed page` : ind.name} title={ind.heroTitle} lede={ind.heroLede} breadcrumbs={crumbs} primary={ind.primaryCta} secondary={{ label: 'See relevant results', href: '#evidence' }} />
+  <PageHero image={ind.heroImage ? peopleImage(ind.heroImage) : undefined} eyebrow={ind.status === 'proposed' && REVIEW ? `${ind.name} · proposed page` : ind.name} title={ind.heroTitle} lede={ind.heroLede} breadcrumbs={crumbs} primary={ind.primaryCta} secondary={{ label: 'See relevant results', href: '#evidence' }} />
 
   {/* Status notices: migration pending (summary records) and proposed route (needs QM-41). Release blockers in release builds. */}
   {ind.contentDepth === 'summary' && (
@@ -119,7 +120,7 @@ const cases = ind.caseStudies.map(caseStudyBySlug).filter(Boolean);
   /* Consideration cards: white card with a 3px teal top rule to mark them as approach notes. */
   .consider { padding: var(--space-6); background: #fff; border: 1px solid var(--qw-line); border-radius: var(--radius-lg); border-top: 3px solid var(--qw-teal-500); }
   .consider h3 { font-size: var(--fs-md); }
-  .consider p { margin: 0; color: var(--qw-slate-700); }
+  .consider p { margin: 0; color: var(--qw-slate-800); }
   /* Related products block and the small evidence footnote. */
   .prods { margin-top: var(--space-12); }
   .prods h3 { font-size: var(--fs-md); }

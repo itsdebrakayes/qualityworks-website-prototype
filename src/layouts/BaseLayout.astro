@@ -35,7 +35,7 @@ import { REVIEW } from '../lib/release';
  * - Breadcrumb JSON-LD is only emitted when there are 2+ crumbs. Pass the SAME array you give PageHero.
  * - `showBreadcrumbs` renders a trail at the top of <main>; most pages instead show breadcrumbs inside
  *   PageHero. Do not use both, or the trail appears twice. No page uses showBreadcrumbs or bodyClass today.
- * - The font preload URL must match the Red Hat Display latin file in src/fonts.css; if the font file
+ * - The font preload URLs must match the Montserrat and Lato latin files in src/fonts.css; if a font file
  *   changes, update both or the preload is wasted and the font loads late.
  * - In templates use JSX-style comments (curly brace + slash-star), never HTML comments: HTML comments
  *   are sent to visitors in the page source.
@@ -70,7 +70,7 @@ const path = Astro.url.pathname;
 // Production canonical = existing domain + preserved path (see docs/06-url-mapping.md).
 const canonical = new URL(path, site.legacyOrigin).toString();
 // og:image must be absolute; falls back to the colour logo when the page has no image of its own.
-const ogImage = new URL(seo.ogImage ?? '/brand/qualityworks-logo-color.png', site.legacyOrigin).toString();
+const ogImage = new URL(seo.ogImage ?? '/brand/qualityworks-wordmark-teal-on-slate.jpg', site.legacyOrigin).toString();
 
 // BreadcrumbList JSON-LD from the same data as the visible trail (Breadcrumbs.astro). Only for 2+ crumbs;
 // the last crumb (current page) has no href, so it is emitted without an `item` URL.
@@ -104,11 +104,13 @@ const ld = [...(crumbLd ? [crumbLd] : []), ...jsonLd];
     <meta property="og:image" content={ogImage} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@qualityworkscg" />
-    {/* theme-color = ink-900 (#16202B), matching the header so mobile browser chrome blends in. */}
-    <meta name="theme-color" content="#16202B" />
+    {/* theme-color = slate-800 (#36414F), matching the header so mobile browser chrome blends in. */}
+    <meta name="theme-color" content="#36414F" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
-    {/* Preload the Red Hat Display latin variable font (see src/fonts.css) so headings do not swap late. */}
-    <link rel="preload" href="/fonts/8vIQ7wUr0m80wwYf0QCXZzYzUoTg_T6h.woff2" as="font" type="font/woff2" crossorigin />
+    {/* Preload the two latin font files every page needs first (src/fonts.css): Montserrat for headings
+        and Lato 400 for body copy, so neither swaps in late. */}
+    <link rel="preload" href="/fonts/montserrat-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/lato-400-latin.woff2" as="font" type="font/woff2" crossorigin />
     {/* Page-specific <head> additions, e.g. article meta tags in pages/[slug].astro. */}
     <slot name="head" />
     {/* One JSON-LD script element per object. set:html avoids HTML-escaping the JSON. */}

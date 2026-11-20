@@ -61,13 +61,13 @@ const icon = tone === 'success' ? 'check' : tone === 'info' ? 'info' : 'alert';
 <style>
   /* Layout: fixed 1.4rem icon column + flexible text column. Text is always dark ink on the pale tint,
      so contrast does not depend on the tone colour. */
-  .alert { display: grid; grid-template-columns: 1.4rem 1fr; gap: var(--space-3); padding: var(--space-4) var(--space-5); border-radius: var(--radius-md); border: 1px solid; font-size: var(--fs-sm); color: var(--qw-ink-900); }
+  .alert { display: grid; grid-template-columns: 1.4rem 1fr; gap: var(--space-3); padding: var(--space-4) var(--space-5); border-radius: var(--radius-md); border: 1px solid; font-size: var(--fs-sm); color: var(--qw-slate-900); }
   /* display:grid above would override the browser's [hidden] rule, so restore it explicitly. */
   .alert[hidden] { display: none; }
   .alert :global(svg) { width: 1.4rem; height: 1.4rem; }
   /* Tones: pale background, slightly darker border, and a saturated icon colour. Border hex values are
      hand-picked mid-tints of each tone (there are no tokens for them yet). */
-  .alert--info { background: var(--qw-info-bg); border-color: var(--qw-teal-100); }
+  .alert--info { background: var(--qw-info-bg); border-color: var(--qw-mint-200); }
   .alert--info :global(svg) { color: var(--qw-teal-700); }
   .alert--success { background: var(--qw-success-bg); border-color: #BFE0C5; }
   .alert--success :global(svg) { color: var(--qw-success); }

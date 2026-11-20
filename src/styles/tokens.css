@@ -1,8 +1,9 @@
 /* ==========================================================================
    QualityWorks design tokens (QM-113 prototype)
-   Derived from: live corporate CSS (bb-theme skin / child theme), logo artwork,
-   agents.qualityworkscg.com and qualitywatcher.ai computed styles (audited 2026-11-17).
-   See docs/02-design-direction.md for provenance of every value.
+   Source (visual revision, 20 Nov 2026): QualityWorks Brand Guidelines v1.0 ("for Partners"),
+   supplied by marketing. Colour, type, radius and width values follow that guide; the few derived
+   accessibility shades are marked "derived" and listed in docs/15-visual-revision.md §2.
+   Earlier values came from the live corporate CSS (docs/02-design-direction.md, historical).
 
    WHAT: the single source of design values (CONTRIBUTING.md rule 3). Three layers:
      1. Brand primitives, prefixed qw (raw colours, named by hue and lightness step).
@@ -32,80 +33,96 @@
        in a comment: the parser would read it as a token.
    ========================================================================== */
 :root {
-  /* Brand — corporate */
-  /* Logo teal and logo green are exact matches to the logo artwork. The darker teal-700 is the
-     accessible interactive colour; ratios in trailing comments are from docs/02 section 4. */
-  --qw-teal-50: #E9F6F7;    /* tint of logo teal; replaces legacy #ECF7F6 */
-  --qw-teal-100: #CDEBEE;
-  --qw-teal-300: #5FC3CF;   /* accent text/links on dark surfaces (8:1 on ink) */
-  --qw-teal-500: #289DAD;   /* LOGO TEAL (exact). Large/decorative use; fails AA as white-text bg (3.2:1) */
-  --qw-teal-700: #1B7480;   /* Interactive teal: buttons + links on light (5.45:1) */
-  --qw-teal-800: #155E68;   /* hover/pressed */
-  --qw-green-400: #8FC640;  /* LOGO GREEN (exact). Accent on dark only */
-  --qw-green-700: #4E7A1C;  /* green text on light (5.1:1) */
-  --qw-mint-500: #29A59A;   /* legacy corporate button colour — retained as data-viz/secondary accent only */
-  --qw-gold-400: #F4B942;   /* legacy accent; highlights, event status */
+  /* Brand — core (QualityWorks Brand Guidelines v1.0, "02 — Color") */
+  /* Exact swatches from the guide. Green is the primary accent, Teal is the wordmark, heading and
+     link colour, Blue is the cool accent, Mint is the one light surface. The guide's 95-degree
+     green-teal-blue gradient is the brand signature: one gradient moment per layout. */
+  --qw-green-500: #2CAF81;  /* GREEN (guide): primary accent; 5.14:1 on slate-900, fails as text on white (2.78:1) */
+  --qw-teal-500: #29A59A;   /* TEAL (guide): wordmark, headings and links on slate; buttons with slate-900 text (4.73:1) */
+  --qw-blue-500: #289DAD;   /* BLUE (guide): cool accent, gradient end */
+  --qw-mint-50: #ECF7F6;    /* MINT (guide): the one light surface */
+  --qw-gradient: linear-gradient(95deg, #2CAF81 0%, #29A59A 52%, #289DAD 100%);
+  /* Accessible text shades derived from the guide's Teal (same hue, lower lightness). The guide's
+     teal and its own light-page eyebrow colour (#1F8D84, 4.04:1) are below 4.5:1 for small text on
+     white, so links and eyebrows on light surfaces use teal-700. Pending Janique's confirmation. */
+  --qw-teal-700: #1D766F;   /* derived: links, eyebrows, outline buttons on white (5.42:1) and mint (4.96:1) */
+  --qw-teal-800: #18625C;   /* derived: hover/pressed for teal-700 (7.14:1 on white) */
+  --qw-mint-200: #C9E8E5;   /* derived tint of teal on mint: borders and hover fills on light surfaces */
+  --qw-caution: #E8B34A;    /* STATE caution (guide): status indicators only, never decoration or text on white */
 
-  /* Neutrals */
-  /* Ink tones are dark backgrounds (950 for product surfaces, 900 for dark corporate sections),
-     slate tones are text colours; the line tokens are hairline borders for light and dark surfaces. */
-  --qw-ink-950: #0E1817;    /* product surfaces (from Agents as a Service #0B1413, warmed to brand) */
-  --qw-ink-900: #16202B;    /* dark corporate sections */
-  --qw-ink-800: #222B37;    /* legacy dark (#222B37) */
-  --qw-ink-700: #2C3846;
-  --qw-slate-700: #36414F;  /* legacy body text colour (exact) */
-  --qw-slate-500: #5A6675;  /* muted text (5.85:1 on white) */
-  --qw-slate-300: #9AA7B4;  /* muted text on dark (6.7:1 on ink-900) */
-  --qw-line: #DCE3E6;
+  /* Neutrals — slate canvas and text (guide) */
+  /* The slate scale carries the brand ("slate carries everything"). 900 is the deepest panel and the
+     dark-section background used site-wide, because teal and green text pass AA on it; 800 is the
+     guide's page background and the header colour (the teal wordmark file is supplied on 800);
+     850 and 700 are card and raised surfaces. 950 appears in the guide's stylesheet and is used for
+     the product layer. The text-on-slate values are the guide's heading, body, muted and caption greys. */
+  --qw-slate-950: #1A212B;  /* product surfaces (guide stylesheet) */
+  --qw-slate-900: #222B37;  /* SLATE 900: dark sections, footer; headings on light (14.3:1 on white) */
+  --qw-slate-850: #2B3540;  /* SLATE 850: cards on dark */
+  --qw-slate-800: #36414F;  /* SLATE 800: header background; body text on light (10.4:1) */
+  --qw-slate-700: #424D5B;  /* SLATE 700: raised surfaces and hairlines on dark */
+  --qw-text-lead: #4A5663;  /* guide light-page lead paragraph colour (7.49:1 on white) */
+  --qw-muted: #5A6673;      /* guide light-page muted colour (5.86:1 on white, 5.36:1 on mint) */
+  --qw-ink-1: #E7ECEF;      /* text on slate: body (8.71:1 on slate-800) */
+  --qw-ink-2: #AEB8C1;      /* text on slate: muted (7.1:1 on slate-900) */
+  --qw-ink-3: #7F8A96;      /* text on slate: captions; large or non-essential text only (4.07:1 on slate-900) */
+  --qw-line: #DDE4E6;       /* guide hairline on light surfaces */
   --qw-line-dark: rgba(255, 255, 255, 0.12);
-  --qw-canvas: #F4F7F7;
   --qw-white: #FFFFFF;
 
   /* Feedback */
-  /* Alert, badge and form-error colours, each a foreground plus a pale background. Info has no
-     separate foreground and reuses the brand teal tint as its background. */
+  /* Alert, badge and form-error colours, each a foreground plus a pale background. These stay as
+     accessible text colours: the guide's state swatches (success #2CB07E, caution #E8B34A, error
+     #E2624E) are below 4.5:1 as text on white, so they are used only for indicators on dark. */
   --qw-danger: #B42318;
   --qw-danger-bg: #FDECEA;
   --qw-warning: #B45309;
   --qw-warning-bg: #FFF4E0;
   --qw-success: #2F7A3E;
   --qw-success-bg: #E8F5EA;
-  --qw-info-bg: var(--qw-teal-50);
+  --qw-info-bg: var(--qw-mint-50);
 
   /* Semantic */
   /* Role-based aliases: components read these, and the surface classes at the bottom of this file
      re-map them, so the same component works on light and dark sections. Defaults are the light theme. */
-  --color-text: var(--qw-slate-700);
-  --color-heading: var(--qw-ink-900);
-  --color-muted: var(--qw-slate-500);
+  --color-text: var(--qw-slate-800);
+  --color-heading: var(--qw-slate-900);
+  --color-lead: var(--qw-text-lead);
+  --color-muted: var(--qw-muted);
   --color-link: var(--qw-teal-700);
+  --color-eyebrow: var(--qw-teal-700);
   --color-bg: var(--qw-white);
   --color-surface: var(--qw-white);
-  --color-surface-alt: var(--qw-canvas);
+  --color-surface-alt: var(--qw-mint-50);
   --color-border: var(--qw-line);
-  --color-primary: var(--qw-teal-700);
-  --color-primary-hover: var(--qw-teal-800);
+  --color-primary: var(--qw-teal-500);
+  --color-primary-hover: var(--qw-green-500);
+  --color-on-primary: var(--qw-slate-900);
   --color-accent: var(--qw-teal-500);
   --focus-ring: var(--qw-teal-700);
 
-  /* Typography — Red Hat Display is the existing corporate face; Red Hat Mono is the
-     same superfamily, used only for technical labels (eyebrows, indices, data). */
-  --font-sans: 'Red Hat Display', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
-  /* Labels/eyebrows now use the corporate face (closer to the live site); monospace is kept for code only. */
-  --font-mono: var(--font-sans);
-  --font-code: 'Red Hat Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  /* Type scale (rem; px at the default 16px root in trailing comments). The four large steps are
-     fluid: clamp(minimum, preferred that grows with viewport width, maximum), so headings scale
-     smoothly between phone and desktop without breakpoints. Line heights: tight for display headings,
-     snug for other headings, body for running text. Tracking is letter-spacing. */
-  --fs-xs: 0.8125rem;   /* 13 */
+  /* Typography — QualityWorks Brand Guidelines v1.0, "03 — Typography" */
+  /* Montserrat is the display face (headlines, card titles, buttons, eyebrows; weights 500 to 800).
+     Lato is the body face (paragraph copy and captions). Both are defined only here: no component
+     names a font family. To set everything in Montserrat, point font-body at the display stack. */
+  --font-display: 'Montserrat', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --font-body: 'Lato', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --font-sans: var(--font-body);
+  /* Labels and eyebrows use the display face; monospace is used for code samples only (system stack). */
+  --font-mono: var(--font-display);
+  --font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+  /* Type scale (rem; px at the default 16px root in trailing comments). Steps follow the guide's
+     scale (D1 44/800, D2 30/700, Heading 22/700, Eyebrow 13/700, Body 17/400/1.6, Caption 13/400).
+     The large steps are fluid: clamp(minimum, preferred, maximum) so headings scale between phone
+     and desktop. The homepage display size tops out at 56px (the guide's own cover heading is 54px). */
+  --fs-xs: 0.8125rem;   /* 13: eyebrow and caption */
   --fs-sm: 0.9375rem;   /* 15 */
-  --fs-base: 1.0625rem; /* 17 */
-  --fs-md: 1.25rem;     /* 20 */
-  --fs-lg: clamp(1.375rem, 1.2rem + 0.6vw, 1.625rem);
-  --fs-xl: clamp(1.75rem, 1.4rem + 1.2vw, 2.375rem);
-  --fs-2xl: clamp(2.125rem, 1.6rem + 2vw, 3.25rem);
-  --fs-3xl: clamp(2.5rem, 1.7rem + 3.4vw, 4.75rem);
+  --fs-base: 1.0625rem; /* 17: body */
+  --fs-md: 1.1875rem;   /* 19 */
+  --fs-lg: clamp(1.25rem, 1.15rem + 0.4vw, 1.375rem);
+  --fs-xl: clamp(1.5rem, 1.3rem + 0.8vw, 1.875rem);
+  --fs-2xl: clamp(1.875rem, 1.5rem + 1.6vw, 2.75rem);
+  --fs-3xl: clamp(2.25rem, 1.6rem + 2.6vw, 3.5rem);
   --lh-tight: 1.08;
   --lh-snug: 1.25;
   --lh-body: 1.6;
@@ -114,8 +131,9 @@
   --fw-medium: 500;
   --fw-semibold: 600;
   --fw-bold: 700;
-  --tracking-tight: -0.01em;
-  --tracking-label: 0.12em;
+  --fw-black: 800;
+  --tracking-tight: -0.015em;
+  --tracking-label: 0.16em;
 
   /* Spacing (4px base) */
   /* Each space step is a multiple of 4px (space-4 is 1rem = 16px). Section padding and the page
@@ -125,23 +143,22 @@
   --space-12: 3rem; --space-16: 4rem; --space-20: 5rem; --space-24: 6rem;
   --section-y: clamp(3.5rem, 2.5rem + 4vw, 6.5rem);
   --gutter: clamp(1rem, 0.5rem + 2.5vw, 2.5rem);
-  --container: 76rem;     /* 1216px */
+  --container: 70rem;     /* 1120px: the guide's maximum content width */
   --container-narrow: 46rem;
 
   /* Shape */
-  /* Corner radii: small for inputs and badges, medium for form fields and images, large for cards
-     (16px everywhere per docs/02). */
+  /* Corner radii from the guide: 6px inputs, 12px notes and images, 18px cards, pill buttons and tags. */
   --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
   --radius-pill: 999px;   /* buttons stay pill-shaped: retained from legacy + product sites */
 
   /* Elevation */
-  /* Shadows are tinted with ink-900 (rgb 22, 32, 43) rather than pure black so they read as part of
+  /* Shadows are tinted with slate-900 (rgb 34, 43, 55) rather than pure black so they read as part of
      the palette. docs/02: hover elevation is used on cards only. */
-  --shadow-sm: 0 1px 2px rgba(22, 32, 43, 0.06), 0 1px 1px rgba(22, 32, 43, 0.04);
-  --shadow-md: 0 6px 20px -8px rgba(22, 32, 43, 0.18), 0 2px 6px rgba(22, 32, 43, 0.06);
-  --shadow-lg: 0 24px 48px -20px rgba(22, 32, 43, 0.35);
+  --shadow-sm: 0 1px 2px rgba(34, 43, 55, 0.06), 0 1px 1px rgba(34, 43, 55, 0.04);
+  --shadow-md: 0 6px 20px -8px rgba(34, 43, 55, 0.18), 0 2px 6px rgba(34, 43, 55, 0.06);
+  --shadow-lg: 0 24px 48px -20px rgba(34, 43, 55, 0.35);
 
   /* Motion */
   /* One easing curve (fast start, gentle stop) and three durations. All durations drop to 0 under
@@ -166,28 +183,29 @@
 }
 
 /* Surface themes: any section can opt into a surface. Components read semantic tokens.
-   surface-dark    dark corporate sections (ink-900 background).
-   surface-product the darker product band (ink-950 and green-tinted card colours), used on
-                   QualityWatcher, Agents as a Service, PRISM and the homepage products band.
-   surface-tint    pale teal background with white cards.
-   surface-alt     light grey canvas background.
-   On dark surfaces, links switch to teal-300 and the accent and focus ring switch to logo green,
-   which keep their contrast on ink (ratios in the primitive comments above). The literal text colour
-   and product card colours below have no primitive token of their own. */
+   surface-dark    dark sections (slate-900 background).
+   surface-product the deeper product band (slate-950), used on QualityWatcher, Agents as a Service,
+                   PRISM and the homepage products band.
+   surface-tint    mint background with white cards.
+   surface-alt     mint background (the guide's one light surface).
+   On dark surfaces, links, eyebrows and the accent switch to the guide's Teal and the focus ring to
+   Green, both of which pass on slate-900 (ratios in the primitive comments above). */
 .surface-dark, .surface-product {
-  --color-text: #D5DDE4;
+  --color-text: var(--qw-ink-1);
   --color-heading: var(--qw-white);
-  --color-muted: var(--qw-slate-300);
-  --color-link: var(--qw-teal-300);
-  --color-bg: var(--qw-ink-900);
-  --color-surface: var(--qw-ink-800);
-  --color-surface-alt: var(--qw-ink-700);
+  --color-lead: var(--qw-ink-1);
+  --color-muted: var(--qw-ink-2);
+  --color-link: var(--qw-teal-500);
+  --color-eyebrow: var(--qw-teal-500);
+  --color-bg: var(--qw-slate-900);
+  --color-surface: var(--qw-slate-850);
+  --color-surface-alt: var(--qw-slate-800);
   --color-border: var(--qw-line-dark);
-  --color-accent: var(--qw-green-400);
-  --focus-ring: var(--qw-green-400);
+  --color-accent: var(--qw-green-500);
+  --focus-ring: var(--qw-green-500);
 }
-.surface-product { --color-bg: var(--qw-ink-950); --color-surface: #15221F; --color-surface-alt: #1B2B28; }
-.surface-tint { --color-bg: var(--qw-teal-50); --color-surface: var(--qw-white); }
+.surface-product { --color-bg: var(--qw-slate-950); --color-surface: var(--qw-slate-900); --color-surface-alt: var(--qw-slate-850); }
+.surface-tint { --color-bg: var(--qw-mint-50); --color-surface: var(--qw-white); }
 /* Any element with a surface class paints its own text colour (not only .section elements). */
 .surface-dark, .surface-product { color: var(--color-text); }
-.surface-alt { --color-bg: var(--qw-canvas); }
+.surface-alt { --color-bg: var(--qw-mint-50); }

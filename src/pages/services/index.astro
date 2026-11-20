@@ -30,6 +30,8 @@
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
+// People photograph for the header (visual revision, docs/15).
+import { peopleImage } from '../../data/peopleImagery';
 import SectionHeading from '../../components/SectionHeading.astro';
 import ServiceCard from '../../components/ServiceCard.astro';
 import CtaBand from '../../components/CtaBand.astro';
@@ -57,7 +59,7 @@ const guide = [
 ];
 ---
 <BaseLayout seo={{ title: 'Solutions: Software Testing, Development & AI Services | QualityWorks', description: 'QualityWorks solutions: test automation, full-stack and non-functional testing, custom software development, technology advisory and AI & agentic business solutions.' }} breadcrumbs={crumbs}>
-  <PageHero eyebrow="Solutions" title="Services for quality, delivery and AI" lede="Three practices, one standard. Whether you need to improve software quality, build or modernize a product, or deploy AI responsibly, start with the problem you are trying to solve." breadcrumbs={crumbs} primary={ctas.contact} />
+  <PageHero image={peopleImage('services-pair')} eyebrow="Solutions" title="Services for quality, delivery and AI" lede="Three practices, one standard. Whether you need to improve software quality, build or modernize a product, or deploy AI responsibly, start with the problem you are trying to solve." breadcrumbs={crumbs} primary={ctas.contact} />
 
   {/* Quick guide: problem-to-service table (answers the core question directly). */}
   <section class="section" aria-labelledby="guide-title">
@@ -100,7 +102,7 @@ const guide = [
 </BaseLayout>
 <style>
   /* Quick-guide table: dark problem text; service links bold and kept on one line (wraps again under 640px). */
-  .guide td:first-child { color: var(--qw-ink-900); }
+  .guide td:first-child { color: var(--qw-slate-900); }
   .guide td:last-child { font-weight: var(--fw-semibold); white-space: nowrap; }
   /* Specialist pages box: dashed border marks it as secondary to the main cards. Links are at least
      44px tall so they are comfortable touch targets on mobile. */

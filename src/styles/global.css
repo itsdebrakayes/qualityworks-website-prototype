@@ -20,7 +20,7 @@
      - A few literal colours remain where no token exists (fixture/review gold palette, form input
        border, badge borders). Prefer adding a token over adding more literals.
    ========================================================================== */
-/* Design tokens first, then the @font-face rules for the self-hosted Red Hat fonts. */
+/* Design tokens first, then the @font-face rules for the self-hosted brand fonts (Montserrat, Lato). */
 @import './tokens.css';
 @import '../fonts.css';
 
@@ -45,9 +45,16 @@ body {
 img, svg, video { display: block; max-width: 100%; height: auto; }
 img { font-style: italic; } /* alt text styling if an image fails */
 /* Headings: text-wrap: balance evens out line lengths in multi-line headings. */
-h1, h2, h3, h4 { color: var(--color-heading); font-weight: var(--fw-bold); line-height: var(--lh-snug); margin: 0 0 var(--space-4); letter-spacing: var(--tracking-tight); text-wrap: balance; }
-h1 { font-size: var(--fs-3xl); line-height: var(--lh-tight); }
+/* Display face (Montserrat) for every heading, per the brand guide; body copy inherits Lato from body. */
+h1, h2, h3, h4 { font-family: var(--font-display); color: var(--color-heading); font-weight: var(--fw-bold); line-height: var(--lh-snug); margin: 0 0 var(--space-4); letter-spacing: var(--tracking-tight); text-wrap: balance; }
+h1 { font-size: var(--fs-3xl); line-height: var(--lh-tight); font-weight: var(--fw-black); }
 h2 { font-size: var(--fs-2xl); line-height: 1.12; }
+/* Interactive UI text uses the display face too: buttons, navigation, form labels, legends, table heads. */
+button, .btn, label, legend, th, summary { font-family: var(--font-display); }
+/* Component titles, headings and labels written as <p>/<span> (BEM names ending in __title, __heading or
+   __label, e.g. card titles, footer column headings, metric labels) also take the display face: the guide
+   sets card titles and labels in Montserrat. Name new title/label elements this way to inherit it. */
+[class*="__title"], [class*="__heading"], [class*="__label"] { font-family: var(--font-display); }
 h3 { font-size: var(--fs-lg); }
 h4 { font-size: var(--fs-md); letter-spacing: 0; }
 /* text-wrap: pretty avoids a single orphaned word on the last line of a paragraph. */
@@ -70,7 +77,7 @@ table { border-collapse: collapse; width: 100%; }
 /* Hidden visually but still read by screen readers (standard clip pattern). */
 .visually-hidden { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 /* Skip link: parked above the viewport until it receives keyboard focus. */
-.skip-link { position: absolute; left: var(--space-4); top: -100px; z-index: 100; background: var(--qw-ink-900); color: #fff; padding: var(--space-3) var(--space-5); border-radius: var(--radius-sm); font-weight: var(--fw-semibold); }
+.skip-link { position: absolute; left: var(--space-4); top: -100px; z-index: 100; background: var(--qw-slate-900); color: #fff; padding: var(--space-3) var(--space-5); border-radius: var(--radius-sm); font-weight: var(--fw-semibold); }
 .skip-link:focus { top: var(--space-4); }
 
 /* Layout ------------------------------------------------------------------ */
@@ -95,33 +102,41 @@ table { border-collapse: collapse; width: 100%; }
 
 /* Type helpers ------------------------------------------------------------ */
 /* Eyebrow: small uppercase label above a heading, introduced by a short accent rule (::before). */
-.eyebrow { display: inline-flex; align-items: center; gap: var(--space-3); font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: var(--fw-semibold); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--color-muted); margin: 0 0 var(--space-4); }
+/* Guide: eyebrows are Montserrat 13/700, uppercase, 0.16em tracking, in teal (teal-700 on light for AA). */
+.eyebrow { display: inline-flex; align-items: center; gap: var(--space-3); font-family: var(--font-display); font-size: var(--fs-xs); font-weight: var(--fw-bold); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--color-eyebrow); margin: 0 0 var(--space-4); }
 .eyebrow::before { content: ""; width: 1.5rem; height: 2px; background: var(--color-accent); flex: none; }
-.lede { font-size: var(--fs-md); line-height: 1.55; color: var(--color-text); max-width: 42rem; }
+.lede { font-size: var(--fs-md); line-height: 1.6; color: var(--color-lead); max-width: 42rem; }
 .muted { color: var(--color-muted); }
+/* Brand signature rule: the guide's 95-degree green-teal-blue gradient as a short pill-shaped bar.
+   Guide rule: one gradient moment per layout, so each page renders at most one (PageHero or the
+   homepage hero). Decorative: always aria-hidden. */
+.brand-rule { display: block; width: min(16rem, 60%); height: 5px; border-radius: var(--radius-pill); background: var(--qw-gradient); }
 .mono { font-family: var(--font-mono); }
 .text-center { text-align: center; }
 /* Brand phrase styling (homepage intro: <em class="beyond">); green on dark surfaces. */
 .beyond { font-family: var(--font-mono); font-weight: var(--fw-medium); color: var(--qw-teal-700); white-space: nowrap; }
-.surface-dark .beyond, .surface-product .beyond { color: var(--qw-green-400); }
+.surface-dark .beyond, .surface-product .beyond { color: var(--qw-green-500); }
 
 /* Buttons: one grammar, three variants, two sizes ------------------------- */
 /* Each variant only changes three local custom properties (background, foreground, border).
    min-height 48px keeps every button a comfortable touch target; the pill radius is retained from
    the legacy and product sites. */
-.btn { --btn-bg: var(--color-primary); --btn-fg: #fff; --btn-border: var(--btn-bg);
+/* Primary: the guide's Teal with slate-900 text (4.73:1); hover moves to the guide's Green (5.14:1).
+   White text on the brand teal would be 3.02:1, below AA, so primary buttons use dark text. */
+.btn { --btn-bg: var(--color-primary); --btn-fg: var(--color-on-primary); --btn-border: var(--btn-bg);
   display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
   min-height: 48px; padding: 0.7rem 1.5rem; border-radius: var(--radius-pill);
   border: 2px solid var(--btn-border); background: var(--btn-bg); color: var(--btn-fg);
-  font: var(--fw-semibold) var(--fs-sm)/1.2 var(--font-sans); letter-spacing: 0.01em; text-decoration: none; cursor: pointer;
+  font: var(--fw-bold) var(--fs-sm)/1.2 var(--font-display); letter-spacing: 0.01em; text-decoration: none; cursor: pointer;
   transition: background var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out); }
 .btn:hover { --btn-bg: var(--color-primary-hover); text-decoration: none; }
 .btn:active { transform: translateY(1px); }
 .btn svg { width: 1.1em; height: 1.1em; flex: none; transition: transform var(--dur-base) var(--ease-out); }
 .btn:hover svg.icon-arrow { transform: translateX(3px); }
 .btn--secondary { --btn-bg: transparent; --btn-fg: var(--color-heading); --btn-border: currentColor; }
+.btn--secondary:not(:hover) { --btn-border: var(--color-heading); }
 .btn--secondary:hover { --btn-bg: var(--color-heading); --btn-fg: var(--color-bg); --btn-border: var(--color-heading); }
-.surface-dark .btn--secondary:hover, .surface-product .btn--secondary:hover { --btn-fg: var(--qw-ink-900); }
+.surface-dark .btn--secondary:hover, .surface-product .btn--secondary:hover { --btn-fg: var(--qw-slate-900); }
 .btn--ghost { --btn-bg: transparent; --btn-fg: var(--color-link); --btn-border: transparent; padding-inline: 0.5rem; }
 .btn--ghost:hover { --btn-bg: transparent; text-decoration: underline; }
 .btn--sm { min-height: 40px; padding: 0.5rem 1.1rem; font-size: var(--fs-xs); }
@@ -140,10 +155,10 @@ table { border-collapse: collapse; width: 100%; }
    the entire card is clickable without nesting links. Focus is drawn on the card (:has) instead of
    the stretched link. */
 .card { position: relative; display: flex; flex-direction: column; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; transition: border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out); }
-/* Hover: border tinted towards logo teal (55%) plus a medium shadow. */
+/* Hover: border tinted towards the brand teal (55%) plus a medium shadow. */
 .card:hover { border-color: color-mix(in srgb, var(--qw-teal-500) 55%, var(--color-border)); box-shadow: var(--shadow-md); }
 .card__body { padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-3); flex: 1; }
-.card__title { font-size: var(--fs-md); margin: 0; letter-spacing: -0.01em; }
+.card__title { font-family: var(--font-display); font-size: var(--fs-md); margin: 0; letter-spacing: -0.01em; }
 .card__title a { color: inherit; text-decoration: none; }
 .card__title a::after { content: ""; position: absolute; inset: 0; z-index: 1; } /* whole card clickable, single link */
 .card__title a:focus-visible { outline: none; }
@@ -156,8 +171,8 @@ table { border-collapse: collapse; width: 100%; }
 .card p { margin: 0; }
 
 /* Badges / chips ---------------------------------------------------------- */
-.badge { display: inline-flex; align-items: center; gap: 0.35em; padding: 0.2rem 0.6rem; border-radius: var(--radius-pill); font: var(--fw-semibold) var(--fs-xs)/1.4 var(--font-sans); background: var(--qw-teal-50); color: var(--qw-teal-800); border: 1px solid var(--qw-teal-100); white-space: nowrap; }
-.badge--neutral { background: var(--qw-canvas); color: var(--qw-slate-700); border-color: var(--qw-line); }
+.badge { display: inline-flex; align-items: center; gap: 0.35em; padding: 0.2rem 0.6rem; border-radius: var(--radius-pill); font: var(--fw-semibold) var(--fs-xs)/1.4 var(--font-display); background: var(--qw-mint-50); color: var(--qw-teal-800); border: 1px solid var(--qw-mint-200); white-space: nowrap; }
+.badge--neutral { background: var(--qw-mint-50); color: var(--qw-slate-800); border-color: var(--qw-line); }
 .badge--success { background: var(--qw-success-bg); color: var(--qw-success); border-color: #BFE0C5; }
 .badge--warning { background: var(--qw-warning-bg); color: var(--qw-warning); border-color: #F5D7A8; }
 .badge--danger { background: var(--qw-danger-bg); color: var(--qw-danger); border-color: #F4C2BD; }
@@ -165,28 +180,29 @@ table { border-collapse: collapse; width: 100%; }
    elsewhere (migration notes, claim annotations, review outlines). */
 .badge--fixture { background: #FFF8E1; color: #7A4B00; border: 1px dashed #C99A2E; }
 /* Badges on dark surfaces use translucent fills so they sit on any dark background. */
-.surface-dark .badge, .surface-product .badge { background: rgba(95, 195, 207, 0.12); color: var(--qw-teal-300); border-color: rgba(95, 195, 207, 0.3); }
-.surface-dark .badge--fixture, .surface-product .badge--fixture { background: rgba(244, 185, 66, 0.12); color: var(--qw-gold-400); border-color: rgba(244, 185, 66, 0.5); }
+/* On dark, badge text is ink-1: teal text on a teal-tinted fill falls below 4.5:1 on lighter card surfaces. */
+.surface-dark .badge, .surface-product .badge { background: color-mix(in srgb, var(--qw-teal-500) 12%, transparent); color: var(--qw-ink-1); border-color: color-mix(in srgb, var(--qw-teal-500) 34%, transparent); }
+.surface-dark .badge--fixture, .surface-product .badge--fixture { background: color-mix(in srgb, var(--qw-caution) 12%, transparent); color: var(--qw-caution); border-color: color-mix(in srgb, var(--qw-caution) 50%, transparent); }
 .chip-list { display: flex; flex-wrap: wrap; gap: var(--space-2); list-style: none; padding: 0; margin: 0; }
 
 /* Check list -------------------------------------------------------------- */
 .checklist { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-3); }
 .checklist li { display: grid; grid-template-columns: 1.25rem 1fr; gap: var(--space-3); align-items: start; }
 /* The tick is an inline SVG data URI (teal on light; green variant on dark below). */
-.checklist li::before { content: ""; width: 1.25rem; height: 1.25rem; margin-top: 0.2rem; border-radius: 50%; background: var(--qw-teal-50) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5.5 10.5l3 3 6-7' fill='none' stroke='%231B7480' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/80% no-repeat; }
-.surface-dark .checklist li::before, .surface-product .checklist li::before { background-color: rgba(143, 198, 64, 0.14); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5.5 10.5l3 3 6-7' fill='none' stroke='%238FC640' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+.checklist li::before { content: ""; width: 1.25rem; height: 1.25rem; margin-top: 0.2rem; border-radius: 50%; background: var(--qw-mint-50) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5.5 10.5l3 3 6-7' fill='none' stroke='%231D766F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/80% no-repeat; }
+.surface-dark .checklist li::before, .surface-product .checklist li::before { background-color: color-mix(in srgb, var(--qw-green-500) 14%, transparent); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5.5 10.5l3 3 6-7' fill='none' stroke='%232CAF81' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
 
 /* Forms ------------------------------------------------------------------- */
 .field { display: grid; gap: var(--space-2); }
-.field label, .field legend { font-weight: var(--fw-semibold); font-size: var(--fs-sm); color: var(--color-heading); }
+.field label, .field legend { font-family: var(--font-display); font-weight: var(--fw-semibold); font-size: var(--fs-sm); color: var(--color-heading); }
 .field .req { color: var(--qw-danger); font-weight: var(--fw-bold); }
 .field .hint { font-size: var(--fs-xs); color: var(--color-muted); margin: 0; }
 /* Inputs: 48px minimum height (touch target), 1.5px mid-grey border so the field boundary stays
    visible, teal border + soft ring on keyboard focus. */
-.input, .textarea, .select { width: 100%; min-height: 48px; padding: 0.7rem 0.9rem; font: inherit; font-size: var(--fs-base); color: var(--qw-ink-900); background: #fff; border: 1.5px solid #A9B5BF; border-radius: var(--radius-md); transition: border-color var(--dur-fast), box-shadow var(--dur-fast); }
+.input, .textarea, .select { width: 100%; min-height: 48px; padding: 0.7rem 0.9rem; font: inherit; font-size: var(--fs-base); color: var(--qw-slate-900); background: #fff; border: 1.5px solid var(--qw-ink-3); border-radius: var(--radius-sm); transition: border-color var(--dur-fast), box-shadow var(--dur-fast); }
 .textarea { min-height: 9rem; resize: vertical; }
-.input:hover, .textarea:hover, .select:hover { border-color: var(--qw-slate-500); }
-.input:focus-visible, .textarea:focus-visible, .select:focus-visible { outline: none; border-color: var(--qw-teal-700); box-shadow: 0 0 0 3px rgba(27, 116, 128, 0.25); }
+.input:hover, .textarea:hover, .select:hover { border-color: var(--qw-muted); }
+.input:focus-visible, .textarea:focus-visible, .select:focus-visible { outline: none; border-color: var(--qw-teal-700); box-shadow: 0 0 0 3px color-mix(in srgb, var(--qw-teal-700) 25%, transparent); }
 /* Invalid fields: !important so the error border wins over hover/focus border colours. */
 [aria-invalid="true"] { border-color: var(--qw-danger) !important; }
 .field-error { display: flex; gap: var(--space-2); align-items: flex-start; color: var(--qw-danger); font-size: var(--fs-sm); font-weight: var(--fw-medium); margin: 0; }
@@ -199,7 +215,8 @@ table { border-collapse: collapse; width: 100%; }
 /* Prose (articles / migrated HTML) --------------------------------------- */
 /* Prose: long-form reading styles for article bodies and rendered docs. Wide tables scroll inside
    themselves (display:block + overflow-x) instead of widening the page. */
-.prose { font-size: 1.125rem; line-height: 1.75; color: var(--qw-slate-700); }
+.prose { font-size: 1.125rem; line-height: 1.75; color: var(--qw-slate-800); }
+.prose h2, .prose h3, .prose h4 { font-family: var(--font-display); }
 .prose > * + * { margin-top: 1.25em; }
 .prose h2 { font-size: var(--fs-xl); margin-top: 2em; }
 .prose h3 { font-size: var(--fs-lg); margin-top: 1.6em; }
@@ -207,13 +224,13 @@ table { border-collapse: collapse; width: 100%; }
 .prose img { border-radius: var(--radius-md); margin-block: 1.5em; height: auto; }
 .prose figure { margin: 2em 0; }
 .prose figcaption { font-size: var(--fs-sm); color: var(--color-muted); margin-top: var(--space-2); }
-.prose blockquote { margin: 2em 0; padding: var(--space-4) var(--space-6); border-left: 4px solid var(--qw-teal-500); background: var(--qw-teal-50); border-radius: 0 var(--radius-md) var(--radius-md) 0; font-size: var(--fs-md); }
+.prose blockquote { margin: 2em 0; padding: var(--space-4) var(--space-6); border-left: 4px solid var(--qw-teal-500); background: var(--qw-mint-50); border-radius: 0 var(--radius-md) var(--radius-md) 0; font-size: var(--fs-md); }
 .prose table { font-size: var(--fs-sm); display: block; overflow-x: auto; }
 .prose th, .prose td { border: 1px solid var(--qw-line); padding: 0.6rem 0.8rem; text-align: left; vertical-align: top; }
-.prose th { background: var(--qw-canvas); }
+.prose th { background: var(--qw-mint-50); }
 .prose a { word-break: break-word; }
-.prose code { white-space: pre-wrap; overflow-wrap: anywhere; background: var(--qw-canvas); padding: 0.1em 0.35em; border-radius: 4px; }
-.prose pre { overflow-x: auto; background: var(--qw-ink-900); color: #E6ECF0; padding: var(--space-4); border-radius: var(--radius-md); }
+.prose code { white-space: pre-wrap; overflow-wrap: anywhere; background: var(--qw-mint-50); padding: 0.1em 0.35em; border-radius: 4px; }
+.prose pre { overflow-x: auto; background: var(--qw-slate-900); color: var(--qw-ink-1); padding: var(--space-4); border-radius: var(--radius-md); }
 .prose pre code { background: none; color: inherit; }
 /* <sup> comes from glyph normalisation of superscript digits (src/lib/glyphs.ts); line-height 0 stops it pushing lines apart. */
 .prose sup { line-height: 0; font-size: 0.7em; }
@@ -227,7 +244,7 @@ table { border-collapse: collapse; width: 100%; }
 /* Data tables used in docs ----------------------------------------------- */
 .data-table { font-size: var(--fs-sm); }
 .data-table th, .data-table td { border-bottom: 1px solid var(--qw-line); padding: 0.6rem 0.75rem; text-align: left; vertical-align: top; }
-.data-table th { font-weight: var(--fw-semibold); background: var(--qw-canvas); position: sticky; top: 0; }
+.data-table th { font-weight: var(--fw-semibold); background: var(--qw-mint-50); position: sticky; top: 0; }
 .table-scroll { overflow-x: auto; border: 1px solid var(--qw-line); border-radius: var(--radius-md); }
 
 /* Motion: restrained reveal, disabled for reduced motion ---------------- */

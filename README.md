@@ -44,15 +44,15 @@ A clickable, code-first prototype of the rebuilt **qualityworkscg.com**, built f
 | Task | QM-113 (prototype). The approved sitemap QM-41 is in Jira and was not accessible to this project |
 | Audience | Janique (review), developers (handoff), QA (test evidence), marketing (content decisions) |
 | What it is *not* | Not a production site. Not connected to HubSpot, BambooHR, analytics or a CMS. No real form submissions |
-| Review history | Round 1 corrections: `docs/11-review-resolution.md`. Round 2: `docs/14-review-round-2.md` |
+| Review history | Round 1 corrections: `docs/11-review-resolution.md`. Round 2: `docs/14-review-round-2.md`. Visual revision: `docs/15-visual-revision.md` |
 
-The **review build** (`npm run build`) has **101 pages**. The **release output** (`npm run build:release`) keeps 80 HTML pages, because it drops the review-only routes (`/prototype/*`, `/design-system/`) and event records marked `fixture` or `not-verified`. The review build contains:
+The **review build** (`npm run build`) has **102 pages**. The **release output** (`npm run build:release`) keeps 80 HTML pages, because it drops the review-only routes (`/prototype/*`, `/design-system/`) and event records marked `fixture` or `not-verified`. The review build contains:
 - the homepage, solutions (services) and engagement models;
 - 3 product pages and a products overview;
 - 10 industry/audience pages and 17 case studies;
 - the resources hub, blog with 12 migrated articles, and events;
 - about, careers and contact;
-- review-only pages: the Review hub with 14 documents, a claims register, and a design-system page.
+- review-only pages: the Review hub with 15 documents, a claims register, and a design-system page.
 
 ---
 
@@ -117,7 +117,7 @@ Start reviewing at **`/prototype/`** (the Review hub). Toggle **“Review annota
 | Language | TypeScript (data, helpers), `.astro` (components/pages), plain CSS | Typed content model, no CSS framework lock-in |
 | Client JavaScript | About 10 KB of small modules (menus, filters, contact form, careers/agents toggles) | Pages read fine without JS; only interactions need it |
 | Content storage | TypeScript modules in `src/data/` + raw WordPress JSON snapshots | CMS-agnostic schemas that map 1:1 to a future CMS |
-| Fonts | Red Hat Display / Red Hat Mono, self-hosted woff2 (SIL OFL) | Same family as the live site; no third-party font requests |
+| Fonts | Montserrat (display) + Lato (body), self-hosted woff2 (SIL OFL) | Specified by the QualityWorks Brand Guidelines v1.0; no third-party font requests |
 | Runtime dependency | `astro` | |
 | Dev dependency | `axe-core@4.10` | Accessibility checks inside the QA script |
 | Machine tools (not in package.json) | Playwright + Chromium; ImageMagick (`convert`) for `fetch-media.sh`; Python 3 + BeautifulSoup for audit helpers | |
@@ -136,7 +136,8 @@ qualityworks-prototype/
 ├── docs/                        project documents 01–14 (also rendered at /prototype/NN-name/)
 │   └── _manual-qa.md            manual inspection log merged into doc 07 by qa-report.mjs
 ├── public/                      copied verbatim to the site root
-│   ├── fonts/                   self-hosted Red Hat Display / Mono woff2 files
+│   ├── fonts/                   self-hosted Montserrat and Lato woff2 files
+│   ├── people/                  header photographs (WebP, from the live site; see src/data/peopleImagery.ts)
 │   ├── brand/                   logo, Clutch badges, CEO portrait (from the live site)
 │   └── media/                   resized featured images for articles and case studies
 ├── qa-output/                   generated QA evidence (results.json, perf-local.json, evidence/*.png)
@@ -171,6 +172,7 @@ qualityworks-prototype/
     │   ├── altText.ts           written alt text for case-study and article images
     │   ├── redirects.json       legacy slug → public slug renames (only home of legacy slugs)
     │   ├── integrity.ts         build-time cross-reference check (unknown related slugs fail the build)
+    │   ├── peopleImagery.ts     header photographs: source URL, alt text, crop focus, licence status
     │   └── migrated/            raw WordPress snapshots (never edited by hand)
     ├── lib/
     │   ├── release.ts           RELEASE / REVIEW flags and rn() helper
@@ -316,14 +318,16 @@ The full field-by-field documentation is in `src/data/types.ts`, and the rationa
 
 ## 12. Design system
 - **Tokens** (`src/styles/tokens.css`), rendered live at `/design-system/`:
-  - colour: logo teal `#289DAD`; interactive teal `#1B7480` (5.45:1 contrast on white); logo green `#8FC640`; ink and slate neutrals;
-  - fluid type scale;
+  - colour (Brand Guidelines v1.0): Green `#2CAF81`, Teal `#29A59A`, Blue `#289DAD`, Mint `#ECF7F6`, the slate canvas `#1A212B`–`#424D5B`, plus derived teal-700 `#1D766F` for small text on light (5.42:1);
+  - fonts: `--font-display` (Montserrat) and `--font-body` (Lato), defined once;
+  - fluid type scale aligned to the guide (D1 44, D2 30, heading 22, eyebrow 13, body 17);
   - 4 px spacing scale;
   - radii, shadows and motion (all disabled under reduced motion).
 - **Surfaces:** `.surface-dark`, `.surface-product`, `.surface-tint` and `.surface-alt` remap the semantic tokens (`--color-text`, `--color-link`…), so components work on any background.
 - **Shared grammar** (`src/styles/global.css`): buttons (one pill style, three variants, two sizes), card shell, badges, checklists, forms, prose for migrated articles, and focus rings.
-- **Typography:** Red Hat Display for everything; Red Hat Mono only for code. The brand-kit fonts have not been supplied to the project (pending, doc 14 §E).
-- Rationale and contrast table: `docs/02-design-direction.md`.
+- **Typography:** Montserrat for headings, buttons, navigation, labels and eyebrows; Lato for paragraph copy and captions; system monospace for code (doc 15 §3).
+- **People imagery:** `PageHero` takes an `image` prop (`peopleImage('id')`); the homepage hero has its own full-width photo layout. Photos and their licence status live in `src/data/peopleImagery.ts` (doc 15 §1).
+- Rationale and contrast table: `docs/02-design-direction.md`; visual revision change log: `docs/15-visual-revision.md`.
 
 ---
 
@@ -442,6 +446,7 @@ Details: `docs/13-integrations-platform.md`.
 | 12 | Review tooling isolation and release cleanup |
 | 13 | Integrations, CMS, privacy, performance, hosting, launch risks |
 | 14 | Review round 2 resolution report |
+| 15 | Visual revision change log (people imagery, brand colours, Montserrat + Lato) |
 
 All of these are also readable inside the site at `/prototype/`.
 
@@ -478,8 +483,9 @@ All of these are also readable inside the site at `/prototype/`.
   - only Chromium has been tested (not Safari, Firefox or Edge);
   - there has been no screen-reader walkthrough;
   - performance has been measured locally only.
-- **Decisions for Janique** (doc 14 §E):
-  - brand-kit fonts;
+- **Decisions for Janique** (doc 14 §E and doc 15 §6):
+  - body typeface (Lato per the brand guide, or Montserrat everywhere), derived colour shades and colour-role mapping;
+  - licence for the live-site header photos, and authentic team photography;
   - corporate repository and hosting;
   - service terminology;
   - migrated-article wording;

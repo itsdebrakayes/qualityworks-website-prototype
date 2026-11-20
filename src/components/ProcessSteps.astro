@@ -45,7 +45,7 @@ const { steps } = Astro.props;
   /* ...with a short 3rem accent segment drawn over the start of that rule (top:-2px overlaps the border). */
   .steps__item::before { content: ""; position: absolute; top: -2px; left: 0; width: 3rem; height: 2px; background: var(--qw-teal-500); }
   /* On dark/product surfaces the accent switches to logo green, which is the accent-on-dark colour (doc 02). */
-  .surface-dark .steps__item::before, .surface-product .steps__item::before { background: var(--qw-green-400); }
+  .surface-dark .steps__item::before, .surface-product .steps__item::before { background: var(--qw-green-500); }
   .steps__index { font: var(--fw-medium) var(--fs-sm)/1 var(--font-mono); color: var(--color-muted); }
   .steps__title { font-size: var(--fs-md); margin: var(--space-3) 0 var(--space-2); }
   .steps__item p { font-size: var(--fs-sm); color: var(--color-muted); margin: 0; }

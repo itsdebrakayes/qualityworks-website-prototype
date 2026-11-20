@@ -29,6 +29,8 @@ import { RELEASE, REVIEW } from '../../lib/release';
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
+// People photograph for the header (visual revision, docs/15).
+import { peopleImage } from '../../data/peopleImagery';
 import SectionHeading from '../../components/SectionHeading.astro';
 import EmptyState from '../../components/EmptyState.astro';
 import Alert from '../../components/Alert.astro';
@@ -46,7 +48,7 @@ const benefits = [
 const workModel = { remote: 'Remote', hybrid: 'Hybrid', 'on-site': 'On-site' };
 ---
 <BaseLayout seo={{ title: 'Careers at QualityWorks | Join the Team', description: 'Join QualityWorks: flexible work, a culture that welcomes individuality, and room to shape your future. See open roles and apply through our BambooHR careers site.' }} breadcrumbs={crumbs}>
-  <PageHero eyebrow="Careers" title="Join the dream team" lede="We’re always on the lookout for people who are ready to shake things up and make a meaningful impact. If that’s you, welcome." breadcrumbs={crumbs} primary={{ label: 'See open roles', href: '#open-roles' }} />
+  <PageHero image={peopleImage('careers-colleagues')} eyebrow="Careers" title="Join the dream team" lede="We’re always on the lookout for people who are ready to shake things up and make a meaningful impact. If that’s you, welcome." breadcrumbs={crumbs} primary={{ label: 'See open roles', href: '#open-roles' }} />
   {/* Benefits of working here. */}
   <section class="section" aria-labelledby="benefits-title">
     <div class="container">
@@ -111,8 +113,8 @@ const workModel = { remote: 'Remote', hybrid: 'Hybrid', 'on-site': 'On-site' };
   </section>
 </BaseLayout>
 <style>
-  /* Benefit cards: decorative 3px top rule in logo green (#8FC640). */
-  .benefit { padding: var(--space-6); border: 1px solid var(--color-border); border-radius: var(--radius-lg); border-top: 3px solid var(--qw-green-400); }
+  /* Benefit cards: decorative 3px top rule in logo green (var(--qw-green-500)). */
+  .benefit { padding: var(--space-6); border: 1px solid var(--color-border); border-radius: var(--radius-lg); border-top: 3px solid var(--qw-green-500); }
   .benefit h3 { font-size: var(--fs-md); }
   .benefit p { margin: 0; color: var(--color-muted); }
   /* Prototype control: dashed gold (#C99A2E) border on pale yellow, the same review-note colour global.css
@@ -126,11 +128,11 @@ const workModel = { remote: 'Remote', hybrid: 'Hybrid', 'on-site': 'On-site' };
      Expired jobs get a canvas background and muted title. */
   .jobs { list-style: none; padding: 0; margin: 0 0 var(--space-4); display: grid; gap: var(--space-3); }
   .job { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--space-4); padding: var(--space-5) var(--space-6); background: #fff; border: 1px solid var(--qw-line); border-radius: var(--radius-lg); }
-  .job--expired { background: var(--qw-canvas); }
-  .job--expired .job__title { color: var(--qw-slate-500); }
+  .job--expired { background: var(--qw-mint-50); }
+  .job--expired .job__title { color: var(--qw-muted); }
   .job__title { font-size: var(--fs-md); margin-bottom: var(--space-2); }
-  .job__meta { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); font-size: var(--fs-sm); color: var(--qw-slate-500); margin-bottom: var(--space-2); }
-  .job__closed { display: flex; gap: var(--space-2); align-items: center; font-size: var(--fs-sm); color: var(--qw-slate-500); margin: 0; }
+  .job__meta { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); font-size: var(--fs-sm); color: var(--qw-muted); margin-bottom: var(--space-2); }
+  .job__closed { display: flex; gap: var(--space-2); align-items: center; font-size: var(--fs-sm); color: var(--qw-muted); margin: 0; }
 </style>
 <script>
   // Prototype state switch: show only the panel whose data-state matches the chosen radio. In release builds

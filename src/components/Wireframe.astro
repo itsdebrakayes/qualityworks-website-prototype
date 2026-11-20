@@ -43,18 +43,18 @@ const { title, decision, owner = 'Product owner' } = Astro.props;
   <slot />
 </div>
 <style>
-  /* Box: dashed border plus faint 45-degree hatching (12px stripes of slate #9AA7B4 at 7% alpha), the
+  /* Box: dashed border plus faint 45-degree hatching (12px stripes of ink-2 (#AEB8C1) at 7% alpha), the
      classic wireframe look, so nobody mistakes it for finished design. */
-  .wf { border: 2px dashed #B9C4CC; border-radius: var(--radius-lg); padding: var(--space-6); background: repeating-linear-gradient(-45deg, transparent 0 12px, rgba(154,167,180,0.07) 12px 24px); }
+  .wf { border: 2px dashed #B9C4CC; border-radius: var(--radius-lg); padding: var(--space-6); background: repeating-linear-gradient(-45deg, transparent 0 12px, color-mix(in srgb, var(--qw-ink-2) 7%, transparent) 12px 24px); }
   /* On dark surfaces use a translucent white border instead of the light grey. */
   .surface-product .wf, .surface-dark .wf { border-color: rgba(255,255,255,0.25); }
   /* Tag in warning amber (light) or gold (dark) so the "decision needed" status stands out. */
   .wf__tag { font-size: var(--fs-xs); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-warning); margin-bottom: var(--space-2); }
-  .surface-product .wf__tag, .surface-dark .wf__tag { color: var(--qw-gold-400); }
+  .surface-product .wf__tag, .surface-dark .wf__tag { color: var(--qw-caution); }
   .wf__title { font-weight: var(--fw-bold); font-size: var(--fs-md); color: var(--color-heading); margin-bottom: var(--space-2); }
   .wf__decision { font-size: var(--fs-sm); color: var(--color-text); }
   /* Placeholder lines: full, 85% and 60% width bars. */
   .wf__lines { display: grid; gap: 0.5rem; margin-top: var(--space-4); }
-  .wf__lines span { height: 0.6rem; border-radius: 4px; background: rgba(154,167,180,0.3); }
+  .wf__lines span { height: 0.6rem; border-radius: 4px; background: color-mix(in srgb, var(--qw-ink-2) 30%, transparent); }
   .wf__lines span:nth-child(2) { width: 85%; } .wf__lines span:nth-child(3) { width: 60%; }
 </style>

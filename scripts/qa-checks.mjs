@@ -15,7 +15,7 @@
  *
  * WHAT IS CHECKED (ids QA-01 … QA-32; QM-112 mapping lives in qa-report.mjs)
  *   1 static per-page checks (headings, links, alt, titles, JSON-LD)   2 horizontal overflow at five
- *   widths + screenshots   3 axe-core WCAG A/AA   4 every glyph rendered in a Red Hat font
+ *   widths + screenshots   3 axe-core WCAG A/AA   4 every glyph rendered in a brand font (Montserrat / Lato)
  *   5 desktop mega-menu (mouse + keyboard + active state)   6 mobile drawer   7 homepage CTAs
  *   8 contact form states   9 case-study filters   10 resource filters   11 event states
  *   12 careers states   13 FAQ accordion + reduced motion   then runtime errors and Blocked items.
@@ -161,10 +161,11 @@ for (const r of keyRoutes.concat(['/industries/', '/products/', '/blog/', '/even
 }
 rec('QA-08', 'BR-12 A11y', '20 key pages (axe-core 4.10, WCAG 2.2 A/AA tags)', 'No automated WCAG A/AA violations incl. colour contrast', axeFindings.length === 0, axeFindings.length ? axeFindings.slice(0, 10).join(' | ') : '0 violations on 20 pages', '', 'Automated checks cover ~30–40% of WCAG; manual screen-reader testing still required');
 
-// ---- 4. Typography: every rendered glyph comes from Red Hat Display / Red Hat Mono
+// ---- 4. Typography: every rendered glyph comes from Montserrat (display) or Lato (body)
 // Uses the DevTools Protocol (CSS.getPlatformFontsForNode) to ask Chromium which font actually drew the
-// glyphs of every element; any family other than Red Hat Display / Mono is a finding. Elements that
-// cannot be queried are skipped (the empty catch).
+// glyphs of every element; any family other than Montserrat / Lato is a finding. Code samples
+// (code, pre, kbd, samp subtrees) are skipped: they deliberately use the system monospace stack
+// (--font-code). Elements that cannot be queried are skipped (the empty catch).
 const fontFindings = [];
 const cdp = await ctx.newCDPSession(page);
 await cdp.send('DOM.enable'); await cdp.send('CSS.enable');
@@ -173,7 +174,7 @@ for (const r of ['/', '/services/test-automation/', '/qualitywatcher-ai-tools/',
   await page.evaluate(() => document.fonts.ready);
   const { root } = await cdp.send('DOM.getDocument', { depth: -1, pierce: false });
   const nodes = [];
-  (function walk(n) { if (n.nodeType === 1 && !['SCRIPT', 'STYLE', 'HEAD', 'svg', 'NOSCRIPT', 'TITLE'].includes(n.nodeName)) nodes.push(n.nodeId); (n.children ?? []).forEach(walk); })(root);
+  (function walk(n) { if (['CODE', 'PRE', 'KBD', 'SAMP'].includes(n.nodeName)) return; if (n.nodeType === 1 && !['SCRIPT', 'STYLE', 'HEAD', 'svg', 'NOSCRIPT', 'TITLE'].includes(n.nodeName)) nodes.push(n.nodeId); (n.children ?? []).forEach(walk); })(root);
   const used = new Map();
   for (const id of nodes) {
     try {
@@ -181,10 +182,10 @@ for (const r of ['/', '/services/test-automation/', '/qualitywatcher-ai-tools/',
       for (const f of fonts) if (f.glyphCount > 0) used.set(f.familyName, (used.get(f.familyName) ?? 0) + f.glyphCount);
     } catch {}
   }
-  const off = [...used].filter(([fam]) => !/^Red Hat (Display|Mono)/.test(fam));
+  const off = [...used].filter(([fam]) => !/^(Montserrat|Lato)\b/.test(fam));
   if (off.length) fontFindings.push(`${r}: ${off.map(([f, n]) => `${f}×${n}`).join(', ')}`);
 }
-rec('QA-09', 'BR-17 Typography', '8 representative pages, every text node', 'All glyphs rendered in Red Hat Display / Red Hat Mono (no fallback font for any character)', fontFindings.length === 0, fontFindings.length ? fontFindings.join(' | ') : 'All glyphs on 8 pages rendered by Red Hat Display/Mono (via CDP CSS.getPlatformFontsForNode)', '');
+rec('QA-09', 'BR-17 Typography', '8 representative pages, every text node', 'All glyphs rendered in Montserrat / Lato (no fallback font for any character; code samples excluded)', fontFindings.length === 0, fontFindings.length ? fontFindings.join(' | ') : 'All glyphs on 8 pages rendered by Montserrat/Lato (via CDP CSS.getPlatformFontsForNode)', '');
 
 // ---- 5. Desktop mega-menu behaviour
 await page.goto(BASE + '/', { waitUntil: 'networkidle' });

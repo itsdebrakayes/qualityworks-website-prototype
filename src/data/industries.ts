@@ -147,5 +147,20 @@ export const industries: Industry[] = [
   })),
 ];
 
+// Header photographs (visual revision, docs/15-visual-revision.md). Ids refer to src/data/peopleImagery.ts;
+// every photo is already published on the matching live-site industry page or section. Public sector,
+// small business and media & entertainment have no suitable photograph of people on the live site, so
+// they keep the text-only header and are listed as required assets in docs/15 §6.
+const HERO_IMAGES: Record<string, string> = {
+  'finance-banking': 'finance-client-meeting',
+  healthcare: 'healthcare-pharmacy',
+  'social-impact': 'social-impact-volunteers',
+  insurance: 'insurance-advisor',
+  logistics: 'logistics-warehouse',
+  retail: 'retail-ecommerce',
+  technology: 'technology-pair',
+};
+for (const ind of industries) ind.heroImage = HERO_IMAGES[ind.slug];
+
 /** Find an industry/audience record by slug; undefined when not found. */
 export const industryBySlug = (slug: string) => industries.find((i) => i.slug === slug);

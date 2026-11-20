@@ -56,17 +56,16 @@ const headingId = `cta-band-${Math.random().toString(36).slice(2, 8)}`;
   </div>
 </section>
 <style>
-  /* Band: diagonal gradient from corporate ink (#16202B) to a deep teal-ink (#123C44). overflow hidden
-     clips the decorative ring motif below. */
-  .cta-band { position: relative; overflow: hidden; padding-block: var(--space-16); background: linear-gradient(120deg, var(--qw-ink-900) 0%, #123C44 100%); }
-  /* Brand gear-ring motif in logo green (#8FC640) at 14% alpha, a 30rem circle tucked off the bottom-right
-     corner. pointer-events none so it never blocks clicks on the buttons. */
-  .cta-band::after { content: ""; position: absolute; right: -8rem; bottom: -14rem; width: 30rem; height: 30rem; border-radius: 50%; background: repeating-radial-gradient(circle, transparent 0 20px, rgba(143,198,64,0.14) 20px 21px); pointer-events: none; }
-  /* z-index 1 keeps the copy and buttons above the ::after motif. */
+  /* Band: solid slate-800, the guide's page-background slate. The brand gradient is reserved for one
+     accent per page (the hero rule), so the band carries no gradient or decorative motif. On slate-800
+     the guide's teal is below 4.5:1 for small text, so the eyebrow and muted copy switch to ink-1. */
+  .cta-band { position: relative; overflow: hidden; padding-block: var(--space-16); background: var(--qw-slate-800);
+    --color-bg: var(--qw-slate-800); --color-eyebrow: var(--qw-ink-1); --color-muted: var(--qw-ink-1); --color-link: var(--qw-white); }
+  /* z-index 1 keeps the copy and buttons above any background layer. */
   .cta-band__inner { position: relative; z-index: 1; display: grid; gap: var(--space-8); align-items: end; }
   /* From 900px, text and buttons sit side by side; the button column takes only the width it needs. */
   @media (min-width: 900px) { .cta-band__inner { grid-template-columns: 1.5fr auto; } }
   .cta-band h2 { font-size: var(--fs-xl); max-width: 26ch; margin-bottom: var(--space-3); }
-  /* Muted on-dark text (slate-300 on ink is about 6.7:1, doc 02), capped at 46ch for readability. */
+  /* Supporting text in ink-1 (8.71:1 on slate-800), capped at 46ch for readability. */
   .cta-band__text { color: var(--color-muted); max-width: 46ch; margin: 0; }
 </style>

@@ -1,76 +1,101 @@
-/* Self-hosted from Google Fonts (SIL Open Font License). Red Hat Display = existing corporate typeface.
+/* BRAND FONTS — self-hosted from Google Fonts (SIL Open Font License 1.1).
 
-   WHAT: the @font-face rules for the brand fonts. Red Hat Display (variable: italic 400-700,
-   normal 300-900) is the text face; Red Hat Mono (400-600) is used only for code (see the
-   font-code token in tokens.css). The woff2 files live in public/fonts/.
+   WHAT: the @font-face rules for the two brand typefaces named in the QualityWorks Brand Guidelines
+   v1.0 ("03 — Typography"):
+     - Montserrat (display): headlines, card titles, buttons, eyebrows, navigation and form labels.
+       Variable font, weights 300-800 (the guide uses 500 / 600 / 700 / 800).
+     - Lato (body): paragraph copy, captions and form input text. Static weights 400, 700, 400 italic.
+   The tokens that apply them are --font-display and --font-body in src/styles/tokens.css. Red Hat
+   Display / Red Hat Mono were removed in the visual revision (docs/15-visual-revision.md §3).
 
-   WHY SELF-HOSTED: no request to a third-party font CDN, and the exact files (and therefore the
-   exact character coverage) are under version control.
+   WHY SELF-HOSTED: no request to a third-party font CDN at runtime (privacy, performance, no
+   dependency on Google availability) and the exact files, therefore the exact character coverage,
+   are under version control. Source URLs: fonts.googleapis.com/css2?family=Montserrat and ?family=Lato
+   (Montserrat v31; Lato v24), downloaded 20 Nov 2026.
 
-   SUBSETS: each face comes in two files, "latin" and "latin-ext", each with a unicode-range
-   descriptor so the browser downloads a file only when the page uses a character in its range.
+   SUBSETS: each face has a "latin" and a "latin-ext" file, each with a unicode-range descriptor so a
+   browser downloads a file only when a page uses a character in that range.
 
-   USED BY: imported by src/styles/global.css. scripts/glyph-lint.mjs READS THIS FILE: it collects
-   the ranges of the normal-style Red Hat Display rules and fails the build if any visible
-   character on a built page falls outside them (it would otherwise render in a fallback font).
+   USED BY: imported by src/styles/global.css. scripts/glyph-lint.mjs READS THIS FILE: it collects the
+   ranges of the normal-style Montserrat AND Lato rules and fails the build if any visible character
+   on a built page falls outside the ranges both fonts cover (it would render in a fallback font).
 
    GOTCHAS
      - Editing a unicode-range here changes what glyph-lint allows. Only widen it if the font file
        really contains those glyphs.
-     - glyph-lint matches the exact text layout of the declarations (family on its own line,
-       then style, then the range). Keep the format if you add or update a rule.
-     - font-display: swap shows fallback text until the font loads, avoiding invisible text. */
-/* latin-ext */
+     - glyph-lint matches the exact text layout of the declarations (family on its own line, then
+       style, then weight, display, src, range). Keep the format if you add or update a rule.
+     - font-display: swap shows fallback text until the font loads, avoiding invisible text. The
+       latin Montserrat file is preloaded in BaseLayout so headings do not swap late. */
+/* Montserrat · latin-ext */
 @font-face {
-  font-family: 'Red Hat Display';
-  font-style: italic;
-  font-weight: 400 700;
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 300 800;
   font-display: swap;
-  src: url(/fonts/8vIS7wUr0m80wwYf0QCXZzYzUoTg-A6tTY_9CQ.woff2) format('woff2');
+  src: url(/fonts/montserrat-latin-ext.woff2) format('woff2');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
-/* latin */
+/* Montserrat · latin */
 @font-face {
-  font-family: 'Red Hat Display';
-  font-style: italic;
-  font-weight: 400 700;
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 300 800;
   font-display: swap;
-  src: url(/fonts/8vIS7wUr0m80wwYf0QCXZzYzUoTg-A6jTY8.woff2) format('woff2');
+  src: url(/fonts/montserrat-latin.woff2) format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
-/* latin-ext */
+/* Lato 400 · latin-ext */
 @font-face {
-  font-family: 'Red Hat Display';
+  font-family: 'Lato';
   font-style: normal;
-  font-weight: 300 900;
+  font-weight: 400;
   font-display: swap;
-  src: url(/fonts/8vIQ7wUr0m80wwYf0QCXZzYzUoTg8z6hVYs.woff2) format('woff2');
+  src: url(/fonts/lato-400-latin-ext.woff2) format('woff2');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
-/* latin */
+/* Lato 400 · latin */
 @font-face {
-  font-family: 'Red Hat Display';
+  font-family: 'Lato';
   font-style: normal;
-  font-weight: 300 900;
+  font-weight: 400;
   font-display: swap;
-  src: url(/fonts/8vIQ7wUr0m80wwYf0QCXZzYzUoTg_T6h.woff2) format('woff2');
+  src: url(/fonts/lato-400-latin.woff2) format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
-/* latin-ext */
+/* Lato 700 · latin-ext */
 @font-face {
-  font-family: 'Red Hat Mono';
+  font-family: 'Lato';
   font-style: normal;
-  font-weight: 400 600;
+  font-weight: 700;
   font-display: swap;
-  src: url(/fonts/jVyN7nDnA2uf2zVvFAhhzEsUVuxSzgw.woff2) format('woff2');
+  src: url(/fonts/lato-700-latin-ext.woff2) format('woff2');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
-/* latin */
+/* Lato 700 · latin */
 @font-face {
-  font-family: 'Red Hat Mono';
+  font-family: 'Lato';
   font-style: normal;
-  font-weight: 400 600;
+  font-weight: 700;
   font-display: swap;
-  src: url(/fonts/jVyN7nDnA2uf2zVvFAhhzEsUWOxS.woff2) format('woff2');
+  src: url(/fonts/lato-700-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* Lato 400 italic · latin-ext */
+@font-face {
+  font-family: 'Lato';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/fonts/lato-400-italic-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* Lato 400 italic · latin */
+@font-face {
+  font-family: 'Lato';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/fonts/lato-400-italic-latin.woff2) format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }

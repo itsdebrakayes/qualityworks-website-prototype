@@ -58,7 +58,7 @@ const isCurrent = (href: string) => norm(href) === cur;
   <div class="container site-header__inner">
     {/* Logo: alt names the link destination rather than describing the image (review round 1, D1). */}
     <a class="site-header__logo" href="/">
-      <img src="/brand/qualityworks-logo-color.png" alt="QualityWorks Consulting Group home" width="175" height="38" />
+      <img src="/brand/qualityworks-wordmark-teal-on-slate.jpg" alt="QualityWorks Consulting Group home" width="677" height="156" />
     </a>
 
     {/* Desktop navigation, shown from 1024px. Each top-level item is a disclosure button plus a hidden panel. */}
@@ -138,7 +138,7 @@ const isCurrent = (href: string) => norm(href) === cur;
       inside and closes on Escape natively. */}
   <dialog class="drawer" id="mobile-nav" aria-label="Site navigation" data-drawer>
     <div class="drawer__top">
-      <a href="/" class="drawer__logo"><img src="/brand/qualityworks-logo-color.png" alt="QualityWorks Consulting Group home" width="150" height="33" /></a>
+      <a href="/" class="drawer__logo"><img src="/brand/qualityworks-wordmark-white.png" alt="QualityWorks Consulting Group home" width="291" height="63" /></a>
       <button type="button" class="drawer__close" data-drawer-close><Icon name="close" /><span class="visually-hidden">Close menu</span></button>
     </div>
     {/* Same primaryNav data as the desktop menu (AC-NAV-3). Each section is an accordion; the active section
@@ -176,9 +176,11 @@ const isCurrent = (href: string) => norm(href) === cur;
 </header>
 
 <style>
-  /* Bar: sticky dark ink header above page content (z-index token). The focus ring switches to logo green,
-     which reads clearly on ink (about 8:1). */
-  .site-header { position: sticky; top: 0; z-index: var(--z-header); background: var(--qw-ink-900); color: #fff; border-bottom: 1px solid rgba(255,255,255,0.08); --focus-ring: var(--qw-green-400); }
+  /* Bar: sticky header above page content (z-index token). Background is the guide's Slate 800, because the
+     supplied primary lockup (teal wordmark) is delivered on Slate 800 (/brand/qualityworks-wordmark-teal-on-slate.jpg,
+     background baked in). Keep the two in step. Nav text is ink-1 (8.71:1); the focus ring is the guide's
+     Green (3.73:1, above the 3:1 needed for focus indicators). */
+  .site-header { position: sticky; top: 0; z-index: var(--z-header); background: var(--qw-slate-800); color: #fff; border-bottom: 1px solid rgba(255,255,255,0.08); --focus-ring: var(--qw-green-500); }
   /* Bar height 72px. Triggers use the same min-height so their underline sits on the bottom edge. */
   .site-header__inner { display: flex; align-items: center; gap: var(--space-6); min-height: 72px; }
   .site-header__logo { flex: none; display: block; padding: 6px 0; }
@@ -190,25 +192,26 @@ const isCurrent = (href: string) => norm(href) === cur;
      .site-header (nearest positioned ancestor) and spans its full width, not the narrow list item. */
   .primary-nav__item { position: static; }
   /* Trigger: full bar height so hovering the trigger and entering the panel never crosses a gap.
-     #E6ECF0 on ink is about 13.8:1. nowrap stops two-word labels from breaking. */
-  .primary-nav__trigger { display: inline-flex; align-items: center; gap: 0.3rem; min-height: 72px; padding: 0 0.7rem; background: none; border: 0; color: #E6ECF0; font: var(--fw-medium) var(--fs-sm)/1 var(--font-sans); cursor: pointer; position: relative; white-space: nowrap; }
+     ink-1 on slate-800 is 8.71:1. Navigation uses the display face (guide: UI text in Montserrat). nowrap stops
+     two-word labels from breaking. */
+  .primary-nav__trigger { display: inline-flex; align-items: center; gap: 0.3rem; min-height: 72px; padding: 0 0.7rem; background: none; border: 0; color: var(--qw-ink-1); font: var(--fw-medium) var(--fs-sm)/1 var(--font-display); cursor: pointer; position: relative; white-space: nowrap; }
   /* Chevron rotates 180deg while the panel is open. */
   .primary-nav__trigger :global(svg) { width: 15px; height: 15px; transition: transform var(--dur-base) var(--ease-out); opacity: 0.8; }
   .primary-nav__trigger[aria-expanded="true"] :global(svg) { transform: rotate(180deg); }
   /* Underline indicator: a 3px bar along the bottom edge, transparent by default. Open = 35% white;
-     active section = logo green. */
+     active section = the guide's Green. */
   .primary-nav__trigger::after { content: ""; position: absolute; left: 0.7rem; right: 0.7rem; bottom: 0; height: 3px; border-radius: 3px 3px 0 0; background: transparent; transition: background var(--dur-base); }
   .primary-nav__trigger:hover, .primary-nav__trigger[aria-expanded="true"] { color: #fff; }
   .primary-nav__trigger[aria-expanded="true"]::after { background: rgba(255,255,255,0.35); }
   .primary-nav__item.is-active .primary-nav__trigger { color: #fff; }
-  .primary-nav__item.is-active .primary-nav__trigger::after { background: var(--qw-green-400); }
+  .primary-nav__item.is-active .primary-nav__trigger::after { background: var(--qw-green-500); }
   /* Inset the focus ring (-4px) so it is drawn inside the full-height trigger. */
   .primary-nav__trigger:focus-visible { outline-offset: -4px; }
 
   /* Mega panel: anchored to the header bottom edge (top:100%), so there is no hover gap. */
   /* The panel is a white surface inside the dark header, so it re-maps the colour tokens (focus ring,
      link, muted, accent) back to their on-light values. */
-  .mega { position: absolute; left: 0; right: 0; top: 100%; background: #fff; color: var(--qw-slate-700); border-top: 1px solid var(--qw-line); box-shadow: var(--shadow-lg); --focus-ring: var(--qw-teal-700); --color-link: var(--qw-teal-700); --color-muted: var(--qw-slate-500); --color-accent: var(--qw-teal-500); }
+  .mega { position: absolute; left: 0; right: 0; top: 100%; background: #fff; color: var(--qw-slate-800); border-top: 1px solid var(--qw-line); box-shadow: var(--shadow-lg); --focus-ring: var(--qw-teal-700); --color-link: var(--qw-teal-700); --color-muted: var(--qw-muted); --color-accent: var(--qw-teal-500); }
   .mega[hidden] { display: none; }
   /* Inner: same width as the page container; link groups on the left, a 17rem aside on the right. */
   .mega__inner { max-width: calc(var(--container) + 2 * var(--gutter)); margin: 0 auto; padding: var(--space-8) var(--gutter) var(--space-10); display: grid; grid-template-columns: 1fr 17rem; gap: var(--space-10); }
@@ -216,33 +219,33 @@ const isCurrent = (href: string) => norm(href) === cur;
      14-22rem column instead of stretching. */
   .mega__groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: var(--space-8); }
   .mega:not(.mega--wide) .mega__groups { grid-template-columns: minmax(14rem, 22rem); }
-  .mega__heading { font: var(--fw-medium) var(--fs-xs)/1.3 var(--font-mono); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-slate-500); margin: 0 0 var(--space-3); padding-bottom: var(--space-2); border-bottom: 1px solid var(--qw-line); }
+  .mega__heading { font: var(--fw-medium) var(--fs-xs)/1.3 var(--font-mono); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-muted); margin: 0 0 var(--space-3); padding-bottom: var(--space-2); border-bottom: 1px solid var(--qw-line); }
   .mega ul { list-style: none; margin: 0; padding: 0; }
   /* Link rows: the negative inline margin cancels the padding, so link text lines up with the group
      heading while the hover background extends past it. */
-  .mega__group a { display: block; padding: 0.5rem 0.6rem; margin-inline: -0.6rem; border-radius: var(--radius-sm); text-decoration: none; color: var(--qw-ink-900); }
-  .mega__group a:hover { background: var(--qw-teal-50); }
+  .mega__group a { display: block; padding: 0.5rem 0.6rem; margin-inline: -0.6rem; border-radius: var(--radius-sm); text-decoration: none; color: var(--qw-slate-900); }
+  .mega__group a:hover { background: var(--qw-mint-50); }
   /* Current page: tinted background plus a 3px inset teal bar on the left (not colour alone). */
-  .mega__group a[aria-current="page"] { background: var(--qw-teal-50); box-shadow: inset 3px 0 0 var(--qw-teal-700); }
+  .mega__group a[aria-current="page"] { background: var(--qw-mint-50); box-shadow: inset 3px 0 0 var(--qw-teal-700); }
   .mega__label { display: inline-flex; align-items: center; gap: 0.35rem; font-weight: var(--fw-semibold); font-size: var(--fs-sm); }
-  .mega__label :global(.mega__ext) { width: 13px; height: 13px; color: var(--qw-slate-500); }
-  .mega__desc { display: block; font-size: var(--fs-xs); color: var(--qw-slate-500); line-height: 1.4; margin-top: 2px; }
-  .mega__aside { background: var(--qw-canvas); border-radius: var(--radius-lg); padding: var(--space-6); align-self: start; }
-  .mega__feature-title { font-weight: var(--fw-bold); font-size: var(--fs-md); color: var(--qw-ink-900); margin-bottom: var(--space-2); line-height: 1.25; }
-  .mega__feature-text { font-size: var(--fs-sm); color: var(--qw-slate-500); }
+  .mega__label :global(.mega__ext) { width: 13px; height: 13px; color: var(--qw-muted); }
+  .mega__desc { display: block; font-size: var(--fs-xs); color: var(--qw-muted); line-height: 1.4; margin-top: 2px; }
+  .mega__aside { background: var(--qw-mint-50); border-radius: var(--radius-lg); padding: var(--space-6); align-self: start; }
+  .mega__feature-title { font-family: var(--font-display); font-weight: var(--fw-bold); font-size: var(--fs-md); color: var(--qw-slate-900); margin-bottom: var(--space-2); line-height: 1.25; }
+  .mega__feature-text { font-size: var(--fs-sm); color: var(--qw-muted); }
   /* Proposed-page dot: hidden unless <html> has the review-mode class (toggled by ProtoBar). :global is
      needed because that class sits on <html>, outside this component. The white outline separates
      the gold dot from the hover background. */
   .proposed-dot { display: none; }
-  :global(html.review-mode) .proposed-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--qw-gold-400); outline: 2px solid #fff; }
+  :global(html.review-mode) .proposed-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--qw-caution); outline: 2px solid #fff; }
 
   /* Actions: margin-left auto pushes the CTA and Menu button to the right edge when the nav is hidden. */
   .site-header__actions { display: flex; align-items: center; gap: var(--space-3); margin-left: auto; }
-  /* Header CTA uses interactive teal (#1B7480, 5.45:1 with white text), darker on hover. */
-  .site-header__actions :global(.btn) { --btn-bg: var(--qw-teal-700); white-space: nowrap; }
-  .site-header__actions :global(.btn:hover) { --btn-bg: var(--qw-teal-800); }
+  /* Header CTA uses interactive teal (var(--qw-teal-700), 5.45:1 with white text), darker on hover. */
+  /* Header CTA uses the standard primary button (brand Teal, slate-900 text); only wrapping is prevented. */
+  .site-header__actions :global(.btn) { white-space: nowrap; }
   /* Menu button: at least 44x44px (touch target); outlined pill in 35% white. */
-  .menu-button { display: inline-flex; align-items: center; gap: 0.4rem; min-height: 44px; min-width: 44px; padding: 0 0.85rem; border: 1.5px solid rgba(255,255,255,0.35); border-radius: var(--radius-pill); background: transparent; color: #fff; font: var(--fw-semibold) var(--fs-sm)/1 var(--font-sans); cursor: pointer; }
+  .menu-button { display: inline-flex; align-items: center; gap: 0.4rem; min-height: 44px; min-width: 44px; padding: 0 0.85rem; border: 1.5px solid rgba(255,255,255,0.35); border-radius: var(--radius-pill); background: transparent; color: #fff; font: var(--fw-semibold) var(--fs-sm)/1 var(--font-display); cursor: pointer; }
   .menu-button :global(svg) { width: 20px; height: 20px; }
 
   /* Breakpoint: from 1024px show the mega-menu and hide the Menu button. Keep in sync with the
@@ -267,37 +270,41 @@ const isCurrent = (href: string) => norm(href) === cur;
   /* Drawer */
   /* Docked to the right (margin-left auto), full height, at most 26rem wide. 100dvh follows the
      visible viewport when mobile browser toolbars show or hide. overflow-y lets long menus scroll. */
-  .drawer { margin: 0 0 0 auto; height: 100dvh; max-height: 100dvh; width: min(100vw, 26rem); max-width: 100vw; padding: 0; border: 0; background: var(--qw-ink-900); color: #fff; overflow-y: auto; --focus-ring: var(--qw-green-400); }
+  .drawer { margin: 0 0 0 auto; height: 100dvh; max-height: 100dvh; width: min(100vw, 26rem); max-width: 100vw; padding: 0; border: 0; background: var(--qw-slate-900); color: #fff; overflow-y: auto; --focus-ring: var(--qw-green-500); }
   /* Dim the page behind the modal: ink at 60% opacity. */
-  .drawer::backdrop { background: rgba(8, 14, 20, 0.6); }
+  .drawer::backdrop { background: rgba(26, 33, 43, 0.6); }
   /* A closed <dialog> is display:none by default; when open, a flex column lets the CTA sit at the bottom. */
   .drawer[open] { display: flex; flex-direction: column; }
   /* Short slide-in only for visitors who have not asked for reduced motion. */
   @media (prefers-reduced-motion: no-preference) { .drawer[open] { animation: slide-in var(--dur-slow) var(--ease-out); } }
   @keyframes slide-in { from { transform: translateX(30px); opacity: 0; } }
   /* Drawer top bar (logo + Close) stays pinned while the list scrolls; its own background hides content beneath. */
-  .drawer__top { display: flex; justify-content: space-between; align-items: center; padding: var(--space-4) var(--space-5); border-bottom: 1px solid rgba(255,255,255,0.1); position: sticky; top: 0; background: var(--qw-ink-900); z-index: 1; }
+  /* Drawer wordmark: the supplied white reversed wordmark, sized like the header logo (guide minimum 120px). */
+  .drawer__logo img { width: 150px; height: auto; }
+  /* Menu link labels use the display face like the rest of the navigation; descriptions stay in the body face. */
+  .mega__label, .drawer__group a, .drawer__overview { font-family: var(--font-display); }
+  .drawer__top { display: flex; justify-content: space-between; align-items: center; padding: var(--space-4) var(--space-5); border-bottom: 1px solid rgba(255,255,255,0.1); position: sticky; top: 0; background: var(--qw-slate-900); z-index: 1; }
   /* Close button: 44x44px touch target. */
   .drawer__close { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.35); background: none; color: #fff; cursor: pointer; }
   .drawer__list { list-style: none; margin: 0; padding: var(--space-2) var(--space-5); }
   .drawer__item { border-bottom: 1px solid rgba(255,255,255,0.1); }
   /* Accordion trigger: full-width 56px row. */
-  .drawer__trigger { width: 100%; display: flex; justify-content: space-between; align-items: center; min-height: 56px; background: none; border: 0; color: #fff; font: var(--fw-semibold) var(--fs-md)/1.2 var(--font-sans); cursor: pointer; text-align: left; padding: 0; }
+  .drawer__trigger { width: 100%; display: flex; justify-content: space-between; align-items: center; min-height: 56px; background: none; border: 0; color: #fff; font: var(--fw-semibold) var(--fs-md)/1.2 var(--font-display); cursor: pointer; text-align: left; padding: 0; }
   /* Active section: a 3px logo-green underline under its label (inset box-shadow, so no layout shift). */
-  .drawer__item.is-active > .drawer__trigger span { box-shadow: inset 0 -3px 0 var(--qw-green-400); }
+  .drawer__item.is-active > .drawer__trigger span { box-shadow: inset 0 -3px 0 var(--qw-green-500); }
   .drawer__trigger :global(svg) { transition: transform var(--dur-base); }
   .drawer__trigger[aria-expanded="true"] :global(svg) { transform: rotate(180deg); }
   .drawer__panel { padding: 0 0 var(--space-5); }
   /* Defensive: keep collapsed panels hidden whatever display rules apply. */
   .drawer__panel[hidden] { display: none; }
-  .drawer__overview { display: inline-block; margin-bottom: var(--space-3); color: var(--qw-teal-300); font-weight: var(--fw-semibold); }
-  .drawer__heading { font: var(--fw-medium) var(--fs-xs)/1.3 var(--font-mono); text-transform: uppercase; letter-spacing: var(--tracking-label); color: var(--qw-slate-300); margin: var(--space-3) 0 var(--space-2); }
+  .drawer__overview { display: inline-block; margin-bottom: var(--space-3); color: var(--qw-teal-500); font-weight: var(--fw-semibold); }
+  .drawer__heading { font: var(--fw-medium) var(--fs-xs)/1.3 var(--font-mono); text-transform: uppercase; letter-spacing: var(--tracking-label); color: var(--qw-ink-2); margin: var(--space-3) 0 var(--space-2); }
   .drawer__group ul { list-style: none; margin: 0; padding: 0; }
-  /* Drawer links: at least 44px tall for touch; #E6ECF0 on ink. */
-  .drawer__group a { display: flex; align-items: center; gap: 0.4rem; min-height: 44px; color: #E6ECF0; text-decoration: none; font-size: var(--fs-base); }
+  /* Drawer links: at least 44px tall for touch; var(--qw-ink-1) on ink. */
+  .drawer__group a { display: flex; align-items: center; gap: 0.4rem; min-height: 44px; color: var(--qw-ink-1); text-decoration: none; font-size: var(--fs-base); }
   .drawer__group a :global(svg) { width: 14px; height: 14px; opacity: 0.7; }
   /* Current page: logo green AND bold, so it does not rely on colour alone. */
-  .drawer__group a[aria-current="page"], .drawer__overview[aria-current="page"] { color: var(--qw-green-400); font-weight: var(--fw-bold); }
+  .drawer__group a[aria-current="page"], .drawer__overview[aria-current="page"] { color: var(--qw-green-500); font-weight: var(--fw-bold); }
   /* CTA pinned to the bottom of the drawer (margin-top auto in the flex column); full-width button. */
   .drawer__cta { padding: var(--space-6) var(--space-5) var(--space-10); margin-top: auto; }
   .drawer__cta :global(.btn) { width: 100%; }

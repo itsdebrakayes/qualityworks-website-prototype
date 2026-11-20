@@ -1,6 +1,6 @@
 /**
  * GLYPH NORMALISATION (typography QA rule BR-17).
- * Red Hat Display does not contain some characters found in migrated WordPress content, which made
+ * The brand fonts (Montserrat, Lato; Latin subsets) do not contain some characters found in migrated WordPress content, which made
  * single characters render in a fallback font. These rules keep meaning but stay inside the brand
  * font. Every rule is listed in docs/04-content-schemas.md for content-owner sign-off.
  *

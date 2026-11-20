@@ -45,7 +45,7 @@ qualityworks-prototype/
     │   └── *.ts / *.json     One module per content type (services, caseStudies, articles, …)
     ├── lib/                  Small framework-free helpers (filters, schema.org, glyphs, release mode)
     ├── styles/               tokens.css (design tokens) + global.css (shared component grammar)
-    ├── fonts.css             @font-face rules for the self-hosted Red Hat fonts
+    ├── fonts.css             @font-face rules for the self-hosted brand fonts (Montserrat, Lato)
     ├── layouts/              BaseLayout.astro: <head>, SEO, header, footer, prototype bar
     ├── components/           Reusable UI pieces (cards, buttons, forms, header…)
     │   └── templates/        Page-level templates reused by several routes (ServiceTemplate)
@@ -167,6 +167,16 @@ Create `src/pages/my-page/index.astro`, wrap the content in `BaseLayout` with a 
 Add a block to `scripts/qa-checks.mjs` using `rec(id, requirement, area, expected, pass, actual, evidence, issue)`. Map the new ID to its QM-112 requirement in `QM112` inside `scripts/qa-report.mjs`. A check that cannot run (missing access) records `pass = null`, which reports **Blocked**, never Pass.
 
 ---
+
+### 4.10 Add a people photograph to a page header
+1. Use a photo QualityWorks has the right to publish (the live site's images or approved team photography). Never use AI-generated people, and never describe stock subjects as staff or clients.
+2. Export WebP files at 800 and 1600px wide (plus 2400px for a full-width hero) to `public/people/{id}-{width}.webp`.
+3. Add a record to `src/data/peopleImagery.ts`: `alt` (what is visible, neutral), `focus` (CSS object-position that keeps faces in frame), `sourceUrl` and `licence`.
+4. Pass it to the header: `<PageHero image={peopleImage('id')} … />`, or set `heroImage` on an industry record. Check the crop at 390, 820 and 1440px.
+5. One photo per header. Do not add photos to body sections as decoration (doc 15 §4 lists the pages deliberately left without one).
+
+### 4.11 Colours and fonts
+Colours and fonts come from the *QualityWorks Brand Guidelines v1.0* and are defined only in `src/styles/tokens.css`. Use semantic tokens (`--color-link`, `--color-eyebrow`, `--color-primary`) or brand primitives (`--qw-teal-500`), never hex values. Headings, buttons, navigation, labels and eyebrows inherit Montserrat (`--font-display`); everything else inherits Lato (`--font-body`). Name a new title or label element with a BEM `__title`, `__heading` or `__label` suffix and it picks up the display face automatically. Before using a brand colour for small text, check its contrast (doc 02 §4): Teal and Green fail as text on white, so use `--qw-teal-700` there. The brand gradient (`.brand-rule`) appears once per page only.
 
 ## 5. Data model cheat sheet
 The full schemas are in `src/data/types.ts` and the reasoning is in `docs/04-content-schemas.md`. Every record carries **`provenance`**:

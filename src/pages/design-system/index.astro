@@ -106,7 +106,7 @@ const inventory = [
   {/* Colour: swatches rendered from tokens.css, with the token's own comment as the note. */}
   <section class="section" aria-labelledby="color-title">
     <div class="container">
-      <SectionHeading eyebrow="Tokens" title="Colour" lede="Exact logo teal (#289DAD) and logo green (#8FC640) are retained. Interactive teal is darkened to #1B7480 so white text passes WCAG AA (the live #289DAD button is 3.2:1)." id="color-title" />
+      <SectionHeading eyebrow="Tokens" title="Colour" lede="From the QualityWorks Brand Guidelines v1.0: Green #2CAF81, Teal #29A59A, Blue #289DAD, Mint #ECF7F6 and the slate canvas. Primary buttons use Teal with slate-900 text (4.73:1). Teal-700 (#1D766F) is a derived text shade for links and eyebrows on light surfaces, because the guide teal is 3.02:1 on white." id="color-title" />
       <ul class="swatches">
         {colors.map((c) => (
           <li><span class="sw" style={`background:${c.value}`}></span><code>{c.name}</code><span class="sw__v">{c.value}</span>{c.note && <span class="sw__n">{c.note}</span>}</li>
@@ -118,15 +118,15 @@ const inventory = [
   {/* Typography: specimen lines plus the font-size, line-height and weight tokens. */}
   <section class="section surface-alt" aria-labelledby="type-title">
     <div class="container">
-      <SectionHeading eyebrow="Tokens" title="Typography" lede="Red Hat Display (the existing corporate face) for everything; Red Hat Mono — same superfamily — only for technical labels. Self-hosted, font-synthesis disabled." id="type-title" />
+      <SectionHeading eyebrow="Tokens" title="Typography" lede="Brand Guidelines v1.0: Montserrat (display) for headlines, card titles, buttons, eyebrows and navigation; Lato (body) for paragraph copy and captions. Both self-hosted; font-synthesis disabled; code samples use the system monospace." id="type-title" />
       <div class="type-specimen">
-        <p class="ts" style="font-size:var(--fs-3xl);font-weight:700;line-height:1.08;letter-spacing:-0.02em">Display 3xl — Engineered</p>
-        <p class="ts" style="font-size:var(--fs-2xl);font-weight:700;letter-spacing:-0.02em">Heading 2xl — Section title</p>
-        <p class="ts" style="font-size:var(--fs-xl);font-weight:700">Heading xl — Sub-section</p>
-        <p class="ts" style="font-size:var(--fs-lg);font-weight:700">Heading lg — Card title</p>
+        <p class="ts" style="font-family:var(--font-display);font-size:var(--fs-3xl);font-weight:800;line-height:1.08;letter-spacing:-0.015em">Display 3xl — Engineered</p>
+        <p class="ts" style="font-family:var(--font-display);font-size:var(--fs-2xl);font-weight:800;letter-spacing:-0.015em">Heading 2xl — Section title</p>
+        <p class="ts" style="font-family:var(--font-display);font-size:var(--fs-xl);font-weight:700">Heading xl — Sub-section</p>
+        <p class="ts" style="font-family:var(--font-display);font-size:var(--fs-lg);font-weight:700">Heading lg — Card title</p>
         <p class="ts" style="font-size:var(--fs-md)">Lede md — Supporting explanation in a single, readable line length.</p>
-        <p class="ts">Body base (17px / 1.6) — We go beyond the code to help clients reach their most extraordinary digital goals.</p>
-        <p class="eyebrow">Eyebrow · Red Hat Mono</p>
+        <p class="ts">Body base (Lato 17px / 1.6) — We go beyond the code to help clients reach their most extraordinary digital goals.</p>
+        <p class="eyebrow">Eyebrow · Montserrat 13/700</p>
       </div>
       <div class="table-scroll"><table class="data-table"><thead><tr><th>Token</th><th>Value</th></tr></thead><tbody>{[...group('--fs-'), ...group('--lh-'), ...group('--fw-')].map((t) => <tr><td><code>{t.name}</code></td><td><code>{t.value}</code></td></tr>)}</tbody></table></div>
     </div>
@@ -157,7 +157,7 @@ const inventory = [
   {/* Cards rendered from real records; product cards sit on the dark product surface they are used on. */}
   <section class="section" aria-labelledby="cards-title">
     <div class="container">
-      <SectionHeading eyebrow="Components" title="Cards" lede="Shared radius (16px), border, hover elevation and single-link click target." id="cards-title" />
+      <SectionHeading eyebrow="Components" title="Cards" lede="Shared radius (18px, per the brand guide), border, hover elevation and single-link click target." id="cards-title" />
       <div class="grid grid--3">
         <ServiceCard service={serviceBySlug('test-automation')!} />
         <CaseStudyCard cs={caseStudies[0]} />
@@ -215,14 +215,14 @@ const inventory = [
   .swatches { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr)); }
   .swatches li { display: grid; gap: 2px; font-size: var(--fs-xs); }
   .sw { height: 64px; border-radius: var(--radius-md); border: 1px solid var(--qw-line); margin-bottom: var(--space-2); }
-  .sw__v { font-family: var(--font-mono); color: var(--qw-slate-500); }
-  .sw__n { color: var(--qw-slate-500); }
+  .sw__v { font-family: var(--font-mono); color: var(--qw-muted); }
+  .sw__n { color: var(--qw-muted); }
   /* Typography specimen spacing. */
   .type-specimen { margin-bottom: var(--space-8); }
-  .ts { margin: 0 0 var(--space-4); color: var(--qw-ink-900); }
+  .ts { margin: 0 0 var(--space-4); color: var(--qw-slate-900); }
   /* Demo wrappers: rows of inline examples, a dark panel, vertical gaps, and an ink-950 panel for product cards. */
   .demo-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; margin-bottom: var(--space-6); }
-  .demo-dark { padding: var(--space-6); border-radius: var(--radius-lg); background: var(--qw-ink-900); }
+  .demo-dark { padding: var(--space-6); border-radius: var(--radius-lg); background: var(--qw-slate-900); }
   .demo-gap { margin-top: var(--space-6); }
-  .demo-product { margin-top: var(--space-6); padding: var(--space-6); border-radius: var(--radius-lg); background: var(--qw-ink-950); }
+  .demo-product { margin-top: var(--space-6); padding: var(--space-6); border-radius: var(--radius-lg); background: var(--qw-slate-950); }
 </style>

@@ -200,22 +200,22 @@ const jsonLd = [serviceLd(s.name, s.seo.description, s.path), ...(s.faqs?.length
   /* "At a glance" card: white panel in the hero aside. Small mono slate label, teal uppercase terms (dt),
      ink values (dd). It stays white even on dark hero variants. */
   .svc-glance { background: #fff; border: 1px solid var(--qw-line); border-radius: var(--radius-lg); padding: var(--space-6); box-shadow: var(--shadow-md); }
-  .svc-glance__label { font-size: var(--fs-xs); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-slate-500); }
+  .svc-glance__label { font-size: var(--fs-xs); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-muted); }
   .svc-glance dl { margin: 0; display: grid; gap: var(--space-4); }
   .svc-glance dt { font-size: var(--fs-xs); font-weight: var(--fw-bold); text-transform: uppercase; letter-spacing: 0.06em; color: var(--qw-teal-700); }
-  .svc-glance dd { margin: 0.2rem 0 0; color: var(--qw-ink-900); font-weight: var(--fw-medium); }
+  .svc-glance dd { margin: 0.2rem 0 0; color: var(--qw-slate-900); font-weight: var(--fw-medium); }
   /* Summary warning spacing. :global because the element is rendered by Alert.astro, so it does not carry
      this component's scope attribute. */
   :global(.svc-alert) { margin-top: var(--space-8); }
   /* Capability tiles: 2.25rem check-mark column + text column. */
   .cap { display: grid; grid-template-columns: 2.25rem 1fr; gap: var(--space-4); padding: var(--space-6); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
-  .cap__mark { width: 2.25rem; height: 2.25rem; border-radius: var(--radius-md); background: var(--qw-teal-50); color: var(--qw-teal-700); display: grid; place-items: center; }
+  .cap__mark { width: 2.25rem; height: 2.25rem; border-radius: var(--radius-md); background: var(--qw-mint-50); color: var(--qw-teal-700); display: grid; place-items: center; }
   .cap__mark :global(svg) { width: 20px; height: 20px; }
   .cap h3 { font-size: var(--fs-md); margin-bottom: var(--space-2); }
   .cap p { margin: 0; color: var(--color-muted); }
   /* Considerations sit on surface-dark, so the audience heading uses logo green (accent on dark). */
   .consider { padding: var(--space-6); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); }
-  .consider h3 { font-size: var(--fs-md); color: var(--qw-green-400); }
+  .consider h3 { font-size: var(--fs-md); color: var(--qw-green-500); }
   .consider p { margin: 0; }
   /* Related-products block and industry links spacing. */
   .rel-products { margin-top: var(--space-12); }

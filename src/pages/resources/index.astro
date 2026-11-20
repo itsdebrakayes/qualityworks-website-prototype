@@ -77,19 +77,19 @@ const count = (t: string) => t === 'event' ? events.length : articles.filter((a)
 </BaseLayout>
 <style>
   /* Filter panel layout: stacked on small screens; from 900px, chips | 16rem topic select | clear button. */
-  .filter-bar { display: grid; gap: var(--space-4); align-items: end; grid-template-columns: 1fr; padding: var(--space-5); background: var(--qw-canvas); border: 1px solid var(--qw-line); border-radius: var(--radius-lg); margin-bottom: var(--space-8); }
+  .filter-bar { display: grid; gap: var(--space-4); align-items: end; grid-template-columns: 1fr; padding: var(--space-5); background: var(--qw-mint-50); border: 1px solid var(--qw-line); border-radius: var(--radius-lg); margin-bottom: var(--space-8); }
   @media (min-width: 900px) { .filter-bar { grid-template-columns: 1fr 16rem auto; } }
-  .res-filter__label { font-weight: var(--fw-semibold); font-size: var(--fs-sm); color: var(--qw-ink-900); margin-bottom: var(--space-2); }
-  /* Content-type chips. 44px min height for touch targets; the #A9B5BF border keeps the unselected chip
+  .res-filter__label { font-weight: var(--fw-semibold); font-size: var(--fs-sm); color: var(--qw-slate-900); margin-bottom: var(--space-2); }
+  /* Content-type chips. 44px min height for touch targets; the var(--qw-ink-3) border keeps the unselected chip
      outline visible on white. Pressed state (aria-pressed="true") uses interactive teal-700 with white text. */
   .chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
-  .chip { min-height: 44px; padding: 0.4rem 1rem; border-radius: var(--radius-pill); border: 1.5px solid #A9B5BF; background: #fff; color: var(--qw-ink-900); font: var(--fw-semibold) var(--fs-sm)/1 var(--font-sans); cursor: pointer; display: inline-flex; gap: 0.4rem; align-items: center; }
+  .chip { min-height: 44px; padding: 0.4rem 1rem; border-radius: var(--radius-pill); border: 1.5px solid var(--qw-ink-3); background: #fff; color: var(--qw-slate-900); font: var(--fw-semibold) var(--fs-sm)/1 var(--font-display); cursor: pointer; display: inline-flex; gap: 0.4rem; align-items: center; }
   .chip:hover { border-color: var(--qw-teal-700); }
   .chip[aria-pressed="true"] { background: var(--qw-teal-700); border-color: var(--qw-teal-700); color: #fff; }
   .chip__n { font-family: var(--font-mono); font-size: var(--fs-xs); opacity: 0.75; }
   /* Clear button row and the live result count, which spans the full width. */
   .filter-bar__actions { display: flex; align-items: center; min-height: 48px; }
-  .filter-bar__count { grid-column: 1 / -1; margin: 0; font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--qw-ink-900); }
+  .filter-bar__count { grid-column: 1 / -1; margin: 0; font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--qw-slate-900); }
   /* Event wrapper: stretch the EventCard to the grid cell height. The explicit [hidden] rule is needed because
      display: flex would otherwise override the hidden attribute the filter script sets. */
   .res-event { display: flex; }

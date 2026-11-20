@@ -11,7 +11,7 @@ summary: "Prioritised decisions needed from stakeholders before development."
 | AS-1 | The live header structure approximates QM-41; top-level labels are *Solutions, Products & Innovations, Who We Help, Results, Resources, Company* | QM-41 inaccessible |
 | AS-2 | Existing URLs must be preserved (incl. `/services/` despite the “Solutions” label) | SEO risk; brief §10 |
 | AS-3 | Prototype stack: **Astro 5 (static), TypeScript data files, plain CSS with custom properties**; no framework had been approved | No repo or technical decision found. Components are framework-neutral HTML/CSS/JS and port easily to Next.js, Nuxt or a CMS theme |
-| AS-4 | Red Hat Display is the approved corporate typeface (Typekit `area-normal` and `nexa-rust` are loaded but not visibly used) | Computed styles |
+| AS-4 | ~~Red Hat Display is the approved corporate typeface~~ Superseded 20 Nov 2026: the Brand Guidelines v1.0 specify Montserrat (display) and Lato (body) (doc 15) | Brand Guidelines v1.0 |
 | AS-5 | Text published on the live site may be shown in the prototype but is **not approved** for the rebuild | Brief §9 |
 | AS-6 | Agents marketplace and qualitywatcher.ai remain separate platforms; the corporate site links to them | Separate codebases observed |
 
@@ -34,6 +34,10 @@ summary: "Prioritised decisions needed from stakeholders before development."
 | P2 | Q-26 | “Black-owned, woman-led”: approved capitalisation and placement | Janique | About/Home |
 | P2 | Q-27 | Company repository and preview host for the handoff (README “Not yet established”) | Technical lead | Handoff |
 | P2 | Q-28 | The “Four Pillars” infographic in the agentic-QA article prints the prohibited term in the image itself; its alt text transcribes it accurately. Replace or re-export the image | Marketing | Article |
+| P1 | Q-29 | Licence for reusing the live-site header photographs (several Adobe Stock) on the rebuilt site; commission authentic team photography (doc 15 V-5, V-6) | Marketing | Headers |
+| P1 | Q-30 | Body typeface: Lato per Brand Guidelines v1.0, or Montserrat everywhere (doc 15 V-1) | Janique | All pages |
+| P2 | Q-31 | Derived accessibility shades (teal-700 `#1D766F`), colour-role mapping, and retirement of the 2023 brand PDF palette (doc 15 V-2 to V-4) | Janique | Design system |
+| P2 | Q-32 | Transparent master files for the teal wordmark (supplied JPG has the Slate 800 background built in) (doc 15 V-10) | Brand owner | Header |
 | P2 | Q-04 | Choose CMS (headless vs. WordPress-as-headless) and owner for each content type | Dev lead | Data integration |
 | P2 | Q-09 | Site search: required at launch? (Pagefind static search recommended) | PM | Header |
 | P2 | Q-10 | Analytics and consent: GA4, Meta pixel, HubSpot tracking/chat; cookie-consent requirement and regions | Marketing / Legal | Launch |

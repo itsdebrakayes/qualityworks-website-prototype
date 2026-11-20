@@ -48,9 +48,9 @@ const H = headingLevel;
 </article>
 <style>
   /* Icon tile: 2.75rem (44px) teal-tinted square with the icon in interactive teal. */
-  .service-card__icon { display: inline-grid; place-items: center; width: 2.75rem; height: 2.75rem; border-radius: var(--radius-md); background: var(--qw-teal-50); color: var(--qw-teal-700); }
-  /* On dark surfaces: a translucent teal-300 tint (rgb 95,195,207 = #5FC3CF) and light teal icon, ~8:1 on ink. */
-  .surface-dark .service-card__icon, .surface-product .service-card__icon { background: rgba(95,195,207,0.12); color: var(--qw-teal-300); }
+  .service-card__icon { display: inline-grid; place-items: center; width: 2.75rem; height: 2.75rem; border-radius: var(--radius-md); background: var(--qw-mint-50); color: var(--qw-teal-700); }
+  /* On dark surfaces: a translucent teal-300 tint (rgb 95,195,207 = var(--qw-teal-500)) and light teal icon, ~8:1 on ink. */
+  .surface-dark .service-card__icon, .surface-product .service-card__icon { background: color-mix(in srgb, var(--qw-teal-500) 12%, transparent); color: var(--qw-teal-500); }
   /* Buyer problem: heading colour plus a 3px teal rule, so it reads as the card's key message. */
   .service-card__problem { font-size: var(--fs-sm); color: var(--color-heading); font-weight: var(--fw-medium); border-left: 3px solid var(--qw-teal-500); padding-left: var(--space-3); }
   .service-card__summary { font-size: var(--fs-sm); color: var(--color-muted); }

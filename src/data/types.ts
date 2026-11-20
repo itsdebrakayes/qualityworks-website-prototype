@@ -560,6 +560,9 @@ export interface Person {
 export interface Industry {
   /** Required. URL-safe id; also used as `CaseStudy.industry`. */
   slug: string;
+  /** Optional. Header photograph id from src/data/peopleImagery.ts (visual revision). Omit when no
+   *  suitable photo of people exists; the page then shows the text-only header. */
+  heroImage?: string;
   /** Required. Route with trailing slash (/industries/{slug}/). */
   path: string;
   /** Required. Display name. */

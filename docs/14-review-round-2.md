@@ -65,7 +65,7 @@ All six corrections are in `src/data/corrections.ts` (the migrated-content corre
 
 | Item | Status |
 |---|---|
-| Red Hat Display / Red Hat Mono vs the approved brand-kit fonts | **Pending.** The brand-kit HTML document has not been supplied to the project; fonts follow the live site |
+| Red Hat Display / Red Hat Mono vs the approved brand-kit fonts | **Superseded (20 Nov 2026):** Brand Guidelines v1.0 supplied; Montserrat + Lato applied (doc 15 §3). Body-face choice is open as V-1 |
 | Corporate repository and hosting | **Pending.** Code is in `itsdebrakayes/qualityworks-website-prototype` (personal, private). No company repo; no host approved (QM-103) |
 | Service terminology changes (e.g. “AI-powered testing”) | **Pending approval** (round 1 A3) |
 | Migrated-article wording (R-01–R-39, R-50–R-56) | **Pending approval** |

@@ -1,16 +1,20 @@
 ---
 /**
- * Shared inner-page hero. Variants: corporate (light), dark (ink), product (deep product surface).
+ * Shared inner-page hero. Variants: corporate (light), dark (slate), product (deep product surface).
  *
  * What: the top band of every inner page: optional breadcrumbs, eyebrow, the page <h1>, a lede,
- * free content, up to two CTAs, and an optional right-hand "aside" column.
+ * free content, the brand gradient rule, up to two CTAs, and an optional right-hand column that
+ * holds either a people photograph (`image` prop) or custom "aside" content.
  *
  * Why: one hero component gives every inner page the same structure and guarantees exactly one <h1>
- * per page (CONTRIBUTING 3.4, QA-01). The three variants implement the design direction
- * (docs/02-design-direction.md): "light" is the corporate default, "dark" the ink corporate surface,
- * and "product" the product layer used for QualityWatcher, Agents as a Service and PRISM.
+ * per page (CONTRIBUTING 3.4, QA-01). The variants implement the design direction
+ * (docs/02-design-direction.md, updated by docs/15-visual-revision.md): "light" is the corporate
+ * default on the guide's Mint surface, "dark" the slate surface, and "product" the product layer used
+ * for QualityWatcher, Agents as a Service and PRISM. The `image` option was added in the visual
+ * revision so page headers can feature people (Janique's feedback), using photographs QualityWorks
+ * already publishes (src/data/peopleImagery.ts).
  *
- * Props: eyebrow, title, lede, variant, breadcrumbs, primary, secondary, compact.
+ * Props: eyebrow, title, lede, variant, breadcrumbs, primary, secondary, compact, image.
  * Slots: default (extra content under the lede) and "aside" (right column on wide screens).
  *
  * Used by: components/LegalStub.astro, components/templates/ServiceTemplate.astro and most inner
@@ -18,27 +22,34 @@
  * industries/[slug], products, products/prism, products/agents-as-a-service, qualitywatcher-ai-tools,
  * resources, services, prototype, prototype/claims, design-system).
  *
- * Accessibility: renders the page's only <h1>, so do not add another h1 in the page body. The motif
- * layer is decorative (aria-hidden, pointer-events none). The `surface-dark` / `surface-product`
- * classes (global.css) switch text, link and focus colours to their on-dark values, keeping contrast.
+ * Accessibility: renders the page's only <h1>, so do not add another h1 in the page body. The photo
+ * carries real alt text from peopleImagery.ts (it shows who the work is for, so it is not treated as
+ * decoration); the gradient rule is aria-hidden. Text never sits on top of the photo, so contrast
+ * does not depend on the image. The `surface-dark` / `surface-product` classes (global.css) switch
+ * text, link and focus colours to their on-dark values.
  *
  * Gotchas:
  * - The primary CTA is always forced to `kind: 'primary'`; the secondary keeps its own kind or falls
  *   back to 'secondary'. Change the Cta data, not this component, if a page needs a ghost secondary.
- * - The two-column layout only applies at 1024px and up AND only when the "aside" slot is filled.
+ * - The two-column layout only applies at 1024px and up AND only when `image` or the "aside" slot is
+ *   given. If both are given, the aside slot wins and the image is not rendered.
+ * - Below 1024px the photo follows the copy as a 16:9 crop; `focus` in peopleImagery.ts keeps faces in frame.
  * - Breadcrumbs given here are visible only; pass the same array to BaseLayout for the JSON-LD.
+ * - The gradient rule is the page's single "brand signature" moment (guide: once per layout). Do not
+ *   add another gradient element to a page that uses PageHero.
  */
 import Breadcrumbs from './Breadcrumbs.astro';
 import Button from './Button.astro';
 import type { Cta } from '../data/types';
+import { type PeopleImage, peopleSrc, peopleSrcset } from '../data/peopleImagery';
 interface Props {
-  /** Short mono label above the title. */
+  /** Short uppercase label above the title. */
   eyebrow?: string;
   /** The page h1 text. Required. */
   title: string;
   /** Intro paragraph under the h1. */
   lede?: string;
-  /** Visual surface: 'light' (default, corporate), 'dark' (ink) or 'product' (deep product surface with grid). */
+  /** Visual surface: 'light' (default, corporate mint), 'dark' (slate) or 'product' (deep product surface with grid). */
   variant?: 'light' | 'dark' | 'product';
   /** Visible breadcrumb trail rendered above the eyebrow. */
   breadcrumbs?: { label: string; href?: string }[];
@@ -47,17 +58,18 @@ interface Props {
   /** Second call to action; rendered with its own `kind`, defaulting to 'secondary'. */
   secondary?: Cta;
   /** Reduced vertical padding, for utility pages (legal stubs, prototype tools). */
-  compact?: boolean
+  compact?: boolean;
+  /** People photograph shown in the right column (use peopleImage('id') from src/data/peopleImagery.ts). */
+  image?: PeopleImage;
 }
-const { eyebrow, title, lede, variant = 'light', breadcrumbs, primary, secondary, compact } = Astro.props;
-// Only switch to the two-column grid when the caller actually provided aside content.
+const { eyebrow, title, lede, variant = 'light', breadcrumbs, primary, secondary, compact, image } = Astro.props;
+// The aside slot takes precedence over the image; either one switches on the two-column grid.
 const hasAside = Astro.slots.has('aside');
+const showImage = !!image && !hasAside;
 ---
 {/* surface-dark / surface-product are global theme classes that re-map colour tokens for dark backgrounds. */}
-<section class:list={['page-hero', `page-hero--${variant}`, { 'surface-dark': variant === 'dark', 'surface-product': variant === 'product', 'page-hero--compact': compact }]}>
-  {/* Decorative brand motif (gear-ring lines); hidden from assistive tech. */}
-  <div class="page-hero__motif" aria-hidden="true"></div>
-  <div class:list={['container', 'page-hero__grid', { 'page-hero__grid--aside': hasAside }]}>
+<section class:list={['page-hero', `page-hero--${variant}`, { 'surface-dark': variant === 'dark', 'surface-product': variant === 'product', 'page-hero--compact': compact, 'page-hero--photo': showImage }]}>
+  <div class:list={['container', 'page-hero__grid', { 'page-hero__grid--aside': hasAside || showImage }]}>
     <div class="page-hero__copy">
       {breadcrumbs && <Breadcrumbs items={breadcrumbs} />}
       {eyebrow && <p class="eyebrow">{eyebrow}</p>}
@@ -65,6 +77,8 @@ const hasAside = Astro.slots.has('aside');
       <h1>{title}</h1>
       {lede && <p class="lede">{lede}</p>}
       <slot />
+      {/* Brand signature: the guide's green-teal-blue gradient, used once per page. Decorative. */}
+      {!compact && <span class="brand-rule page-hero__rule" aria-hidden="true"></span>}
       {/* CTA row: primary is always primary-styled; secondary defaults to the outline style. */}
       {(primary || secondary) && (
         <div class="btn-row page-hero__ctas">
@@ -73,35 +87,39 @@ const hasAside = Astro.slots.has('aside');
         </div>
       )}
     </div>
-    {/* Optional right column (e.g. the "At a glance" card on service pages). */}
+    {/* Optional right column: custom aside content (e.g. "At a glance" on service pages) or a people photo.
+        The photo is the hero's LCP candidate, so it loads eagerly with high fetch priority. */}
     {hasAside && <div class="page-hero__aside"><slot name="aside" /></div>}
+    {showImage && image && (
+      <figure class="page-hero__photo">
+        <img src={peopleSrc(image)} srcset={peopleSrcset(image)} sizes="(min-width: 1024px) 34rem, 100vw"
+          alt={image.alt} width="1600" height={Math.round(1600 / image.ratio)} loading="eager" fetchpriority="high" decoding="async"
+          style={`object-position: ${image.focus}`} />
+      </figure>
+    )}
   </div>
 </section>
 <style>
-  /* Base: overflow hidden clips the oversized motif circle that is positioned partly off-canvas. */
   .page-hero { position: relative; overflow: hidden; padding-block: var(--space-12) var(--space-16); background: var(--color-bg); }
-  /* Light (corporate) variant: a soft teal-to-white wash instead of a stock photo (doc 02 drops photo heroes). */
-  .page-hero--light { background: linear-gradient(180deg, var(--qw-teal-50) 0%, #fff 100%); }
+  /* Light (corporate) variant: the guide's Mint, its one light surface. */
+  .page-hero--light { background: var(--qw-mint-50); }
   .page-hero--compact { padding-block: var(--space-10) var(--space-12); }
-  /* Grid: position relative lifts the content above the absolutely positioned motif layer. */
   .page-hero__grid { position: relative; display: grid; gap: var(--space-10); align-items: center; }
-  /* Two columns only on desktop and only with an aside; copy gets slightly more width (1.15 : 0.85). */
+  /* Two columns only on desktop and only with an aside or photo; copy gets slightly more width. */
   @media (min-width: 1024px) { .page-hero__grid--aside { grid-template-columns: 1.15fr 0.85fr; gap: var(--space-16); } }
   /* Cap the h1 at about 22 characters per line so long titles wrap into a balanced block. */
   .page-hero h1 { font-size: var(--fs-2xl); max-width: 22ch; }
   .page-hero__copy .lede { margin-bottom: 0; }
+  .page-hero__rule { margin-top: var(--space-8); }
   .page-hero__ctas { margin-top: var(--space-8); }
-  /* Brand motif: the gear ring from the QualityWorks "Q", drawn as fine concentric lines. */
-  /* A 36rem circle pushed up and right so only its lower-left arc shows. Lines are 1px every 23px in
-     brand teal (#289DAD) at 16% alpha; the radial mask fades the rings out toward the edge. The
-     unprefixed and -webkit- mask are both set for Safari support. */
-  .page-hero__motif { position: absolute; right: -12rem; top: -10rem; width: 36rem; height: 36rem; border-radius: 50%; opacity: 0.5; pointer-events: none;
-    background: repeating-radial-gradient(circle, transparent 0 22px, rgba(40,157,173,0.16) 22px 23px); mask: radial-gradient(circle, #000 35%, transparent 70%); -webkit-mask: radial-gradient(circle, #000 35%, transparent 70%); }
-  /* On dark/product surfaces the rings switch to logo green (#8FC640) and are a little stronger. */
-  .page-hero--dark .page-hero__motif, .page-hero--product .page-hero__motif { opacity: 0.8; background: repeating-radial-gradient(circle, transparent 0 22px, rgba(143,198,64,0.12) 22px 23px); }
-  /* Product variant: deepest product surface (ink-950) with a teal glow in the top-right corner. */
-  .page-hero--product { background: radial-gradient(80% 60% at 85% 0%, rgba(40,157,173,0.22), transparent 60%), var(--qw-ink-950); }
+  /* People photo: rounded (guide: 18px cards), cropped to 4:3 on desktop and 16:9 below 1024px.
+     object-position comes from the image record so faces stay in frame. */
+  .page-hero__photo { margin: 0; border-radius: var(--radius-lg); overflow: hidden; aspect-ratio: 16 / 9; background: var(--color-surface-alt); box-shadow: var(--shadow-md); }
+  .page-hero__photo img { width: 100%; height: 100%; object-fit: cover; }
+  @media (min-width: 1024px) { .page-hero__photo { aspect-ratio: 4 / 3; } }
+  /* Product variant: deepest product surface (slate-950) with a faint teal glow in the top-right corner. */
+  .page-hero--product { background: radial-gradient(80% 60% at 85% 0%, color-mix(in srgb, var(--qw-teal-500) 16%, transparent), transparent 60%), var(--qw-slate-950); }
   /* Product variant grid: 1px white lines at 3.5% alpha on a 48px grid, faded out toward the bottom.
      This "fine grid" is the signature of the product layer in doc 02. */
-  .page-hero--product::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px); background-size: 48px 48px; mask: linear-gradient(180deg, #000, transparent 85%); -webkit-mask: linear-gradient(180deg, #000, transparent 85%); }
+  .page-hero--product::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px); background-size: 48px 48px; mask: linear-gradient(180deg, #000, transparent 85%); -webkit-mask: linear-gradient(180deg, #000, transparent 85%); pointer-events: none; }
 </style>
