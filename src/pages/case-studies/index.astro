@@ -32,6 +32,8 @@ import { RELEASE, REVIEW } from '../../lib/release';
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
+// People photograph for the section overview header (visual revision, docs/15).
+import { peopleImage } from '../../data/peopleImagery';
 import CaseStudyCard from '../../components/CaseStudyCard.astro';
 import FilterBar from '../../components/FilterBar.astro';
 import EmptyState from '../../components/EmptyState.astro';
@@ -53,7 +55,7 @@ const industryOpts = [...new Set(caseStudies.map((c) => c.industry))].map((v) =>
 const serviceOpts = [...new Set(caseStudies.flatMap((c) => c.serviceTags))].map((v) => ({ value: v, label: serviceBySlug(v)?.name ?? v, count: count((c) => c.serviceTags.includes(v)) })).sort((a, b) => a.label.localeCompare(b.label));
 ---
 <BaseLayout seo={{ title: 'Case Studies: Testing, Development & AI Results | QualityWorks', description: 'Results from QualityWorks engagements in banking, insurance, healthcare, utilities, media and more. Filter case studies by industry and service.' }} breadcrumbs={crumbs}>
-  <PageHero eyebrow="Results" title="Case studies" lede="How we’ve helped organizations solve difficult digital challenges — with the outcomes as each client engagement reported them." breadcrumbs={crumbs} compact />
+  <PageHero image={peopleImage('results-celebration')} eyebrow="Results" title="Case studies" lede="How we’ve helped organizations solve difficult digital challenges — with the outcomes as each client engagement reported them." breadcrumbs={crumbs} compact />
   <section class="section" aria-labelledby="list-title">
     <div class="container">
       <h2 id="list-title" class="visually-hidden">Case study list</h2>

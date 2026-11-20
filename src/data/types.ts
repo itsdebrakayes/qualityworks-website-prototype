@@ -440,6 +440,9 @@ export interface Article {
   author: string;
   /** Required. ISO date `YYYY-MM-DD`; lists sort by it, newest first. */
   publishedAt: string;
+  /** Optional. True for an announced resource that has not been released yet: cards show "Coming soon"
+   *  instead of a date, and `publishedAt` must be a date that has not happened yet (never backdated). */
+  comingSoon?: boolean;
   /** Required. ISO date of last modification (used as dateModified in JSON-LD). */
   updatedAt: string;
   /** Required. Card/listing summary. */

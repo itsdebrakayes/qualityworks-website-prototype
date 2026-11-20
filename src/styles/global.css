@@ -178,7 +178,8 @@ table { border-collapse: collapse; width: 100%; }
 .badge--danger { background: var(--qw-danger-bg); color: var(--qw-danger); border-color: #F4C2BD; }
 /* Fixture badge: dashed gold palette. The same three colours mark fixture/review-only content
    elsewhere (migration notes, claim annotations, review outlines). */
-.badge--fixture { background: #FFF8E1; color: #7A4B00; border: 1px dashed #C99A2E; }
+.badge--fixture { background: #FFF8E1; color: #7A4B00; border: 1px dashed #C99A2E; white-space: normal; max-width: 100%; line-height: 1.35; align-items: flex-start; }
+.badge--fixture svg { flex: none; margin-top: 0.15em; }
 /* Badges on dark surfaces use translucent fills so they sit on any dark background. */
 /* On dark, badge text is ink-1: teal text on a teal-tinted fill falls below 4.5:1 on lighter card surfaces. */
 .surface-dark .badge, .surface-product .badge { background: color-mix(in srgb, var(--qw-teal-500) 12%, transparent); color: var(--qw-ink-1); border-color: color-mix(in srgb, var(--qw-teal-500) 34%, transparent); }
@@ -202,6 +203,10 @@ table { border-collapse: collapse; width: 100%; }
 .input, .textarea, .select { width: 100%; min-height: 48px; padding: 0.7rem 0.9rem; font: inherit; font-size: var(--fs-base); color: var(--qw-slate-900); background: #fff; border: 1.5px solid var(--qw-ink-3); border-radius: var(--radius-sm); transition: border-color var(--dur-fast), box-shadow var(--dur-fast); }
 .textarea { min-height: 9rem; resize: vertical; }
 .input:hover, .textarea:hover, .select:hover { border-color: var(--qw-muted); }
+/* Selects: the native arrow sits almost against the border in most browsers, so it is replaced with a
+   drawn chevron inset 1rem from the right edge, with room reserved for it (padding-right 2.75rem). */
+.select { appearance: none; -webkit-appearance: none; padding-right: 2.75rem; cursor: pointer;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='%23222B37' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 1rem center / 1rem 1rem; }
 .input:focus-visible, .textarea:focus-visible, .select:focus-visible { outline: none; border-color: var(--qw-teal-700); box-shadow: 0 0 0 3px color-mix(in srgb, var(--qw-teal-700) 25%, transparent); }
 /* Invalid fields: !important so the error border wins over hover/focus border colours. */
 [aria-invalid="true"] { border-color: var(--qw-danger) !important; }

@@ -63,6 +63,16 @@ const builtPath = (path: string) => {
   return !seg.includes('/') && seg.length > 0 ? migratedSlugs.has(seg) || ['contact-us', 'careers', 'about-us', 'blog', 'case-studies', 'industries', 'services', 'maturity-assessments', 'innovation-tourism', 'qualitywatcher-ai-tools', 'privacy-policy', 'terms-conditions', 'engagement-models'].includes(seg) : true;
 };
 
+/**
+ * Posts that are whitepapers, with the cover used on cards. "More QA, Not Less" exists as a whitepaper document
+ * (shared drive: QualityWorks_More_QA_Not_Less_Whitepaper.docx) and its live banner says "This whitepaper
+ * explores…". The cover is the banner's title panel, cropped to 16:9 so cards show the full title
+ * (public/media/more-qa-not-less-whitepaper-cover.webp, cropped from qualityworks_more_qa_not_less_featured.jpg).
+ */
+const WHITEPAPERS: Record<string, { cover: string }> = {
+  'more-qa-not-less-closing-the-verification-gap-in-ai-accelerated-software-delivery': { cover: '/media/more-qa-not-less-whitepaper-cover.webp' },
+};
+
 /** WordPress posts (migrated snapshot) + clearly labelled fixtures for content types with no live data. */
 const migrated: Article[] = (raw as any[]).map((p) => ({
   ...p,
@@ -71,9 +81,10 @@ const migrated: Article[] = (raw as any[]).map((p) => ({
   bodyHtml: normalizeLinks(normalizeHeadings(normalizeHtml(applyCorrections(`article:${p.slug}`, 'bodyHtml', p.bodyHtml))), builtPath),
   tags: applyCorrectionsList(`article:${p.slug}`, 'tags', p.tags),
   // News: WordPress category 'News', or a company-news slug prefix. Everything else is a blog post.
-  type: p.categories.includes('News') || /^(qualityworks-wins|announcing)/.test(p.slug) ? 'news' : 'blog',
+  // Whitepapers published as posts (WHITEPAPERS above) are typed 'whitepaper' so the resource hub files them correctly.
+  type: WHITEPAPERS[p.slug] ? 'whitepaper' : p.categories.includes('News') || /^(qualityworks-wins|announcing)/.test(p.slug) ? 'news' : 'blog',
   // Local mirrored copy in public/media/ when present (scripts/fetch-media.sh), else the live URL.
-  image: localMedia(p.image),
+  image: WHITEPAPERS[p.slug]?.cover ?? localMedia(p.image),
   // Alt text rewritten after viewing each image (src/data/altText.ts). Audit item A11Y-03.
   imageAlt: articleAlt[p.slug] ?? p.imageAlt ?? '',
   // Published on the live site today; still needs re-approval before reuse in the rebuild.
@@ -81,15 +92,17 @@ const migrated: Article[] = (raw as any[]).map((p) => ({
 }));
 
 // FIXTURES: illustrative resource cards for content types with no live data. Provenance 'fixture';
-// removed from release builds below. The PRISM whitepaper title is real, its date is illustrative and
-// it links to the PRISM product page because no downloadable asset was found (docs/04 §12).
+// removed from release builds below. The PRISM whitepaper title is real; it is not released yet ("Coming soon")
+// and links to the PRISM product page because no downloadable asset was found (docs/04 §12).
 const fixtures: Article[] = [
   {
     id: 'fixture-whitepaper-prism', slug: 'prism-whitepaper', title: 'PRISM™: The AI Output Quality Standard (whitepaper)', type: 'whitepaper',
-    author: 'QualityWorks Consulting Group', publishedAt: '2026-10-01', updatedAt: '2026-10-01',
+    // Not released yet, so it is never backdated: the card shows "Coming soon" and the sort date is a
+    // placeholder in the future (31 Dec 2026). Replace both with the real release date once it is set.
+    author: 'QualityWorks Consulting Group', publishedAt: '2026-12-31', updatedAt: '2026-12-31', comingSoon: true,
     excerpt: 'The homepage advertises a “New whitepaper” for PRISM™, but no downloadable asset was found. This card shows how a gated or ungated whitepaper would appear once the file and landing page are approved.',
     metaDescription: null, categories: ['AI'], tags: ['PRISM'], image: null, imageAlt: '', href: '/products/prism/',
-    provenance: { source: 'fixture', approval: 'fixture', note: 'Placeholder for a real asset. Title is real; date is illustrative.' },
+    provenance: { source: 'fixture', approval: 'fixture', note: 'Placeholder for a real asset. Title is real; not yet released (no release date approved).' },
   },
 ];
 

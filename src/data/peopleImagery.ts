@@ -84,6 +84,20 @@ export const peopleImagery: PeopleImage[] = [
   { id: 'logistics-warehouse', widths: [600], ratio: 1, focus: '50% 40%',
     alt: 'A warehouse worker checks a tablet between tall shelving aisles',
     sourceUrl: `${LIVE}logistics-inustry.jpg`, licence: 'live-site-asset-unconfirmed' },
+  // Section overview headers (added after review: every page reachable as a menu "overview" gets a photo).
+  { id: 'products-engineer', widths: [800, 1600], ratio: 1600 / 1067, focus: '75% 35%',
+    alt: 'An engineer smiles while working at a desk with code on two monitors',
+    sourceUrl: `${LIVE}AdobeStock_434993367.jpeg`, licence: 'live-site-asset-unconfirmed' },
+  { id: 'industries-team', widths: [800, 1136], ratio: 1136 / 900, focus: '55% 35%',
+    alt: 'A team talks through ideas around a meeting table with laptops',
+    sourceUrl: `${LIVE}teama.jpg`, licence: 'live-site-asset-unconfirmed' },
+  { id: 'results-celebration', widths: [800, 1600], ratio: 1600 / 1067, focus: '60% 30%',
+    alt: 'A developer raises a fist in celebration in front of a monitor showing code',
+    sourceUrl: `${LIVE}AdobeStock_215707658-web-scaled.jpg`, licence: 'live-site-asset-unconfirmed' },
+  // 600px source only (no larger original on the live site): soft on large screens; replacement listed in docs/15 §6.
+  { id: 'resources-audience', widths: [600], ratio: 1, focus: '50% 45%',
+    alt: 'An audience smiles and applauds during a presentation',
+    sourceUrl: `${LIVE}About_Us_Our_Team_image_sm.jpg`, licence: 'live-site-asset-unconfirmed' },
 ];
 
 /** Look up a header photo by id. Throws at build time for an unknown id, so a typo cannot reach a built page. */

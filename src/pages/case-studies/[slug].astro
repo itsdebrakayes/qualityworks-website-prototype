@@ -23,7 +23,8 @@
  * Review/release: no REVIEW/RELEASE logic in this file. The disclosure line ("Client disclosure approval:
  *   to be confirmed / approved / not approved") is shown in every build.
  * Gotchas:
- *   - The page renders its own hero (no PageHero), so it places <Breadcrumbs> and the single <h1> itself.
+ *   - The page renders its own hero (no PageHero), so it places <Breadcrumbs> and the single <h1> itself. Its image
+ *     follows the PageHero photo treatment (blended on desktop, plain picture on mobile; docs/15).
  *   - The metrics source line uses only the FIRST metric's `metricSource`; all metrics in one record are
  *     assumed to share a source.
  *   - Story sections with 20 characters or fewer are dropped, so stub values like "N/A" never render as a
@@ -63,10 +64,18 @@ const rawDescription = cs.summary || cs.challenge;
 const description = rawDescription.length <= 160 ? rawDescription : rawDescription.slice(0, 155).replace(/\s+\S*$/, '') + '…';
 ---
 <BaseLayout seo={{ title: `${cs.title} | QualityWorks Case Study`.slice(0, 90), description, ogImage: cs.image ?? undefined }} breadcrumbs={crumbs} ogType="article">
-  {/* Custom dark hero: breadcrumbs, h1, summary, key facts and the optional case-study image. */}
-  <section class="cs-hero surface-dark">
+  {/* Custom dark hero: breadcrumbs, h1, summary, key facts and the optional case-study image. The image uses
+      the same treatment as the people-focused PageHero headers (docs/15): a plain edge-to-edge picture above the
+      copy below 1024px; from 1024px it fills the right half of the band and blends into slate. No boxed card. */}
+  <section class:list={['cs-hero', 'surface-dark', { 'cs-hero--photo': !!cs.image }]}>
+    {cs.image && (
+      <div class="cs-hero__media">
+        <img src={cs.image} alt={cs.altText} width="720" height="480" loading="eager" fetchpriority="high" decoding="async" />
+        <div class="cs-hero__blend" aria-hidden="true"></div>
+      </div>
+    )}
     <div class="container cs-hero__grid">
-      <div>
+      <div class="cs-hero__copy">
         <Breadcrumbs items={crumbs} />
         <p class="eyebrow">Case study · {industry?.name}</p>
         <h1>{cs.title}</h1>
@@ -77,7 +86,6 @@ const description = rawDescription.length <= 160 ? rawDescription : rawDescripti
           <div><dt>Services</dt><dd>{cs.serviceTags.map((t, i) => { const s = serviceBySlug(t); return <>{i > 0 && ', '}{s ? <a href={s.path}>{s.name}</a> : t}</>; })}</dd></div>
         </dl>
       </div>
-      {cs.image && <div class="cs-hero__media"><img src={cs.image} alt={cs.altText} width="720" height="480" /></div>}
     </div>
   </section>
 
@@ -128,11 +136,26 @@ const description = rawDescription.length <= 160 ? rawDescription : rawDescripti
 </BaseLayout>
 <style>
   /* Hero: teal glow (logo teal var(--qw-teal-500) at 25%) from the top-right corner over ink-900. Image column from 1024px. */
-  .cs-hero { padding-block: var(--space-10) var(--space-16); background: radial-gradient(60% 80% at 100% 0%, color-mix(in srgb, var(--qw-teal-500) 25%, transparent), transparent 60%), var(--qw-slate-900); }
-  .cs-hero__grid { display: grid; gap: var(--space-10); align-items: center; }
-  @media (min-width: 1024px) { .cs-hero__grid { grid-template-columns: 1.2fr 0.8fr; } }
+  /* Hero: solid slate-900 band (no gradient background; the brand gradient is reserved for one rule per page). */
+  .cs-hero { position: relative; overflow: hidden; padding-block: var(--space-10) var(--space-16); background: var(--qw-slate-900); }
+  .cs-hero__grid { position: relative; display: grid; gap: var(--space-10); align-items: center; }
   .cs-hero h1 { font-size: var(--fs-2xl); }
-  .cs-hero__media img { border-radius: var(--radius-lg); aspect-ratio: 4/3; object-fit: cover; width: 100%; }
+  /* Image, below 1024px: a plain edge-to-edge picture at the top of the band (no radius, no shadow). */
+  .cs-hero--photo { padding-top: 0; }
+  .cs-hero__media { position: relative; margin-bottom: var(--space-8); }
+  .cs-hero__media img { display: block; width: 100%; aspect-ratio: 16 / 9; height: auto; object-fit: cover; }
+  .cs-hero__blend { display: none; }
+  @media (min-width: 1024px) {
+    /* Image, from 1024px: fills the right 55% of the band at full height and blends into slate on its left
+       edge, like PageHero's photo headers. The copy column stays on the solid part of the band. */
+    .cs-hero--photo { padding-top: var(--space-10); }
+    .cs-hero__media { position: absolute; top: 0; right: 0; bottom: 0; width: 55%; margin: 0; }
+    .cs-hero__media img { height: 100%; aspect-ratio: auto; }
+    .cs-hero__blend { display: block; position: absolute; inset: 0; pointer-events: none;
+      background: linear-gradient(90deg, var(--qw-slate-900) 0%, color-mix(in srgb, var(--qw-slate-900) 80%, transparent) 16%, color-mix(in srgb, var(--qw-slate-900) 35%, transparent) 38%, transparent 62%),
+        linear-gradient(0deg, color-mix(in srgb, var(--qw-slate-900) 55%, transparent) 0%, transparent 30%); }
+    .cs-hero--photo .cs-hero__copy { max-width: min(36rem, 43vw); }
+  }
   /* Facts list: mono uppercase labels in logo green, which is an accent meant for dark surfaces like this one. */
   .cs-facts { display: grid; gap: var(--space-3); margin: var(--space-8) 0 0; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }
   .cs-facts dt { font: var(--fw-medium) var(--fs-xs)/1.3 var(--font-mono); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-green-500); }

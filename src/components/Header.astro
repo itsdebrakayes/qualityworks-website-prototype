@@ -103,17 +103,20 @@ const isCurrent = (href: string) => norm(href) === cur;
                       </div>
                     ))}
                   </div>
-                  {/* Right column: a featured promo if the nav item defines one, otherwise a link to the section overview page. */}
+                  {/* Right column: a featured promo if the nav item defines one, plus a link to the section overview
+                      page. The top-level trigger is a button (it opens this panel), so on desktop this link is the only
+                      way to reach the overview; it is omitted only when the promo's CTA already points there. */}
                   <div class="mega__aside">
-                    {item.feature ? (
+                    {item.feature && (
                       <>
                         <p class="eyebrow">{item.feature.eyebrow}</p>
                         <p class="mega__feature-title">{item.feature.title}</p>
                         <p class="mega__feature-text">{item.feature.text}</p>
                         <a class="link-arrow" href={item.feature.cta.href}>{item.feature.cta.label}<Icon name="arrow" /></a>
                       </>
-                    ) : item.href && (
-                      <a class="link-arrow" href={item.href}>{item.label} overview<Icon name="arrow" /></a>
+                    )}
+                    {item.href && item.feature?.cta.href !== item.href && (
+                      <a class:list={['link-arrow', { 'mega__overview': !!item.feature }]} href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label} overview<Icon name="arrow" /></a>
                     )}
                   </div>
                 </div>
@@ -232,6 +235,8 @@ const isCurrent = (href: string) => norm(href) === cur;
   .mega__desc { display: block; font-size: var(--fs-xs); color: var(--qw-muted); line-height: 1.4; margin-top: 2px; }
   .mega__aside { background: var(--qw-mint-50); border-radius: var(--radius-lg); padding: var(--space-6); align-self: start; }
   .mega__feature-title { font-family: var(--font-display); font-weight: var(--fw-bold); font-size: var(--fs-md); color: var(--qw-slate-900); margin-bottom: var(--space-2); line-height: 1.25; }
+  /* Overview link under a promo block: separated by a hairline so it reads as its own destination. */
+  .mega__overview { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--qw-mint-200); width: 100%; }
   .mega__feature-text { font-size: var(--fs-sm); color: var(--qw-muted); }
   /* Proposed-page dot: hidden unless <html> has the review-mode class (toggled by ProtoBar). :global is
      needed because that class sits on <html>, outside this component. The white outline separates

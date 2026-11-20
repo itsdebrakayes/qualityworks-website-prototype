@@ -30,6 +30,8 @@
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
+// People photograph for the section overview header (visual revision, docs/15).
+import { peopleImage } from '../../data/peopleImagery';
 import ArticleCard from '../../components/ArticleCard.astro';
 import EventCard from '../../components/EventCard.astro';
 import EmptyState from '../../components/EmptyState.astro';
@@ -44,7 +46,7 @@ const topics = [...new Set(articles.flatMap((a) => a.categories))].filter((c) =>
 const count = (t: string) => t === 'event' ? events.length : articles.filter((a) => a.type === t).length;
 ---
 <BaseLayout seo={{ title: 'Resources: Articles, Whitepapers, News & Events | QualityWorks', description: 'Insights on software testing, test automation, agentic QA and AI adoption from QualityWorks, plus company news, whitepapers and speaking events.' }} breadcrumbs={crumbs}>
-  <PageHero eyebrow="Resources" title="Insights, news and events" lede="Practical thinking on software quality, AI and delivery from the QualityWorks team." breadcrumbs={crumbs} compact />
+  <PageHero image={peopleImage('resources-audience')} eyebrow="Resources" title="Insights, news and events" lede="Practical thinking on software quality, AI and delivery from the QualityWorks team." breadcrumbs={crumbs} compact />
   <section class="section">
     <div class="container">
       {/* Hand-built filter form (see Gotchas). onsubmit="return false" stops Enter from reloading the page. */}

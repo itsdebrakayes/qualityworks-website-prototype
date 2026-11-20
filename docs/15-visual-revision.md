@@ -95,10 +95,19 @@ No earlier "existing prototype" with people-featuring headers was found in the p
 | Careers | Blended photo header: two colleagues at a laptop (`careers-colleagues`) |
 | Services overview | Blended photo header: two engineers at a screen (`services-pair`, the live homepage hero) |
 | Contact Us | Now uses the shared photo header (`contact-team`); "What happens next", other contact channels and the form follow in the section below |
+| Section overviews: Products & Innovations, Who We Help, Results (case studies), Resources | Blended photo headers (`products-engineer`, `industries-team`, `results-celebration`, `resources-audience`), so every page reachable as a menu overview has people in its header |
+| Case-study detail pages (17) | The case study's own image now uses the same treatment (blended on the right from 1024px, plain picture above the copy on phones) instead of a rounded card |
 | Industries: Finance & Banking, Healthcare, Social Impact, Insurance, Logistics, Retail, Technology | Blended photo header from the matching live-site industry image (`heroImage` in `src/data/industries.ts`) |
 | Other inner pages | Mint hero surface (text-only), brand gradient rule, no ring motif |
 
 **Deliberately unchanged:** product pages (QualityWatcher AI, Agents as a Service, PRISM) keep the product surface and product preview; case-study pages keep their own case-study image; service detail pages keep the "At a glance" panel (adding a stock photo would not help a buyer compare services); articles keep their featured images. Public Sector, Small Business and Media & Entertainment have no suitable people photo on the live site (text header kept; see §6).
+
+**Other changes from the same review**
+- **Menu overview links:** every mega-menu panel now ends with a "… overview" link to its section page unless its promo already points there. Solutions previously had no route to `/services/` on desktop (the top-level item opens the menu).
+- **Dropdown filters** (case studies, resources): the native arrow sat against the border; selects now draw a chevron inset 1rem from the right with room reserved for it.
+- **Whitepaper cover:** "More QA, Not Less" is typed as a whitepaper (it exists as a whitepaper document on the shared drive and its banner says "This whitepaper…"), and its card uses the cover panel cropped from the live banner (`public/media/more-qa-not-less-whitepaper-cover.webp`) so the title is no longer cut off.
+- **PRISM whitepaper card:** not released, so it is no longer backdated (was "Oct 1, 2026"). The card says "Coming soon"; its sort date is a future placeholder (31 Dec 2026) until a real release date is set (V-11).
+- **Pills:** the long "Illustrative fixture — not real QualityWorks data" pill no longer appears on resource cards (it did not fit); any remaining review-only fixture pills wrap within their container.
 
 ## 5. QA performed (20 Nov 2026)
 
@@ -131,3 +140,5 @@ Not verified: Safari, Firefox and Edge rendering (MQ-20 still open); real-device
 | V-8 | **Tagline punctuation.** H1 now reads "Engineered for Excellence." per the guide's rule; confirm | Janique |
 | V-9 | **Guide copy conflicts (not applied).** The guide's on-brand example and service list use "autonomous testing", which round 1 removed. The prototype keeps the approved round-1 wording | Janique |
 | V-10 | **Wordmark file format.** The supplied teal wordmark is a JPG with the Slate 800 background built in, so it only works on Slate 800. A transparent SVG/PNG master is needed for production | Brand owner |
+| V-11 | **PRISM whitepaper release date.** The card shows "Coming soon"; supply the real date (and the PDF) when known | Janique / product owner |
+| V-12 | **Resources header photo** is only 600px wide on the live site, so it is soft on large screens; supply a larger original or an approved event photo | Marketing |
