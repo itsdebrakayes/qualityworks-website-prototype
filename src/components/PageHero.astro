@@ -3,8 +3,8 @@
  * Shared inner-page hero. Variants: corporate (light), dark (slate), product (deep product surface).
  *
  * What: the top band of every inner page: optional breadcrumbs, eyebrow, the page <h1>, a lede,
- * free content, the brand gradient rule, up to two CTAs, and an optional right-hand column that
- * holds either a people photograph (`image` prop) or custom "aside" content.
+ * free content, the brand gradient rule, up to two CTAs, and either a people photograph (`image` prop,
+ * blended into the band like the homepage hero) or a custom right-hand "aside" column.
  *
  * Why: one hero component gives every inner page the same structure and guarantees exactly one <h1>
  * per page (CONTRIBUTING 3.4, QA-01). The variants implement the design direction
@@ -24,16 +24,18 @@
  *
  * Accessibility: renders the page's only <h1>, so do not add another h1 in the page body. The photo
  * carries real alt text from peopleImagery.ts (it shows who the work is for, so it is not treated as
- * decoration); the gradient rule is aria-hidden. Text never sits on top of the photo, so contrast
- * does not depend on the image. The `surface-dark` / `surface-product` classes (global.css) switch
+ * decoration); the gradient rule and blend layer are aria-hidden. Text never sits on top of the photo:
+ * on desktop the copy column is on the solid slate part of the band, so contrast does not depend on it. The `surface-dark` / `surface-product` classes (global.css) switch
  * text, link and focus colours to their on-dark values.
  *
  * Gotchas:
  * - The primary CTA is always forced to `kind: 'primary'`; the secondary keeps its own kind or falls
  *   back to 'secondary'. Change the Cta data, not this component, if a page needs a ghost secondary.
- * - The two-column layout only applies at 1024px and up AND only when `image` or the "aside" slot is
- *   given. If both are given, the aside slot wins and the image is not rendered.
- * - Below 1024px the photo follows the copy as a 16:9 crop; `focus` in peopleImagery.ts keeps faces in frame.
+ * - The two-column layout only applies at 1024px and up and only with the "aside" slot. If both `image`
+ *   and the aside slot are given, the aside slot wins and the image is not rendered.
+ * - A header with `image` is always the dark slate band, whatever `variant` says (it matches the homepage
+ *   hero). Below 1024px the photo is a plain 16:9 picture above the copy; from 1024px it fills the right
+ *   62% and blends into slate. `focus` in peopleImagery.ts keeps faces in frame at both crops.
  * - Breadcrumbs given here are visible only; pass the same array to BaseLayout for the JSON-LD.
  * - The gradient rule is the page's single "brand signature" moment (guide: once per layout). Do not
  *   add another gradient element to a page that uses PageHero.
@@ -68,8 +70,19 @@ const hasAside = Astro.slots.has('aside');
 const showImage = !!image && !hasAside;
 ---
 {/* surface-dark / surface-product are global theme classes that re-map colour tokens for dark backgrounds. */}
-<section class:list={['page-hero', `page-hero--${variant}`, { 'surface-dark': variant === 'dark', 'surface-product': variant === 'product', 'page-hero--compact': compact, 'page-hero--photo': showImage }]}>
-  <div class:list={['container', 'page-hero__grid', { 'page-hero__grid--aside': hasAside || showImage }]}>
+<section class:list={['page-hero', showImage ? 'page-hero--photo' : `page-hero--${variant}`, { 'surface-dark': variant === 'dark' || showImage, 'surface-product': variant === 'product' && !showImage, 'page-hero--compact': compact }]}>
+  {/* Photo header (same treatment as the homepage hero): below 1024px a plain edge-to-edge picture above the
+      copy; from 1024px the photo fills the right side of the band and blends into slate on its left edge.
+      The photo is the hero's LCP candidate, so it loads eagerly with high fetch priority. */}
+  {showImage && image && (
+    <div class="page-hero__media">
+      <img class="page-hero__img" src={peopleSrc(image)} srcset={peopleSrcset(image)} sizes="(min-width: 1024px) 62vw, 100vw"
+        alt={image.alt} width="1600" height={Math.round(1600 / image.ratio)} loading="eager" fetchpriority="high" decoding="async"
+        style={`object-position: ${image.focus}`} />
+      <div class="page-hero__blend" aria-hidden="true"></div>
+    </div>
+  )}
+  <div class:list={['container', 'page-hero__grid', { 'page-hero__grid--aside': hasAside }]}>
     <div class="page-hero__copy">
       {breadcrumbs && <Breadcrumbs items={breadcrumbs} />}
       {eyebrow && <p class="eyebrow">{eyebrow}</p>}
@@ -87,16 +100,8 @@ const showImage = !!image && !hasAside;
         </div>
       )}
     </div>
-    {/* Optional right column: custom aside content (e.g. "At a glance" on service pages) or a people photo.
-        The photo is the hero's LCP candidate, so it loads eagerly with high fetch priority. */}
+    {/* Optional right column: custom aside content (e.g. "At a glance" on service pages). */}
     {hasAside && <div class="page-hero__aside"><slot name="aside" /></div>}
-    {showImage && image && (
-      <figure class="page-hero__photo">
-        <img src={peopleSrc(image)} srcset={peopleSrcset(image)} sizes="(min-width: 1024px) 34rem, 100vw"
-          alt={image.alt} width="1600" height={Math.round(1600 / image.ratio)} loading="eager" fetchpriority="high" decoding="async"
-          style={`object-position: ${image.focus}`} />
-      </figure>
-    )}
   </div>
 </section>
 <style>
@@ -112,11 +117,28 @@ const showImage = !!image && !hasAside;
   .page-hero__copy .lede { margin-bottom: 0; }
   .page-hero__rule { margin-top: var(--space-8); }
   .page-hero__ctas { margin-top: var(--space-8); }
-  /* People photo: rounded (guide: 18px cards), cropped to 4:3 on desktop and 16:9 below 1024px.
-     object-position comes from the image record so faces stay in frame. */
-  .page-hero__photo { margin: 0; border-radius: var(--radius-lg); overflow: hidden; aspect-ratio: 16 / 9; background: var(--color-surface-alt); box-shadow: var(--shadow-md); }
-  .page-hero__photo img { width: 100%; height: 100%; object-fit: cover; }
-  @media (min-width: 1024px) { .page-hero__photo { aspect-ratio: 4 / 3; } }
+  /* Photo header (visual revision, docs/15): slate-900 band. Mobile and tablet: the picture is a plain
+     edge-to-edge 16:9 band at the top (no radius, no shadow, no text over it). */
+  .page-hero--photo { background: var(--qw-slate-900); padding-top: 0; }
+  .page-hero__media { position: relative; margin-bottom: var(--space-8); }
+  .page-hero__img { display: block; width: 100%; aspect-ratio: 16 / 9; height: auto; object-fit: cover; }
+  .page-hero__blend { display: none; }
+  @media (min-width: 1024px) {
+    /* Desktop: the photo fills the right 62% of the band at full height. The blend layer fades it into
+       slate-900 on its left edge (and slightly at the bottom), so the copy always sits on solid slate and
+       never covers faces; `focus` in peopleImagery.ts keeps faces in the visible part of the crop. */
+    .page-hero--photo { padding-top: var(--space-12); }
+    .page-hero__media { position: absolute; top: 0; right: 0; bottom: 0; width: 62%; margin: 0; }
+    .page-hero__img { width: 100%; height: 100%; aspect-ratio: auto; }
+    .page-hero__blend { display: block; position: absolute; inset: 0; pointer-events: none;
+      background:
+        linear-gradient(90deg, var(--qw-slate-900) 0%, color-mix(in srgb, var(--qw-slate-900) 80%, transparent) 14%, color-mix(in srgb, var(--qw-slate-900) 35%, transparent) 34%, transparent 58%),
+        linear-gradient(0deg, color-mix(in srgb, var(--qw-slate-900) 55%, transparent) 0%, transparent 30%); }
+    /* Copy column stays on the solid slate part of the band (left 38% of the width plus the blend zone). */
+    .page-hero--photo .page-hero__copy { max-width: min(32rem, 38vw); }
+    .page-hero--photo { min-height: 30rem; display: flex; align-items: center; }
+    .page-hero--photo .page-hero__grid { width: 100%; }
+  }
   /* Product variant: deepest product surface (slate-950) with a faint teal glow in the top-right corner. */
   .page-hero--product { background: radial-gradient(80% 60% at 85% 0%, color-mix(in srgb, var(--qw-teal-500) 16%, transparent), transparent 60%), var(--qw-slate-950); }
   /* Product variant grid: 1px white lines at 3.5% alpha on a 48px grid, faded out toward the bottom.

@@ -24,8 +24,8 @@ No earlier "existing prototype" with people-featuring headers was found in the p
 **Before:** a dark ink gradient with a concentric-ring motif and a faint grid (no people). This is what read as "AI-generated".
 
 **After:**
-- The homepage hero is a **photograph of two people working through a technical problem at a workstation** (`home-mentoring`, originally `AdobeStock_507970416` on the live site, 2560px source → 800/1600/2400px WebP).
-- **Desktop (≥ 1100px):** the photo fills the hero; a slate-900 scrim sits behind the copy (solid to 38% of the width, ≥ 92% to 50%) and fades out toward the people on the right. Text never depends on the photo for contrast (measured in §5).
+- The homepage hero is a **photograph of two people working through a technical problem at a workstation** (`home-mentoring`, originally `AdobeStock_507970416` on the live site, 2560px source to 800/1600/2400px WebP).
+- **Desktop (at least 1100px):** the photo fills the hero; a slate-900 scrim sits behind the copy (solid to 38% of the width, at least 92% to 50%) and fades out toward the people on the right. Text never depends on the photo for contrast (measured in §5).
 - **Tablet and mobile (< 1100px):** the photo is a 16:9 band **above** the copy, so text never covers faces.
 - H1, lede, both CTAs, the company facts and the three pathway cards are unchanged and still above the fold at 1440 × 900 (AC-HOME-1, QA-16).
 - The concentric-ring motifs (homepage hero, inner-page heroes, CTA band) and the grid overlay on corporate heroes were removed. The fine grid stays only on the **product** layer (QualityWatcher, Agents as a Service, PRISM), where it signals product UI.
@@ -51,7 +51,7 @@ No earlier "existing prototype" with people-featuring headers was found in the p
 | Light-page text (guide stylesheet) | `#4A5663` lead, `#5A6673` muted, `#DDE4E6` hairline | `--qw-text-lead`, `--qw-muted`, `--qw-line` | Light-surface text and borders |
 | State | `#2CB07E` / `#E8B34A` / `#E2624E` | `--qw-caution` (caution used) | Status indicators only |
 
-### Before → after
+### Before and after
 
 | Role | Before | After |
 |---|---|---|
@@ -70,7 +70,7 @@ No earlier "existing prototype" with people-featuring headers was found in the p
 | Muted text on dark | `#9AA7B4` | `#AEB8C1` |
 | Hairline | `#DCE3E6` | `#DDE4E6` |
 | Highlight / event status | gold `#F4B942` | caution `#E8B34A` |
-| CTA band | gradient `#16202B → #123C44` + rings | solid slate 800 |
+| CTA band | gradient `#16202B to #123C44` + rings | solid slate 800 |
 
 **Derived shades (not in the guide; pending confirmation):** `--qw-teal-700 #1D766F` and `--qw-teal-800 #18625C` (the guide's teal and its own light-page eyebrow colour `#1F8D84` are 3.02:1 and 4.04:1 on white, below AA for small text), and `--qw-mint-200 #C9E8E5` (border tint). Accessible feedback colours (`#B42318`, `#B45309`, `#2F7A3E`) remain for form errors and badges because the guide's state swatches fail as text on white. Review-only annotation colours (amber) are unchanged.
 
@@ -86,15 +86,17 @@ No earlier "existing prototype" with people-featuring headers was found in the p
 
 ## 4. Page headers revised
 
+**Treatment (revised 20 Nov 2026 after Debra-Kaye's review):** every photo header uses the same blend as the homepage, with no boxed or rounded photo card. The header is a slate-900 band. From 1024px the photo fills the right 62% of the band at full height and blends into slate on its left edge (and slightly at the bottom). The copy column (max 32rem) sits on the solid part of the band. Below 1024px the photo is a plain edge-to-edge 16:9 picture at the top of the header, with nothing over it, followed by the copy. Measured worst-case contrast behind header text (11 pages at 1024, 1280, 1440 and 1920px): eyebrow 4.73:1, H1 7.42:1, lede 5.8:1, breadcrumbs 7.1:1.
+
 | Page | Change |
 |---|---|
 | Homepage | Full-width people photograph (see §1) |
-| About Us | Header photo: colleagues working through a problem (`about-team`) |
-| Careers | Header photo: two colleagues at a laptop (`careers-colleagues`) |
-| Services overview | Header photo: two engineers at a screen (`services-pair`, the live homepage hero) |
-| Contact Us | Photo in the left column on desktop only (`contact-team`); phones keep the form near the top |
-| Industries: Finance & Banking, Healthcare, Social Impact, Insurance, Logistics, Retail, Technology | Header photo from the matching live-site industry image (`heroImage` in `src/data/industries.ts`) |
-| All inner pages | Mint hero surface, brand gradient rule, no ring motif |
+| About Us | Blended photo header: colleagues working through a problem (`about-team`) |
+| Careers | Blended photo header: two colleagues at a laptop (`careers-colleagues`) |
+| Services overview | Blended photo header: two engineers at a screen (`services-pair`, the live homepage hero) |
+| Contact Us | Now uses the shared photo header (`contact-team`); "What happens next", other contact channels and the form follow in the section below |
+| Industries: Finance & Banking, Healthcare, Social Impact, Insurance, Logistics, Retail, Technology | Blended photo header from the matching live-site industry image (`heroImage` in `src/data/industries.ts`) |
+| Other inner pages | Mint hero surface (text-only), brand gradient rule, no ring motif |
 
 **Deliberately unchanged:** product pages (QualityWatcher AI, Agents as a Service, PRISM) keep the product surface and product preview; case-study pages keep their own case-study image; service detail pages keep the "At a glance" panel (adding a stock photo would not help a buyer compare services); articles keep their featured images. Public Sector, Small Business and Media & Entertainment have no suitable people photo on the live site (text header kept; see §6).
 
@@ -105,13 +107,15 @@ No earlier "existing prototype" with people-featuring headers was found in the p
 | `npm run build` | 102 pages (doc 15 added); glyph lint clean (Montserrat + Lato); data integrity check clean; 18 redirect rules (pending host) |
 | `npm run qa:checks` (Playwright + axe-core) | **35 pass, 0 fail, 2 blocked** (QA-31 HubSpot, QA-32 screen reader: no access in this environment). Two failures found during the revision were fixed: button text contrast in the header CTA, teal text on translucent dark cards (QA-08), and a 38px overflow at 360px on Contact (QA-07) |
 | QA-09 fonts in a real browser | Every glyph on 8 representative pages drawn by Montserrat or Lato |
-| Hero text over photo (pixel-sampled worst case behind each text element, 1100/1280/1440/1920px) | Eyebrow ≥ 4.66:1, H1 ≥ 12.99:1, lede ≥ 7.25:1, facts ≥ 6.67:1 |
+| Hero text over photo (pixel-sampled worst case behind each text element, 1100/1280/1440/1920px) | Eyebrow at least 4.66:1, H1 at least 12.99:1, lede at least 7.25:1, facts at least 6.67:1 |
 | Old-palette scan of built CSS/HTML | 0 occurrences of `#16202B`, `#8FC640`, `#F4B942`, `#5FC3CF`, `#1B7480`, `#0E1817`, canvas/tint greys; 0 references to Red Hat |
 | Visual review | Desktop 1440, tablet 820, mobile 390 for Home, About, Careers, Contact, Services, Test Automation, Finance & Banking, Case Studies, fintech case study, QualityWatcher AI, Agents as a Service; homepage also at 1100, 1280, 1920; mega-menu, mobile drawer and footer. Logged as MQ-25 to MQ-28 in doc 07 |
 | `npm run check:content` | Marketing 0, source 0 (review documents informational only) |
 | `npm run build:release` | Fails by design (doc 12 launch blockers); no new blocker types |
 
 Not verified: Safari, Firefox and Edge rendering (MQ-20 still open); real-device testing; screen-reader walkthrough.
+
+**Preview-link fix (20 Nov 2026).** The first republish of the review link showed no photos: the script that converts the build for the review link rewrote `src` but not `srcset`, so browsers requested image paths that do not exist on the preview host. The repository build was not affected. The script now rewrites `srcset`, and the republished review link was checked in a browser (every header image loads).
 
 ## 6. Missing assets, conflicts and decisions for Janique
 

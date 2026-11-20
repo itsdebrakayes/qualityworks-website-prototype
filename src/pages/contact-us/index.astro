@@ -20,37 +20,30 @@ import { rn } from '../../lib/release';
  *   in release builds the attribute is omitted. The form's simulation control and release behaviour
  *   (error, never a false success, until an endpoint exists) live inside ContactForm.astro.
  * Gotchas:
- *   - This page renders its own hero (no PageHero), so it places <Breadcrumbs> and the single <h1> itself.
+ *   - The header is the shared PageHero with the `contact-team` photo (visual revision, docs/15); it renders the
+ *     breadcrumbs and the single <h1>. The section below holds the contact details and the form.
  *   - Do not add a response time ("we reply within 24 hours") until the business approves one.
  *   - CVs are not accepted through the form; applicants are sent to /careers/ (BambooHR).
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import PageHero from '../../components/PageHero.astro';
 import ContactForm from '../../components/ContactForm.astro';
 import Icon from '../../components/Icon.astro';
 import { site } from '../../data/site';
-import { peopleImage, peopleSrc, peopleSrcset } from '../../data/peopleImagery';
+import { peopleImage } from '../../data/peopleImagery';
 // Contact header photograph (visual revision, docs/15).
 const contactImage = peopleImage('contact-team');
 const crumbs = [{ label: 'Home', href: '/' }, { label: 'Contact Us' }];
 ---
 <BaseLayout seo={{ title: 'Contact QualityWorks | Talk to a Software Quality & AI Expert', description: 'Get in touch with QualityWorks about software testing, custom development or AI solutions. Offices in Los Angeles and Kingston, Jamaica.' }} breadcrumbs={crumbs}>
-  {/* Custom dark hero: intro column and form column side by side from 1024px, stacked below. */}
-  <section class="contact surface-dark">
+  {/* Photo header (visual revision, docs/15): the shared PageHero photo band, same treatment as the homepage
+      and other people-focused headers. On phones it is a plain picture above the heading. */}
+  <PageHero image={contactImage} eyebrow="Contact us" title="Got questions? Let’s talk." lede="We have the expertise you need to solve the problems you don’t want to handle on your own. Tell us what you’re working on." breadcrumbs={crumbs} />
+  {/* Dark section under the header: what happens next and other channels beside the form from 1024px,
+      stacked below. */}
+  <section class="contact surface-dark" aria-label="Contact details and form">
     <div class="container contact__grid">
       <div class="contact__intro">
-        <Breadcrumbs items={crumbs} />
-        <p class="eyebrow">Contact us</p>
-        <h1>Got questions? Let’s talk.</h1>
-        <p class="lede">We have the expertise you need to solve the problems you don’t want to handle on your own. Tell us what you’re working on.</p>
-        {/* The page's single brand-gradient moment (guide: once per layout). */}
-        <span class="brand-rule contact__rule" aria-hidden="true"></span>
-        {/* People photograph (visual revision, docs/15). Desktop only: on phones the form stays close to the
-            top of the page, because completing it is the visitor's task here. */}
-        <figure class="contact__photo">
-          <img src={peopleSrc(contactImage)} srcset={peopleSrcset(contactImage)} sizes="30rem" alt={contactImage.alt}
-            width="1600" height="1067" loading="eager" decoding="async" style={`object-position: ${contactImage.focus}`} />
-        </figure>
         {/* Sets expectations without committing to a response time (see the review note below). */}
         <h2 class="contact__h">What happens next</h2>
         <ol class="next">
@@ -76,20 +69,14 @@ const crumbs = [{ label: 'Home', href: '/' }, { label: 'Contact Us' }];
   </section>
 </BaseLayout>
 <style>
-  /* Hero surface: solid slate-900 (visual revision: no gradient backgrounds; the brand gradient is used
-     once, as the rule under the intro). */
-  .contact { padding-block: var(--space-10) var(--space-20); background: var(--qw-slate-900); }
-  .contact__rule { margin-top: var(--space-8); }
-  /* Photo: hidden below 1024px (form first on phones and tablets); 16:10 crop with rounded corners. */
-  .contact__photo { display: none; margin: var(--space-8) 0 0; border-radius: var(--radius-lg); overflow: hidden; aspect-ratio: 16 / 10; }
-  .contact__photo img { width: 100%; height: 100%; object-fit: cover; }
-  @media (min-width: 1024px) { .contact__photo { display: block; } }
+  /* Section under the photo header: solid slate-900, continuing the header band. A hairline separates them. */
+  .contact { padding-block: var(--space-10) var(--space-20); background: var(--qw-slate-900); border-top: 1px solid var(--qw-line-dark); }
   /* Two-column layout from 1024px; the form column is slightly wider because it carries more content. */
   .contact__grid { display: grid; gap: var(--space-12); }
   @media (min-width: 1024px) { .contact__grid { grid-template-columns: 0.9fr 1.1fr; gap: var(--space-16); align-items: start; } }
   /* Typography and the numbered "What happens next" list. */
-  .contact h1 { font-size: var(--fs-2xl); }
   .contact__h { font-size: var(--fs-md); margin-top: var(--space-10); }
+  .contact__intro > .contact__h:first-child { margin-top: 0; }
   .next { padding-left: 1.25rem; display: grid; gap: var(--space-2); }
   .next__note { font-size: var(--fs-xs); color: var(--color-muted); }
   /* Contact-channel list: icon + text rows. margin-top: 3px nudges the 20px icon onto the first text line. */

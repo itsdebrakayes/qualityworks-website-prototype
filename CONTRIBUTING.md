@@ -172,7 +172,7 @@ Add a block to `scripts/qa-checks.mjs` using `rec(id, requirement, area, expecte
 1. Use a photo QualityWorks has the right to publish (the live site's images or approved team photography). Never use AI-generated people, and never describe stock subjects as staff or clients.
 2. Export WebP files at 800 and 1600px wide (plus 2400px for a full-width hero) to `public/people/{id}-{width}.webp`.
 3. Add a record to `src/data/peopleImagery.ts`: `alt` (what is visible, neutral), `focus` (CSS object-position that keeps faces in frame), `sourceUrl` and `licence`.
-4. Pass it to the header: `<PageHero image={peopleImage('id')} … />`, or set `heroImage` on an industry record. Check the crop at 390, 820 and 1440px.
+4. Pass it to the header: `<PageHero image={peopleImage('id')} … />`, or set `heroImage` on an industry record. The header becomes the dark blended photo band. Check the crop at 390, 820 and 1440px (faces must sit in the right-hand part of the photo on desktop).
 5. One photo per header. Do not add photos to body sections as decoration (doc 15 §4 lists the pages deliberately left without one).
 
 ### 4.11 Colours and fonts

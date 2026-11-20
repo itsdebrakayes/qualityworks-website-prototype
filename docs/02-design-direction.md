@@ -30,7 +30,7 @@ summary: "Older corporate pages vs. newer product pages, and the unified system 
 A refined B2B editorial system on the brand's slate canvas, with people photography in headers and one technical accent layer for products.
 
 - **From the Brand Guidelines v1.0:** teal wordmark on Slate 800 (header) and white reversed wordmark (footer, drawer); Green `#2CAF81`, Teal `#29A59A`, Blue `#289DAD`, Mint `#ECF7F6`; the slate canvas; Montserrat display + Lato body; uppercase teal eyebrows with 0.16em tracking; pill buttons; 6/12/18px radii; 1120px content width; one gradient moment per page; "Engineered for Excellence." with the period.
-- **People-focused headers:** the homepage hero is a full-width photograph of people working together, with a slate scrim behind the copy; About, Careers, Services and seven industry pages show a people photograph beside the header copy (`PageHero` `image` prop, `src/data/peopleImagery.ts`). Photos come from the live site; they are not presented as employees.
+- **People-focused headers:** the homepage hero is a full-width photograph of people working together, with a slate scrim behind the copy; About, Careers, Services, Contact and seven industry pages use the same treatment: a slate band with the photo on the right blending into slate (a plain full-width picture above the copy on phones) (`PageHero` `image` prop, `src/data/peopleImagery.ts`). Photos come from the live site; they are not presented as employees.
 - **Retained:** pathway panel in the homepage hero, *&lt;beyond the code&gt;* phrase, core copy, dash-framed eyebrow (short accent rule + label), static scannable proof instead of carousels.
 - **Removed:** concentric gear-ring motifs and the corporate grid overlay (they read as generated imagery), the two-tone logo, Red Hat Display / Mono.
 - **Product layer:** the `surface-product` theme (Slate 950 `#1A212B`) with a fine grid, used on QualityWatcher, Agents as a Service, PRISM and the homepage products band.
@@ -62,7 +62,7 @@ A refined B2B editorial system on the brand's slate canvas, with people photogra
 | ink-1 `#E7ECEF` on slate 800 | 8.71 | Navigation, CTA band text |
 | ink-2 `#AEB8C1` on slate 900 | 7.10 | Muted on dark |
 | `#5A6673` on white / Mint | 5.86 / 5.36 | Muted on light |
-| Green on slate 800 (focus ring in header) | 3.73 | Focus indicator (≥ 3:1) |
+| Green on slate 800 (focus ring in header) | 3.73 | Focus indicator (at least 3:1) |
 
 ## 5. Restraint rules
 
