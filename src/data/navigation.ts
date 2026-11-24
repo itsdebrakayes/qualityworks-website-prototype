@@ -87,7 +87,8 @@ export const primaryNav: NavItem[] = [
         heading: 'Software quality products',
         links: [
           { label: 'QualityWatcher AI', href: '/qualitywatcher-ai-tools/', description: 'AI test creation and automation (qualitywatcher.ai)' },
-          { label: 'QualityWatcher Test Management', href: 'https://qualitywatcher.com/', description: 'Test case management (qualitywatcher.com)', external: true },
+          // QualityWatcher Test Management link removed from the menu (Janique, 23 Nov 2026: "This link is no longer
+          // needed/valid"). The product record stays in products.ts until its status is confirmed (docs/16 §6).
           { label: 'PRISM™ AI Output Quality Standard', href: '/products/prism/', description: '10-dimension framework for AI outputs', status: 'proposed' },
         ],
       },
@@ -155,8 +156,8 @@ export const primaryNav: NavItem[] = [
       {
         heading: 'Learn',
         links: [
-          { label: 'Resource Hub', href: '/resources/', description: 'Articles, whitepapers, news and events', status: 'proposed' },
-          { label: 'Blog', href: '/blog/', description: 'Insights from our team' },
+          { label: 'Resource Hub', href: '/resources/', description: 'Whitepapers, case studies and events', status: 'proposed' },
+          { label: 'Blog', href: '/blog/', description: 'Articles, news and insights' },
           { label: 'Events & Speaking', href: '/events/', description: 'Where to catch our team next', status: 'proposed' },
         ],
       },

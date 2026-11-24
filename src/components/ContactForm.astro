@@ -156,7 +156,15 @@ const fields = [
 <style>
   /* Card: always a white surface (even on dark sections), so it re-maps the colour tokens to on-light values.
      clamp() scales the padding from 1.25rem on phones to 2.25rem on desktop. */
-  .contact-form { background: #fff; color: var(--qw-slate-800); border: 1px solid var(--qw-line); border-radius: var(--radius-lg); padding: clamp(1.25rem, 3vw, 2.25rem); box-shadow: var(--shadow-md); --color-heading: var(--qw-slate-900); --color-muted: var(--qw-muted); --focus-ring: var(--qw-teal-700); --color-link: var(--qw-teal-700); }
+  .contact-form { background: #fff; color: var(--qw-slate-800); border: 1px solid var(--qw-line); border-radius: 28px; padding: clamp(1.25rem, 3.5vw, 2.75rem); padding-top: clamp(1.75rem, 4vw, 3rem); box-shadow: 0 40px 80px -40px rgba(34, 43, 55, 0.45), 0 2px 8px rgba(34, 43, 55, 0.06); position: relative; overflow: hidden; --color-heading: var(--qw-slate-900); --color-muted: var(--qw-muted); --focus-ring: var(--qw-teal-700); --color-link: var(--qw-teal-700); }
+  /* Redesign: a brand colour bar (teal | green | blue blocks, no gradient) across the top of the card. */
+  .contact-form::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 8px; background: linear-gradient(90deg, var(--qw-teal-500) 0 50%, var(--qw-green-500) 50% 80%, #289DAD 80%); }
+  /* Larger, softer fields with a mint fill that turns white with a teal edge on focus. */
+  .contact-form :global(.input), .contact-form :global(.textarea) { min-height: 52px; border-radius: 14px; background: var(--qw-mint-50); border: 1.5px solid var(--qw-ink-3); transition: background 0.2s, border-color 0.2s; }
+  .contact-form :global(.input:hover), .contact-form :global(.textarea:hover) { border-color: var(--qw-teal-700); }
+  .contact-form :global(.input:focus), .contact-form :global(.textarea:focus) { background: #fff; border-color: var(--qw-teal-700); }
+  .contact-form :global(.input[aria-invalid="true"]) { border-color: var(--qw-danger); background: #fff; }
+  .contact-form label { font-family: var(--font-display); font-weight: var(--fw-semibold); color: var(--qw-slate-900); }
   /* Fields: one column on phones; two columns from 560px, where non-half fields span both columns. */
   .contact-form__grid { display: grid; gap: var(--space-5); grid-template-columns: 1fr; }
   @media (min-width: 560px) { .contact-form__grid { grid-template-columns: 1fr 1fr; } .field--full, .field:not(.field--half) { grid-column: 1 / -1; } }
@@ -187,7 +195,8 @@ const fields = [
   .sim-options label { display: inline-flex; gap: 0.4rem; align-items: center; min-height: 32px; }
   .contact-form__actions { margin-top: var(--space-6); }
   /* Submit: min-width 12rem so the button does not shrink when the label changes to "Sending…". */
-  .contact-form__actions .btn { min-width: 12rem; position: relative; }
+  .contact-form__actions .btn { min-width: 12rem; position: relative; min-height: 56px; padding-inline: 2rem; font-size: var(--fs-md); }
+  @media (max-width: 559px) { .contact-form__actions .btn { width: 100%; } }
   /* Spinner: hidden until the submit button has aria-busy="true"; 40% white track with a solid white arc.
      The global reduced-motion rule effectively stops the spin for visitors who ask for less motion. */
   .spinner { display: none; width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }

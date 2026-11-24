@@ -44,26 +44,26 @@ const count = (slug: string) => caseStudies.filter((c) => c.industry === slug).l
   <section class="section" aria-labelledby="sectors-title">
     <div class="container">
       <SectionHeading eyebrow="Industries" title="By industry" id="sectors-title" />
-      <ul class="ind-grid">
+      <ul class="ind-grid" data-reveal-stagger>
         {sectors.map((i) => (
-          <li><a class="ind" href={i.path}><span class="ind__name">{i.name}</span><span class="ind__text">{i.heroLede}</span><span class="ind__meta">{count(i.slug)} case {count(i.slug) === 1 ? 'study' : 'studies'}<Icon name="arrow" /></span></a></li>
+          <li data-reveal="up">{(() => { const im = i.heroImage ? peopleImage(i.heroImage) : undefined; return (<a class="ind ind--photo" href={i.path}>{im && <span class="ind__media"><img src={`/people/${im.id}-800.webp`} alt="" width="800" height={Math.round(800 / im.ratio)} loading="lazy" decoding="async" style={`object-position: ${im.focus}`} /></span>}<span class="ind__inner"><span class="ind__name">{i.name}</span><span class="ind__text">{i.heroLede}</span><span class="ind__meta">{count(i.slug)} case {count(i.slug) === 1 ? 'study' : 'studies'}<Icon name="arrow" /></span></span></a>); })()}</li>
         ))}
       </ul>
     </div>
   </section>
   {/* By type of organization: proposed audience pages, labelled with the intended persona. */}
-  <section class="section surface-tint" aria-labelledby="org-title">
+  <section class="section surface-teal" aria-labelledby="org-title">
     <div class="container">
       <SectionHeading eyebrow="Organizations" title="By type of organization" id="org-title" />
-      <ul class="ind-grid ind-grid--2">
+      <ul class="ind-grid ind-grid--2" data-reveal-stagger>
         {audiences.map((i) => (
-          <li><a class="ind" href={i.path}><span class="ind__name">{i.name}</span><span class="ind__text">{i.heroLede}</span><span class="ind__meta">For {i.personas.primary.split('/')[0].trim()}<Icon name="arrow" /></span></a></li>
+          <li data-reveal="up"><a class="ind ind--org" href={i.path}><span class="ind__orgic" aria-hidden="true"><Icon name={i.slug.includes('public') ? 'globe' : 'spark'} /></span><span class="ind__name">{i.name}</span><span class="ind__text">{i.heroLede}</span><span class="ind__meta">For {i.personas.primary.split('/')[0].trim()}<Icon name="arrow" /></span></a></li>
         ))}
       </ul>
     </div>
   </section>
   {/* Catch-all CTA for sectors not listed. */}
-  <CtaBand title="Don’t see your industry?" text="Most of our work transfers across sectors. Tell us about yours." primary={ctas.contact} />
+  <CtaBand tone="green" title="Don’t see your industry?" text="Most of our work transfers across sectors. Tell us about yours." primary={ctas.contact} />
 </BaseLayout>
 <style>
   /* Card grids. min(100%, 17rem) stops a card overflowing on screens narrower than 17rem (QA checks 360px).
@@ -77,4 +77,18 @@ const count = (slug: string) => caseStudies.filter((c) => c.industry === slug).l
   .ind__text { font-size: var(--fs-sm); color: var(--qw-muted); }
   .ind__meta { margin-top: auto; display: inline-flex; gap: 0.4rem; align-items: center; font-weight: var(--fw-semibold); font-size: var(--fs-sm); color: var(--qw-teal-700); }
   .ind__meta :global(svg) { width: 16px; height: 16px; }
+  /* Redesign: photo cards (people imagery) with a lift-and-zoom hover; org cards as big white tiles on teal. */
+  .ind-grid > li { height: 100%; }
+  .ind--photo { padding: 0; overflow: hidden; border-radius: 22px; }
+  .ind__media { display: block; aspect-ratio: 16 / 10; overflow: hidden; background: var(--qw-mint-50); }
+  .ind__media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .6s ease; }
+  .ind--photo:hover .ind__media img { transform: scale(1.06); }
+  .ind__inner { flex: 1; display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-6); }
+  .ind:hover { transform: translateY(-4px); }
+  .ind { transition: border-color var(--dur-base), box-shadow var(--dur-base), transform .3s ease; }
+  .ind--org { border: 0; border-radius: 24px; padding: var(--space-8); box-shadow: 0 30px 50px -36px rgba(34,43,55,.7); }
+  .ind--org .ind__name { font-size: var(--fs-xl); }
+  .ind__orgic { width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; background: var(--qw-green-500); color: var(--qw-slate-900); }
+  .ind__orgic :global(svg) { width: 26px; height: 26px; }
+  @media (prefers-reduced-motion: reduce) { .ind:hover, .ind--photo:hover .ind__media img { transform: none; } }
 </style>

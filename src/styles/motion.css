@@ -1,0 +1,43 @@
+/* MOTION STYLES — the CSS half of src/lib/motion.ts (docs/16-redesign-system.md §3).
+   Start states are only applied under html.js-motion (set by the script), so without JavaScript, or with
+   prefers-reduced-motion, every element is shown in its final state. */
+
+/* Reveal variants ---------------------------------------------------------- */
+html.js-motion:not(.reduced-motion) [data-reveal],
+html.js-motion:not(.reduced-motion) .reveal {
+  opacity: 0; transform: translateY(28px);
+  transition: opacity 800ms var(--ease-out), transform 900ms var(--ease-out), clip-path 1000ms var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 90ms);
+}
+html.js-motion:not(.reduced-motion) [data-reveal="scale"] { transform: scale(0.94); }
+html.js-motion:not(.reduced-motion) [data-reveal="left"] { transform: translateX(-40px); }
+html.js-motion:not(.reduced-motion) [data-reveal="right"] { transform: translateX(40px); }
+html.js-motion:not(.reduced-motion) [data-reveal="fade"] { transform: none; }
+/* Mask: a clip-path wipe from the bottom, used for large type and images. */
+html.js-motion:not(.reduced-motion) [data-reveal="mask"] { opacity: 1; transform: none; clip-path: inset(0 0 100% 0); }
+html.js-motion [data-reveal].is-visible, html.js-motion .reveal.is-visible { opacity: 1; transform: none; clip-path: inset(0 0 0 0); }
+
+/* Animated headline words: <span class="word"> inside [data-words]; each rises in turn. */
+html.js-motion:not(.reduced-motion) [data-words] .word { display: inline-block; opacity: 0; transform: translateY(0.55em); transition: opacity 700ms var(--ease-out), transform 800ms var(--ease-out); transition-delay: calc(var(--w, 0) * 70ms + 120ms); }
+html.js-motion [data-words].is-visible .word { opacity: 1; transform: none; }
+
+/* Pointer scenes: layers translate with --mx/--my scaled by their own --depth (px). */
+[data-pointer-scene] { --mx: 0; --my: 0; }
+[data-depth] { transform: translate3d(calc(var(--mx) * var(--depth, 10) * 1px), calc(var(--my) * var(--depth, 10) * 1px), 0); transition: transform 600ms cubic-bezier(.2,.8,.2,1); }
+
+/* Tilt: 3D rotation toward the pointer. */
+[data-tilt] { --rx: 0deg; --ry: 0deg; transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)); transition: transform 400ms var(--ease-out); transform-style: preserve-3d; }
+
+/* Ambient float for floating UI chips (paused for reduced motion by the global rule). */
+@keyframes qw-float { 0%, 100% { translate: 0 0; } 50% { translate: 0 -10px; } }
+@keyframes qw-pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--qw-green-500) 55%, transparent); } 100% { box-shadow: 0 0 0 14px transparent; } }
+@keyframes qw-dash { to { stroke-dashoffset: 0; } }
+@keyframes qw-spin { to { transform: rotate(360deg); } }
+@keyframes qw-blink { 50% { opacity: 0; } }
+@keyframes qw-scan { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
+.float { animation: qw-float 6s ease-in-out infinite; animation-delay: calc(var(--f, 0) * -1.5s); }
+
+/* Reduced motion: every animation and transition near zero (also in global.css). */
+@media (prefers-reduced-motion: reduce) {
+  .float, [data-depth], [data-tilt] { animation: none !important; transform: none !important; }
+}

@@ -26,27 +26,48 @@ interface Props {
 }
 const { steps } = Astro.props;
 ---
-<ol class="steps">
+{/* Redesign (docs/16 §4; Janique: "This could be more graphical"): a connected journey. Numbered nodes sit on
+    a track whose filled portion follows scroll progress (--p from data-scroll-progress); each node lights up
+    as the fill reaches it and its card rises in. Horizontal from 900px, vertical timeline below. Without JS or
+    with reduced motion the track is fully drawn and every node is lit. */}
+<ol class="steps" data-scroll-progress style={`--n:${steps.length}`} data-reveal-stagger>
   {steps.map((s, i) => (
-    <li class="steps__item">
-      {/* Zero-padded visual number ("01"); hidden from screen readers because the <ol> already conveys order. */}
-      <span class="steps__index" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-      <h3 class="steps__title">{s.title}</h3>
-      <p>{s.text}</p>
+    <li class="steps__item" data-reveal="up" style={`--k:${i}`}>
+      <span class="steps__node" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+      <div class="steps__card">
+        <h3 class="steps__title">{s.title}</h3>
+        <p>{s.text}</p>
+      </div>
     </li>
   ))}
 </ol>
 <style>
-  /* Grid of steps: as many 14rem+ columns as fit, so 3-5 steps sit in one row on desktop and stack on phones.
-     min(100%, 14rem) stops a column from overflowing a narrow screen. */
-  .steps { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-6); grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); counter-reset: s; }
-  /* Each step sits under a 2px neutral rule... */
-  .steps__item { position: relative; padding-top: var(--space-6); border-top: 2px solid var(--color-border); }
-  /* ...with a short 3rem accent segment drawn over the start of that rule (top:-2px overlaps the border). */
-  .steps__item::before { content: ""; position: absolute; top: -2px; left: 0; width: 3rem; height: 2px; background: var(--qw-teal-500); }
-  /* On dark/product surfaces the accent switches to logo green, which is the accent-on-dark colour (doc 02). */
-  .surface-dark .steps__item::before, .surface-product .steps__item::before { background: var(--qw-green-500); }
-  .steps__index { font: var(--fw-medium) var(--fs-sm)/1 var(--font-mono); color: var(--color-muted); }
-  .steps__title { font-size: var(--fs-md); margin: var(--space-3) 0 var(--space-2); }
+  .steps { --p: 1; --fill: clamp(0, calc((var(--p) - 0.15) * 2.2), 1); list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-6); position: relative; }
+  :global(html.js-motion:not(.reduced-motion)) .steps { --p: 0; }
+  /* Track + fill */
+  .steps::before, .steps::after { content: ""; position: absolute; border-radius: 4px; }
+  .steps::before { background: color-mix(in srgb, var(--qw-teal-500) 25%, transparent); }
+  .steps::after { background: var(--qw-teal-500); }
+  .surface-teal .steps::before, .surface-green .steps::before { background: color-mix(in srgb, var(--qw-slate-900) 20%, transparent); }
+  .surface-teal .steps::after, .surface-green .steps::after { background: var(--qw-slate-900); }
+  /* Vertical (phones/tablets) */
+  .steps::before, .steps::after { left: 27px; top: 28px; bottom: 28px; width: 4px; }
+  .steps::after { bottom: auto; height: calc((100% - 56px) * var(--fill)); }
+  .steps__item { position: relative; display: grid; grid-template-columns: 58px 1fr; gap: var(--space-5); align-items: start; }
+  .steps__node { position: relative; z-index: 1; width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; background: var(--qw-white); color: var(--qw-slate-900); border: 3px solid var(--qw-teal-500); font: var(--fw-black) var(--fs-sm)/1 var(--font-display); transition: background 400ms, color 400ms, transform 400ms var(--ease-out); }
+  /* A node is "lit" once the fill has passed its position in the sequence. */
+  .steps__item .steps__node { --lit: clamp(0, calc((var(--fill) * var(--n) - var(--k)) * 4), 1); background: color-mix(in srgb, var(--qw-teal-500) calc(var(--lit) * 100%), var(--qw-white)); transform: scale(calc(0.9 + var(--lit) * 0.1)); }
+  .surface-teal .steps__node, .surface-green .steps__node { border-color: var(--qw-slate-900); }
+  .steps__card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-5) var(--space-6); box-shadow: var(--shadow-sm); }
+  .surface-dark .steps__card, .surface-product .steps__card { background: var(--qw-slate-850); }
+  .steps__title { font-size: var(--fs-md); margin: 0 0 var(--space-2); }
   .steps__item p { font-size: var(--fs-sm); color: var(--color-muted); margin: 0; }
+  .surface-teal .steps__item p, .surface-green .steps__item p { color: var(--qw-slate-800); }
+  @media (min-width: 900px) {
+    .steps { grid-template-columns: repeat(var(--n), 1fr); gap: var(--space-5); }
+    .steps::before, .steps::after { left: 29px; right: 29px; top: 27px; bottom: auto; width: auto; height: 4px; }
+    .steps::after { right: auto; width: calc((100% - 58px) * var(--fill)); height: 4px; }
+    .steps__item { grid-template-columns: 1fr; gap: var(--space-5); }
+    .steps__card { min-height: 100%; }
+  }
 </style>

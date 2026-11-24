@@ -1,0 +1,167 @@
+---
+import { RELEASE } from '../../lib/release';
+/**
+ * QwDemo: the interactive "How it works" product demonstration on /qualitywatcher-ai-tools/.
+ * An auto-cycling, four-stage workflow (requirement → generated test cases → UI automation script →
+ * human review) built on motion.ts `data-cycle` (accessible tabs, arrow keys, pauses on hover/focus).
+ *
+ * Content: stage labels and descriptions reuse the page's existing "How it works" and human-review copy.
+ * The window contents are SAMPLE text (the same user story and rows as the previous hero mock); the
+ * figcaption says it is illustrative, and RELEASE builds carry the same release blocker the hero mock had.
+ * Without JS every panel is visible (stacked); `hidden` is only set by the script.
+ */
+import Icon from '../Icon.astro';
+const stages = [
+  { tab: 'Requirement', title: 'Explore tools', icon: 'doc', text: 'Start with pre-populated examples, or enter your own requirements, stories or schemas.' },
+  { tab: 'Test cases', title: 'Observe and review results', icon: 'layers', text: 'Test cases are generated with titles, steps, test data and expected results, ready for your team to review.' },
+  { tab: 'Automation', title: 'Automate and export', icon: 'code', text: 'Transform reviewed test cases into automation scripts, or export them to QualityWatcher or CSV.' },
+  { tab: 'Human review', title: 'People decide', icon: 'team', text: 'Generated test cases and scripts are drafts. QA engineers review titles, steps, data and expected results before they are used.' },
+];
+const rows = [
+  { t: 'Reset with registered email', r: 'Reset link sent' },
+  { t: 'Reset with unknown email', r: 'Neutral message shown' },
+  { t: 'Expired reset link', r: 'Prompt to request new link' },
+];
+---
+<div class="demo" data-cycle="4200">
+  <div class="demo__rail">
+    <div class="demo__tabs" role="tablist" aria-label="QualityWatcher AI workflow stages">
+      {stages.map((s, i) => (
+        <button type="button" class="demo__tab" role="tab" id={`qw-tab-${i}`} aria-controls={`qw-panel-${i}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-cycle-tab={i}>
+          <span class="demo__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+          <span class="demo__tabtext"><span class="demo__tablabel">{s.tab}</span><span class="demo__tabtitle">{s.title}</span><span class="demo__tabdesc">{s.text}</span></span>
+          <span class="demo__progress" aria-hidden="true"><i></i></span>
+        </button>
+      ))}
+    </div>
+  </div>
+
+  <figure class="demo__stage" aria-labelledby="qw-demo-cap" data-release-blocker={RELEASE ? 'illustrative-mock: replace with approved product screenshots' : undefined}>
+    <div class="win">
+      <div class="win__bar" aria-hidden="true"><span></span><span></span><span></span><p>qualitywatcher.ai</p></div>
+      <ol class="win__steps" aria-hidden="true">{stages.map((s) => <li><Icon name={s.icon} /></li>)}</ol>
+      <div class="win__body">
+        <div class="panel" id="qw-panel-0" role="tabpanel" aria-labelledby="qw-tab-0" data-cycle-panel="0" data-cycle-hide>
+          <p class="panel__label mono">Input · user story</p>
+          <p class="type"><span class="visually-hidden">As a member, I can reset my password from the login page using my registered email.</span><span class="type__text" aria-hidden="true" data-type>As a member, I can reset my password from the login page using my registered email.</span><span class="type__caret" aria-hidden="true"></span></p>
+          <div class="panel__foot" aria-hidden="true"><span class="fake-btn"><Icon name="spark" />Generate test cases</span><span class="hint">Any format: stories, requirements, schemas</span></div>
+        </div>
+        <div class="panel" id="qw-panel-1" role="tabpanel" aria-labelledby="qw-tab-1" data-cycle-panel="1" data-cycle-hide>
+          <p class="panel__label mono">Generated · for review</p>
+          <ul class="cases">
+            {rows.map((r, i) => (
+              <li class="case" style={`--k:${i}`}><span class="case__icon"><Icon name="doc" /></span><span><strong>{r.t}</strong><small>Expected: {r.r}</small></span><span class="pill pill--draft">Draft</span></li>
+            ))}
+          </ul>
+        </div>
+        <div class="panel" id="qw-panel-2" role="tabpanel" aria-labelledby="qw-tab-2" data-cycle-panel="2" data-cycle-hide>
+          <p class="panel__label mono">UI automation script · draft</p>
+          <pre class="code"><code><span class="ln" style="--k:0"><b>test</b>('reset with registered email', <b>async</b> ({'{'} page {'}'}) =&gt; {'{'}</span><span class="ln" style="--k:1">  <b>await</b> page.goto('/login');</span><span class="ln" style="--k:2">  <b>await</b> page.getByRole('link', {'{'} name: 'Forgot password' {'}'}).click();</span><span class="ln" style="--k:3">  <b>await</b> page.getByLabel('Email').fill(member.email);</span><span class="ln" style="--k:4">  <b>await</b> page.getByRole('button', {'{'} name: 'Send link' {'}'}).click();</span><span class="ln" style="--k:5">  <b>await</b> expect(page.getByText('Reset link sent')).toBeVisible();</span><span class="ln" style="--k:6">{'}'});</span></code></pre>
+        </div>
+        <div class="panel" id="qw-panel-3" role="tabpanel" aria-labelledby="qw-tab-3" data-cycle-panel="3" data-cycle-hide>
+          <p class="panel__label mono">QA review</p>
+          <ul class="cases">
+            {rows.map((r, i) => (
+              <li class="case" style={`--k:${i}`}><span class="case__icon"><Icon name="doc" /></span><span><strong>{r.t}</strong><small>Expected: {r.r}</small></span>{i < 2 ? <span class="pill pill--ok"><Icon name="check" />Approved</span> : <span class="pill pill--wait">Needs edit</span>}</li>
+            ))}
+          </ul>
+          <p class="stamp" aria-hidden="true"><Icon name="check" />Reviewed by your QA team</p>
+        </div>
+      </div>
+    </div>
+    <figcaption id="qw-demo-cap">Illustrative interface preview built for the prototype — not a product screenshot. Replace with approved screenshots.</figcaption>
+  </figure>
+</div>
+<style>
+  .demo { display: grid; gap: var(--space-8); align-items: start; }
+  @media (min-width: 1024px) { .demo { grid-template-columns: 0.85fr 1.15fr; gap: var(--space-12); } }
+  .demo__tabs { display: grid; gap: var(--space-3); }
+  .demo__tab { all: unset; box-sizing: border-box; cursor: pointer; position: relative; display: grid; grid-template-columns: auto 1fr; gap: var(--space-4); padding: var(--space-4) var(--space-5); border-radius: 18px; background: var(--qw-white); border: 1px solid color-mix(in srgb, var(--qw-slate-900) 10%, transparent); overflow: hidden; transition: background 300ms, box-shadow 300ms, transform 300ms; }
+  .demo__tab:hover { transform: translateX(4px); }
+  .demo__tab:focus-visible { outline: 3px solid var(--qw-slate-900); outline-offset: 3px; }
+  .demo__tab[aria-selected="true"] { background: var(--qw-slate-900); color: var(--qw-white); box-shadow: 0 24px 40px -24px rgba(34,43,55,.6); }
+  .demo__num { font: var(--fw-black) 1.5rem/1 var(--font-display); color: var(--qw-teal-700); min-width: 2.2ch; }
+  .demo__tab[aria-selected="true"] .demo__num { color: var(--qw-teal-500); }
+  .demo__tabtext { display: grid; gap: 2px; }
+  .demo__tablabel { font: var(--fw-bold) 0.72rem/1.2 var(--font-display); letter-spacing: 0.08em; text-transform: uppercase; color: var(--qw-teal-700); }
+  .demo__tab[aria-selected="true"] .demo__tablabel { color: var(--qw-teal-500); }
+  .demo__tabtitle { font: var(--fw-bold) var(--fs-md)/1.25 var(--font-display); }
+  .demo__tabdesc { font-size: var(--fs-sm); line-height: 1.5; color: var(--qw-slate-800); }
+  .demo__tab[aria-selected="true"] .demo__tabdesc { color: #E3ECEB; }
+  /* Collapse descriptions of inactive tabs only when JS is running (all text visible otherwise). */
+  :global(html.js-motion) .demo__tab[aria-selected="false"] .demo__tabdesc { display: none; }
+  .demo__progress { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; }
+  .demo__progress i { display: block; height: 100%; width: 0; background: var(--qw-teal-500); }
+  :global(html.js-motion:not(.reduced-motion)) .demo:not(:hover):not(:focus-within) .demo__tab[aria-selected="true"] .demo__progress i { animation: qw-fill 4200ms linear forwards; }
+  @keyframes qw-fill { to { width: 100%; } }
+
+  /* Product window */
+  .demo__stage { margin: 0; position: relative; }
+  .win { position: relative; background: var(--qw-white); border-radius: 22px; box-shadow: 0 40px 80px -40px rgba(34,43,55,.55), 0 0 0 1px rgba(34,43,55,.08); overflow: hidden; }
+  .win__bar { display: flex; align-items: center; gap: 6px; padding: 12px 16px; background: var(--qw-slate-900); }
+  .win__bar span { width: 10px; height: 10px; border-radius: 50%; background: var(--qw-teal-500); }
+  .win__bar span:nth-child(2) { background: var(--qw-green-500); } .win__bar span:nth-child(3) { background: #ECF7F6; }
+  .win__bar p { margin: 0 0 0 12px; font: var(--fw-semibold) var(--fs-xs)/1 var(--font-mono, monospace); color: #E3ECEB; }
+  .win__steps { list-style: none; margin: 0; padding: 14px 20px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; background: var(--qw-mint-50); position: relative; }
+  .win__steps li { position: relative; display: grid; place-items: center; height: 40px; border-radius: 12px; background: var(--qw-white); color: var(--qw-slate-900); transition: background 400ms, transform 400ms; }
+  .win__steps li :global(svg) { width: 18px; height: 18px; }
+  .demo[data-state="0"] .win__steps li:nth-child(-n+1), .demo[data-state="1"] .win__steps li:nth-child(-n+2), .demo[data-state="2"] .win__steps li:nth-child(-n+3), .demo[data-state="3"] .win__steps li { background: var(--qw-teal-500); }
+  .demo[data-state="0"] .win__steps li:nth-child(1), .demo[data-state="1"] .win__steps li:nth-child(2), .demo[data-state="2"] .win__steps li:nth-child(3), .demo[data-state="3"] .win__steps li:nth-child(4) { background: var(--qw-slate-900); color: var(--qw-white); transform: translateY(-2px); }
+  .win__body { padding: var(--space-6); min-height: 21rem; display: grid; }
+  :global(html.js-motion) .win__body > .panel { grid-area: 1 / 1; }
+  .panel { color: var(--qw-slate-900); }
+  .panel + .panel { margin-top: var(--space-6); }
+  :global(html.js-motion) .panel + .panel { margin-top: 0; }
+  .panel__label { font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--qw-teal-700); margin: 0 0 var(--space-3); }
+  .panel.is-active { animation: qw-panel-in 500ms var(--ease-out) both; }
+  @keyframes qw-panel-in { from { opacity: 0; transform: translateY(14px); } }
+
+  /* Stage 1: typed requirement */
+  .type { font: var(--fw-semibold) clamp(1.1rem, 0.9rem + 0.8vw, 1.45rem)/1.45 var(--font-display); padding: var(--space-5); border-radius: 16px; background: var(--qw-mint-50); border: 2px solid var(--qw-teal-500); margin: 0 0 var(--space-5); min-height: 8.5rem; }
+  .type__caret { display: inline-block; width: 3px; height: 1.1em; margin-left: 3px; vertical-align: -0.15em; background: var(--qw-slate-900); animation: qw-blink 1s steps(1) infinite; }
+  .panel__foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); }
+  .fake-btn { display: inline-flex; align-items: center; gap: 8px; padding: 0.7rem 1.1rem; border-radius: 999px; background: var(--qw-slate-900); color: var(--qw-white); font: var(--fw-bold) var(--fs-sm)/1 var(--font-display); }
+  .fake-btn :global(svg) { width: 16px; height: 16px; color: var(--qw-teal-500); }
+  :global(html.js-motion:not(.reduced-motion)) .panel.is-active .fake-btn { animation: qw-press 600ms 2300ms both; }
+  @keyframes qw-press { 50% { transform: scale(0.94); background: var(--qw-teal-700); } }
+  .hint { font-size: var(--fs-xs); color: var(--qw-muted); }
+
+  /* Stage 2 and 4: case rows */
+  .cases { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+  .case { display: grid; grid-template-columns: auto 1fr auto; gap: var(--space-3); align-items: center; padding: var(--space-3) var(--space-4); border-radius: 14px; border: 1px solid color-mix(in srgb, var(--qw-slate-900) 10%, transparent); background: var(--qw-white); }
+  .case strong { display: block; font: var(--fw-bold) var(--fs-sm)/1.3 var(--font-display); }
+  .case small { display: block; font-size: var(--fs-xs); color: var(--qw-muted); }
+  .case__icon { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--qw-mint-50); color: var(--qw-teal-700); }
+  .case__icon :global(svg) { width: 17px; height: 17px; }
+  :global(html.js-motion:not(.reduced-motion)) .panel.is-active .case { animation: qw-row 600ms var(--ease-out) both; animation-delay: calc(var(--k) * 260ms + 150ms); }
+  @keyframes qw-row { from { opacity: 0; transform: translateX(24px); } }
+  .pill { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 99px; font: var(--fw-bold) 0.72rem/1.2 var(--font-display); white-space: nowrap; }
+  .pill :global(svg) { width: 13px; height: 13px; }
+  .pill--draft { background: var(--qw-mint-50); color: var(--qw-teal-700); }
+  .pill--ok { background: var(--qw-green-500); color: var(--qw-slate-900); }
+  .pill--wait { background: color-mix(in srgb, var(--qw-caution) 22%, white); color: var(--qw-slate-900); }
+  .stamp { display: inline-flex; align-items: center; gap: 8px; margin: var(--space-5) 0 0; padding: 0.6rem 1rem; border-radius: 12px; border: 2px solid var(--qw-slate-900); font: var(--fw-black) var(--fs-sm)/1 var(--font-display); text-transform: uppercase; letter-spacing: 0.06em; rotate: -3deg; }
+  .stamp :global(svg) { width: 18px; height: 18px; color: var(--qw-teal-700); }
+  :global(html.js-motion:not(.reduced-motion)) .panel.is-active .stamp { animation: qw-stamp 500ms 1000ms cubic-bezier(.3,1.6,.5,1) both; }
+  @keyframes qw-stamp { from { opacity: 0; transform: scale(1.6); } }
+
+  /* Stage 3: code */
+  .code { margin: 0; padding: var(--space-5); border-radius: 16px; background: var(--qw-slate-900); color: #E3ECEB; font-size: 0.8rem; line-height: 1.75; overflow-x: auto; }
+  .code b { color: var(--qw-teal-500); font-weight: 600; }
+  .ln { display: block; white-space: pre; }
+  :global(html.js-motion:not(.reduced-motion)) .panel.is-active .ln { animation: qw-row 450ms var(--ease-out) both; animation-delay: calc(var(--k) * 180ms + 100ms); }
+
+  .demo figcaption { font-size: var(--fs-xs); color: var(--qw-slate-900); margin-top: var(--space-3); padding-left: var(--space-3); border-left: 3px solid var(--qw-caution); }
+  @media (max-width: 559px) { .win__body { padding: var(--space-4); min-height: 0; } .case { grid-template-columns: 1fr auto; } .case__icon { display: none; } }
+</style>
+<script>
+  // Typewriter for the requirement text: re-types each time its panel becomes active (skipped for reduced motion).
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll<HTMLElement>('[data-type]').forEach((el) => {
+    const full = el.textContent || ''; const panel = el.closest('[data-cycle-panel]'); if (!panel || reduce) return;
+    let t = 0;
+    const run = () => { clearInterval(t); let n = 0; el.textContent = ''; t = window.setInterval(() => { n += 2; el.textContent = full.slice(0, n); if (n >= full.length) clearInterval(t); }, 38); };
+    new MutationObserver(() => { if (panel.classList.contains('is-active')) run(); }).observe(panel, { attributes: true, attributeFilter: ['class'] });
+    if (panel.classList.contains('is-active')) run();
+  });
+</script>

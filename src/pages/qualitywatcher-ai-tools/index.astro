@@ -11,8 +11,10 @@ import { RELEASE, REVIEW, rn } from '../../lib/release';
  *   secondary automation engineer, A. Proof required: C07–C09 and the WSSC case study. Primary CTA:
  *   "Open QualityWatcher AI" (external); secondary "Talk to an automation expert" (/contact-us/).
  *   Journey B in docs/03 §3 runs through this page.
- * What, top to bottom: product hero with an illustrative interface mock; "How it works" (3 steps); the four
- *   tools with their observed link status; "AI drafts. People decide." human-review section; results
+ * What, top to bottom: bright teal hero (people photo + AI chips); "How it works" interactive demo
+ *   (components/products/QwDemo.astro, auto-cycling tabs, carries the illustrative mock); the four
+ *   tools with their observed link status; "AI drafts. People decide." human-review section (photo +
+ *   review chips, components/products/ReviewPhoto.astro); results
  *   (StatBlock C07–C09 + WSSC case study card); access tiers with a discrepancy warning (P-03); FAQ;
  *   closing CtaBand.
  * Data: src/data/products.ts (`qwTools`: names, descriptions, CTA links and `observedStatus` from a
@@ -21,14 +23,14 @@ import { RELEASE, REVIEW, rn } from '../../lib/release';
  * SEO: inline title/description. JSON-LD: FAQPage built from `faqs` (faqLd), plus BreadcrumbList
  *   (Home > Products > QualityWatcher AI) from BaseLayout.
  * Review/release behaviour:
- *   - The hero mock carries `data-release-blocker` in RELEASE builds (illustrative mock, needs approved
+ *   - The demo window (QwDemo, formerly the hero mock) carries `data-release-blocker` in RELEASE builds (illustrative mock, needs approved
  *     product screenshots). The P-03 access Alert carries one too (access model unresolved). Both keep the
  *     release gate failing until resolved.
  *   - The "Proposed copy" note under the human-review list renders in REVIEW builds only.
  *   - StatBlock: in RELEASE it drops any stat whose claim has a `verification` value and hides the footnote
  *     (C07–C09 currently have none, so all three stay).
  * Gotchas:
- *   - The hero mock is built for the prototype, NOT a product screenshot; its figcaption says so. Keep that
+ *   - The demo window is built for the prototype, NOT a product screenshot; its figcaption says so. Keep that
  *     caption until real screenshots replace it.
  *   - A tool whose observedStatus is 'not-found-404' shows a disabled-style message instead of a link
  *     (today: Schema to API Automation). Never link visitors to a known 404.
@@ -42,7 +44,6 @@ import { RELEASE, REVIEW, rn } from '../../lib/release';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
-import ProcessSteps from '../../components/ProcessSteps.astro';
 import StatBlock from '../../components/StatBlock.astro';
 import FaqAccordion from '../../components/FaqAccordion.astro';
 import CtaBand from '../../components/CtaBand.astro';
@@ -50,6 +51,9 @@ import Alert from '../../components/Alert.astro';
 import Button from '../../components/Button.astro';
 import Icon from '../../components/Icon.astro';
 import CaseStudyCard from '../../components/CaseStudyCard.astro';
+import QwDemo from '../../components/products/QwDemo.astro';
+import ReviewPhoto from '../../components/products/ReviewPhoto.astro';
+import { peopleImage } from '../../data/peopleImagery';
 import { qwTools } from '../../data/products';
 import { caseStudyBySlug } from '../../data/caseStudies';
 import { faqLd } from '../../lib/schema';
@@ -76,51 +80,36 @@ const faqs: FaqItem[] = [
 const wssc = caseStudyBySlug('ai-powered-test-case-generation-wssc');
 ---
 <BaseLayout seo={{ title: 'QualityWatcher AI: AI Test Case & Automation Generation | QualityWorks', description: 'Generate test cases from any requirement format, turn them into UI automation and get automation help with QualityWatcher AI tools from QualityWorks.' }} breadcrumbs={crumbs} jsonLd={[faqLd(faqs)].filter((x) => x !== null)}>
-  <PageHero variant="product" eyebrow="QualityWatcher AI · Product" title="Simplify quality with AI-driven testing tools" lede="Generate real-world test cases from requirements in any format, convert them into automation scripts, and get expert automation help — with your QA team reviewing every output." breadcrumbs={crumbs} primary={qwExternal} secondary={{ label: 'Talk to an automation expert', href: '/contact-us/' }}>
-    {/* Hero aside: illustrative mock of the tool (release blocker in RELEASE builds). Rows are sample text only. */}
-    <Fragment slot="aside">
-      <figure class="mock" aria-labelledby="mock-cap" data-release-blocker={RELEASE ? 'illustrative-mock: replace with approved product screenshots' : undefined}>
-        <div class="mock__bar" aria-hidden="true"><span></span><span></span><span></span><p>Rapid Test Case Generation</p></div>
-        <div class="mock__body">
-          <p class="mock__label mono">Input · user story</p>
-          <p class="mock__input">As a member, I can reset my password from the login page using my registered email.</p>
-          <p class="mock__label mono">Generated · for review</p>
-          <table class="mock__table">
-            <thead><tr><th scope="col">Title</th><th scope="col">Expected result</th><th scope="col">Review</th></tr></thead>
-            <tbody>
-              <tr><td>Reset with registered email</td><td>Reset link sent</td><td><span class="pill ok">Approved</span></td></tr>
-              <tr><td>Reset with unknown email</td><td>Neutral message shown</td><td><span class="pill ok">Approved</span></td></tr>
-              <tr><td>Expired reset link</td><td>Prompt to request new link</td><td><span class="pill wait">Needs edit</span></td></tr>
-            </tbody>
-          </table>
-        </div>
-        <figcaption id="mock-cap">Illustrative interface preview built for the prototype — not a product screenshot. Replace with approved screenshots.</figcaption>
-      </figure>
-    </Fragment>
-  </PageHero>
+  {/* Bright teal hero with a people photo and floating AI-review chips (replaces the dark product-grid hero). */}
+  <PageHero tone="teal" image={peopleImage('products-engineer')} ui="ai" eyebrow="QualityWatcher AI · Product" title="Simplify quality with AI-driven testing tools" lede="Generate real-world test cases from requirements in any format, convert them into automation scripts, and get expert automation help — with your QA team reviewing every output." breadcrumbs={crumbs} primary={qwExternal} secondary={{ label: 'Talk to an automation expert', href: '/contact-us/' }} />
 
-  {/* How it works: three steps from input to reviewed, exported test assets. */}
-  <section class="section" aria-labelledby="how-title">
+  {/* How it works: interactive, auto-cycling product demonstration (QwDemo). Carries the illustrative-mock
+      caption and RELEASE blocker that the old hero mock had. */}
+  <section class="section surface-mint how" aria-labelledby="how-title">
     <div class="container">
-      <SectionHeading eyebrow="How it works" title="From any input to reviewed test assets" id="how-title" />
-      <ProcessSteps steps={[
-        { title: 'Explore tools', text: 'Start with pre-populated examples, or enter your own requirements, stories or schemas.' },
-        { title: 'Observe and review results', text: 'Test cases are generated with titles, steps, test data and expected results, ready for your team to review.' },
-        { title: 'Automate and export', text: 'Transform reviewed test cases into automation scripts, or export them to QualityWatcher or CSV.' },
-      ]} />
+      <div class="section-intro" data-reveal>
+        <p class="eyebrow">How it works</p>
+        <h2 id="how-title" class="display-sm">From any input to <span class="mark">reviewed</span> test assets</h2>
+      </div>
+      <QwDemo />
     </div>
   </section>
 
   {/* The tools: one card per QwTool with its observed status badge and CTA (or an unavailable notice). */}
-  <section class="section surface-product" aria-labelledby="tools-title">
+  <section class="section surface-white" aria-labelledby="tools-title">
     <div class="container">
-      <SectionHeading eyebrow="The tools" title="Four QualityWatcher AI tools" lede="Status shown is what the prototype observed on 17 Nov 2026. The product owner must confirm availability before launch." id="tools-title" />
-      <div class="tools">
-        {qwTools.map((t) => {
+      <div class="section-intro" data-reveal>
+        <p class="eyebrow">The tools</p>
+        <h2 id="tools-title">Four QualityWatcher AI tools</h2>
+        <p class="lede">Status shown is what the prototype observed on 17 Nov 2026. The product owner must confirm availability before launch.</p>
+      </div>
+      <div class="tools" data-reveal-stagger>
+        {qwTools.map((t, i) => {
           const st = statusMeta[t.observedStatus];
+          const icon = ['doc', 'code', 'agent', 'api'][i] ?? 'spark';
           return (
-            <article class="tool">
-              <p class="tool__status"><span class:list={['badge', st.cls]}>{st.label}</span></p>
+            <div class="tool-wrap" data-reveal="up"><article class:list={['tool', `tool--${i % 4}`]} data-tilt="5">
+              <div class="tool__top"><span class:list={['icon-badge', i === 1 && 'icon-badge--green', i === 2 && 'icon-badge--slate', i === 3 && 'icon-badge--mint']}><Icon name={icon} /></span><span class:list={['badge', st.cls]}>{st.label}</span></div>
               <h3>{t.name}</h3>
               <p>{t.description}</p>
               {t.observedStatus === 'not-found-404' ? (
@@ -128,26 +117,29 @@ const wssc = caseStudyBySlug('ai-powered-test-case-generation-wssc');
               ) : (
                 <Button cta={{ label: t.ctaLabel, href: t.ctaHref, external: true, kind: 'secondary', handoffNote: 'Opens qualitywatcher.ai; sign-in required' }} size="sm" />
               )}
-            </article>
+            </article></div>
           );
         })}
       </div>
     </div>
   </section>
 
-  {/* Human review: answers "where do humans review?" from the core question. */}
-  <section class="section" aria-labelledby="human-title">
-    <div class="container split">
+  {/* Human review: answers "where do humans review?" from the core question. People photo + review chips. */}
+  <section class="section surface-mint" aria-labelledby="human-title">
+    <div class="container human">
+      <ReviewPhoto image={peopleImage('services-pair')} chips={[
+        { title: 'AI draft created', sub: 'Human review required', icon: 'agent', tone: 'slate', x: '2%', y: '8%' },
+        { title: 'Expired reset link', sub: 'Needs edit', icon: 'doc', x: '52%', y: '58%' },
+        { title: 'Approved by reviewer', icon: 'check', tone: 'green', x: '8%', y: '78%' },
+      ]} />
       <div>
-        <p class="eyebrow">Human review</p>
-        <h2 id="human-title">AI drafts. People decide.</h2>
-        <p class="lede">The tools reduce repetitive work that invites human error. They don’t decide what “correct” means for your product.</p>
-      </div>
-      <div>
-        <ul class="checklist review-list">
-          <li><span><strong>Automated:</strong> drafting test case titles, steps, test data and expected results from your input; converting reviewed cases into UI automation scripts; suggesting fixes when automation fails.</span></li>
-          <li><span><strong>Human-validated:</strong> whether a test case reflects the real requirement, edge cases specific to your domain, data privacy of inputs, and whether a script is fit to run in your pipeline.</span></li>
-          <li><span><strong>Where QualityWorks helps:</strong> our consultants set up review workflows and train teams — see the WSSC pilot below.</span></li>
+        <p class="eyebrow" data-reveal>Human review</p>
+        <h2 id="human-title" class="display-sm" data-reveal>AI drafts. <span class="mark">People decide.</span></h2>
+        <p class="lede" data-reveal>The tools reduce repetitive work that invites human error. They don’t decide what “correct” means for your product.</p>
+        <ul class="review-list" data-reveal-stagger>
+          <li data-reveal><span class="icon-badge icon-badge--mint"><Icon name="automation" /></span><span><strong>Automated:</strong> drafting test case titles, steps, test data and expected results from your input; converting reviewed cases into UI automation scripts; suggesting fixes when automation fails.</span></li>
+          <li data-reveal><span class="icon-badge icon-badge--green"><Icon name="team" /></span><span><strong>Human-validated:</strong> whether a test case reflects the real requirement, edge cases specific to your domain, data privacy of inputs, and whether a script is fit to run in your pipeline.</span></li>
+          <li data-reveal><span class="icon-badge icon-badge--slate"><Icon name="learn" /></span><span><strong>Where QualityWorks helps:</strong> our consultants set up review workflows and train teams — see the WSSC pilot below.</span></li>
         </ul>
         {REVIEW && <p class="muted small-note" data-review-note={rn('Proposed copy — confirm with product owner')}>Proposed copy. The exact automated vs. human steps must be confirmed by the product owner.</p>}
       </div>
@@ -155,9 +147,12 @@ const wssc = caseStudyBySlug('ai-powered-test-case-generation-wssc');
   </section>
 
   {/* Results: stats must reference claims (StatBlock enforces this), plus the WSSC case study. */}
-  <section class="section surface-alt" aria-labelledby="results-title">
+  <section class="section surface-white" aria-labelledby="results-title">
     <div class="container">
-      <SectionHeading eyebrow="Results" title="Average results per client project" id="results-title" />
+      <div class="section-intro" data-reveal>
+        <p class="eyebrow">Results</p>
+        <h2 id="results-title">Average results per client project</h2>
+      </div>
       <StatBlock stats={[
         { value: '10×', label: 'Reduction in time to create test cases', claim: 'C07' },
         { value: '3×', label: 'Reduction in time to create an automated test', claim: 'C08' },
@@ -168,21 +163,24 @@ const wssc = caseStudyBySlug('ai-powered-test-case-generation-wssc');
   </section>
 
   {/* Access tiers from the live page, flagged as an unresolved discrepancy (P-03). */}
-  <section class="section" aria-labelledby="access-title">
+  <section class="section surface-mint" aria-labelledby="access-title">
     <div class="container">
-      <SectionHeading eyebrow="Access" title="Registered and unregistered access" id="access-title" />
+      <div class="section-intro" data-reveal>
+        <p class="eyebrow">Access</p>
+        <h2 id="access-title">Registered and unregistered access</h2>
+      </div>
       <Alert tone="warning" title="Discrepancy to resolve before launch (P-03)" data-release-blocker={RELEASE ? 'unresolved: QualityWatcher access model' : undefined}>
         <p>The live page lists the tiers below, but every tool link currently redirects to a sign-in page. Keep, change or remove this section once the product owner confirms the access model.</p>
       </Alert>
-      <div class="grid grid--2 tiers">
-        <div class="tier"><h3>Registered user</h3><ul class="checklist"><li>Free access</li><li>Daily usage</li><li>Detailed filtering</li><li>Chat history</li><li>Export test cases to QualityWatcher</li><li>Export as CSV</li></ul></div>
-        <div class="tier"><h3>Unregistered user</h3><ul class="checklist"><li>Free access</li><li>Limited access: 3 uses</li><li>Export test cases to QualityWatcher</li></ul></div>
+      <div class="tiers" data-reveal-stagger>
+        <div class="tier tier--feature" data-reveal><span class="icon-badge"><Icon name="shield" /></span><h3>Registered user</h3><ul class="checklist"><li>Free access</li><li>Daily usage</li><li>Detailed filtering</li><li>Chat history</li><li>Export test cases to QualityWatcher</li><li>Export as CSV</li></ul></div>
+        <div class="tier" data-reveal><span class="icon-badge icon-badge--mint"><Icon name="globe" /></span><h3>Unregistered user</h3><ul class="checklist"><li>Free access</li><li>Limited access: 3 uses</li><li>Export test cases to QualityWatcher</li></ul></div>
       </div>
     </div>
   </section>
 
   {/* FAQ: same `faqs` array as the FAQPage JSON-LD, so visible content and schema always match. */}
-  <section class="section surface-alt" aria-labelledby="faq-title">
+  <section class="section surface-white" aria-labelledby="faq-title">
     <div class="container container--narrow">
       <SectionHeading eyebrow="FAQ" title="QualityWatcher AI questions" id="faq-title" />
       <FaqAccordion items={faqs} />
@@ -193,40 +191,35 @@ const wssc = caseStudyBySlug('ai-powered-test-case-generation-wssc');
   <CtaBand eyebrow="Get started" title="Try the tools, or let us set them up with your team." primary={qwExternal} secondary={{ label: 'Talk to an automation expert', href: '/contact-us/' }} />
 </BaseLayout>
 <style>
-  /* Interface mock: a near-black app window (var(--qw-slate-950)) with fake window-control dots, a sample input and a
-     results table. Colours are hard-coded because the mock imitates a product UI, not site chrome. */
-  .mock { margin: 0; background: var(--qw-slate-950); border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-lg); }
-  .mock__bar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); }
-  .mock__bar span { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,0.18); }
-  .mock__bar p { margin: 0 0 0 10px; font-size: var(--fs-xs); color: var(--qw-ink-2); }
-  .mock__body { padding: var(--space-5); }
-  .mock__label { font-size: 0.6875rem; letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-teal-500); margin-bottom: var(--space-2); }
-  .mock__input { font-size: var(--fs-sm); padding: var(--space-3); border-radius: var(--radius-sm); background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); color: var(--qw-ink-1); margin-bottom: var(--space-4); }
-  .mock__table { font-size: var(--fs-xs); color: var(--qw-ink-1); }
-  .mock__table th { text-align: left; font-weight: var(--fw-semibold); color: var(--qw-ink-2); padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-  .mock__table td { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); }
-  /* Review pills: green = approved, gold = needs edit (15% tints of logo green var(--qw-green-500) and gold var(--qw-caution)). */
-  .pill { display: inline-block; padding: 2px 8px; border-radius: 99px; font-weight: var(--fw-semibold); white-space: nowrap; }
-  .pill.ok { background: color-mix(in srgb, var(--qw-green-500) 15%, transparent); color: var(--qw-green-500); }
-  .pill.wait { background: color-mix(in srgb, var(--qw-caution) 15%, transparent); color: var(--qw-caution); }
-  /* Caption in gold with a dashed rule so the "illustrative, not a screenshot" note stands out. */
-  .mock figcaption { font-size: var(--fs-xs); color: var(--qw-caution); padding: var(--space-3) var(--space-5); border-top: 1px dashed color-mix(in srgb, var(--qw-caution) 40%, transparent); }
-  /* Tool cards: auto-fit grid (16rem minimum); the CTA or unavailable note is pushed to the card bottom with
-     margin-top: auto. The !important beats the `.tool p { margin: 0 }` rule above it. */
-  .tools { display: grid; gap: var(--space-5); grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
-  .tool { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-6); border-radius: var(--radius-lg); background: var(--color-surface); border: 1px solid var(--color-border); }
+  .how { overflow: hidden; }
+  /* Tool cards: equal heights (grid rows stretch; flex column pushes the CTA to the bottom). */
+  .tools { display: grid; gap: var(--space-5); grid-template-columns: 1fr; align-items: stretch; }
+  @media (min-width: 640px) { .tools { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1180px) { .tools { grid-template-columns: repeat(4, 1fr); } }
+  .tool-wrap { height: 100%; }
+  .tool { height: 100%; display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-6); border-radius: 22px; background: var(--qw-white); border: 1px solid color-mix(in srgb, var(--qw-slate-900) 10%, transparent); box-shadow: 0 1px 2px rgba(34,43,55,.04); transition: box-shadow 300ms, border-color 300ms; }
+  .tool:hover { box-shadow: 0 30px 50px -30px rgba(34,43,55,.45); border-color: var(--qw-teal-500); }
+  .tool--0 { border-top: 6px solid var(--qw-teal-500); } .tool--1 { border-top: 6px solid var(--qw-green-500); } .tool--2 { border-top: 6px solid var(--qw-slate-900); } .tool--3 { border-top: 6px solid #289DAD; }
+  .tool__top { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3); margin-bottom: var(--space-2); }
   .tool h3 { font-size: var(--fs-md); margin: 0; }
   .tool p { margin: 0; font-size: var(--fs-sm); }
   .tool :global(.btn) { margin-top: auto; align-self: flex-start; }
-  .tool__unavailable { margin-top: auto !important; display: flex; gap: 0.5rem; color: var(--qw-caution); }
+  .tool__unavailable { margin-top: auto !important; display: flex; gap: 0.5rem; color: var(--qw-slate-900); padding: var(--space-3); border-radius: 12px; background: color-mix(in srgb, var(--qw-caution) 18%, white); }
   .tool__unavailable :global(svg) { width: 18px; height: 18px; flex: none; }
-  /* Status badges re-tinted (translucent fills, light text) so they suit the dark product surface. */
-  .surface-product .badge--warning { background: color-mix(in srgb, var(--qw-caution) 12%, transparent); color: var(--qw-caution); border-color: color-mix(in srgb, var(--qw-caution) 40%, transparent); }
-  .surface-product .badge--danger { background: rgba(255,120,100,0.12); color: #FFB4A8; border-color: rgba(255,120,100,0.4); }
-  /* Human-review list, review note, and spacing for the WSSC card and access tiers. */
-  .review-list li span { display: block; }
+  /* Human review: photo left, copy right. */
+  .human { display: grid; gap: var(--space-12); align-items: center; }
+  @media (min-width: 960px) { .human { grid-template-columns: 1fr 1fr; gap: var(--space-16); } }
+  .human h2.display-sm { font-size: clamp(2rem, 1.4rem + 1.8vw, 3rem); }
+  .review-list { list-style: none; padding: 0; margin: var(--space-8) 0 0; display: grid; gap: var(--space-4); }
+  .review-list li { display: grid; grid-template-columns: auto 1fr; gap: var(--space-4); align-items: start; padding: var(--space-4); border-radius: 18px; background: var(--qw-white); }
+  .review-list .icon-badge { width: 44px; height: 44px; border-radius: 13px; }
+  .review-list .icon-badge :global(svg) { width: 22px; height: 22px; }
   .small-note { font-size: var(--fs-xs); margin-top: var(--space-4); }
   .wssc { margin-top: var(--space-10); }
-  .tiers { margin-top: var(--space-6); }
-  .tier { padding: var(--space-6); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
+  .tiers { margin-top: var(--space-6); display: grid; gap: var(--space-5); align-items: stretch; }
+  @media (min-width: 768px) { .tiers { grid-template-columns: 1fr 1fr; } }
+  .tier { height: 100%; padding: var(--space-8); border-radius: 22px; background: var(--qw-white); }
+  .tier h3 { margin-top: var(--space-4); }
+  .tier--feature { background: var(--qw-teal-500); color: var(--qw-slate-900); --color-heading: var(--qw-slate-900); --color-text: var(--qw-slate-900); }
+  .tier--feature .icon-badge { background: var(--qw-slate-900); color: var(--qw-white); }
 </style>

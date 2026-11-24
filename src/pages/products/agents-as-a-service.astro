@@ -1,5 +1,5 @@
 ---
-import { rn } from '../../lib/release';
+import { rn, REVIEW } from '../../lib/release';
 /**
  * AGENTS AS A SERVICE (proposed corporate page). The marketplace at agents.qualityworkscg.com
  * remains the system of record for catalog, packages, prices and checkout. This page explains
@@ -12,9 +12,12 @@ import { rn } from '../../lib/release';
  *   Core question: "Is a ready-made agent right for us? How do I buy one?" Proof required: marketplace
  *   catalog snapshot. Primary CTA: "Browse the marketplace" (external, `ctas.agentsMarketplace`).
  *   Secondary: "Talk to us first" (/contact-us/?topic=smb-ai). Journeys D and E in docs/03 §3 use this page.
- * What, top to bottom: product hero with a hand-off note and an example "where agents fit" org chart; the
- *   problem; a marketplace-vs-custom-AI comparison table; a catalog preview with a label legend and
- *   department filter chips; three "How it works" steps; FAQ; closing CtaBand.
+ * What, top to bottom (redesign 24 Nov 2026): bright green hero with a hand-off note and orbiting agent
+ *   persona portraits (components/products/AgentOrbit.astro); the problem; a marketplace-vs-custom-AI
+ *   comparison table; a catalog preview (portrait cards) with a label legend and department filter chips;
+ *   an interactive "agent → workflow → human approval" visualisation (components/products/AgentFlow.astro,
+ *   replaces the old hero org chart); three graphical "How it works" steps; a human-oversight section with a
+ *   people photo (proposed copy, REVIEW note); FAQ; closing CtaBand.
  * Data: src/data/products.ts (`agentSnapshot`: 8 agents observed on 17 Nov 2026; `agentCatalogFacts`:
  *   total observed, departments, steps), src/data/site.ts (`ctas.agentsMarketplace`). Problem list,
  *   comparison rows and FAQs are inline.
@@ -34,11 +37,14 @@ import { rn } from '../../lib/release';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
-import ProcessSteps from '../../components/ProcessSteps.astro';
 import FaqAccordion from '../../components/FaqAccordion.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import Button from '../../components/Button.astro';
 import Icon from '../../components/Icon.astro';
+import AgentOrbit from '../../components/products/AgentOrbit.astro';
+import AgentFlow from '../../components/products/AgentFlow.astro';
+import ReviewPhoto from '../../components/products/ReviewPhoto.astro';
+import { peopleImage } from '../../data/peopleImagery';
 import { agentSnapshot, agentCatalogFacts } from '../../data/products';
 import { ctas } from '../../data/site';
 import { faqLd } from '../../lib/schema';
@@ -58,50 +64,34 @@ const faqs: FaqItem[] = [
 ];
 ---
 <BaseLayout seo={{ title: 'Agents as a Service: AI Agents for Business Teams | QualityWorks', description: 'Named AI agents for sales, support, marketing, admin, finance and operations, configured for your tools by QualityWorks. Compare with custom AI consulting.' }} breadcrumbs={crumbs} jsonLd={[faqLd(faqs)].filter((x) => x !== null)}>
-  <PageHero variant="product" eyebrow="QualityWorks AI Agents as a Service" title="Hire your AI workforce in days, not months" lede="Buy named AI agents for sales, support, marketing, admin, finance and operations. QualityWorks configures them for your tools so your team can stop losing time to repeat work." breadcrumbs={crumbs} primary={ctas.agentsMarketplace} secondary={{ label: 'Not sure? Talk to us first', href: '/contact-us/?topic=smb-ai' }}>
-    {/* Hand-off note under the hero CTAs: buying happens on the separate marketplace. */}
+  <PageHero tone="green" eyebrow="QualityWorks AI Agents as a Service" title="Hire your AI workforce in days, not months" lede="Buy named AI agents for sales, support, marketing, admin, finance and operations. QualityWorks configures them for your tools so your team can stop losing time to repeat work." breadcrumbs={crumbs} primary={ctas.agentsMarketplace} secondary={{ label: 'Not sure? Talk to us first', href: '/contact-us/?topic=smb-ai' }}>
+    {/* Hand-off note under the hero lede: buying happens on the separate marketplace. */}
     <p class="handoff"><Icon name="info" /><span>Packages, prices and checkout are on the separate marketplace at <strong>agents.qualityworkscg.com</strong>.</span></p>
-    {/* Hero aside: one row per department. Only the second row (i === 1) is "open" and shows the first agent
-        in that department, as an illustration; the CSS hides the agent line in every other row. */}
-    <Fragment slot="aside">
-      <div class="orgchart" aria-label="Example: where agents fit in a team">
-        <p class="orgchart__label mono">Example · where agents fit</p>
-        <ul>
-          {departments.map((d, i) => {
-            const a = agentSnapshot.find((x) => x.category === d)!;
-            return (
-              <li class:list={['orgchart__row', { 'is-open': i === 1 }]}>
-                <span class="orgchart__dept">{d}</span>
-                <span class="orgchart__agent"><span class="avatar" aria-hidden="true">{a.name[0]}</span><span><strong>{a.name}</strong> · {a.role}</span></span>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    </Fragment>
+    {/* Hero aside: agent persona portraits orbiting "your team" (decorative, pointer parallax). */}
+    <Fragment slot="aside"><AgentOrbit /></Fragment>
   </PageHero>
 
   {/* The problem: the repetitive work SMB teams want to offload. */}
-  <section class="section" aria-labelledby="problem-title">
+  <section class="section surface-white" aria-labelledby="problem-title">
     <div class="container split">
-      <div><p class="eyebrow">The problem</p><h2 id="problem-title">Your team is doing work AI should handle</h2></div>
+      <div data-reveal><p class="eyebrow">The problem</p><h2 id="problem-title" class="display-sm">Your team is doing work <span class="mark">AI should handle</span></h2></div>
       <div>
-        <p class="lede">Too much time goes to repetitive tasks, manual follow-ups and operational overhead.</p>
-        <ul class="checklist">
-          <li>Customer questions slow down your team</li>
-          <li>Sales opportunities stall without follow-up</li>
-          <li>Internal updates take hours to compile</li>
-          <li>Scaling requires hiring, and hiring is expensive</li>
+        <p class="lede" data-reveal>Too much time goes to repetitive tasks, manual follow-ups and operational overhead.</p>
+        <ul class="pains" data-reveal-stagger>
+          <li data-reveal><span class="icon-badge icon-badge--mint"><Icon name="mail" /></span>Customer questions slow down your team</li>
+          <li data-reveal><span class="icon-badge icon-badge--mint"><Icon name="cycle" /></span>Sales opportunities stall without follow-up</li>
+          <li data-reveal><span class="icon-badge icon-badge--mint"><Icon name="doc" /></span>Internal updates take hours to compile</li>
+          <li data-reveal><span class="icon-badge icon-badge--mint"><Icon name="team" /></span>Scaling requires hiring, and hiring is expensive</li>
         </ul>
       </div>
     </div>
   </section>
 
   {/* Comparison: marketplace agent vs custom AI consulting, so visitors pick the right route before clicking. */}
-  <section class="section surface-alt" aria-labelledby="compare-title">
+  <section class="section surface-mint" aria-labelledby="compare-title">
     <div class="container">
       <SectionHeading eyebrow="Choose the right route" title="Marketplace agent or custom AI solution?" lede="Both come from QualityWorks. They solve different problems." id="compare-title" />
-      <div class="table-scroll">
+      <div class="table-scroll compare-wrap" data-reveal>
         <table class="data-table compare">
           <caption class="visually-hidden">Agents as a Service compared with AI & Agentic Business Solutions consulting</caption>
           <thead><tr><th scope="col"></th><th scope="col">Agents as a Service</th><th scope="col">AI & Agentic Business Solutions</th></tr></thead>
@@ -114,15 +104,15 @@ const faqs: FaqItem[] = [
           </tbody>
         </table>
       </div>
-      <div class="btn-row compare__ctas">
+      <div class="btn-row btn-row--equal compare__ctas">
         <Button cta={{ ...ctas.agentsMarketplace, kind: 'primary' }} />
         <Button href="/services/ai-service/" label="Explore custom AI solutions" variant="secondary" />
       </div>
     </div>
   </section>
 
-  {/* Catalog preview: legend for listing labels, department chips, agent cards (no prices), link to the full catalog. */}
-  <section class="section surface-product" aria-labelledby="catalog-title">
+  {/* Catalog preview: legend for listing labels, department chips, agent cards with persona portraits (no prices). */}
+  <section class="section surface-white" aria-labelledby="catalog-title">
     <div class="container">
       <SectionHeading eyebrow="Catalog preview" title="A sample of available agents" lede={`The marketplace listed ${agentCatalogFacts.totalAgentsObserved} agents across ${agentCatalogFacts.departments.length} departments on 17 Nov 2026. This preview is a snapshot; the marketplace is always current.`} id="catalog-title" />
       <div class="legend" data-review-note={rn('Marketplace does not publish definitions for these labels — Q-21')}>
@@ -139,11 +129,16 @@ const faqs: FaqItem[] = [
       {/* Screen-reader-only live region: the chip script writes "Showing N agents" here after each filter. */}
       <p class="visually-hidden" aria-live="polite" data-agent-count></p>
       <ul class="agents" data-agents>
-        {agentSnapshot.map((a) => (
+        {agentSnapshot.map((a, i) => (
           <li class="agent" data-dept={a.category}>
-            <div class="agent__head"><span class="avatar" aria-hidden="true">{a.name[0]}</span><div><h3>{a.name}</h3><p class="agent__role">{a.role}</p></div></div>
-            <p class="agent__desc">{a.description}</p>
-            <p class="agent__meta"><span class="badge" title="Marketplace listing label">{availability[a.availabilityStatus]}</span><span class="agent__dept">{a.category}</span></p>
+            <div class="agent__card" data-tilt="6">
+              <div class:list={['agent__media', `agent__media--${i % 3}`]}><img src={`/agents/${a.id}.webp`} alt={`${a.name}, AI agent persona portrait from the marketplace`} width="320" height="320" loading="lazy" decoding="async" /><span class="badge agent__label" title="Marketplace listing label">{availability[a.availabilityStatus]}</span></div>
+              <div class="agent__body">
+                <h3>{a.name}</h3><p class="agent__role">{a.role}</p>
+                <p class="agent__desc">{a.description}</p>
+                <p class="agent__meta"><span class="agent__dept">{a.category}</span></p>
+              </div>
+            </div>
           </li>
         ))}
       </ul>
@@ -151,17 +146,70 @@ const faqs: FaqItem[] = [
     </div>
   </section>
 
-  {/* How it works: marketplace steps, with a note that nothing deploys automatically at checkout. */}
-  <section class="section" aria-labelledby="steps-title">
+  {/* Interactive visualisation: choose an agent → its illustrative path to a human approval checkpoint. */}
+  <section class="section surface-teal" aria-labelledby="flow-title">
     <div class="container">
-      <SectionHeading eyebrow="How it works" title="Three steps to an agent in your workflow" id="steps-title" />
-      <ProcessSteps steps={agentCatalogFacts.steps} />
+      <div class="section-intro" data-reveal>
+        <p class="eyebrow">Agents, workflows, people</p>
+        <h2 id="flow-title" class="display-sm">See where each agent fits, and where <span class="mark">your team decides</span></h2>
+        <p class="lede">Pick an agent to follow a piece of work from arrival to a human approval checkpoint.</p>
+      </div>
+      <AgentFlow />
+    </div>
+  </section>
+
+  {/* How it works: marketplace steps as a graphical, scroll-drawn track; note that nothing deploys at checkout. */}
+  <section class="section surface-white" aria-labelledby="steps-title">
+    <div class="container">
+      <div class="section-intro" data-reveal>
+        <p class="eyebrow">How it works</p>
+        <h2 id="steps-title" class="display-sm">Three steps to an agent in your workflow</h2>
+      </div>
+      <div class="steps-wrap" data-scroll-progress>
+      <span class="steps__track" aria-hidden="true"><i></i></span>
+      <ol class="steps" data-reveal-stagger>
+        {agentCatalogFacts.steps.map((st, i) => (
+          <li class:list={['step', `step--${i}`]} data-reveal="up">
+            <div class="step__visual" aria-hidden="true">
+              {i === 0 && <span class="step__faces">{agentSnapshot.slice(0, 4).map((a) => <img src={`/agents/${a.id}.webp`} alt="" width="56" height="56" loading="lazy" />)}<b>+{agentCatalogFacts.totalAgentsObserved - 4}</b></span>}
+              {i === 1 && <span class="chip-ui step__chip"><span class="chip-ui__icon chip-ui__icon--slate"><Icon name="calendar" /></span><span>Onboarding session<small>Connect tools and workflows</small></span></span>}
+              {i === 2 && <span class="chip-ui step__chip"><span class="chip-ui__dot"></span><span>Agent deployed<small>Into your workstream</small></span></span>}
+            </div>
+            <span class="step__num" aria-hidden="true">{i + 1}</span>
+            <span class:list={['icon-badge', i === 1 && 'icon-badge--green', i === 2 && 'icon-badge--slate']}><Icon name={['search', 'cycle', 'spark'][i]} /></span>
+            <h3>{st.title}</h3>
+            <p>{st.text}</p>
+          </li>
+        ))}
+      </ol>
+      </div>
       <p class="handoff handoff--light"><Icon name="external" /><span>Steps 1–2 happen on agents.qualityworkscg.com. Step 3 is completed by the QualityWorks team after the setup call. Nothing is deployed automatically at checkout.</span></p>
     </div>
   </section>
 
+  {/* Human oversight: people photo + review chips. Copy restates facts already on this page / the marketplace. */}
+  <section class="section surface-mint" aria-labelledby="human-title">
+    <div class="container human">
+      <ReviewPhoto tone="green" image={peopleImage('finance-client-meeting')} chips={[
+        { title: 'Kai: drafting reply', sub: 'Human review in control', faces: ['/agents/kai-customer-service.webp'], x: '2%', y: '6%' },
+        { title: 'Setup call', sub: 'With the QualityWorks team', icon: 'calendar', tone: 'slate', x: '50%', y: '62%' },
+        { title: 'Human approval', sub: 'Kept in the loop', dot: true, x: '8%', y: '80%' },
+      ]} />
+      <div>
+        <p class="eyebrow" data-reveal>Human oversight</p>
+        <h2 id="human-title" class="display-sm" data-reveal>Agents take the repeat work. <span class="mark">People stay in charge.</span></h2>
+        <ul class="oversight" data-reveal-stagger>
+          <li data-reveal><span class="icon-badge icon-badge--green"><Icon name="calendar" /></span><span>Every agent still needs a setup call before QualityWorks deploys it.</span></li>
+          <li data-reveal><span class="icon-badge icon-badge--slate"><Icon name="shield" /></span><span>Nothing is deployed automatically at checkout. QualityWorks finalizes setup and deploys the agents into your workstream.</span></li>
+          <li data-reveal><span class="icon-badge icon-badge--mint"><Icon name="team" /></span><span>Agents such as Kai handle common support questions quickly while keeping human review in control.</span></li>
+        </ul>
+        {REVIEW && <p class="small-note" data-review-note={rn('Proposed section — confirm human-oversight wording with product owner')}>Proposed section built from statements already on this page and the marketplace listing. Confirm wording with the product owner.</p>}
+      </div>
+    </div>
+  </section>
+
   {/* FAQ: same `faqs` array as the FAQPage JSON-LD. */}
-  <section class="section surface-alt" aria-labelledby="faq-title">
+  <section class="section surface-white" aria-labelledby="faq-title">
     <div class="container container--narrow">
       <SectionHeading eyebrow="FAQ" title="Agents as a Service questions" id="faq-title" />
       <FaqAccordion items={faqs} />
@@ -169,52 +217,84 @@ const faqs: FaqItem[] = [
   </section>
 
   {/* Closing CTA: marketplace hand-off or a guided conversation (?topic=smb-ai pre-tags the contact form). */}
-  <CtaBand title="Start with one agent, or build a cross-functional team." text="Browse the marketplace, or talk to us if you’re not sure an agent is the right fit." primary={ctas.agentsMarketplace} secondary={{ label: 'Talk to us first', href: '/contact-us/?topic=smb-ai' }} />
+  <CtaBand tone="green" title="Start with one agent, or build a cross-functional team." text="Browse the marketplace, or talk to us if you’re not sure an agent is the right fit." primary={ctas.agentsMarketplace} secondary={{ label: 'Talk to us first', href: '/contact-us/?topic=smb-ai' }} />
 </BaseLayout>
 <style>
-  /* Hand-off notes: teal-300 icon on the dark hero, teal-700 (--light modifier) on the white steps section. */
-  .handoff { display: flex; gap: var(--space-2); align-items: flex-start; font-size: var(--fs-sm); color: var(--color-muted); margin-top: var(--space-6); }
-  .handoff :global(svg) { width: 18px; height: 18px; flex: none; margin-top: 2px; color: var(--qw-teal-500); }
+  /* Hand-off note: slate-900 on the green hero; teal-700 icon (--light modifier) on white. */
+  .handoff { display: flex; gap: var(--space-2); align-items: flex-start; font-size: var(--fs-sm); color: var(--color-text); margin-top: var(--space-6); max-width: 34rem; }
+  .handoff :global(svg) { width: 18px; height: 18px; flex: none; margin-top: 2px; }
   .handoff--light :global(svg) { color: var(--qw-teal-700); }
-  /* Org chart in the hero aside. Closed rows show only the department; the open row gets a translucent
-     teal-300 (var(--qw-teal-500)) border and fill. */
-  .orgchart { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius-lg); padding: var(--space-5); }
-  .orgchart__label { font-size: var(--fs-xs); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-green-500); }
-  .orgchart ul { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-2); }
-  .orgchart__row { display: grid; gap: var(--space-2); padding: var(--space-3) var(--space-4); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-md); font-size: var(--fs-sm); }
-  .orgchart__dept { font-weight: var(--fw-semibold); color: #fff; }
-  .orgchart__agent { display: flex; gap: var(--space-3); align-items: center; color: var(--color-text); }
-  .orgchart__row:not(.is-open) .orgchart__agent { display: none; }
-  .orgchart__row.is-open { border-color: color-mix(in srgb, var(--qw-teal-500) 45%, transparent); background: color-mix(in srgb, var(--qw-teal-500) 6%, transparent); }
-  /* Letter avatar (first letter of the agent name), logo teal to logo green gradient. Decorative: aria-hidden. */
-  .avatar { flex: none; width: 2.25rem; height: 2.25rem; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(135deg, var(--qw-teal-500), var(--qw-green-500)); color: var(--qw-slate-950); font-weight: var(--fw-bold); }
-  /* Comparison table: row headers are not sticky (global.css makes .data-table th sticky); the Agents column
-     header gets a light teal tint to mark the product being described. */
+  /* Problem list as tiles. */
+  .pains { list-style: none; padding: 0; margin: var(--space-6) 0 0; display: grid; gap: var(--space-3); }
+  @media (min-width: 640px) { .pains { grid-template-columns: 1fr 1fr; } }
+  .pains li { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5); border-radius: 20px; background: var(--qw-mint-50); font: var(--fw-bold) var(--fs-base)/1.35 var(--font-display); color: var(--qw-slate-900); height: 100%; }
+  .pains .icon-badge { background: var(--qw-white); width: 44px; height: 44px; }
+  /* Comparison table. */
+  .compare-wrap { background: var(--qw-white); border-radius: 22px; padding: var(--space-2); }
   .compare th[scope="row"] { width: 12rem; background: var(--qw-mint-50); position: static; }
-  .compare thead th:nth-child(2) { background: var(--qw-mint-50); }
+  .compare thead th:nth-child(2) { background: var(--qw-green-500); color: var(--qw-slate-900); }
   .compare__ctas { margin-top: var(--space-6); }
   /* Label legend above the catalog. */
-  .legend { margin: 0 0 var(--space-8); padding: var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-lg); font-size: var(--fs-sm); }
+  .legend { margin: 0 0 var(--space-8); padding: var(--space-5); border-radius: 20px; background: var(--qw-mint-50); font-size: var(--fs-sm); }
   .legend__title { font-weight: var(--fw-bold); color: var(--color-heading); }
   .legend dl { margin: 0; display: grid; gap: var(--space-4); }
+  @media (min-width: 900px) { .legend dl { grid-template-columns: 1.4fr 1fr; } }
   .legend dt { display: flex; flex-wrap: wrap; gap: var(--space-2); font-weight: var(--fw-semibold); color: var(--color-heading); margin-bottom: var(--space-1); }
   .legend dd { margin: 0; }
-  /* Department chips for the dark product surface; pressed state = teal-300 fill with ink text. */
+  /* Department chips; pressed state = slate fill. */
   .filter-chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-6); }
-  .chip { min-height: 40px; padding: 0.4rem 1rem; border-radius: var(--radius-pill); border: 1px solid var(--color-border); background: transparent; color: var(--color-text); font: var(--fw-semibold) var(--fs-sm)/1 var(--font-display); cursor: pointer; }
-  .chip:hover { border-color: var(--qw-teal-500); }
-  .chip[aria-pressed="true"] { background: var(--qw-teal-500); color: var(--qw-slate-950); border-color: var(--qw-teal-500); }
-  /* Agent cards: auto-fill grid with a 16rem minimum. The explicit [hidden] rule is needed because
-     display: flex would otherwise override the hidden attribute set by the filter script. */
-  .agents { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr)); }
-  .agent { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5); border-radius: var(--radius-lg); background: var(--color-surface); border: 1px solid var(--color-border); }
+  .chip { min-height: 40px; padding: 0.4rem 1rem; border-radius: var(--radius-pill); border: 1px solid var(--color-border); background: var(--qw-white); color: var(--qw-slate-900); font: var(--fw-semibold) var(--fs-sm)/1 var(--font-display); cursor: pointer; }
+  .chip:hover { border-color: var(--qw-teal-700); }
+  .chip[aria-pressed="true"] { background: var(--qw-slate-900); color: var(--qw-white); border-color: var(--qw-slate-900); }
+  /* Agent cards with persona portraits: equal heights; [hidden] rule beats display:flex. */
+  .agents { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-5); grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr)); align-items: stretch; }
+  .agent { display: flex; }
   .agent[hidden] { display: none; }
-  .agent__head { display: flex; gap: var(--space-3); align-items: center; }
-  .agent h3 { font-size: var(--fs-base); margin: 0; }
-  .agent__role { margin: 0; font-size: var(--fs-xs); font-family: var(--font-mono); letter-spacing: 0.04em; text-transform: uppercase; color: var(--qw-teal-500); }
+  .agent__card { flex: 1; display: flex; flex-direction: column; border-radius: 22px; overflow: hidden; background: var(--qw-white); border: 1px solid color-mix(in srgb, var(--qw-slate-900) 10%, transparent); transition: box-shadow 300ms; }
+  .agent__card:hover { box-shadow: 0 30px 50px -30px rgba(34,43,55,.5); }
+  .agent__media { position: relative; background: var(--qw-teal-500); aspect-ratio: 5 / 4; display: grid; place-items: end center; overflow: hidden; }
+  .agent__media--1 { background: var(--qw-green-500); } .agent__media--2 { background: var(--qw-mint-50); }
+  .agent__media img { width: 78%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 50% 50% 0 0; translate: 0 8%; transition: transform 500ms var(--ease-out); }
+  .agent__card:hover .agent__media img { transform: scale(1.05); }
+  .agent__label { position: absolute; top: 12px; left: 12px; background: var(--qw-white); color: var(--qw-slate-900); border-color: transparent; }
+  .agent__body { flex: 1; display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-5); }
+  .agent h3 { font-size: var(--fs-md); margin: 0; }
+  .agent__role { margin: 0; font: var(--fw-bold) 0.72rem/1.3 var(--font-display); letter-spacing: 0.06em; text-transform: uppercase; color: var(--qw-teal-700); }
   .agent__desc { font-size: var(--fs-sm); margin: 0; }
-  .agent__meta { margin: auto 0 0; display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; font-size: var(--fs-xs); color: var(--color-muted); }
+  .agent__meta { margin: auto 0 0; padding-top: var(--space-3); font-size: var(--fs-xs); color: var(--color-muted); }
   .catalog-note { margin-top: var(--space-8); }
+  /* How it works: three tiles on a track that fills as the section scrolls through (--p from data-scroll-progress). */
+  .steps-wrap { position: relative; }
+  .steps { list-style: none; padding: 0; margin: 0; position: relative; display: grid; gap: var(--space-5); }
+  @media (min-width: 900px) { .steps { grid-template-columns: repeat(3, 1fr); } }
+  .steps__track { display: none; }
+  @media (min-width: 900px) {
+    .steps__track { display: block; position: absolute; left: 8%; right: 8%; top: 5.25rem; height: 6px; border-radius: 4px; background: var(--qw-mint-50); z-index: 0; }
+    .steps__track i { display: block; height: 100%; width: calc(min(1, var(--p, 1) * 1.6) * 100%); background: var(--qw-green-500); border-radius: inherit; transition: width 200ms linear; }
+  }
+  .step { position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-6); border-radius: 24px; background: var(--qw-white); border: 1px solid color-mix(in srgb, var(--qw-slate-900) 10%, transparent); height: 100%; }
+  .step__visual { height: 7.5rem; border-radius: 18px; background: var(--qw-teal-500); display: grid; place-items: center; margin-bottom: var(--space-4); position: relative; overflow: hidden; }
+  .step--1 .step__visual { background: var(--qw-green-500); } .step--2 .step__visual { background: var(--qw-slate-900); }
+  .step__faces { display: flex; align-items: center; }
+  .step__faces img { width: 56px; height: 56px; border-radius: 50%; border: 3px solid var(--qw-white); object-fit: cover; background: var(--qw-mint-50); margin-left: -14px; }
+  .step__faces img:first-child { margin-left: 0; }
+  .step__faces b { margin-left: -14px; width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: var(--qw-slate-900); color: var(--qw-white); border: 3px solid var(--qw-white); font: var(--fw-bold) var(--fs-sm)/1 var(--font-display); }
+  .step__chip { position: static; animation: qw-float 5s ease-in-out infinite; }
+  .step__num { position: absolute; right: var(--space-6); top: calc(7.5rem + var(--space-8)); font: var(--fw-black) 3rem/1 var(--font-display); color: var(--qw-teal-500); opacity: 0.9; }
+  .step h3 { margin: var(--space-2) 0 0; font-size: var(--fs-lg); }
+  .step p { margin: 0; }
+  .steps:hover .step__faces img { transition: margin 300ms; margin-left: -6px; }
+  .steps:hover .step__faces img:first-child { margin-left: 0; }
+  /* Human oversight section. */
+  .human { display: grid; gap: var(--space-12); align-items: center; }
+  @media (min-width: 960px) { .human { grid-template-columns: 1fr 1fr; gap: var(--space-16); } }
+  .human h2.display-sm { font-size: clamp(2rem, 1.4rem + 1.8vw, 3rem); }
+  .split h2.display-sm { font-size: clamp(2rem, 1.4rem + 1.8vw, 3rem); }
+  .oversight { list-style: none; padding: 0; margin: var(--space-8) 0 0; display: grid; gap: var(--space-4); }
+  .oversight li { display: grid; grid-template-columns: auto 1fr; gap: var(--space-4); align-items: center; padding: var(--space-4); border-radius: 18px; background: var(--qw-white); }
+  .oversight .icon-badge { width: 44px; height: 44px; border-radius: 13px; }
+  .oversight .icon-badge :global(svg) { width: 22px; height: 22px; }
+  .small-note { font-size: var(--fs-xs); margin-top: var(--space-4); color: var(--qw-muted); }
 </style>
 <script>
   // Department filter (single-select). Clicking a chip marks it pressed, hides cards from other departments

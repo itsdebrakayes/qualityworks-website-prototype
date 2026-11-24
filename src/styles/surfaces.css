@@ -1,0 +1,110 @@
+/* SURFACES & VISUAL GRAMMAR — the redesign's bright, colour-blocked system (docs/16-redesign-system.md §2).
+   Feedback (Janique, Sabrina, 23 Nov 2026): navy-heavy heroes are dull; use brighter approved colours and
+   strong colour-blocking; avoid generic "AI" gradients. Every colour here is an approved Brand Guidelines
+   v1.0 value (or a documented derived accessibility shade in tokens.css).
+
+   CONTRAST RULES (computed, docs/02 §4): on Teal #29A59A and Green #2CAF81 all text is slate-900
+   (4.73:1 and 5.14:1); white text is never used on them. Buttons on teal/green are slate-900 with white
+   text (14.3:1). Mint and white take the standard light-theme tokens.
+
+   SURFACES
+     .surface-teal    brand Teal block (heroes, CTA bands, feature tiles)
+     .surface-green   brand Green block (Agents as a Service, highlights)
+     .surface-mint    Mint (#ECF7F6) light block
+     .surface-white   explicit white block
+     .surface-dark / .surface-product (tokens.css) remain for occasional contrast and the product layer. */
+
+.surface-teal, .surface-green {
+  --color-text: var(--qw-slate-900);
+  --color-heading: var(--qw-slate-900);
+  --color-lead: var(--qw-slate-900);
+  --color-muted: var(--qw-slate-900);
+  --color-link: var(--qw-slate-900);
+  --color-eyebrow: var(--qw-slate-900);
+  --color-accent: var(--qw-white);
+  --color-border: color-mix(in srgb, var(--qw-slate-900) 22%, transparent);
+  --color-surface: var(--qw-white);
+  --color-primary: var(--qw-slate-900);
+  --color-primary-hover: var(--qw-slate-800);
+  --color-on-primary: var(--qw-white);
+  --focus-ring: var(--qw-slate-900);
+  color: var(--color-text);
+}
+.surface-teal { --color-bg: var(--qw-teal-500); background: var(--qw-teal-500); }
+.surface-green { --color-bg: var(--qw-green-500); background: var(--qw-green-500); }
+.surface-mint { --color-bg: var(--qw-mint-50); background: var(--qw-mint-50); }
+.surface-white { --color-bg: var(--qw-white); background: var(--qw-white); }
+/* Links inside bright blocks are always underlined (colour alone would not distinguish them). */
+.surface-teal a:not(.btn), .surface-green a:not(.btn) { text-decoration-thickness: 2px; }
+.surface-teal .eyebrow::before, .surface-green .eyebrow::before { background: var(--qw-slate-900); }
+.surface-teal .btn--secondary:hover, .surface-green .btn--secondary:hover { --btn-bg: var(--qw-slate-900); --btn-fg: var(--qw-white); --btn-border: var(--qw-slate-900); }
+
+/* Display type: large, tight Montserrat for statements. */
+.display { font-family: var(--font-display); font-weight: var(--fw-black); font-size: clamp(2.5rem, 1.4rem + 4.6vw, 5.5rem); line-height: 1.0; letter-spacing: -0.03em; }
+.display-sm { font-family: var(--font-display); font-weight: var(--fw-black); font-size: clamp(2rem, 1.3rem + 2.8vw, 3.75rem); line-height: 1.04; letter-spacing: -0.025em; }
+/* Highlight words in a statement with a brand colour bar under them (not gradient text). */
+.mark { background: linear-gradient(transparent 62%, color-mix(in srgb, var(--qw-green-500) 55%, transparent) 62%); padding: 0 0.08em; }
+.surface-teal .mark, .surface-green .mark { background: linear-gradient(transparent 62%, color-mix(in srgb, var(--qw-white) 55%, transparent) 62%); }
+
+/* Equal-width buttons in a row (Janique: "Buttons need to be the same width"). */
+.btn-row.btn-row--equal { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; width: max-content; max-width: 100%; }
+.btn-row.btn-row--equal .btn { width: 100%; min-width: 13rem; }
+@media (max-width: 559px) { .btn-row.btn-row--equal { grid-auto-flow: row; width: 100%; } .btn-row.btn-row--equal .btn { min-width: 0; } }
+
+/* Colour-block section edges: a curved bottom edge that dips into the next section. */
+.edge-curve { position: relative; }
+.edge-curve::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: clamp(24px, 4vw, 64px); background: var(--edge-next, var(--qw-white)); border-radius: 50% 50% 0 0 / 100% 100% 0 0; pointer-events: none; }
+
+/* Floating UI chips: small white "interface" cards that float over photos and visuals. Shared by heroes,
+   product demos and illustrations (components/FloatingUI.astro). */
+.chip-ui { position: absolute; display: flex; align-items: center; gap: 0.6rem; padding: 0.65rem 0.85rem; background: var(--qw-white); color: var(--qw-slate-900); border-radius: 14px; box-shadow: 0 18px 40px -14px rgba(34, 43, 55, 0.45), 0 2px 6px rgba(34, 43, 55, 0.12); font: var(--fw-semibold) var(--fs-xs)/1.3 var(--font-display); white-space: nowrap; z-index: 2; }
+.chip-ui small { display: block; font: var(--fw-regular) 0.72rem/1.3 var(--font-body); color: var(--qw-muted); }
+.chip-ui__icon { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; flex: none; background: var(--qw-mint-50); color: var(--qw-teal-700); }
+.chip-ui__icon svg { width: 17px; height: 17px; }
+.chip-ui__icon--green { background: var(--qw-green-500); color: var(--qw-slate-900); }
+.chip-ui__icon--slate { background: var(--qw-slate-900); color: var(--qw-white); }
+.chip-ui__dot { width: 9px; height: 9px; border-radius: 50%; background: var(--qw-green-500); animation: qw-pulse 1.8s ease-out infinite; }
+.chip-ui__bar { display: block; height: 6px; width: 7rem; border-radius: 6px; background: var(--qw-mint-50); overflow: hidden; margin-top: 4px; }
+.chip-ui__bar i { display: block; height: 100%; width: var(--w, 70%); background: var(--qw-teal-500); border-radius: inherit; }
+@media (max-width: 767px) { .chip-ui { scale: 0.82; transform-origin: left top; } }
+
+/* Bento grid: varied tile sizes for feature collections. */
+.bento { display: grid; gap: var(--space-4); grid-template-columns: repeat(6, 1fr); }
+.bento > * { grid-column: span 6; border-radius: var(--radius-lg); padding: var(--space-8); position: relative; overflow: hidden; }
+@media (min-width: 768px) {
+  .bento > .span-2 { grid-column: span 2; } .bento > .span-3 { grid-column: span 3; } .bento > .span-4 { grid-column: span 4; }
+}
+
+/* Icon badge: a solid rounded square for section icons. */
+.icon-badge { width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; background: var(--qw-teal-500); color: var(--qw-slate-900); flex: none; }
+.icon-badge svg { width: 26px; height: 26px; }
+.icon-badge--green { background: var(--qw-green-500); }
+.icon-badge--mint { background: var(--qw-mint-50); color: var(--qw-teal-700); }
+.icon-badge--slate { background: var(--qw-slate-900); color: var(--qw-white); }
+
+/* Section intro block used across redesigned pages. */
+.section-intro { max-width: 46rem; margin-bottom: var(--space-12); }
+.section-intro--center { margin-inline: auto; text-align: center; }
+.section-intro--center .eyebrow { justify-content: center; }
+.section-intro h2 { font-size: var(--fs-2xl); }
+
+/* Slide-in reveals start off to the side; clip so they never create horizontal scrolling. */
+main { overflow-x: clip; }
+
+/* Floating, moving interface chips over photos were removed at the user's request (24 Nov 2026).
+   Any remaining chip marked .float (FloatingUI, product orbit/review visuals) is hidden site-wide. */
+.chip-ui.float, .fui { display: none !important; }
+
+/* FROSTED GLASS (requested 24 Nov 2026): translucent, blurred panels over colour and photography.
+   Header, mega-menu, pathway cards, product tiles and several cards use it. Text keeps solid colours; the
+   panels stay opaque enough for AA contrast, and fall back to solid colours where backdrop-filter is missing. */
+.glass { background: rgba(255, 255, 255, 0.62); -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%); border: 1px solid rgba(255, 255, 255, 0.55); box-shadow: 0 20px 50px -24px rgba(34, 43, 55, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.6); }
+.glass-dark { background: rgba(34, 43, 55, 0.62); -webkit-backdrop-filter: blur(18px) saturate(140%); backdrop-filter: blur(18px) saturate(140%); border: 1px solid rgba(255, 255, 255, 0.14); box-shadow: 0 20px 50px -24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.12); }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass { background: rgba(255, 255, 255, 0.94); } .glass-dark { background: rgba(34, 43, 55, 0.95); }
+}
+/* Site header as dark frosted glass. */
+.site-header { background: rgba(54, 65, 79, 0.72) !important; -webkit-backdrop-filter: blur(18px) saturate(150%); backdrop-filter: blur(18px) saturate(150%); }
+.mega { background: rgba(255, 255, 255, 0.86) !important; -webkit-backdrop-filter: blur(22px) saturate(160%); backdrop-filter: blur(22px) saturate(160%); }
+/* Cards that sit on colour blocks or photos become glass. */
+.surface-teal .card, .surface-green .card, .surface-teal .steps__card, .surface-green .steps__card { background: rgba(255, 255, 255, 0.7); -webkit-backdrop-filter: blur(16px) saturate(160%); backdrop-filter: blur(16px) saturate(160%); border-color: rgba(255, 255, 255, 0.6); }

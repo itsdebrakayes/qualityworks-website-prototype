@@ -4,7 +4,7 @@
  * Primary persona: Enterprise CTO / VP Eng. Secondary: QA Director, SMB Founder.
  * Core question: "Which QualityWorks service fits my problem?"  Conversion: service detail → contact.
  *
- * What: the Solutions hub. Sections, top to bottom: hero; a "Quick guide" problem-to-service table;
+ * What: the Solutions hub. Sections, top to bottom: hero; three pathway jump tiles (anchors); a "Quick guide" problem-to-service table;
  *   one section per Solutions mega-menu group (Improve Software Quality / Build or Modernize a Digital
  *   Product / Deploy, Integrate, or Govern AI) with ServiceCards; a "Specialist testing pages" link list
  *   under the first group; closing CtaBand.
@@ -39,6 +39,14 @@ import Icon from '../../components/Icon.astro';
 import { services, pathways } from '../../data/services';
 import { primaryNav } from '../../data/navigation';
 import { ctas } from '../../data/site';
+import SignatureVisual from '../../components/solutions/SignatureVisual.astro';
+// Per-group signature visual (by the group's lead service) and colour treatment.
+const groupLook = [
+  { sig: 'test-automation', pw: 'quality', surface: 'surface-mint', badge: 'icon-badge' },
+  { sig: 'custom-software-development', pw: 'build', surface: 'surface-white', badge: 'icon-badge icon-badge--green' },
+  { sig: 'ai-service', pw: 'ai', surface: 'surface-mint', badge: 'icon-badge icon-badge--slate' },
+] as const;
+const pathIcon = ['shield', 'code', 'agent'];
 
 // Solutions mega-menu groups (headings + links) in navigation order; the page mirrors the menu.
 const groups = primaryNav.find((n) => n.id === 'solutions')!.groups!;
@@ -61,46 +69,98 @@ const guide = [
 <BaseLayout seo={{ title: 'Solutions: Software Testing, Development & AI Services | QualityWorks', description: 'QualityWorks solutions: test automation, full-stack and non-functional testing, custom software development, technology advisory and AI & agentic business solutions.' }} breadcrumbs={crumbs}>
   <PageHero image={peopleImage('services-pair')} eyebrow="Solutions" title="Services for quality, delivery and AI" lede="Three practices, one standard. Whether you need to improve software quality, build or modernize a product, or deploy AI responsibly, start with the problem you are trying to solve." breadcrumbs={crumbs} primary={ctas.contact} />
 
+  {/* Pathway jump tiles: three bright colour blocks linking to the in-page group anchors. */}
+  <nav class="pw-jump" aria-label="Solution pathways">
+    <div class="container pw-jump__grid" data-reveal-stagger>
+      {groups.map((g, i) => (
+        <a class:list={['pw-jump__tile', ['surface-teal', 'surface-green', 'pw-jump__tile--slate'][i]]} href={`#${pathways[i]?.id}`} data-reveal="up">
+          <span class="pw-jump__n mono">{pathways[i]?.index}</span>
+          <span class="pw-jump__label">{g.heading}</span>
+          <span class="pw-jump__go" aria-hidden="true"><Icon name="arrow" /></span>
+        </a>
+      ))}
+    </div>
+  </nav>
+
   {/* Quick guide: problem-to-service table (answers the core question directly). */}
   <section class="section" aria-labelledby="guide-title">
-    <div class="container">
-      <SectionHeading eyebrow="Quick guide" title="Which service fits your problem?" lede="Answer-first: find your situation, follow the link." id="guide-title" />
-      <div class="table-scroll">
+    <div class="container guide-wrap">
+      <div>
+        <SectionHeading eyebrow="Quick guide" title="Which service fits your problem?" lede="Answer-first: find your situation, follow the link." id="guide-title" />
+      </div>
+      <div class="table-scroll" data-reveal="up">
         <table class="data-table guide">
           <caption class="visually-hidden">Common problems and the QualityWorks service that addresses each</caption>
           <thead><tr><th scope="col">If this sounds like you…</th><th scope="col">Start with</th></tr></thead>
-          <tbody>{guide.map(([p, n, h]) => <tr><td>{p}</td><td><a href={h}>{n}</a></td></tr>)}</tbody>
+          <tbody>{guide.map(([p, n, h]) => <tr><td>{p}</td><td><a href={h}>{n}<Icon name="arrow" /></a></td></tr>)}</tbody>
         </table>
       </div>
     </div>
   </section>
 
-  {/* One section per Solutions group. Alternating tinted backgrounds; section id = pathway id for anchors. */}
+  {/* One section per Solutions group: intro column with a signature visual + equal-height cards.
+      Section id = pathway id for anchors. */}
   {groups.map((g, i) => {
     // Positional match: group i uses pathway i for its eyebrow, lede and anchor id (see Gotchas).
     const pw = pathways[i];
+    const look = groupLook[i] ?? groupLook[0];
     // Nav links without a matching service record (none today) are skipped.
     const list = g.links.map((l) => byPath(l.href)).filter(Boolean);
     return (
-      <section class:list={['section', { 'surface-alt': i % 2 === 0 }]} aria-labelledby={`g-${i}`} id={pw?.id}>
-        <div class="container">
-          <SectionHeading eyebrow={`${pw?.index ?? ''} / ${pw?.label ?? ''}`} title={g.heading} lede={pw?.text} id={`g-${i}`} />
-          <div class="grid grid--3">{list.map((s) => <ServiceCard service={s!} />)}</div>
-          {i === 0 && (
-            <div class="specialist">
-              <p class="specialist__title">Specialist testing pages</p>
-              <ul>{specialist.map((s) => <li><a href={s.path}>{s.name}<Icon name="arrow" /></a></li>)}</ul>
-            </div>
-          )}
+      <section class:list={['section', 'grp', look.surface]} aria-labelledby={`g-${i}`} id={pw?.id}>
+        <div class="container grp__grid">
+          <div class="grp__intro">
+            <span class={look.badge} aria-hidden="true"><Icon name={pathIcon[i] ?? 'spark'} /></span>
+            <SectionHeading eyebrow={`${pw?.index ?? ''} / ${pw?.label ?? ''}`} title={g.heading} lede={pw?.text} id={`g-${i}`} />
+            <div class="grp__sig" data-reveal="scale"><SignatureVisual slug={look.sig} pathway={look.pw} size="sm" /></div>
+          </div>
+          <div>
+            <div class="grp__cards" data-reveal-stagger>{list.map((s) => <div class="grp__card" data-reveal="up"><ServiceCard service={s!} /></div>)}</div>
+            {i === 0 && (
+              <div class="specialist">
+                <p class="specialist__title">Specialist testing pages</p>
+                <ul>{specialist.map((s) => <li><a href={s.path}>{s.name}<Icon name="arrow" /></a></li>)}</ul>
+              </div>
+            )}
+          </div>
         </div>
       </section>
     );
   })}
 
   {/* Closing CTA: contact, or browse case studies for proof. */}
-  <CtaBand title="Not sure which service you need?" text="Describe what you’re trying to achieve and we’ll recommend a starting point." primary={ctas.contact} secondary={{ label: 'Browse case studies', href: '/case-studies/' }} />
+  <CtaBand tone="green" title="Not sure which service you need?" text="Describe what you’re trying to achieve and we’ll recommend a starting point." primary={ctas.contact} secondary={{ label: 'Browse case studies', href: '/case-studies/' }} />
 </BaseLayout>
 <style>
+  /* Pathway jump tiles overlap the hero's bottom edge. */
+  .pw-jump { position: relative; z-index: 2; margin-top: calc(var(--space-10) * -1); }
+  .pw-jump__grid { display: grid; gap: var(--space-4); }
+  @media (min-width: 768px) { .pw-jump__grid { grid-template-columns: repeat(3, 1fr); } }
+  .pw-jump__tile { display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto 1fr; gap: var(--space-3); min-height: 9rem; padding: var(--space-6); border-radius: 24px; text-decoration: none !important; box-shadow: 0 24px 48px -30px rgba(34,43,55,.6); transition: transform .3s ease; }
+  .pw-jump__tile:hover { transform: translateY(-6px); }
+  .pw-jump__tile--slate { background: var(--qw-slate-900); color: #fff; }
+  .pw-jump__n { font-size: var(--fs-xs); letter-spacing: .1em; grid-column: 1; }
+  .pw-jump__label { grid-column: 1; font: var(--fw-black) var(--fs-lg)/1.15 var(--font-display); letter-spacing: -0.01em; align-self: end; }
+  .pw-jump__go { grid-column: 2; grid-row: 1 / 3; align-self: end; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--qw-slate-900); color: #fff; transition: transform .3s; }
+  .pw-jump__tile--slate .pw-jump__go { background: var(--qw-green-500); color: var(--qw-slate-900); }
+  .pw-jump__tile:hover .pw-jump__go { transform: translateX(4px); }
+  .pw-jump__go :global(svg) { width: 20px; height: 20px; }
+  /* Quick guide */
+  .guide-wrap { display: grid; gap: var(--space-8); }
+  @media (min-width: 1024px) { .guide-wrap { grid-template-columns: 0.8fr 1.2fr; gap: var(--space-16); align-items: start; } }
+  .guide { border-radius: 20px; overflow: hidden; }
+  .guide td a { display: inline-flex; gap: .4rem; align-items: center; }
+  .guide td a :global(svg) { width: 16px; height: 16px; transition: transform .2s; }
+  .guide tr:hover td a :global(svg) { transform: translateX(4px); }
+  .guide tbody tr { transition: background .2s; }
+  .guide tbody tr:hover { background: var(--qw-mint-50); }
+  /* Pathway groups */
+  .grp__grid { display: grid; gap: var(--space-10); }
+  @media (min-width: 1024px) { .grp__grid { grid-template-columns: 0.75fr 1.25fr; gap: var(--space-12); } .grp__intro { position: sticky; top: 7rem; align-self: start; } }
+  .grp__intro .icon-badge { margin-bottom: var(--space-6); }
+  .grp__sig { margin-top: var(--space-6); max-width: 30rem; }
+  .grp__cards { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); align-items: stretch; }
+  .grp__card, .grp__card > :global(*) { height: 100%; }
   /* Quick-guide table: dark problem text; service links bold and kept on one line (wraps again under 640px). */
   .guide td:first-child { color: var(--qw-slate-900); }
   .guide td:last-child { font-weight: var(--fw-semibold); white-space: nowrap; }

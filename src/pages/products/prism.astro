@@ -10,7 +10,7 @@
  *   Core question: "How do we know AI outputs are good enough?" Proof required: whitepaper and sample
  *   scorecard (both missing). Primary CTA: "Ask about PRISM" (to /contact-us/). Required data:
  *   product-owner content (missing).
- * What, top to bottom: product hero with a grading-scale aside (A+ to F); an info Alert stating what is
+ * What, top to bottom: bright teal hero with a white grading-scale card (A+ to F, animated tiles); an info Alert stating what is
  *   confirmed vs not; "What it is" with the five topic areas; four Wireframe modules (dimension list, how a
  *   score is produced, sample report, who it is for / how to engage); a whitepaper Wireframe; closing CtaBand.
  * Data: no data module for the page body. Confirmed copy (name, expansion, 10 dimensions, A+ to F grade,
@@ -36,6 +36,7 @@ import Wireframe from '../../components/Wireframe.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import ClaimRef from '../../components/ClaimRef.astro';
 import Alert from '../../components/Alert.astro';
+import Icon from '../../components/Icon.astro';
 
 const crumbs = [{ label: 'Home', href: '/' }, { label: 'Products', href: '/products/' }, { label: 'PRISM™' }];
 // Five topic areas confirmed from the live homepage teaser.
@@ -44,12 +45,13 @@ const topics = ['AI Test Strategy', 'AI-Augmented Testing', 'Generative Test Cre
 const grades = ['A+', 'A', 'B', 'C', 'D', 'F'];
 ---
 <BaseLayout seo={{ title: 'PRISM™ AI Output Quality Standard | QualityWorks', description: 'PRISM (Performance & Reasoning Intelligence Scoring Method) is a QualityWorks framework that grades AI-generated outputs in production on an A+ to F scale.' }} breadcrumbs={crumbs}>
-  <PageHero variant="product" eyebrow="PRISM™ · Performance & Reasoning Intelligence Scoring Method" title="The AI output quality standard" lede="Benchmark scores tell you how a model performs on academic tests. PRISM™ tells you how it performs on your business." breadcrumbs={crumbs} primary={{ label: 'Ask about PRISM', href: '/contact-us/' }}>
+  <PageHero tone="teal" eyebrow="PRISM™ · Performance & Reasoning Intelligence Scoring Method" title="The AI output quality standard" lede="Benchmark scores tell you how a model performs on academic tests. PRISM™ tells you how it performs on your business." breadcrumbs={crumbs} primary={{ label: 'Ask about PRISM', href: '/contact-us/' }}>
     {/* Hero aside: the A+ to F grading scale with the C17 claim annotation. */}
     <Fragment slot="aside">
-      <div class="grade" aria-label="PRISM grading scale A plus to F">
+      <div class="grade" aria-label="PRISM grading scale A plus to F" data-tilt="6">
         <p class="grade__label mono">Grading scale</p>
-        <ol class="grade__scale">{grades.map((g) => <li>{g}</li>)}</ol>
+        <ol class="grade__scale">{grades.map((g, i) => <li style={`--k:${i}`}>{g}</li>)}</ol>
+        <div class="grade__meter" aria-hidden="true"><i></i></div>
         <p class="grade__note">A proprietary 10-dimension framework<ClaimRef id="C17" /> translates complex model behavior into a clear grade your entire team can act on.</p>
       </div>
     </Fragment>
@@ -61,19 +63,19 @@ const grades = ['A+', 'A', 'B', 'C', 'D', 'F'];
   </Alert></div>
 
   {/* What it is: confirmed description plus topic-area chips. */}
-  <section class="section" aria-labelledby="what-title">
+  <section class="section surface-white" aria-labelledby="what-title">
     <div class="container split">
-      <div><p class="eyebrow">What it is</p><h2 id="what-title">A structured way to evaluate AI-generated outputs in production</h2></div>
+      <div data-reveal><p class="eyebrow">What it is</p><h2 id="what-title" class="what-h">A structured way to evaluate AI-generated outputs in production</h2></div>
       <div>
         <p class="lede">PRISM™ adds a layer to AI testing: instead of only testing the software around a model, it evaluates the quality of the outputs the model produces.</p>
         <p>Topic areas covered:</p>
-        <ul class="chip-list">{topics.map((t) => <li class="badge badge--neutral">{t}</li>)}</ul>
+        <ul class="topics" data-reveal-stagger>{topics.map((t, i) => <li data-reveal="scale"><span class:list={['icon-badge', i % 3 === 1 && 'icon-badge--green', i % 3 === 2 && 'icon-badge--slate']} aria-hidden="true"><Icon name={['compass', 'automation', 'spark', 'gauge', 'agent'][i]} /></span>{t}</li>)}</ul>
       </div>
     </div>
   </section>
 
   {/* Framework: placeholders until the product owner decides what to publish about the 10 dimensions. */}
-  <section class="section surface-alt" aria-labelledby="dims-title">
+  <section class="section surface-mint" aria-labelledby="dims-title">
     <div class="container">
       <SectionHeading eyebrow="Framework" title="The 10 dimensions" id="dims-title" />
       <div class="grid grid--2">
@@ -84,7 +86,7 @@ const grades = ['A+', 'A', 'B', 'C', 'D', 'F'];
   </section>
 
   {/* In practice: sample scorecard and engagement model, both awaiting decisions. */}
-  <section class="section" aria-labelledby="report-title">
+  <section class="section surface-white" aria-labelledby="report-title">
     <div class="container">
       <SectionHeading eyebrow="In practice" title="What a PRISM report looks like" id="report-title" />
       <div class="grid grid--2">
@@ -95,7 +97,7 @@ const grades = ['A+', 'A', 'B', 'C', 'D', 'F'];
   </section>
 
   {/* Whitepaper: the asset advertised on the homepage was not found (see the PRISM fixture card in articles.ts). */}
-  <section class="section surface-alt" aria-labelledby="wp-title">
+  <section class="section surface-mint" aria-labelledby="wp-title">
     <div class="container">
       <SectionHeading eyebrow="Whitepaper" title="Read the PRISM™ whitepaper" id="wp-title" />
       <Wireframe title="Whitepaper download" decision="Supply the PDF and decide gated (form) vs. ungated. If gated, the form uses the same fields and consent as the contact form." owner="Marketing" />
@@ -106,18 +108,30 @@ const grades = ['A+', 'A', 'B', 'C', 'D', 'F'];
   <CtaBand title="Evaluating AI outputs in production?" text="Talk to the team behind PRISM™ about your use case." primary={{ label: 'Ask about PRISM', href: '/contact-us/' }} secondary={{ label: 'AI & agentic solutions', href: '/services/ai-service/' }} />
 </BaseLayout>
 <style>
-  /* Grading-scale panel in the dark product hero: faint gold (gold-400, var(--qw-caution)) border and tint. */
-  .grade { border: 1px solid color-mix(in srgb, var(--qw-caution) 40%, transparent); border-radius: var(--radius-lg); padding: var(--space-6); background: color-mix(in srgb, var(--qw-caution) 5%, transparent); }
-  .grade__label { font-size: var(--fs-xs); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-caution); }
-  /* Six equal columns, one per grade. */
-  .grade__scale { list-style: none; padding: 0; margin: var(--space-4) 0; display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
-  .grade__scale li { text-align: center; padding: var(--space-3) 0; font-weight: var(--fw-bold); font-size: var(--fs-md); color: #fff; border-radius: var(--radius-sm); background: rgba(255,255,255,0.06); }
-  /* Position-based tints: A+ and A in logo green (var(--qw-green-500)), C in gold, F in a soft red. B and D keep the
-     neutral tint. Tied to the order of the `grades` array in the frontmatter. */
-  .grade__scale li:nth-child(1), .grade__scale li:nth-child(2) { background: color-mix(in srgb, var(--qw-green-500) 25%, transparent); }
-  .grade__scale li:nth-child(4) { background: color-mix(in srgb, var(--qw-caution) 25%, transparent); }
-  .grade__scale li:nth-child(6) { background: rgba(255,120,100,0.22); }
+  /* Grading-scale card on the teal hero (redesign): white card, slate text, grade tiles in brand colours
+     (A+/A green, B teal, C caution gold, D slate, F slate-800). Tiles pop in one after another. */
+  .grade { border-radius: 24px; padding: var(--space-8); background: var(--qw-white); color: var(--qw-slate-900); box-shadow: 0 40px 70px -40px rgba(34,43,55,.6); }
+  .grade__label { font-size: var(--fs-xs); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-teal-700); font-weight: 700; }
+  /* Six equal columns, one per grade. Colours tied to the order of `grades` (see Gotchas). */
+  .grade__scale { list-style: none; padding: 0; margin: var(--space-4) 0; display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+  .grade__scale li { text-align: center; padding: var(--space-4) 0; font: var(--fw-black) var(--fs-lg)/1 var(--font-display); color: var(--qw-slate-900); border-radius: 12px; background: var(--qw-mint-50); }
+  .grade__scale li:nth-child(1), .grade__scale li:nth-child(2) { background: var(--qw-green-500); }
+  .grade__scale li:nth-child(3) { background: var(--qw-teal-500); }
+  .grade__scale li:nth-child(4) { background: var(--qw-caution); }
+  .grade__scale li:nth-child(5) { background: var(--qw-slate-800); color: var(--qw-white); }
+  .grade__scale li:nth-child(6) { background: var(--qw-slate-900); color: var(--qw-white); }
+  :global(html.js-motion:not(.reduced-motion)) .grade__scale li { animation: prism-pop 600ms cubic-bezier(.3,1.5,.5,1) both; animation-delay: calc(var(--k) * 110ms + 500ms); }
+  @keyframes prism-pop { from { opacity: 0; transform: translateY(16px) scale(0.8); } }
+  .grade__meter { height: 8px; border-radius: 8px; background: var(--qw-mint-50); overflow: hidden; margin-bottom: var(--space-4); }
+  .grade__meter i { display: block; height: 100%; width: 100%; background: var(--qw-teal-500); transform-origin: left; }
+  :global(html.js-motion:not(.reduced-motion)) .grade__meter i { animation: prism-meter 1600ms 1100ms var(--ease-out) both; }
+  @keyframes prism-meter { from { transform: scaleX(0); } }
   .grade__note { font-size: var(--fs-sm); margin: 0; }
+  .what-h { font-size: clamp(1.75rem, 1.3rem + 1.4vw, 2.5rem) !important; }
+  .topics { list-style: none; padding: 0; margin: var(--space-4) 0 0; display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr)); }
+  .topics li { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-4); border-radius: 18px; background: var(--qw-mint-50); font: var(--fw-bold) var(--fs-sm)/1.3 var(--font-display); color: var(--qw-slate-900); height: 100%; }
+  .topics .icon-badge { width: 40px; height: 40px; border-radius: 12px; }
+  .topics .icon-badge :global(svg) { width: 20px; height: 20px; }
   /* :global because the class is passed into the Alert component, outside this file's style scope. */
-  :global(.prism-alert) { margin-top: var(--space-8); }
+  :global(.prism-alert) { margin-top: var(--space-8); margin-bottom: var(--space-4); }
 </style>

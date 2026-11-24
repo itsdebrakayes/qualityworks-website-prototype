@@ -1,0 +1,286 @@
+---
+/**
+ * Per-service "signature" visual (Janique, 23 Nov 2026: stop identical solution pages).
+ *
+ * What: a lightweight animated SVG/CSS illustration chosen by service slug (falls back by pathway):
+ *   pipeline (CI checks), layers (full stack), devices, load (load graph), shield (scanning), a11y,
+ *   api (request/response), screens (app screens assembling), agents (agent network), data, roadmap, team.
+ * Content rule: purely illustrative. Labels are generic stage names only. NO figures, client names or
+ *   claims, so nothing here needs a claim ID. Decorative: aria-hidden; the page text carries the meaning.
+ * Motion: CSS keyframes only; disabled under prefers-reduced-motion (static final frame).
+ */
+import Icon from '../Icon.astro';
+interface Props { slug: string; pathway: 'quality' | 'build' | 'ai'; size?: 'lg' | 'sm' }
+const { slug, pathway, size = 'lg' } = Astro.props;
+const bySlug: Record<string, string> = {
+  'test-automation': 'pipeline', 'full-stack-testing': 'layers', 'web-mobile-application-testing': 'devices',
+  'user-experience-testing': 'devices', 'non-functional-testing': 'load', 'performance-testing': 'load',
+  'security-testing': 'shield', accessibility: 'a11y', 'api-cloud-services-testing': 'api', 'ai-test-squad': 'team',
+  'maturity-assessments': 'roadmap', 'custom-software-development': 'screens', 'technology-advisory-partnership': 'roadmap',
+  'digital-agile-transformation': 'roadmap', 'dedicated-teams': 'team', 'staff-augmentation': 'team',
+  'consulting-training': 'team', 'innovation-tourism': 'roadmap', 'ai-service': 'agents', 'data-quality': 'data',
+  'ai-governance': 'shield',
+};
+const kind = bySlug[slug] ?? { quality: 'pipeline', build: 'screens', ai: 'agents' }[pathway];
+const title: Record<string, string> = {
+  pipeline: 'pipeline / main', layers: 'coverage / all layers', devices: 'device lab', load: 'load profile',
+  shield: 'security scan', a11y: 'accessibility audit', api: 'api / contract', screens: 'build / app', agents: 'agent workflow',
+  data: 'data checks', roadmap: 'roadmap', team: 'your team + QualityWorks',
+};
+---
+<div class:list={['sig', `sig--${kind}`, `sig--${pathway}`, `sig--${size}`]} aria-hidden="true" data-tilt="5">
+  <div class="sig__bar"><i></i><i></i><i></i><span class="mono">{title[kind]}</span></div>
+  <div class="sig__body">
+    {kind === 'pipeline' && (
+      <div class="pipe">
+        {['Commit', 'Build', 'Unit', 'UI suite', 'Mobile', 'Release'].map((s, i) => (
+          <div class="pipe__stage" style={`--i:${i}`}><span class="pipe__dot"><Icon name="check" /></span><span>{s}</span></div>
+        ))}
+        <div class="pipe__log mono">
+          <p style="--i:1"><b><Icon name="check" /></b> smoke suite</p><p style="--i:2"><b><Icon name="check" /></b> regression · web</p><p style="--i:3"><b><Icon name="check" /></b> regression · mobile</p><p style="--i:4" class="pipe__gate">release gate open</p>
+        </div>
+      </div>
+    )}
+    {kind === 'layers' && (
+      <div class="layers">
+        {[['UI', 'devices'], ['API', 'api'], ['Services', 'layers'], ['Data', 'data'], ['Security', 'shield'], ['Performance', 'gauge']].map(([l, ic], i) => (
+          <div class="layers__row" style={`--i:${i}`}><span class="layers__ic"><Icon name={ic} /></span><span>{l}</span><span class="layers__track"><i></i></span><span class="layers__ok"><Icon name="check" /></span></div>
+        ))}
+      </div>
+    )}
+    {kind === 'devices' && (
+      <div class="devices">
+        <div class="dev dev--desk"><span class="scan"></span><i></i><i></i><i></i></div>
+        <div class="dev dev--tab"><span class="scan"></span><i></i><i></i></div>
+        <div class="dev dev--phone"><span class="scan"></span><i></i><i></i></div>
+        <span class="devices__ok"><Icon name="check" /> Cross-device pass</span>
+      </div>
+    )}
+    {kind === 'load' && (
+      <svg class="load" viewBox="0 0 320 180">
+        <g class="load__grid">{[30, 70, 110, 150].map((y) => <line x1="10" x2="310" y1={y} y2={y} />)}</g>
+        <path class="load__area" d="M10 150 C60 148 80 120 120 110 S190 60 220 70 S280 40 310 46 L310 170 L10 170Z" />
+        <path class="load__line" pathLength="1" d="M10 150 C60 148 80 120 120 110 S190 60 220 70 S280 40 310 46" />
+        <path class="load__p95" pathLength="1" d="M10 160 C80 158 120 150 170 140 S260 120 310 118" />
+        <circle class="load__dot" r="6" cx="310" cy="46" />
+        <text x="14" y="22">throughput</text><text x="230" y="112">latency</text>
+      </svg>
+    )}
+    {kind === 'shield' && (
+      <div class="shield">
+        <svg viewBox="0 0 120 140"><path d="M60 6 L110 26 V66 C110 100 88 124 60 134 C32 124 10 100 10 66 V26Z" /><path class="shield__tick" pathLength="1" d="M38 70 L54 86 L84 54" /></svg>
+        <span class="shield__beam"></span>
+        <ul class="mono"><li style="--i:0">auth</li><li style="--i:1">inputs</li><li style="--i:2">dependencies</li><li style="--i:3">config</li></ul>
+      </div>
+    )}
+    {kind === 'a11y' && (
+      <div class="a11y">
+        <div class="a11y__page"><i class="h"></i><i></i><i></i><i class="btnx"></i><span class="a11y__focus"></span></div>
+        <ul class="mono"><li style="--i:0"><Icon name="check" /> Contrast</li><li style="--i:1"><Icon name="check" /> Keyboard</li><li style="--i:2"><Icon name="check" /> Screen reader</li><li style="--i:3"><Icon name="check" /> Alt text</li></ul>
+      </div>
+    )}
+    {kind === 'api' && (
+      <div class="api">
+        <div class="api__node"><Icon name="code" /><span>Client</span></div>
+        <div class="api__wire"><span class="api__req mono">GET /orders</span><span class="api__res mono">200 OK</span></div>
+        <div class="api__node api__node--srv"><Icon name="api" /><span>Service</span></div>
+        <pre class="api__json mono">{'{\n  "status": "ok",\n  "schema": "valid",\n  "contract": "match"\n}'}</pre>
+      </div>
+    )}
+    {kind === 'screens' && (
+      <div class="screens">
+        <div class="scr scr--a"><i class="h"></i><i></i><i></i><i class="cta"></i></div>
+        <div class="scr scr--b"><i class="img"></i><i></i><i></i></div>
+        <div class="scr scr--c"><i class="h"></i><i class="row"></i><i class="row"></i><i class="row"></i></div>
+        <span class="screens__tag"><Icon name="code" /> Shipped to staging</span>
+      </div>
+    )}
+    {kind === 'agents' && (
+      <svg class="agents" viewBox="0 0 320 200">
+        <g class="agents__links">
+          <path pathLength="1" d="M160 100 L60 46" /><path pathLength="1" d="M160 100 L262 46" /><path pathLength="1" d="M160 100 L60 160" /><path pathLength="1" d="M160 100 L262 160" />
+        </g>
+        <circle class="agents__pulse" cx="160" cy="100" r="30" />
+        <circle class="agents__hub" cx="160" cy="100" r="30" />
+        <text class="agents__hubt" x="160" y="105">Orchestrator</text>
+        {[[62, 46, 'Intake'], [258, 46, 'Research'], [62, 160, 'Draft'], [258, 160, 'Human review']].map(([x, y, t], i) => (
+          <g class="agents__node" style={`--i:${i}`}><rect x={(x as number) - 52} y={(y as number) - 16} width="104" height="32" rx="10" /><text x={x} y={(y as number) + 5}>{t}</text></g>
+        ))}
+      </svg>
+    )}
+    {kind === 'data' && (
+      <div class="data">
+        {[0, 1, 2, 3, 4].map((r) => (
+          <div class="data__row" style={`--i:${r}`}>{[0, 1, 2, 3].map((c) => <i class:list={{ bad: r === 2 && c === 2 }}></i>)}<span class="data__ok"><Icon name="check" /></span></div>
+        ))}
+      </div>
+    )}
+    {kind === 'roadmap' && (
+      <svg class="road" viewBox="0 0 320 180">
+        <path class="road__path" pathLength="1" d="M16 150 C80 150 70 90 130 90 S190 40 250 40 L304 40" />
+        {[[16, 150, 'Assess'], [130, 90, 'Plan'], [210, 52, 'Deliver'], [304, 40, 'Scale']].map(([x, y, t], i) => (
+          <g class="road__pt" style={`--i:${i}`}><circle cx={x} cy={y} r="9" /><text x={x} y={(y as number) + 28}>{t}</text></g>
+        ))}
+      </svg>
+    )}
+    {kind === 'team' && (
+      <div class="team">
+        {['QA lead', 'Automation', 'Developer', 'Your PO', 'Your devs', 'Analyst'].map((r, i) => (
+          <span class:list={['team__p', { 'team__p--you': r.startsWith('Your') }]} style={`--i:${i}`}><Icon name={r.startsWith('Your') ? 'team' : 'squad'} />{r}</span>
+        ))}
+        <span class="team__ring"></span>
+      </div>
+    )}
+  </div>
+</div>
+<style>
+  .sig { --a: var(--qw-teal-500); --b: var(--qw-green-500); position: relative; background: #fff; border-radius: 22px; box-shadow: 0 30px 60px -30px rgba(34,43,55,.45), 0 0 0 1px rgba(34,43,55,.06); overflow: hidden; color: var(--qw-slate-900); transform: perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)); transition: transform .3s ease; }
+  .sig--build { --a: var(--qw-green-500); --b: var(--qw-teal-500); }
+  .sig__bar { display: flex; align-items: center; gap: 6px; padding: 12px 16px; border-bottom: 1px solid var(--qw-line); background: var(--qw-mint-50); }
+  .sig__bar i { width: 9px; height: 9px; border-radius: 50%; background: rgba(34,43,55,.18); }
+  .sig__bar i:first-child { background: var(--a); }
+  .sig__bar span { margin-left: 8px; font-size: .72rem; color: var(--qw-slate-700, #36414F); }
+  .sig__body { padding: 22px; min-height: 240px; display: grid; align-items: center; position: relative; }
+  .sig--sm .sig__body { min-height: 180px; padding: 16px; }
+  .sig :global(svg) { display: block; }
+  text { font: 600 11px/1 var(--font-display); fill: var(--qw-slate-900); text-anchor: middle; }
+  @keyframes sig-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @keyframes sig-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+  @keyframes sig-pop { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+
+  /* pipeline */
+  .pipe { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; position: relative; }
+  .pipe::before { content: ""; position: absolute; left: 8%; right: 8%; top: 17px; height: 3px; background: var(--qw-mint-50); }
+  .pipe::after { content: ""; position: absolute; left: 8%; top: 17px; height: 3px; width: 84%; background: var(--a); transform-origin: left; animation: pipe-fill 6s ease-in-out infinite; }
+  @keyframes pipe-fill { 0% { transform: scaleX(0); } 60%,100% { transform: scaleX(1); } }
+  .pipe__stage { position: relative; z-index: 1; display: grid; justify-items: center; gap: 6px; font: 600 .7rem/1.2 var(--font-display); text-align: center; }
+  .pipe__dot { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: #fff; border: 3px solid var(--qw-mint-50); color: transparent; animation: pipe-dot 6s infinite; animation-delay: calc(var(--i) * .6s); }
+  .pipe__dot :global(svg) { width: 16px; height: 16px; }
+  @keyframes pipe-dot { 0%,8% { background:#fff; color: transparent; border-color: var(--qw-mint-50); } 14%,92% { background: var(--b); color: var(--qw-slate-900); border-color: var(--b); } 100% { background:#fff; color: transparent; } }
+  .pipe__log { grid-column: 1 / -1; margin-top: 18px; background: var(--qw-slate-900); color: #fff; border-radius: 12px; padding: 12px 14px; font-size: .74rem; }
+  .pipe__log p { margin: 0 0 4px; animation: sig-in .5s both; animation-delay: calc(var(--i) * .5s + .3s); }
+  .pipe__log b { color: var(--qw-green-500); display: inline-grid; vertical-align: -3px; margin-right: 4px; }
+  .pipe__log b :global(svg) { width: 14px; height: 14px; }
+  .pipe__gate { color: var(--qw-slate-900); background: var(--qw-green-500); display: inline-block; padding: 2px 8px; border-radius: 6px; margin: 4px 0 0 !important; }
+
+  /* layers */
+  .layers { display: grid; gap: 8px; }
+  .layers__row { display: grid; grid-template-columns: 30px 6.5rem 1fr 24px; gap: 10px; align-items: center; font: 600 .8rem/1 var(--font-display); animation: sig-in .5s both; animation-delay: calc(var(--i) * .12s); }
+  .layers__ic { width: 30px; height: 30px; border-radius: 9px; background: var(--qw-mint-50); color: var(--qw-teal-700); display: grid; place-items: center; }
+  .layers__ic :global(svg) { width: 16px; height: 16px; }
+  .layers__track { height: 8px; border-radius: 8px; background: var(--qw-mint-50); overflow: hidden; }
+  .layers__track i { display: block; height: 100%; width: 100%; background: var(--a); transform-origin: left; animation: layer-fill 5s ease-in-out infinite; animation-delay: calc(var(--i) * .35s); }
+  @keyframes layer-fill { 0% { transform: scaleX(0); } 45%,100% { transform: scaleX(1); } }
+  .layers__ok { color: var(--qw-green-700, #1d7d5c); }
+  .layers__ok :global(svg) { width: 18px; height: 18px; }
+
+  /* devices */
+  .devices { position: relative; height: 230px; }
+  .dev { position: absolute; background: var(--qw-mint-50); border: 3px solid var(--qw-slate-900); border-radius: 12px; overflow: hidden; padding: 12px; display: grid; gap: 8px; align-content: start; }
+  .dev i { display: block; height: 10px; border-radius: 5px; background: rgba(34,43,55,.15); }
+  .dev i:first-of-type { width: 60%; background: var(--a); height: 14px; }
+  .dev--desk { left: 0; top: 0; width: 62%; height: 72%; }
+  .dev--tab { left: 46%; top: 26%; width: 34%; height: 68%; background: #fff; }
+  .dev--phone { right: 0; top: 14%; width: 18%; height: 80%; border-radius: 16px; background: #fff; }
+  .scan { position: absolute; left: 0; right: 0; height: 30%; background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--b) 35%, transparent)); animation: scan 3s linear infinite; }
+  .dev--tab .scan { animation-delay: .7s; } .dev--phone .scan { animation-delay: 1.4s; }
+  @keyframes scan { from { top: -30%; } to { top: 100%; } }
+  .devices__ok { position: absolute; left: 8px; bottom: 0; display: inline-flex; gap: 6px; align-items: center; background: var(--qw-green-500); padding: 6px 10px; border-radius: 10px; font: 700 .75rem/1 var(--font-display); animation: sig-pop 3s infinite; }
+  .devices__ok :global(svg) { width: 14px; height: 14px; }
+
+  /* load */
+  .load__grid line { stroke: var(--qw-mint-50); stroke-width: 2; }
+  .load__area { fill: color-mix(in srgb, var(--a) 18%, transparent); }
+  .load__line { fill: none; stroke: var(--a); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 1; animation: sig-draw 3.5s ease-out infinite alternate; }
+  .load__p95 { fill: none; stroke: var(--qw-slate-900); stroke-width: 2; stroke-dasharray: 1; animation: sig-draw 3.5s .4s ease-out infinite alternate; }
+  .load__dot { fill: var(--b); animation: sig-pop 1.6s infinite; transform-origin: 310px 46px; }
+  .load text { text-anchor: start; font-size: 10px; }
+
+  /* shield */
+  .shield { position: relative; display: grid; grid-template-columns: 140px 1fr; gap: 20px; align-items: center; overflow: hidden; }
+  .shield svg path:first-child { fill: var(--qw-mint-50); stroke: var(--a); stroke-width: 5; }
+  .shield__tick { fill: none; stroke: var(--qw-slate-900); stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; animation: sig-draw 1.4s 1s both; }
+  .shield__beam { position: absolute; left: 0; width: 150px; height: 4px; background: var(--b); box-shadow: 0 0 0 6px color-mix(in srgb, var(--b) 25%, transparent); animation: beam 2.6s ease-in-out infinite alternate; }
+  @keyframes beam { from { top: 6%; } to { top: 90%; } }
+  .shield ul, .a11y ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: .78rem; }
+  .shield li { padding: 8px 12px; border-radius: 10px; background: var(--qw-mint-50); animation: sweep 4s infinite; animation-delay: calc(var(--i) * .5s); }
+  @keyframes sweep { 0%,20% { background: var(--qw-mint-50); } 30%,100% { background: var(--qw-green-500); } }
+
+  /* a11y */
+  .a11y { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: center; }
+  .a11y__page { position: relative; background: var(--qw-mint-50); border-radius: 12px; padding: 14px; display: grid; gap: 10px; height: 180px; align-content: start; }
+  .a11y__page i { height: 10px; border-radius: 5px; background: rgba(34,43,55,.18); display: block; }
+  .a11y__page .h { width: 70%; height: 16px; background: var(--qw-slate-900); }
+  .a11y__page .btnx { width: 50%; height: 26px; border-radius: 8px; background: var(--a); }
+  .a11y__focus { position: absolute; border: 3px solid var(--qw-slate-900); border-radius: 10px; outline: 3px solid var(--qw-green-500); animation: focus-move 6s infinite steps(1); }
+  @keyframes focus-move { 0% { left: 8px; top: 8px; width: 75%; height: 28px; } 33% { left: 8px; top: 46px; width: 90%; height: 46px; } 66% { left: 8px; top: 104px; width: 56%; height: 38px; } }
+  .a11y li { display: flex; gap: 6px; align-items: center; animation: sig-in .5s both; animation-delay: calc(var(--i) * .3s + .2s); }
+  .a11y li :global(svg) { width: 16px; height: 16px; color: var(--qw-green-700, #1d7d5c); }
+
+  /* api */
+  .api { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; }
+  .api__node { display: grid; justify-items: center; gap: 6px; font: 700 .72rem/1 var(--font-display); }
+  .api__node :global(svg) { width: 44px; height: 44px; padding: 10px; border-radius: 14px; background: var(--qw-mint-50); color: var(--qw-teal-700); }
+  .api__node--srv :global(svg) { background: var(--qw-slate-900); color: #fff; }
+  .api__wire { position: relative; height: 70px; border-top: 2px dashed rgba(34,43,55,.25); margin-top: 34px; }
+  .api__req, .api__res { position: absolute; font-size: .68rem; padding: 4px 8px; border-radius: 8px; white-space: nowrap; }
+  .api__req { top: -48px; background: var(--a); animation: req 3s ease-in-out infinite; }
+  .api__res { top: 6px; background: var(--qw-green-500); animation: res 3s ease-in-out infinite; }
+  @keyframes req { 0% { left: 0; opacity: 0; } 10% { opacity: 1; } 45% { left: calc(100% - 80px); opacity: 1; } 50%,100% { opacity: 0; left: calc(100% - 80px); } }
+  @keyframes res { 0%,50% { right: 0; opacity: 0; } 55% { opacity: 1; } 95% { right: calc(100% - 60px); opacity: 1; } 100% { opacity: 0; } }
+  .api__json { grid-column: 1 / -1; margin: 0; background: var(--qw-slate-900); color: #fff; border-radius: 12px; padding: 12px 14px; font-size: .74rem; }
+
+  /* screens */
+  .screens { position: relative; height: 240px; }
+  .scr { position: absolute; width: 42%; height: 82%; background: #fff; border: 2px solid var(--qw-slate-900); border-radius: 14px; padding: 12px; display: grid; gap: 8px; align-content: start; box-shadow: 0 16px 30px -18px rgba(34,43,55,.5); animation: assemble 6s ease-in-out infinite; }
+  .scr i { display: block; height: 10px; border-radius: 5px; background: rgba(34,43,55,.14); }
+  .scr .h { height: 18px; width: 70%; background: var(--a); }
+  .scr .cta { height: 24px; width: 55%; background: var(--qw-slate-900); margin-top: 10px; }
+  .scr .img { height: 70px; background: var(--qw-mint-50); border: 2px dashed var(--b); }
+  .scr .row { height: 22px; background: var(--qw-mint-50); }
+  .scr--a { left: 2%; top: 8%; --from: -30px; animation-delay: 0s; }
+  .scr--b { left: 29%; top: 0; background: var(--qw-mint-50); --from: -60px; animation-delay: .3s; z-index: 1; }
+  .scr--c { right: 2%; top: 10%; --from: -90px; animation-delay: .6s; }
+  @keyframes assemble { 0% { opacity: 0; transform: translateY(var(--from)) rotate(-4deg); } 18%,85% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(20px); } }
+  .screens__tag { position: absolute; z-index: 2; left: 50%; bottom: 0; translate: -50% 0; display: inline-flex; gap: 6px; align-items: center; background: var(--qw-green-500); padding: 7px 12px; border-radius: 10px; font: 700 .75rem/1 var(--font-display); white-space: nowrap; }
+  .screens__tag :global(svg) { width: 14px; height: 14px; }
+
+  /* agents */
+  .agents__links path { fill: none; stroke: var(--a); stroke-width: 3; stroke-dasharray: .04 .03; animation: flow 2s linear infinite; }
+  @keyframes flow { to { stroke-dashoffset: -.14; } }
+  .agents__hub { fill: var(--qw-slate-900); }
+  .agents__hubt { fill: #fff; font-size: 9px; }
+  .agents__pulse { fill: none; stroke: var(--b); stroke-width: 3; transform-origin: 160px 100px; animation: ring 2.4s ease-out infinite; }
+  @keyframes ring { from { transform: scale(1); opacity: .9; } to { transform: scale(2.1); opacity: 0; } }
+  .agents__node rect { fill: var(--qw-mint-50); stroke: var(--a); stroke-width: 2; }
+  .agents__node { animation: node 6s infinite; animation-delay: calc(var(--i) * 1.5s); }
+  @keyframes node { 0%,20% { opacity: 1; } 8% { opacity: .55; } }
+  .agents__node:last-of-type rect { fill: var(--qw-green-500); stroke: var(--qw-slate-900); }
+
+  /* data */
+  .data { display: grid; gap: 8px; }
+  .data__row { display: grid; grid-template-columns: repeat(4, 1fr) 24px; gap: 8px; align-items: center; animation: sig-in .4s both; animation-delay: calc(var(--i) * .15s); }
+  .data__row i { height: 22px; border-radius: 6px; background: var(--qw-mint-50); }
+  .data__row i.bad { animation: fix 4s infinite; }
+  @keyframes fix { 0%,30% { background: #f3c9c4; } 50%,100% { background: var(--qw-green-500); } }
+  .data__ok :global(svg) { width: 18px; height: 18px; color: var(--qw-green-700, #1d7d5c); }
+
+  /* roadmap */
+  .road__path { fill: none; stroke: var(--a); stroke-width: 6; stroke-linecap: round; stroke-dasharray: 1; animation: sig-draw 2.4s ease-out both; }
+  .road__pt circle { fill: #fff; stroke: var(--qw-slate-900); stroke-width: 4; animation: dotfill 6s infinite; animation-delay: calc(var(--i) * .7s); }
+  @keyframes dotfill { 0%,10% { fill: #fff; } 18%,90% { fill: var(--qw-green-500); } }
+
+  /* team */
+  .team { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .team__p { position: relative; z-index: 1; display: grid; justify-items: center; gap: 6px; padding: 14px 8px; border-radius: 14px; background: var(--qw-mint-50); font: 700 .74rem/1.1 var(--font-display); text-align: center; animation: sig-in .5s both, bob 4s ease-in-out infinite; animation-delay: calc(var(--i) * .15s), calc(var(--i) * .4s); }
+  .team__p :global(svg) { width: 26px; height: 26px; color: var(--qw-teal-700); }
+  .team__p--you { background: var(--qw-green-500); }
+  .team__p--you :global(svg) { color: var(--qw-slate-900); }
+  @keyframes bob { 50% { transform: translateY(-4px); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sig *, .sig *::before, .sig *::after { animation: none !important; }
+    .pipe__dot { background: var(--b); color: var(--qw-slate-900); border-color: var(--b); }
+    .pipe::after { transform: none; }
+  }
+</style>

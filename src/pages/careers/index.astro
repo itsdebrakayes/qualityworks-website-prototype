@@ -19,6 +19,7 @@ import { RELEASE, REVIEW } from '../../lib/release';
  *   - REVIEW builds: the state-switch fieldset, the fixture "jobs" panel and the simulated "down" panel are
  *     rendered; the radios toggle which panel is visible (script below).
  *   - RELEASE builds: only the live empty state is rendered. No fixtures and no simulation reach the page.
+ * Redesign: benefits as three bright colour tiles with icons beside a people photo; open roles on mint.
  * Gotchas:
  *   - Production should fetch the public BambooHR list (bambooHr.listEndpoint) at build or request time
  *     and render real roles in the "live" panel. Never collect résumés on the corporate site.
@@ -30,7 +31,7 @@ import { RELEASE, REVIEW } from '../../lib/release';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
 // People photograph for the header (visual revision, docs/15).
-import { peopleImage } from '../../data/peopleImagery';
+import { peopleImage, peopleSrc, peopleSrcset } from '../../data/peopleImagery';
 import SectionHeading from '../../components/SectionHeading.astro';
 import EmptyState from '../../components/EmptyState.astro';
 import Alert from '../../components/Alert.astro';
@@ -45,19 +46,31 @@ const benefits = [
   ['Shape your future', 'From day one we encourage our team to own their role and share in the leadership of the company in their own way. We welcome fresh ideas that spark meaningful improvements.'],
 ];
 // Display labels for the Job.workModel enum.
+// Presentation only: icon and tone per benefit tile, in order.
+const benefitLook = [['spark', 'teal'], ['devices', 'green'], ['compass', 'slate']];
+const teamPhoto = peopleImage('services-pair');
 const workModel = { remote: 'Remote', hybrid: 'Hybrid', 'on-site': 'On-site' };
 ---
 <BaseLayout seo={{ title: 'Careers at QualityWorks | Join the Team', description: 'Join QualityWorks: flexible work, a culture that welcomes individuality, and room to shape your future. See open roles and apply through our BambooHR careers site.' }} breadcrumbs={crumbs}>
-  <PageHero image={peopleImage('careers-colleagues')} eyebrow="Careers" title="Join the dream team" lede="We’re always on the lookout for people who are ready to shake things up and make a meaningful impact. If that’s you, welcome." breadcrumbs={crumbs} primary={{ label: 'See open roles', href: '#open-roles' }} />
-  {/* Benefits of working here. */}
-  <section class="section" aria-labelledby="benefits-title">
+  <PageHero image={peopleImage('careers-colleagues')} ui="people" eyebrow="Careers" title="Join the dream team" lede="We’re always on the lookout for people who are ready to shake things up and make a meaningful impact. If that’s you, welcome." breadcrumbs={crumbs} primary={{ label: 'See open roles', href: '#open-roles' }} />
+  {/* Benefits of working here: three colour tiles with icons, beside a people photo from 1024px. */}
+  <section class="section surface-white" aria-labelledby="benefits-title">
     <div class="container">
       <SectionHeading eyebrow="Don’t miss out" title="Benefits of working with us" id="benefits-title" />
-      <div class="grid grid--3">{benefits.map(([t, d]) => <div class="benefit"><h3>{t}</h3><p>{d}</p></div>)}</div>
+      <div class="benefits-wrap">
+        <div class="benefits" data-reveal-stagger>{benefits.map(([t, d], i) => (
+          <div class:list={['benefit', `benefit--${benefitLook[i][1]}`]} data-reveal="up">
+            <span class="benefit__icon" aria-hidden="true"><Icon name={benefitLook[i][0]} /></span>
+            <span class="benefit__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <h3>{t}</h3><p>{d}</p>
+          </div>
+        ))}</div>
+        <img class="benefits__photo" data-reveal="scale" src={peopleSrc(teamPhoto)} srcset={peopleSrcset(teamPhoto)} sizes="(min-width: 1024px) 32vw, 100vw" alt={teamPhoto.alt} width="1600" height={Math.round(1600 / teamPhoto.ratio)} loading="lazy" decoding="async" style={`object-position:${teamPhoto.focus}`} />
+      </div>
     </div>
   </section>
 
-  <section class="section surface-alt" id="open-roles" aria-labelledby="roles-title">
+  <section class="section surface-mint" id="open-roles" aria-labelledby="roles-title">
     <div class="container">
       <SectionHeading eyebrow="Open opportunities" title="Open roles" lede="Roles are listed from our BambooHR careers site. Applications are completed on BambooHR." id="roles-title" />
 
@@ -113,10 +126,22 @@ const workModel = { remote: 'Remote', hybrid: 'Hybrid', 'on-site': 'On-site' };
   </section>
 </BaseLayout>
 <style>
-  /* Benefit cards: decorative 3px top rule in logo green (var(--qw-green-500)). */
-  .benefit { padding: var(--space-6); border: 1px solid var(--color-border); border-radius: var(--radius-lg); border-top: 3px solid var(--qw-green-500); }
-  .benefit h3 { font-size: var(--fs-md); }
-  .benefit p { margin: 0; color: var(--color-muted); }
+  /* Benefit tiles: teal, green and slate colour blocks with an icon and a large faint number. */
+  .benefits-wrap { display: grid; gap: var(--space-6); }
+  @media (min-width: 1024px) { .benefits-wrap { grid-template-columns: 2fr 1fr; align-items: stretch; } }
+  .benefits { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); }
+  .benefit { position: relative; overflow: hidden; display: flex; flex-direction: column; padding: var(--space-6); border-radius: 26px; background: var(--b-bg); color: var(--b-fg); min-height: 20rem; transition: transform 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out); }
+  .benefit:hover { transform: translateY(-6px); box-shadow: 0 28px 48px -28px rgba(34,43,55,0.55); }
+  .benefit--teal { --b-bg: var(--qw-teal-500); --b-fg: var(--qw-slate-900); --i-bg: var(--qw-slate-900); --i-fg: #fff; }
+  .benefit--green { --b-bg: var(--qw-green-500); --b-fg: var(--qw-slate-900); --i-bg: #fff; --i-fg: var(--qw-slate-900); }
+  .benefit--slate { --b-bg: var(--qw-slate-900); --b-fg: #fff; --i-bg: var(--qw-teal-500); --i-fg: var(--qw-slate-900); }
+  .benefit__icon { display: grid; place-items: center; width: 3.25rem; height: 3.25rem; border-radius: 16px; background: var(--i-bg); color: var(--i-fg); margin-bottom: var(--space-8); transition: transform 0.5s var(--ease-out); }
+  .benefit:hover .benefit__icon { transform: rotate(-8deg) scale(1.12); }
+  .benefit__icon :global(svg) { width: 24px; height: 24px; }
+  .benefit__num { position: absolute; right: 1rem; top: 0.2rem; font: var(--fw-black) 5rem/1 var(--font-display); opacity: 0.16; letter-spacing: -0.05em; }
+  .benefit h3 { font-size: var(--fs-lg); color: inherit; margin-top: auto; }
+  .benefit p { margin: 0; color: inherit; }
+  .benefits__photo { width: 100%; height: 100%; min-height: 18rem; object-fit: cover; border-radius: 26px; display: block; }
   /* Prototype control: dashed gold (#C99A2E) border on pale yellow, the same review-note colour global.css
      uses for [data-review-note] outlines, so reviewers recognise it as prototype-only. */
   .state-switch { border: 1px dashed #C99A2E; border-radius: var(--radius-md); background: #FFFCF2; padding: var(--space-4); margin: 0 0 var(--space-6); }
@@ -127,6 +152,7 @@ const workModel = { remote: 'Remote', hybrid: 'Hybrid', 'on-site': 'On-site' };
   /* Vacancy list: one row per job, title/meta on the left and Apply/Closed on the right (wraps on mobile).
      Expired jobs get a canvas background and muted title. */
   .jobs { list-style: none; padding: 0; margin: 0 0 var(--space-4); display: grid; gap: var(--space-3); }
+  .job { border-radius: 20px !important; }
   .job { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--space-4); padding: var(--space-5) var(--space-6); background: #fff; border: 1px solid var(--qw-line); border-radius: var(--radius-lg); }
   .job--expired { background: var(--qw-mint-50); }
   .job--expired .job__title { color: var(--qw-muted); }

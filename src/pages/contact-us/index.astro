@@ -4,8 +4,9 @@ import { rn } from '../../lib/release';
  * CONTACT (/contact-us/ — legacy URL). Preserves the live field set. Submission is simulated.
  * Persona: all. Core question: "How do I reach the right person, and what happens next?"
  *
- * What: the main conversion page. Left column: intro, "What happens next" steps and other ways to reach
- *   the company (email, office phones, careers pointer). Right column: the shared ContactForm component.
+ * What: the main conversion page. Redesign (Janique 24 Nov: "This entire page is one colour"): teal photo hero; a white band of colourful
+ *   contact tiles (email, each office's phones, careers pointer); a mint band with the form on a white card
+ *   beside a graphical numbered "What happens next" timeline.
  * Persona / CTA (docs/03-page-map-personas.md §2, "Contact" row): primary persona All; no secondary.
  *   Proof required: none. Primary CTA: "Send message" (the ContactForm submit button). Required data:
  *   a form endpoint, which is NOT connected.
@@ -34,34 +35,69 @@ import { peopleImage } from '../../data/peopleImagery';
 // Contact header photograph (visual revision, docs/15).
 const contactImage = peopleImage('contact-team');
 const crumbs = [{ label: 'Home', href: '/' }, { label: 'Contact Us' }];
+// "What happens next" steps (copy unchanged); icons are presentation only.
+const steps = [
+  ['We read every message and route it to the right practice lead.', 'mail'],
+  ['We reply by email to arrange a conversation.', 'calendar'],
+  ['If we’re not the right fit, we’ll tell you.', 'check'],
+];
+// Tile tones for the office tiles, in order (presentation only).
+const officeTones = ['green', 'mint'];
 ---
 <BaseLayout seo={{ title: 'Contact QualityWorks | Talk to a Software Quality & AI Expert', description: 'Get in touch with QualityWorks about software testing, custom development or AI solutions. Offices in Los Angeles and Kingston, Jamaica.' }} breadcrumbs={crumbs}>
-  {/* Photo header (visual revision, docs/15): the shared PageHero photo band, same treatment as the homepage
-      and other people-focused headers. On phones it is a plain picture above the heading. */}
-  <PageHero image={contactImage} eyebrow="Contact us" title="Got questions? Let’s talk." lede="We have the expertise you need to solve the problems you don’t want to handle on your own. Tell us what you’re working on." breadcrumbs={crumbs} />
-  {/* Dark section under the header: what happens next and other channels beside the form from 1024px,
-      stacked below. */}
-  <section class="contact surface-dark" aria-label="Contact details and form">
+  {/* Bright teal photo header (redesign): the shared PageHero photo band with "contact" interface chips. */}
+  <PageHero image={contactImage} tone="teal" ui="contact" eyebrow="Contact us" title="Got questions? Let’s talk." lede="We have the expertise you need to solve the problems you don’t want to handle on your own. Tell us what you’re working on." breadcrumbs={crumbs} primary={{ label: 'Write to us', href: '#contact-form' }} />
+
+  {/* Band 1 (white): other ways to reach us, as colourful tiles. Contact channels from site.ts. Each office
+      can list several phones. */}
+  <section class="section ways-sec surface-white" aria-labelledby="ways-title">
+    <div class="container">
+      <div class="section-intro" data-reveal="up">
+        <p class="eyebrow">Reach us directly</p>
+        <h2 id="ways-title" class="display-sm">Other ways to reach us</h2>
+      </div>
+      <ul class="ways" data-reveal-stagger>
+        <li class="way way--teal" data-reveal="up">
+          <span class="way__icon"><Icon name="mail" /></span>
+          <p class="way__label">Email</p>
+          <p class="way__main way__main--email"><a href={`mailto:${site.email}`}>{site.email}</a></p>
+        </li>
+        {site.offices.map((o, i) => (
+          <li class:list={['way', `way--${officeTones[i] ?? 'mint'}`]} data-reveal="up">
+            <span class="way__icon"><Icon name="phone" /></span>
+            <p class="way__label">{o.label}</p>
+            <p class="way__place"><Icon name="pin" />{o.locality}</p>
+            <p class="way__main">{o.phones.map((p, j) => <>{j > 0 && <span class="way__sep" aria-hidden="true"> · </span>}<a href={`tel:${p.tel}`}>{p.display}</a></>)}</p>
+          </li>
+        ))}
+        <li class="way way--slate" data-reveal="up">
+          <span class="way__icon"><Icon name="person-plus" /></span>
+          <p class="way__label">Careers</p>
+          <p class="way__main way__main--text">Looking for a job? Visit <a href="/careers/">Careers</a> — we don’t accept CVs through this form.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  {/* Band 2 (mint): graphical "What happens next" timeline beside the form (white card) from 1024px. */}
+  <section class="contact surface-mint" id="contact-form" aria-label="Contact form and what happens next">
     <div class="container contact__grid">
-      <div class="contact__intro">
+      <div class="contact__intro" data-reveal="left">
         {/* Sets expectations without committing to a response time (see the review note below). */}
-        <h2 class="contact__h">What happens next</h2>
-        <ol class="next">
-          <li>We read every message and route it to the right practice lead.</li>
-          <li>We reply by email to arrange a conversation.</li>
-          <li>If we’re not the right fit, we’ll tell you.</li>
+        <p class="eyebrow">After you hit send</p>
+        <h2 class="contact__h display-sm">What happens next</h2>
+        <ol class="next" data-reveal-stagger>
+          {steps.map(([t, icon], i) => (
+            <li class="next__step" data-reveal="up">
+              <span class="next__num" aria-hidden="true">{i + 1}</span>
+              <span class="next__body"><span class="next__icon" aria-hidden="true"><Icon name={icon} /></span><span>{t}</span></span>
+            </li>
+          ))}
         </ol>
         <p class="next__note" data-review-note={rn('Response-time commitment intentionally omitted')}>We don’t state a response time until one is approved.</p>
-        {/* Contact channels from site.ts. Each office can list several phones, joined with a middle dot. */}
-        <h2 class="contact__h">Other ways to reach us</h2>
-        <ul class="ways">
-          <li><Icon name="mail" /><a href={`mailto:${site.email}`}>{site.email}</a></li>
-          {site.offices.map((o) => <li><Icon name="phone" /><span><span class="muted">{o.label} · {o.locality}</span><br />{o.phones.map((p, i) => <>{i > 0 && ' · '}<a href={`tel:${p.tel}`}>{p.display}</a></>)}</span></li>)}
-          <li><Icon name="person-plus" /><span>Looking for a job? Visit <a href="/careers/">Careers</a> — we don’t accept CVs through this form.</span></li>
-        </ul>
       </div>
       {/* Form column. The visually hidden h2 keeps the heading outline intact for screen-reader users. */}
-      <div class="contact__form">
+      <div class="contact__form" data-reveal="up">
         <h2 class="visually-hidden">Contact form</h2>
         <ContactForm />
       </div>
@@ -69,18 +105,41 @@ const crumbs = [{ label: 'Home', href: '/' }, { label: 'Contact Us' }];
   </section>
 </BaseLayout>
 <style>
-  /* Section under the photo header: solid slate-900, continuing the header band. A hairline separates them. */
-  .contact { padding-block: var(--space-10) var(--space-20); background: var(--qw-slate-900); border-top: 1px solid var(--qw-line-dark); }
-  /* Two-column layout from 1024px; the form column is slightly wider because it carries more content. */
+  /* CONTACT TILES: four colourful tiles (teal email, green and mint offices, slate careers). */
+  .ways-sec .section-intro { margin-bottom: var(--space-10); }
+  .ways { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
+  .way { position: relative; display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-6); min-height: 14rem; border-radius: 26px; background: var(--t-bg); color: var(--t-fg); border: 2px solid var(--t-border, transparent); transition: transform 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out); }
+  .way:hover { transform: translateY(-5px); box-shadow: 0 26px 44px -26px rgba(34,43,55,0.5); }
+  .way p { margin: 0; }
+  .way--teal { --t-bg: var(--qw-teal-500); --t-fg: var(--qw-slate-900); --i-bg: var(--qw-slate-900); --i-fg: #fff; }
+  .way--green { --t-bg: var(--qw-green-500); --t-fg: var(--qw-slate-900); --i-bg: #fff; --i-fg: var(--qw-slate-900); }
+  .way--mint { --t-bg: var(--qw-mint-50); --t-fg: var(--qw-slate-900); --t-border: var(--qw-teal-500); --i-bg: var(--qw-teal-500); --i-fg: var(--qw-slate-900); }
+  .way--slate { --t-bg: var(--qw-slate-900); --t-fg: #fff; --i-bg: var(--qw-green-500); --i-fg: var(--qw-slate-900); }
+  .way__icon { display: grid; place-items: center; width: 3.25rem; height: 3.25rem; border-radius: 16px; background: var(--i-bg); color: var(--i-fg); margin-bottom: auto; }
+  .way__icon :global(svg) { width: 24px; height: 24px; }
+  .way__label { margin-top: var(--space-6) !important; font: var(--fw-semibold) var(--fs-xs)/1 var(--font-display); letter-spacing: 0.08em; text-transform: uppercase; }
+  .way__place { display: flex; align-items: center; gap: 0.35rem; font-size: var(--fs-sm); }
+  .way__place :global(svg) { width: 16px; height: 16px; flex: none; }
+  .way__main { font: var(--fw-bold) var(--fs-md)/1.35 var(--font-display); overflow-wrap: anywhere; }
+  .way__main--email { font-size: var(--fs-base); overflow-wrap: anywhere; }
+  .way__main--text { font: var(--fw-regular) var(--fs-base)/1.5 var(--font-body); }
+  .way a { color: inherit; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+  .way a:focus-visible { outline: 3px solid currentColor; outline-offset: 3px; border-radius: 4px; }
+
+  /* FORM BAND: mint, two columns from 1024px. */
+  .contact { padding-block: var(--space-20); scroll-margin-top: 5rem; }
   .contact__grid { display: grid; gap: var(--space-12); }
-  @media (min-width: 1024px) { .contact__grid { grid-template-columns: 0.9fr 1.1fr; gap: var(--space-16); align-items: start; } }
-  /* Typography and the numbered "What happens next" list. */
-  .contact__h { font-size: var(--fs-md); margin-top: var(--space-10); }
-  .contact__intro > .contact__h:first-child { margin-top: 0; }
-  .next { padding-left: 1.25rem; display: grid; gap: var(--space-2); }
+  @media (min-width: 1024px) { .contact__grid { grid-template-columns: 0.85fr 1.15fr; gap: var(--space-16); align-items: start; } .contact__intro { position: sticky; top: 7rem; } }
+  .contact__h { margin-bottom: var(--space-8); }
+  /* Graphical numbered timeline: big numbered discs joined by a vertical teal line. */
+  .next { list-style: none; padding: 0; margin: 0 0 var(--space-6); display: grid; gap: var(--space-5); position: relative; }
+  .next::before { content: ""; position: absolute; left: 1.75rem; top: 1.75rem; bottom: 1.75rem; width: 3px; margin-left: -1.5px; background: repeating-linear-gradient(var(--qw-teal-500) 0 8px, transparent 8px 14px); }
+  .next__step { position: relative; display: grid; grid-template-columns: 3.5rem 1fr; gap: var(--space-4); align-items: center; }
+  .next__num { display: grid; place-items: center; width: 3.5rem; height: 3.5rem; border-radius: 50%; background: var(--qw-teal-500); color: var(--qw-slate-900); font: var(--fw-black) 1.5rem/1 var(--font-display); box-shadow: 0 0 0 6px var(--qw-mint-50); position: relative; z-index: 1; }
+  .next__step:nth-child(2) .next__num { background: var(--qw-green-500); }
+  .next__step:nth-child(3) .next__num { background: var(--qw-slate-900); color: #fff; }
+  .next__body { display: flex; gap: var(--space-3); align-items: center; padding: var(--space-4) var(--space-5); background: #fff; border-radius: 18px; color: var(--qw-slate-900); font-weight: var(--fw-semibold); box-shadow: 0 14px 30px -24px rgba(34,43,55,0.5); }
+  .next__icon { display: grid; place-items: center; width: 2.25rem; height: 2.25rem; border-radius: 12px; background: var(--qw-mint-50); color: var(--qw-teal-700); flex: none; }
+  .next__icon :global(svg) { width: 18px; height: 18px; }
   .next__note { font-size: var(--fs-xs); color: var(--color-muted); }
-  /* Contact-channel list: icon + text rows. margin-top: 3px nudges the 20px icon onto the first text line. */
-  .ways { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-4); }
-  .ways li { display: flex; gap: var(--space-3); align-items: flex-start; }
-  .ways :global(svg) { width: 20px; height: 20px; color: var(--qw-teal-500); flex: none; margin-top: 3px; }
 </style>

@@ -1,0 +1,97 @@
+---
+/**
+ * Capability explorer (Janique on Test Automation capabilities: "Don't like how this section looks").
+ *
+ * What: an accessible tab set. Capability titles on the left (role="tab"), the selected capability on the
+ * right as a large colour-block panel with an icon composition. Auto-advances via data-cycle (motion.ts),
+ * stops on interaction; arrow keys move between tabs. Without JS every panel is shown, stacked.
+ * Content: only the service record's own capability titles and text. Icons are chosen by keyword.
+ */
+import Icon from '../Icon.astro';
+interface Props { items: { title: string; text: string }[]; fallbackIcon: string; idBase?: string }
+const { items, fallbackIcon, idBase = 'cap' } = Astro.props;
+const rules: [RegExp, string][] = [
+  [/mobile|device/i, 'devices'], [/web/i, 'code'], [/train|upskill|support/i, 'learn'], [/perform|load/i, 'gauge'],
+  [/api|cloud|integrat/i, 'api'], [/secur|govern|risk/i, 'shield'], [/manual/i, 'check'], [/strateg|assess|advis|roadmap/i, 'compass'],
+  [/automat/i, 'automation'], [/data/i, 'data'], [/agent|ai\b|intelligen/i, 'agent'], [/team|squad/i, 'team'], [/access/i, 'access'],
+];
+const iconFor = (t: string) => rules.find(([r]) => r.test(t))?.[1] ?? fallbackIcon;
+const pad = (n: number) => String(n + 1).padStart(2, '0');
+---
+<div class="cx" data-cycle="5000">
+  <div class="cx__tabs" role="tablist" aria-label="Capabilities">
+    {items.map((c, i) => (
+      <button type="button" role="tab" class="cx__tab" id={`${idBase}-tab-${i}`} aria-controls={`${idBase}-panel-${i}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-cycle-tab={i}>
+        <span class="cx__num mono" aria-hidden="true">{pad(i)}</span>
+        <span class="cx__ic" aria-hidden="true"><Icon name={iconFor(c.title)} /></span>
+        <span class="cx__label">{c.title}</span>
+        <span class="cx__prog" aria-hidden="true"></span>
+      </button>
+    ))}
+  </div>
+  <div class="cx__stage">
+    {items.map((c, i) => (
+      <div class:list={['cx__panel', { 'is-active': i === 0 }]} role="tabpanel" id={`${idBase}-panel-${i}`} aria-labelledby={`${idBase}-tab-${i}`} data-cycle-panel={i} data-cycle-hide tabindex="0">
+        <div class="cx__art" aria-hidden="true">
+          <span class="cx__ring cx__ring--a"></span><span class="cx__ring cx__ring--b"></span>
+          <span class="cx__big"><Icon name={iconFor(c.title)} /></span>
+          <span class="cx__orb cx__orb--1"><Icon name="check" /></span>
+          <span class="cx__orb cx__orb--2"><Icon name="spark" /></span>
+          <span class="cx__orb cx__orb--3"><Icon name="cycle" /></span>
+        </div>
+        <div class="cx__copy">
+          <p class="cx__count mono" aria-hidden="true">{pad(i)} / {pad(items.length - 1)}</p>
+          <h3>{c.title}</h3>
+          <p>{c.text}</p>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+<style>
+  .cx { display: grid; gap: var(--space-6); }
+  @media (min-width: 900px) { .cx { grid-template-columns: minmax(16rem, 0.8fr) 1.2fr; gap: var(--space-8); align-items: stretch; } }
+  .cx__tabs { display: grid; gap: 8px; align-content: start; }
+  .cx__tab { position: relative; overflow: hidden; display: grid; grid-template-columns: auto auto 1fr; gap: 12px; align-items: center; text-align: left; padding: 14px 16px; min-height: 60px; border-radius: 16px; border: 1px solid var(--qw-line); background: #fff; color: var(--qw-slate-900); font: var(--fw-bold) var(--fs-sm)/1.25 var(--font-display); cursor: pointer; transition: background .25s, border-color .25s, transform .25s; }
+  .cx__tab:hover { border-color: var(--qw-teal-500); transform: translateX(4px); }
+  .cx__tab:focus-visible { outline: 3px solid var(--qw-slate-900); outline-offset: 2px; }
+  .cx__tab[aria-selected="true"] { background: var(--qw-slate-900); color: #fff; border-color: var(--qw-slate-900); }
+  .cx__num { font-size: .72rem; opacity: .7; }
+  .cx__ic { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--qw-mint-50); color: var(--qw-teal-700); }
+  .cx__tab[aria-selected="true"] .cx__ic { background: var(--qw-green-500); color: var(--qw-slate-900); }
+  .cx__ic :global(svg) { width: 18px; height: 18px; }
+  .cx__prog { position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: var(--qw-green-500); transform: scaleX(0); transform-origin: left; }
+  .cx__tab[aria-selected="true"] .cx__prog { animation: cx-prog 5s linear forwards; }
+  .cx:hover .cx__prog, .cx:focus-within .cx__prog { animation-play-state: paused; }
+  @keyframes cx-prog { to { transform: scaleX(1); } }
+
+  .cx__stage { display: grid; }
+  .cx__panel { grid-area: 1 / 1; display: grid; gap: var(--space-6); padding: var(--space-8); border-radius: 28px; background: var(--qw-teal-500); color: var(--qw-slate-900); align-content: start; margin-bottom: var(--space-4); }
+  @media (min-width: 900px) { .cx__panel { grid-template-columns: 0.9fr 1.1fr; align-items: center; min-height: 100%; margin: 0; padding: var(--space-10); } }
+  .cx__panel:focus-visible { outline: 3px solid var(--qw-slate-900); outline-offset: 3px; }
+  .cx__panel[hidden] { display: none; }
+  .cx__panel.is-active .cx__copy > * { animation: cx-in .5s both; }
+  .cx__panel.is-active .cx__copy > :nth-child(2) { animation-delay: .08s; }
+  .cx__panel.is-active .cx__copy > :nth-child(3) { animation-delay: .16s; }
+  @keyframes cx-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  .cx__count { font-size: var(--fs-xs); letter-spacing: .1em; margin: 0 0 var(--space-3); }
+  .cx__copy h3 { font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2.25rem); line-height: 1.1; letter-spacing: -0.02em; margin-bottom: var(--space-4); color: var(--qw-slate-900); }
+  .cx__copy p:last-child { font-size: var(--fs-md); margin: 0; color: var(--qw-slate-900); }
+
+  .cx__art { position: relative; aspect-ratio: 1; max-width: 260px; width: 100%; margin-inline: auto; display: grid; place-items: center; }
+  .cx__ring { position: absolute; border-radius: 50%; border: 2px dashed rgba(34,43,55,.35); }
+  .cx__ring--a { inset: 0; animation: cx-spin 30s linear infinite; }
+  .cx__ring--b { inset: 18%; border-style: solid; border-color: rgba(255,255,255,.6); }
+  .cx__big { position: relative; width: 44%; aspect-ratio: 1; border-radius: 28%; background: #fff; display: grid; place-items: center; color: var(--qw-teal-700); box-shadow: 0 24px 40px -20px rgba(34,43,55,.6); }
+  .cx__panel.is-active .cx__big { animation: cx-pop .6s cubic-bezier(.2,.9,.3,1.3) both; }
+  .cx__big :global(svg) { width: 50%; height: 50%; }
+  .cx__orb { position: absolute; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; background: var(--qw-slate-900); color: #fff; animation: cx-float 5s ease-in-out infinite; }
+  .cx__orb :global(svg) { width: 20px; height: 20px; }
+  .cx__orb--1 { top: 4%; right: 12%; background: var(--qw-green-500); color: var(--qw-slate-900); }
+  .cx__orb--2 { bottom: 10%; right: 0; background: #fff; color: var(--qw-teal-700); animation-delay: -1.6s; }
+  .cx__orb--3 { bottom: 16%; left: 2%; animation-delay: -3.2s; }
+  @keyframes cx-spin { to { rotate: 360deg; } }
+  @keyframes cx-pop { from { transform: scale(.6) rotate(-10deg); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes cx-float { 50% { transform: translateY(-10px); } }
+  @media (prefers-reduced-motion: reduce) { .cx *, .cx *::before { animation: none !important; } .cx__tab:hover { transform: none; } }
+</style>

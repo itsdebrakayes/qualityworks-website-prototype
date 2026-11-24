@@ -1,0 +1,61 @@
+---
+/**
+ * Floating interface chips: small white "software UI" cards layered over a photo or visual, each drifting
+ * gently and moving with the pointer at its own depth (data-depth inside a [data-pointer-scene]).
+ *
+ * Why: the redesign's people-first + technology direction (docs/16 §1): people photographed at work,
+ * surrounded by the interfaces QualityWorks builds and tests. The chips illustrate kinds of work; they
+ * carry NO figures, client names or claims, so nothing here needs a claim ID.
+ *
+ * Props: set — which group of chips to show ('testing' | 'ai' | 'agents' | 'build' | 'people' | 'contact').
+ * Accessibility: purely decorative (aria-hidden); the page text says everything the chips illustrate.
+ * Layout: the parent must be position: relative. Chips are placed with --x/--y percentages.
+ */
+import Icon from './Icon.astro';
+interface Props { set?: 'testing' | 'ai' | 'agents' | 'build' | 'people' | 'contact' }
+const { set = 'testing' } = Astro.props;
+type Chip = { x: string; y: string; d: number; icon?: string; tone?: '' | 'green' | 'slate'; title: string; sub?: string; bar?: string; dot?: boolean };
+const sets: Record<string, Chip[]> = {
+  testing: [
+    { x: '34%', y: '64%', d: 18, icon: 'check', tone: 'green', title: 'Regression suite', sub: 'All checks passing' },
+    { x: '56%', y: '8%', d: 26, icon: 'code', title: 'Test case generated', sub: 'Awaiting QA review', bar: '72%' },
+    { x: '58%', y: '72%', d: 14, icon: 'shield', tone: 'slate', title: 'Release gate', sub: 'Ready to deploy', dot: true },
+  ],
+  ai: [
+    { x: '4%', y: '18%', d: 20, icon: 'agent', tone: 'slate', title: 'AI draft created', sub: 'Human review required' },
+    { x: '60%', y: '10%', d: 28, icon: 'spark', title: 'Model output graded', bar: '84%' },
+    { x: '54%', y: '74%', d: 12, icon: 'check', tone: 'green', title: 'Approved by reviewer', dot: true },
+  ],
+  agents: [
+    { x: '4%', y: '12%', d: 22, icon: 'agent', tone: 'green', title: 'Agent: drafting reply', sub: 'Inbox · Support' },
+    { x: '58%', y: '16%', d: 30, icon: 'cycle', title: 'Workflow step 2 of 3', bar: '66%' },
+    { x: '56%', y: '76%', d: 14, icon: 'team', tone: 'slate', title: 'Human approval', sub: 'Kept in the loop', dot: true },
+  ],
+  build: [
+    { x: '6%', y: '16%', d: 18, icon: 'devices', title: 'Build #128 deployed', sub: 'Web · iOS · Android' },
+    { x: '58%', y: '10%', d: 26, icon: 'code', tone: 'slate', title: 'Pull request merged' },
+    { x: '56%', y: '74%', d: 14, icon: 'check', tone: 'green', title: 'Quality checks', sub: 'Passing', dot: true },
+  ],
+  people: [
+    { x: '5%', y: '16%', d: 18, icon: 'team', tone: 'green', title: 'Kingston · Los Angeles', sub: 'One team, one time zone' },
+    { x: '60%', y: '76%', d: 14, icon: 'learn', tone: 'slate', title: 'Coaching session', sub: 'Upskilling your team', dot: true },
+  ],
+  contact: [
+    { x: '6%', y: '16%', d: 18, icon: 'mail', title: 'Message received', sub: 'Routed to a practice lead' },
+    { x: '58%', y: '74%', d: 14, icon: 'calendar', tone: 'green', title: 'Conversation booked', dot: true },
+  ],
+};
+const chips = sets[set] ?? sets.testing;
+---
+<div class="fui" aria-hidden="true">
+  {chips.map((c, i) => (
+    <div class="chip-ui float" data-depth style={`--x:${c.x};--y:${c.y};--depth:${c.d};--f:${i};left:var(--x);top:var(--y)`}>
+      {c.dot ? <span class="chip-ui__dot"></span> : c.icon && <span class:list={['chip-ui__icon', c.tone && `chip-ui__icon--${c.tone}`]}><Icon name={c.icon} /></span>}
+      <span>{c.title}{c.sub && <small>{c.sub}</small>}{c.bar && <span class="chip-ui__bar" style={`--w:${c.bar}`}><i></i></span>}</span>
+    </div>
+  ))}
+</div>
+<style>
+  .fui { position: absolute; inset: 0; pointer-events: none; }
+  /* The float animation uses `translate`, the pointer parallax uses `transform`, so both compose. */
+</style>

@@ -3,7 +3,7 @@
  * BLOG (/blog/ — legacy URL). Articles stay at root-level slugs to preserve WordPress URLs.
  *
  * What: the blog listing. Every migrated post is rendered as an ArticleCard linking to /{post-slug}/
- *   (built by src/pages/[slug].astro), with a client-side category filter.
+ *   (built by src/pages/[slug].astro), with client-side type (Articles / News chips) and category filters.
  * Persona / CTA: "Resources / Blog / Article" row in docs/03-page-map-personas.md §2. Primary persona
  *   B and E; secondary A. Core question: "What can I learn before talking to sales?" Primary CTA:
  *   "Talk to an expert" (shown at the end of each article, not on this list).
@@ -12,44 +12,115 @@
  * SEO: inline title/description. Breadcrumbs Home > Resources > Blog produce BreadcrumbList JSON-LD via
  *   BaseLayout. No other JSON-LD.
  * Review/release: no REVIEW/RELEASE logic. The "migration" note below is visible in both builds.
+ * Redesign (Janique 24 Nov: "Not seeing how blog and Resource Hub differs"): the Blog is the editorial stream of
+ *   articles, news and insights. Magazine layout: the newest post renders as a wide featured card (first grid
+ *   item, CSS only, so filtering is unchanged), type chips (Articles / News) plus the category select, and
+ *   a hero aside and closing band that point to the Resource Hub for whitepapers, case studies and events.
  * Gotchas:
  *   - Only 12 of the 99 live posts are migrated. Production needs pagination (/blog/page/2/), which is
  *     not built.
  *   - The filter matches against ArticleCard's `data-categories` attribute, a "|"-joined list. If that
  *     separator changes in ArticleCard.astro, update the `match` function in the <script> below.
- *   - Filter state lives in the URL (?category=...) via src/lib/filters.ts, so filtered views are shareable.
+ *   - The filter form is hand-built (like resources/index.astro) because FilterBar only renders selects; it
+ *     uses the data-* hooks src/lib/filters.ts expects. Posts typed 'whitepaper' (one migrated post) show under
+ *     "All" only; whitepapers are presented as such in the Resource Hub.
+ *   - Filter state lives in the URL (?type=...&category=...) via src/lib/filters.ts, so filtered views are shareable.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
 import ArticleCard from '../../components/ArticleCard.astro';
-import FilterBar from '../../components/FilterBar.astro';
 import EmptyState from '../../components/EmptyState.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import Icon from '../../components/Icon.astro';
 import { blogPosts } from '../../data/articles';
 const crumbs = [{ label: 'Home', href: '/' }, { label: 'Resources', href: '/resources/' }, { label: 'Blog' }];
 // Category options for the filter: unique categories across all posts, minus WordPress's default
 // "Uncategorized", sorted A-Z, each with a post count for the option label.
 const cats = [...new Set(blogPosts.flatMap((a) => a.categories))].filter((c) => c !== 'Uncategorized').sort().map((c) => ({ value: c, label: c, count: blogPosts.filter((a) => a.categories.includes(c)).length }));
+// Editorial type chips: Articles (type 'blog') and News, with counts.
+const types = [{ id: 'blog', label: 'Articles' }, { id: 'news', label: 'News' }].map((t) => ({ ...t, n: blogPosts.filter((a) => a.type === t.id).length }));
 ---
 <BaseLayout seo={{ title: 'Blog: Software Testing, QA & AI Insights | QualityWorks', description: 'What QualityWorks experts are saying about software testing, test automation, agentic QA, AI adoption, agile and software development.' }} breadcrumbs={crumbs}>
-  <PageHero eyebrow="Blog" title="Our blog" lede="See what our experts are saying about end-to-end testing, agile, automation, AI and software development." breadcrumbs={crumbs} compact />
-  <section class="section">
+  <PageHero tone="mint" eyebrow="Blog · Articles, news and insights" title="Our blog" lede="See what our experts are saying about end-to-end testing, agile, automation, AI and software development." breadcrumbs={crumbs}>
+    <p class="purpose">Short reads from our team and company news, newest first. For whitepapers, case studies and events, visit the Resource Hub.</p>
+    <div slot="aside" class="hub-card">
+      <span class="hub-card__icon" aria-hidden="true"><Icon name="layers" /></span>
+      <p class="hub-card__eyebrow">Looking to go deeper?</p>
+      <p class="hub-card__title">Resource Hub</p>
+      <p class="hub-card__text">Whitepapers, case studies and events &amp; webinars.</p>
+      <a class="btn" href="/resources/">Visit the Resource Hub</a>
+    </div>
+  </PageHero>
+  <section class="section surface-white">
     <div class="container">
-      {/* Filter bar, results grid and empty state. The ids are wired up by initFilters() in the script below. */}
+      {/* Filter form, results grid and empty state. The ids are wired up by initFilters() in the script below. */}
       <h2 class="visually-hidden">Articles</h2>
-      <FilterBar id="blog-filter" resultLabel="articles" filters={[{ name: 'category', label: 'Category', options: cats }]} />
-      <div class="grid grid--3" id="blog-results">{blogPosts.map((a) => <ArticleCard a={a} />)}</div>
+      <form class="filter-bar blog-filter" id="blog-filter" role="search" aria-label="Filter articles" data-filter-bar onsubmit="return false">
+        <div>
+          <p class="blog-filter__label" id="blog-type-label">Show</p>
+          <div class="chips" role="group" aria-labelledby="blog-type-label" data-chip-filter="type">
+            <button type="button" class="chip" aria-pressed="true" data-value="">All</button>
+            {types.map((t) => <button type="button" class="chip" aria-pressed="false" data-value={t.id}>{t.label} <span class="chip__n">{t.n}</span></button>)}
+          </div>
+        </div>
+        <div class="field">
+          <label for="blog-category">Category</label>
+          <select class="select" id="blog-category" data-filter="category"><option value="">All categories</option>{cats.map((c) => <option value={c.value}>{c.label} ({c.count})</option>)}</select>
+        </div>
+        <div class="filter-bar__actions"><button type="button" class="btn btn--ghost btn--sm" data-filter-clear disabled>Clear filters</button></div>
+        <p class="filter-bar__count" aria-live="polite" data-filter-count></p>
+      </form>
+      <div class="grid grid--3 mag" id="blog-results">{blogPosts.map((a) => <ArticleCard a={a} />)}</div>
       <EmptyState title="No articles in this category" id="blog-empty" hidden><p>Choose another category.</p></EmptyState>
       {/* Migration note: tells reviewers the list is a partial snapshot and pagination is still required. */}
       <p class="migration">Showing the 12 most recent posts migrated from WordPress for the prototype. The live blog has 99 posts; pagination (12 per page, <code>/blog/page/2/</code>) is required in production.</p>
     </div>
   </section>
+  <CtaBand tone="green" eyebrow="Resource Hub" title="Whitepapers, case studies and events" text="Deeper educational material lives in the Resource Hub." primary={{ label: 'Visit the Resource Hub', href: '/resources/' }} secondary={{ label: 'Browse case studies', href: '/case-studies/' }} photo="resources-audience" />
 </BaseLayout>
-<style>.migration { margin-top: var(--space-8); font-size: var(--fs-sm); color: var(--color-muted); }</style>
+<style>
+  .purpose { margin-top: var(--space-4); max-width: 36rem; font-size: var(--fs-sm); color: var(--qw-slate-900); }
+  /* Hero aside: a teal card pointing to the Resource Hub. */
+  .hub-card { position: relative; padding: var(--space-8); border-radius: 28px; background: var(--qw-teal-500); color: var(--qw-slate-900); box-shadow: 0 30px 60px -34px rgba(34,43,55,0.55); }
+  .hub-card p { margin: 0; }
+  .hub-card__icon { display: grid; place-items: center; width: 3.25rem; height: 3.25rem; border-radius: 16px; background: var(--qw-slate-900); color: #fff; margin-bottom: var(--space-6); }
+  .hub-card__icon :global(svg) { width: 24px; height: 24px; }
+  .hub-card__eyebrow { font: var(--fw-semibold) var(--fs-xs)/1 var(--font-display); letter-spacing: 0.08em; text-transform: uppercase; }
+  .hub-card__title { font: var(--fw-black) var(--fs-2xl)/1.1 var(--font-display); letter-spacing: -0.02em; margin: var(--space-2) 0 !important; }
+  .hub-card__text { margin-bottom: var(--space-6) !important; }
+  .hub-card .btn { --btn-bg: var(--qw-slate-900); --btn-fg: #fff; --btn-border: var(--qw-slate-900); }
+  /* Filter panel (mirrors resources/index.astro). */
+  .filter-bar { display: grid; gap: var(--space-4); align-items: end; grid-template-columns: 1fr; padding: var(--space-5); background: var(--qw-mint-50); border-radius: 22px; margin-bottom: var(--space-10); }
+  @media (min-width: 900px) { .filter-bar { grid-template-columns: 1fr 18rem auto; } }
+  .blog-filter__label { font-weight: var(--fw-semibold); font-size: var(--fs-sm); color: var(--qw-slate-900); margin-bottom: var(--space-2); }
+  .chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .chip { min-height: 44px; padding: 0.4rem 1.1rem; border-radius: var(--radius-pill); border: 1.5px solid var(--qw-ink-3); background: #fff; color: var(--qw-slate-900); font: var(--fw-semibold) var(--fs-sm)/1 var(--font-display); cursor: pointer; display: inline-flex; gap: 0.4rem; align-items: center; }
+  .chip:hover { border-color: var(--qw-teal-700); }
+  .chip[aria-pressed="true"] { background: var(--qw-slate-900); border-color: var(--qw-slate-900); color: #fff; }
+  .chip__n { font-family: var(--font-mono); font-size: var(--fs-xs); opacity: 0.75; }
+  .filter-bar__actions { display: flex; align-items: center; min-height: 48px; }
+  .filter-bar__count { grid-column: 1 / -1; margin: 0; font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--qw-slate-900); }
+  /* Magazine layout: the first (newest) card is a wide feature from 768px, with the image on the left. */
+  .mag { gap: var(--space-8) var(--space-6); }
+  @media (min-width: 768px) {
+    .mag > :global(.article-card:first-child) { grid-column: 1 / -1; display: grid; grid-template-columns: 1.25fr 1fr; border: 0; background: var(--qw-slate-900); color: #fff; border-radius: 28px; --color-heading: #fff; --color-muted: var(--qw-mint-50); --color-link: #fff; --focus-ring: var(--qw-teal-500); }
+    .mag > :global(.article-card:first-child .card__media) { height: 100%; aspect-ratio: auto; background: #fff; display: grid; place-items: center; }
+    .mag > :global(.article-card:first-child .card__media img) { height: 100%; min-height: 22rem; object-fit: contain; }
+    .mag > :global(.article-card:first-child .card__body) { padding: var(--space-10); justify-content: center; gap: var(--space-4); }
+    .mag > :global(.article-card:first-child .card__title) { font-size: var(--fs-2xl); line-height: 1.15; }
+    .mag > :global(.article-card:first-child .card__title a) { color: #fff; }
+    .mag > :global(.article-card:first-child .card__meta) { color: var(--qw-teal-500); }
+    .mag > :global(.article-card:first-child .card__meta::before) { content: "Latest · "; }
+  }
+  .mag > :global(.article-card) { border-radius: 22px; }
+  .migration { margin-top: var(--space-8); font-size: var(--fs-sm); color: var(--color-muted); }
+</style>
 <script>
-  // Client-side category filter. initFilters() reads/writes ?category= in the URL, hides non-matching
+  // Client-side filters. initFilters() reads/writes ?type= and ?category= in the URL, hides non-matching
   // cards, announces the result count in a live region and shows #blog-empty when nothing matches.
   import { initFilters } from '../../lib/filters';
-  // match: no category selected shows every card; otherwise the card's "|"-joined data-categories must
-  // contain the selected value exactly (not a substring match).
-  initFilters({ bar: '#blog-filter', results: '#blog-results', empty: '#blog-empty', noun: ['article', 'articles'], match: (el, f) => !f.category || (el.dataset.categories ?? '').split('|').includes(f.category) });
+  // match: type chip (card data-type) AND category: no category selected shows every card; otherwise the
+  // card's "|"-joined data-categories must contain the selected value exactly (not a substring match).
+  initFilters({ bar: '#blog-filter', results: '#blog-results', empty: '#blog-empty', noun: ['article', 'articles'],
+    match: (el, f) => (!f.type || el.dataset.type === f.type) && (!f.category || (el.dataset.categories ?? '').split('|').includes(f.category)) });
 </script>

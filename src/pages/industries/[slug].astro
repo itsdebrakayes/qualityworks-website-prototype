@@ -46,6 +46,7 @@ import CaseStudyCard from '../../components/CaseStudyCard.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import Alert from '../../components/Alert.astro';
 import ClaimRef from '../../components/ClaimRef.astro';
+import Icon from '../../components/Icon.astro';
 import { industries } from '../../data/industries';
 import { serviceBySlug } from '../../data/services';
 import { productBySlug } from '../../data/products';
@@ -61,7 +62,7 @@ const cases = ind.caseStudies.map(caseStudyBySlug).filter(Boolean);
 ---
 <BaseLayout seo={ind.seo} breadcrumbs={crumbs}>
   {/* Hero: secondary CTA jumps to the #evidence section further down this page. */}
-  <PageHero image={ind.heroImage ? peopleImage(ind.heroImage) : undefined} eyebrow={ind.status === 'proposed' && REVIEW ? `${ind.name} · proposed page` : ind.name} title={ind.heroTitle} lede={ind.heroLede} breadcrumbs={crumbs} primary={ind.primaryCta} secondary={{ label: 'See relevant results', href: '#evidence' }} />
+  <PageHero ui="people" image={ind.heroImage ? peopleImage(ind.heroImage) : undefined} eyebrow={ind.status === 'proposed' && REVIEW ? `${ind.name} · proposed page` : ind.name} title={ind.heroTitle} lede={ind.heroLede} breadcrumbs={crumbs} primary={ind.primaryCta} secondary={{ label: 'See relevant results', href: '#evidence' }} />
 
   {/* Status notices: migration pending (summary records) and proposed route (needs QM-41). Release blockers in release builds. */}
   {ind.contentDepth === 'summary' && (
@@ -73,20 +74,20 @@ const cases = ind.caseStudies.map(caseStudyBySlug).filter(Boolean);
 
   {/* The challenge: sector-specific buyer problem (buyerChallenge), not shared boilerplate. */}
   <section class="section" aria-labelledby="challenge-title">
-    <div class="container split">
-      <div><p class="eyebrow">The challenge</p><h2 id="challenge-title">What makes {ind.name.toLowerCase()} different</h2></div>
-      <div><p class="lede">{ind.buyerChallenge}</p></div>
+    <div class="container split ichal">
+      <div data-reveal="up"><p class="eyebrow">The challenge</p><h2 id="challenge-title" class="display-sm">What makes {ind.name.toLowerCase()} different</h2></div>
+      <div class="ichal__card" data-reveal="right"><span class="icon-badge icon-badge--slate" aria-hidden="true"><Icon name="alert" /></span><p class="lede">{ind.buyerChallenge}</p></div>
     </div>
   </section>
 
   {/* Considerations: only full records have them; ClaimRef annotations attach to specific cards (see Gotchas). */}
   {ind.considerations.length > 0 && (
-    <section class="section surface-alt" aria-labelledby="consider-title">
+    <section class="section surface-mint" aria-labelledby="consider-title">
       <div class="container">
         <SectionHeading eyebrow="How we approach it" title={`Considerations for ${ind.name.toLowerCase()}`} id="consider-title" />
-        <div class="grid grid--2">
-          {ind.considerations.map((c) => (
-            <div class="consider"><h3>{c.title}</h3><p>{c.text}{ind.slug === 'healthcare' && c.title.startsWith('Compliance') && <ClaimRef id="C19" />}{ind.slug === 'public-sector' && c.title.startsWith('Procurement') && <ClaimRef id="C13" />}</p></div>
+        <div class="grid grid--2 eq" data-reveal-stagger>
+          {ind.considerations.map((c, n) => (
+            <div class="consider" data-reveal="up"><span class:list={['icon-badge', ['', 'icon-badge--green', 'icon-badge--slate', 'icon-badge--mint'][n % 4]]} aria-hidden="true"><Icon name={['shield', 'check', 'gauge', 'team'][n % 4]} /></span><span class="consider__n mono" aria-hidden="true">{String(n + 1).padStart(2, '0')}</span><h3>{c.title}</h3><p>{c.text}{ind.slug === 'healthcare' && c.title.startsWith('Compliance') && <ClaimRef id="C19" />}{ind.slug === 'public-sector' && c.title.startsWith('Procurement') && <ClaimRef id="C13" />}</p></div>
           ))}
         </div>
       </div>
@@ -97,16 +98,16 @@ const cases = ind.caseStudies.map(caseStudyBySlug).filter(Boolean);
   <section class="section" aria-labelledby="caps-title">
     <div class="container">
       <SectionHeading eyebrow="Relevant capabilities" title="Services that apply" id="caps-title" />
-      <div class="grid grid--3">{caps.map((s) => <ServiceCard service={s!} />)}</div>
-      {prods.length > 0 && <div class="prods"><h3>Related products</h3><div class="grid grid--3">{prods.map((p) => <ProductCard p={p!} />)}</div></div>}
+      <div class="grid grid--3 eq" data-reveal-stagger>{caps.map((s) => <div data-reveal="up"><ServiceCard service={s!} /></div>)}</div>
+      {prods.length > 0 && <div class="prods"><h3>Related products</h3><div class="grid grid--3 eq">{prods.map((p) => <ProductCard p={p!} />)}</div></div>}
     </div>
   </section>
 
   {/* Evidence: published case studies for this sector (target of the hero's "See relevant results" link). */}
-  <section class="section surface-alt" id="evidence" aria-labelledby="evidence-title">
+  <section class="section surface-teal" id="evidence" aria-labelledby="evidence-title">
     <div class="container">
       <SectionHeading eyebrow="Evidence" title="Published results" id="evidence-title" />
-      {cases.length ? <div class="grid grid--3">{cases.map((c) => <CaseStudyCard cs={c!} />)}</div> : <p>No published case studies for this sector yet.</p>}
+      {cases.length ? <div class="grid grid--3 eq" data-reveal-stagger>{cases.map((c) => <div data-reveal="up"><CaseStudyCard cs={c!} /></div>)}</div> : <p>No published case studies for this sector yet.</p>}
       {ind.evidenceNote && <p class="evidence-note" data-review-note={rn('Evidence note')}>{ind.evidenceNote}</p>}
     </div>
   </section>
@@ -118,7 +119,17 @@ const cases = ind.caseStudies.map(caseStudyBySlug).filter(Boolean);
   /* :global because the class is passed into the Alert component, outside this file's style scope. */
   :global(.ind-alert) { margin-top: var(--space-8); }
   /* Consideration cards: white card with a 3px teal top rule to mark them as approach notes. */
-  .consider { padding: var(--space-6); background: #fff; border: 1px solid var(--qw-line); border-radius: var(--radius-lg); border-top: 3px solid var(--qw-teal-500); }
+  .consider { position: relative; height: 100%; display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-8); background: #fff; border-radius: 24px; box-shadow: 0 24px 44px -34px rgba(34,43,55,.6); transition: transform .3s ease; }
+  .consider:hover { transform: translateY(-4px); }
+  .consider .icon-badge--mint { background: var(--qw-mint-50); }
+  .consider__n { position: absolute; top: var(--space-8); right: var(--space-8); font-size: var(--fs-xs); opacity: .6; }
+  /* Challenge: statement left, problem card right. */
+  .ichal { align-items: center; }
+  .ichal__card { display: grid; gap: var(--space-5); padding: var(--space-8); border-radius: 28px; background: var(--qw-mint-50); border-left: 8px solid var(--qw-green-500); }
+  .ichal__card .lede { margin: 0; color: var(--qw-slate-900); }
+  .eq { align-items: stretch; }
+  .eq > :global(*), .eq > div > :global(*) { height: 100%; }
+  .evidence-note { color: var(--qw-slate-900) !important; }
   .consider h3 { font-size: var(--fs-md); }
   .consider p { margin: 0; color: var(--qw-slate-800); }
   /* Related products block and the small evidence footnote. */

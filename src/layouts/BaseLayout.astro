@@ -146,17 +146,12 @@ const ld = [...(crumbLd ? [crumbLd] : []), ...jsonLd];
         window.addEventListener('pageshow', function (e) { if (e.persisted) toTop(); });
       })();
     </script>
-    {/* Bundled module script (processed by Astro/Vite), deferred until the document is parsed. */}
+    {/* Bundled module script (processed by Astro/Vite), deferred until the document is parsed: the shared
+        motion system (src/lib/motion.ts). Content is complete without it; it only adds motion and interaction. */}
     <script>
-      // Restrained reveal-on-scroll. Content is visible without JS and with reduced motion.
-      const els = document.querySelectorAll('.reveal');
-      if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        const io = new IntersectionObserver((entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px' });
-        els.forEach((el) => io.observe(el));
-      } else els.forEach((el) => el.classList.add('is-visible'));
+      import { initMotion } from '../lib/motion';
+      initMotion();
     </script>
-    {/* Without JavaScript the reveal animation never runs, so force .reveal content visible. */}
-    <noscript><style>.reveal { opacity: 1 !important; transform: none !important; }</style></noscript>
   </body>
 </html>
 <style>

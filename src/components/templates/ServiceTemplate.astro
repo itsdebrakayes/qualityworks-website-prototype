@@ -6,8 +6,9 @@ import { RELEASE, rn } from '../../lib/release';
  * gracefully without layout changes.
  *
  * What: a complete PAGE (it wraps BaseLayout) built from one `Service` record in src/data/services.ts.
- * Section order: hero with an "At a glance" card -> summary-record warning (if any) -> the challenge
- * -> capabilities -> how we deliver (process) -> buyer considerations -> related results (case
+ * Section order: hero (pathway colour + people photo + UI chips) -> intro band ("At a glance" card,
+ * summary-record warning if any, the challenge, per-slug SignatureVisual) -> capabilities (explorer for
+ * quality, bento for build/ai) -> how we deliver (process) -> buyer considerations -> related results (case
  * studies and products) -> FAQ -> related services and industries -> closing CtaBand.
  *
  * Why: the live site has many near-identical service pages (doc 02 lists "near-identical industry and
@@ -59,6 +60,9 @@ import { productBySlug } from '../../data/products';
 import { services } from '../../data/services';
 import { industryBySlug } from '../../data/industries';
 import { faqLd, serviceLd } from '../../lib/schema';
+import { peopleImage } from '../../data/peopleImagery';
+import SignatureVisual from '../solutions/SignatureVisual.astro';
+import CapabilityExplorer from '../solutions/CapabilityExplorer.astro';
 import type { Service } from '../../data/types';
 interface Props {
   /** The service record to render (src/data/services.ts). Callers look it up by slug or getStaticPaths. */
@@ -79,78 +83,145 @@ const relIndustries = (s.relatedIndustries ?? []).map(industryBySlug).filter(Boo
 const siblings = services.filter((x) => x.group === s.group && x.slug !== s.slug && x.contentDepth === 'full').slice(0, 3);
 // Page JSON-LD: always a Service; FAQPage only when this record has FAQs (they are rendered below).
 const jsonLd = [serviceLd(s.name, s.seo.description, s.path), ...(s.faqs?.length ? [faqLd(s.faqs)] : [])].filter((x) => x !== null);
+
+// ---- Redesign (Janique, 23 Nov 2026): vary composition by pathway, people imagery, signature visual ----
+// Pathway -> hero colour block + floating UI chip set. quality = teal/testing, build = green/build, ai = mint/ai.
+const pw = s.pathway;
+const heroTone = ({ quality: 'teal', build: 'green', ai: 'mint' } as const)[pw];
+const heroUi = ({ quality: 'testing', build: 'build', ai: 'ai' } as const)[pw];
+// People photograph per page (falls back by pathway). Only approved library photos (peopleImagery.ts).
+const heroPhotoBySlug: Record<string, string> = {
+  'test-automation': 'technology-pair', 'full-stack-testing': 'services-pair', 'web-mobile-application-testing': 'products-engineer',
+  'non-functional-testing': 'home-mentoring', 'api-cloud-services-testing': 'products-engineer', 'ai-test-squad': 'about-team',
+  'maturity-assessments': 'home-mentoring', 'custom-software-development': 'products-engineer', 'technology-advisory-partnership': 'home-mentoring',
+  'digital-agile-transformation': 'careers-colleagues', 'dedicated-teams': 'about-team', 'staff-augmentation': 'careers-colleagues',
+  'consulting-training': 'resources-audience', 'innovation-tourism': 'industries-team', 'ai-service': 'contact-team',
+  'data-quality': 'technology-pair', 'ai-governance': 'finance-client-meeting',
+};
+const heroPhoto = peopleImage(heroPhotoBySlug[s.slug] ?? { quality: 'technology-pair', build: 'products-engineer', ai: 'contact-team' }[pw]);
+// Considerations photo: a different people photo from the hero.
+const considerPhotoId = ({ quality: 'home-mentoring', build: 'careers-colleagues', ai: 'about-team' } as const)[pw];
+const considerPhoto = peopleImage(considerPhotoId === heroPhoto.id ? 'services-pair' : considerPhotoId);
+const considerSurface = ({ quality: 'surface-teal', build: 'surface-mint', ai: 'surface-green' } as const)[pw];
+// Capabilities layout: quality services get the interactive explorer; build/ai (and engagement models) a bento.
+const useExplorer = pw === 'quality' && s.kind !== 'engagement-model' && s.capabilities.length >= 3;
+// Bento spans: rows of [4,2] / [2,4] / [2,2,2] so every row fills 6 columns and tiles in a row share height.
+const spans: number[] = [];
+{ let left = s.capabilities.length; let flip = false;
+  while (left > 0) {
+    if (left === 1) { spans.push(6); left -= 1; }
+    else if (left === 3 || left >= 5 && spans.length % 2 === 1) { spans.push(2, 2, 2); left -= 3; }
+    else { spans.push(...(flip ? [2, 4] : [4, 2])); flip = !flip; left -= 2; }
+  } }
+const capIcons: [RegExp, string][] = [[/mobile|device/i, 'devices'], [/web|app|software|product/i, 'code'], [/train|upskill|coach/i, 'learn'], [/perform/i, 'gauge'], [/api|cloud|integrat/i, 'api'], [/secur|govern|risk|compliance/i, 'shield'], [/strateg|assess|advis|roadmap|plan/i, 'compass'], [/automat/i, 'automation'], [/data/i, 'data'], [/agent|\bai\b|model/i, 'agent'], [/team|squad|talent/i, 'team'], [/agile|transform|process/i, 'cycle']];
+const capIcon = (t: string) => capIcons.find(([r]) => r.test(t))?.[1] ?? s.icon;
 ---
 <BaseLayout seo={s.seo} breadcrumbs={crumbs} jsonLd={jsonLd}>
-  {/* Hero: eyebrow = the mega-menu group, h1 = heroTitle, CTAs from the record. */}
-  <PageHero eyebrow={s.group} title={s.heroTitle} lede={s.heroLede} breadcrumbs={crumbs} primary={s.primaryCta} secondary={s.secondaryCta}>
-    {/* "At a glance" card in the hero aside column: problem, audience and type, plus review-only claim badges. */}
-    <Fragment slot="aside">
-      <div class="svc-glance">
-        <p class="svc-glance__label mono">At a glance</p>
-        <dl>
-          <div><dt>Problem it solves</dt><dd>{s.buyerProblem}</dd></div>
-          <div><dt>Best for</dt><dd>{s.personas.primary}{s.personas.secondary && <>; {s.personas.secondary}</>}</dd></div>
-          {/* Kind -> human label. Keep in step with the Service["kind"] union in src/data/types.ts. */}
-          <div><dt>Type</dt><dd>{{ service: 'Consulting service', 'engagement-model': 'Engagement model', assessment: 'Assessment', program: 'Program' }[s.kind]}</dd></div>
-        </dl>
-        {/* Review-only claim badges for the claims this page displays (render nothing in release builds). */}
-        {s.claims?.length ? <p class="svc-glance__claims">{s.claims.map((c) => <ClaimRef id={c} />)}</p> : null}
+  {/* Hero: pathway colour block + people photograph + floating UI chips (Janique: people-focused hero).
+      eyebrow = the mega-menu group, h1 = heroTitle, CTAs from the record (equal width in PageHero). */}
+  <PageHero tone={heroTone} image={heroPhoto} ui={heroUi} eyebrow={s.group} title={s.heroTitle} lede={s.heroLede} breadcrumbs={crumbs} primary={s.primaryCta} secondary={s.secondaryCta} />
+
+  {/* Intro band: "At a glance" card (lifted over the hero edge), the challenge, and the page's signature
+      animated visual (chosen by slug in SignatureVisual). */}
+  <div class:list={['svc-intro', `svc-intro--${pw}`]}>
+    <div class="container svc-intro__grid">
+      <div class="svc-intro__copy">
+        {/* "At a glance": problem, audience and type, plus review-only claim badges. */}
+        <div class="svc-glance" data-reveal="up">
+          <p class="svc-glance__label mono">At a glance</p>
+          <dl>
+            <div><dt>Problem it solves</dt><dd>{s.buyerProblem}</dd></div>
+            <div><dt>Best for</dt><dd>{s.personas.primary}{s.personas.secondary && <>; {s.personas.secondary}</>}</dd></div>
+            {/* Kind -> human label. Keep in step with the Service["kind"] union in src/data/types.ts. */}
+            <div><dt>Type</dt><dd>{{ service: 'Consulting service', 'engagement-model': 'Engagement model', assessment: 'Assessment', program: 'Program' }[s.kind]}</dd></div>
+          </dl>
+          {/* Review-only claim badges for the claims this page displays (render nothing in release builds). */}
+          {s.claims?.length ? <p class="svc-glance__claims">{s.claims.map((c) => <ClaimRef id={c} />)}</p> : null}
+        </div>
+        {/* Summary records: honest "content pending" warning; a release blocker in release builds. */}
+        {s.contentDepth === 'summary' && (
+          <div data-release-blocker={RELEASE ? 'summary-record: full service copy not migrated' : undefined}><Alert tone="warning" title="Summary record — full content pending migration" class="svc-alert">
+            <p>This page exists on the live site. The prototype shows the template with a summary only. {s.provenance.note}</p>
+          </Alert></div>
+        )}
+        {/* The challenge: the buyer problem as the h2, expanded by the `challenge` text. Optional. */}
+        {s.challenge && (
+          <section class="svc-challenge" aria-labelledby="challenge-title" data-reveal="up">
+            <p class="eyebrow">The challenge</p><h2 id="challenge-title">{s.buyerProblem}</h2>
+            <p class="lede">{s.challenge}</p>
+          </section>
+        )}
       </div>
-    </Fragment>
-  </PageHero>
-
-  {/* Summary records: honest "content pending" warning; a release blocker in release builds. */}
-  {s.contentDepth === 'summary' && (
-    <div class="container" data-release-blocker={RELEASE ? 'summary-record: full service copy not migrated' : undefined}><Alert tone="warning" title="Summary record — full content pending migration" class="svc-alert">
-      <p>This page exists on the live site. The prototype shows the template with a summary only. {s.provenance.note}</p>
-    </Alert></div>
-  )}
-
-  {/* The challenge: the buyer problem as the h2, expanded by the `challenge` text. Optional. */}
-  {s.challenge && (
-    <section class="section" aria-labelledby="challenge-title">
-      <div class="container split">
-        <div><p class="eyebrow">The challenge</p><h2 id="challenge-title">{s.buyerProblem}</h2></div>
-        <div><p class="lede">{s.challenge}</p></div>
+      <div class="svc-intro__visual" data-reveal="scale">
+        <span class="svc-intro__block" aria-hidden="true" data-parallax="0.08"></span>
+        <SignatureVisual slug={s.slug} pathway={pw} />
       </div>
-    </section>
-  )}
+    </div>
+  </div>
 
-  {/* Capabilities: always rendered. Engagement models get a different title because they describe a way
-      of working rather than a capability list. */}
-  <section class:list={['section', { 'surface-alt': !!s.challenge }]} aria-labelledby="caps-title">
+  {/* Capabilities: always rendered. Composition varies by pathway: quality = interactive explorer (tabs),
+      build/ai/engagement models = bento of icon tiles. Engagement models get a different title. */}
+  <section class:list={['section', 'svc-caps', `svc-caps--${pw}`]} aria-labelledby="caps-title">
     <div class="container">
-      <SectionHeading eyebrow="What we deliver" title={s.kind === 'engagement-model' ? 'How this model works' : `${s.name} capabilities`} id="caps-title" />
-      <div class="caps grid grid--2">
-        {s.capabilities.map((c) => (
-          <div class="cap">
-            <span class="cap__mark" aria-hidden="true"><Icon name="check" /></span>
-            <div><h3>{c.title}</h3><p>{c.text}</p></div>
-          </div>
-        ))}
+      <div class="section-intro" data-reveal="up">
+        <p class="eyebrow">What we deliver</p>
+        <h2 id="caps-title" class="display-sm">{s.kind === 'engagement-model' ? 'How this model works' : `${s.name} capabilities`}</h2>
       </div>
+      {useExplorer ? (
+        <CapabilityExplorer items={s.capabilities} fallbackIcon={s.icon} />
+      ) : (
+        <div class="bento svc-bento" data-reveal-stagger>
+          {s.capabilities.map((c, i) => (
+            <div class:list={['svc-tile', `span-${spans[i]}`, { 'svc-tile--feature': spans[i] >= 4 || spans[i] === 6 }]} data-reveal="up">
+              <span class:list={['icon-badge', { 'icon-badge--slate': spans[i] >= 4, 'icon-badge--mint': spans[i] < 4 }]} aria-hidden="true"><Icon name={capIcon(c.title)} /></span>
+              <h3>{c.title}</h3><p>{c.text}</p>
+              <span class="svc-tile__n mono" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   </section>
 
-  {/* How we deliver: numbered steps from `process`. Optional. */}
+  {/* How we deliver: graphical connected steps from `process`. Optional. Framed in a colour block with a
+      people photo so the approach reads as work done with people, not a list. */}
   {s.process && (
-    <section class="section" aria-labelledby="process-title">
+    <section class:list={['section', 'svc-process', pw === 'quality' ? 'surface-white svc-process--framed' : 'surface-mint']} aria-labelledby="process-title">
       <div class="container">
-        <SectionHeading eyebrow="Our approach" title="How we deliver" id="process-title" />
-        <ProcessSteps steps={s.process} />
+        <div class="svc-process__head">
+          <div class="section-intro" data-reveal="up">
+            <p class="eyebrow">Our approach</p>
+            <h2 id="process-title" class="display-sm">How we deliver</h2>
+          </div>
+          <p class="svc-process__count" aria-hidden="true" data-reveal="scale"><span>{String(s.process.length).padStart(2, '0')}</span> steps</p>
+        </div>
+        <div class="svc-process__frame" data-reveal="up"><ProcessSteps steps={s.process} /></div>
       </div>
     </section>
   )}
 
-  {/* Buyer considerations: proposed copy (pending approval), shown on the dark surface. Optional. */}
+  {/* Buyer considerations: proposed copy (pending approval). People photo with overlay chips beside the
+      considerations (Janique). Colour block varies by pathway. Optional. */}
   {s.considerations && s.considerations.length > 0 && (
-    <section class="section surface-dark" aria-labelledby="consider-title" data-review-note={rn('Proposed buyer-specific copy (pending approval)')}>
-      <div class="container">
-        <SectionHeading eyebrow="Buyer considerations" title="What to know before you start" id="consider-title" />
-        <div class="grid grid--3">
-          {s.considerations.map((c) => (
-            <div class="consider"><h3>{c.audience}</h3><p>{c.text}</p></div>
-          ))}
+    <section class:list={['section', considerSurface, 'svc-consider']} aria-labelledby="consider-title" data-review-note={rn('Proposed buyer-specific copy (pending approval)')}>
+      <div class="container svc-consider__grid">
+        <div class="svc-consider__media" data-reveal="left" data-pointer-scene>
+          <img src={`/people/${considerPhoto.id}-800.webp`} alt={considerPhoto.alt} width="800" height={Math.round(800 / considerPhoto.ratio)} loading="lazy" decoding="async" style={`object-position: ${considerPhoto.focus}`} />
+          <div class="svc-consider__chips" aria-hidden="true">
+            {s.considerations.map((c, i) => (
+              <span class="chip-ui" data-depth style={`--depth:${12 + i * 8}; --cx:${[6, 22, 10][i % 3]}%; --cy:${[7, 44, 78][i % 3]}%`}>
+                <span class:list={['chip-ui__icon', { 'chip-ui__icon--green': i === 0, 'chip-ui__icon--slate': i === 2 }]}><Icon name={['team', 'check', 'shield'][i % 3]} /></span>{c.audience}
+              </span>
+            ))}
+          </div>
+        </div>
+        <div>
+          <SectionHeading eyebrow="Buyer considerations" title="What to know before you start" id="consider-title" />
+          <div class="svc-consider__list" data-reveal-stagger>
+            {s.considerations.map((c, i) => (
+              <div class="consider" data-reveal="up"><span class="consider__n mono" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span><div><h3>{c.audience}</h3><p>{c.text}</p></div></div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -161,11 +232,11 @@ const jsonLd = [serviceLd(s.name, s.seo.description, s.path), ...(s.faqs?.length
     <section class="section" aria-labelledby="proof-title">
       <div class="container">
         <SectionHeading eyebrow="Proof" title="Related results" id="proof-title" />
-        {related.length > 0 && <div class="grid grid--3">{related.map((cs) => <CaseStudyCard cs={cs!} />)}</div>}
+        {related.length > 0 && <div class="grid grid--3 eq" data-reveal-stagger>{related.map((cs) => <div data-reveal="up"><CaseStudyCard cs={cs!} /></div>)}</div>}
         {relProducts.length > 0 && (
           <div class="rel-products">
             <h3 class="rel-title">Related products</h3>
-            <div class="grid grid--3">{relProducts.map((p) => <ProductCard p={p!} />)}</div>
+            <div class="grid grid--3 eq">{relProducts.map((p) => <ProductCard p={p!} />)}</div>
           </div>
         )}
       </div>
@@ -174,7 +245,7 @@ const jsonLd = [serviceLd(s.name, s.seo.description, s.path), ...(s.faqs?.length
 
   {/* FAQ: native accordion. Its presence must match the FAQPage JSON-LD built in the frontmatter. */}
   {s.faqs && s.faqs.length > 0 && (
-    <section class="section surface-alt" aria-labelledby="faq-title">
+    <section class="section surface-mint" aria-labelledby="faq-title">
       <div class="container container--narrow">
         <SectionHeading eyebrow="FAQ" title={`${s.name}: common questions`} id="faq-title" />
         <FaqAccordion items={s.faqs} />
@@ -187,37 +258,86 @@ const jsonLd = [serviceLd(s.name, s.seo.description, s.path), ...(s.faqs?.length
     <section class="section" aria-labelledby="more-title">
       <div class="container">
         <SectionHeading eyebrow="Keep exploring" title="Related services and industries" id="more-title" />
-        <div class="grid grid--3">{siblings.map((x) => <ServiceCard service={x} />)}</div>
+        <div class="grid grid--3 eq">{siblings.map((x) => <ServiceCard service={x} />)}</div>
         {relIndustries.length > 0 && <p class="ind-links">Industries: {relIndustries.map((i, n) => <>{n > 0 && ' · '}<a href={i!.path}>{i!.name}</a></>)}</p>}
       </div>
     </section>
   )}
 
-  {/* Closing call to action; secondary always points to the case-study list. */}
-  <CtaBand title={`Talk to us about ${s.name.toLowerCase()}.`} text="Tell us where you are today. We’ll recommend a starting point — or tell you if you don’t need us." primary={s.primaryCta} secondary={{ label: 'See case studies', href: '/case-studies/' }} />
+  {/* Closing call to action; secondary always points to the case-study list. Green band for build pages. */}
+  <CtaBand tone={pw === 'build' ? 'green' : 'teal'} title={`Talk to us about ${s.name.toLowerCase()}.`} text="Tell us where you are today. We’ll recommend a starting point — or tell you if you don’t need us." primary={s.primaryCta} secondary={{ label: 'See case studies', href: '/case-studies/' }} />
 </BaseLayout>
 <style>
-  /* "At a glance" card: white panel in the hero aside. Small mono slate label, teal uppercase terms (dt),
-     ink values (dd). It stays white even on dark hero variants. */
-  .svc-glance { background: #fff; border: 1px solid var(--qw-line); border-radius: var(--radius-lg); padding: var(--space-6); box-shadow: var(--shadow-md); }
+  /* Intro band: glance card lifts over the hero's bottom edge; signature visual on the right. */
+  .svc-intro { position: relative; padding-bottom: var(--space-20); }
+  .svc-intro__grid { display: grid; gap: var(--space-10); align-items: start; }
+  @media (min-width: 1024px) { .svc-intro__grid { grid-template-columns: 1.05fr 0.95fr; gap: var(--space-16); } }
+  .svc-intro__copy { display: grid; gap: var(--space-10); }
+  .svc-glance { position: relative; z-index: 2; margin-top: calc(var(--space-12) * -1); background: #fff; border-radius: 24px; padding: var(--space-6) var(--space-8); box-shadow: 0 30px 60px -32px rgba(34,43,55,.5), 0 0 0 1px rgba(34,43,55,.06); }
   .svc-glance__label { font-size: var(--fs-xs); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-muted); }
   .svc-glance dl { margin: 0; display: grid; gap: var(--space-4); }
+  @media (min-width: 640px) { .svc-glance dl { grid-template-columns: 1.4fr 1.2fr 0.8fr; gap: var(--space-6); } .svc-glance dl > div + div { border-left: 1px solid var(--qw-line); padding-left: var(--space-6); } }
   .svc-glance dt { font-size: var(--fs-xs); font-weight: var(--fw-bold); text-transform: uppercase; letter-spacing: 0.06em; color: var(--qw-teal-700); }
-  .svc-glance dd { margin: 0.2rem 0 0; color: var(--qw-slate-900); font-weight: var(--fw-medium); }
-  /* Summary warning spacing. :global because the element is rendered by Alert.astro, so it does not carry
-     this component's scope attribute. */
-  :global(.svc-alert) { margin-top: var(--space-8); }
-  /* Capability tiles: 2.25rem check-mark column + text column. */
-  .cap { display: grid; grid-template-columns: 2.25rem 1fr; gap: var(--space-4); padding: var(--space-6); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
-  .cap__mark { width: 2.25rem; height: 2.25rem; border-radius: var(--radius-md); background: var(--qw-mint-50); color: var(--qw-teal-700); display: grid; place-items: center; }
-  .cap__mark :global(svg) { width: 20px; height: 20px; }
-  .cap h3 { font-size: var(--fs-md); margin-bottom: var(--space-2); }
-  .cap p { margin: 0; color: var(--color-muted); }
-  /* Considerations sit on surface-dark, so the audience heading uses logo green (accent on dark). */
-  .consider { padding: var(--space-6); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); }
-  .consider h3 { font-size: var(--fs-md); color: var(--qw-green-500); }
-  .consider p { margin: 0; }
-  /* Related-products block and industry links spacing. */
+  .svc-glance dd { margin: 0.25rem 0 0; color: var(--qw-slate-900); font-weight: var(--fw-semibold); font-size: var(--fs-sm); }
+  :global(.svc-alert) { margin: 0; }
+  .svc-challenge h2 { font-size: var(--fs-2xl); max-width: 22ch; }
+  .svc-challenge .lede { margin: 0; }
+  .svc-intro__visual { position: relative; padding: var(--space-8) var(--space-6) var(--space-6) 0; margin-top: var(--space-12); }
+  .svc-intro__block { position: absolute; inset: 0 0 18% 14%; border-radius: 32px; background: var(--qw-teal-500); }
+  .svc-intro--build .svc-intro__block { background: var(--qw-green-500); inset: 12% 10% 0 0; border-radius: 50% 32px 32px 32px; }
+  .svc-intro--ai .svc-intro__block { background: var(--qw-mint-50); inset: 4% 4% 4% 4%; border-radius: 50%; border: 2px dashed var(--qw-teal-500); }
+  .svc-intro__visual :global(.sig) { position: relative; }
+  @media (max-width: 1023px) { .svc-intro__visual { margin-top: 0; padding-right: var(--space-4); } }
+
+  /* Capabilities */
+  .svc-caps { background: #fff; }
+  .svc-caps--quality { background: var(--qw-mint-50); }
+  .svc-caps .section-intro { margin-bottom: var(--space-10); }
+  .svc-tile { display: flex; flex-direction: column; gap: var(--space-3); background: var(--qw-mint-50); border: 1px solid transparent; transition: transform .3s ease, box-shadow .3s ease, background .3s; }
+  .svc-tile:hover { transform: translateY(-4px); box-shadow: 0 24px 40px -28px rgba(34,43,55,.55); background: #fff; border-color: var(--qw-line); }
+  .svc-tile--feature { background: var(--qw-green-500); }
+  .svc-caps--ai .svc-tile--feature { background: var(--qw-teal-500); }
+  .svc-tile--feature:hover { background: var(--qw-green-500); }
+  .svc-caps--ai .svc-tile--feature:hover { background: var(--qw-teal-500); }
+  .svc-tile--feature h3 { font-size: var(--fs-xl); }
+  .svc-tile h3 { font-size: var(--fs-md); margin: var(--space-3) 0 0; color: var(--qw-slate-900); }
+  .svc-tile p { margin: 0; color: var(--qw-slate-900); }
+  .svc-tile__n { position: absolute; top: var(--space-6); right: var(--space-6); font-size: var(--fs-xs); color: var(--qw-slate-900); opacity: .6; }
+  .svc-tile .icon-badge { transition: transform .3s; }
+  .svc-tile .icon-badge--mint { background: #fff; }
+  .svc-tile:hover .icon-badge--mint { background: var(--qw-mint-50); }
+  .svc-tile:hover .icon-badge { transform: rotate(-8deg) scale(1.06); }
+
+  /* Process */
+  .svc-process__head { display: flex; justify-content: space-between; align-items: end; gap: var(--space-6); flex-wrap: wrap; }
+  .svc-process__count { font: var(--fw-bold) var(--fs-sm)/1 var(--font-display); text-transform: uppercase; letter-spacing: .08em; display: flex; align-items: center; gap: .6rem; margin: 0 0 var(--space-12); }
+  .svc-process__count span { display: grid; place-items: center; width: 72px; height: 72px; border-radius: 22px; background: var(--qw-teal-500); font-size: 1.8rem; font-weight: 900; letter-spacing: -0.02em; }
+  .svc-process--framed .svc-process__frame { background: var(--qw-mint-50); }
+  .svc-process__frame { background: #fff; border-radius: 28px; padding: clamp(1.25rem, 3vw, 3rem); box-shadow: 0 30px 60px -40px rgba(34,43,55,.45); }
+
+  /* Considerations */
+  .svc-consider__grid { display: grid; gap: var(--space-10); align-items: center; }
+  @media (min-width: 1024px) { .svc-consider__grid { grid-template-columns: 0.9fr 1.1fr; gap: var(--space-16); } }
+  @media (min-width: 1024px) { .surface-mint.svc-consider .svc-consider__media { order: 2; } }
+  .svc-consider__media { position: relative; border-radius: 28px; }
+  .svc-consider__media img { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 28px; box-shadow: 0 40px 70px -40px rgba(34,43,55,.7); }
+  @media (max-width: 1023px) { .svc-consider__media img { aspect-ratio: 4 / 3; } }
+  .svc-consider__chips .chip-ui { max-width: 78%; white-space: normal; left: var(--cx); top: var(--cy); transform: translate(calc(var(--mx, 0) * var(--depth, 0) * 1px), calc(var(--my, 0) * var(--depth, 0) * 1px)); animation: chip-drift 6s ease-in-out infinite; }
+  .svc-consider__chips .chip-ui:nth-child(2) { animation-delay: -2s; }
+  .svc-consider__chips .chip-ui:nth-child(3) { animation-delay: -4s; }
+  @keyframes chip-drift { 50% { translate: 0 -8px; } }
+  @media (prefers-reduced-motion: reduce) { .svc-consider__chips .chip-ui { animation: none; } }
+  .svc-consider__list { display: grid; gap: var(--space-4); }
+  .consider { display: grid; grid-template-columns: auto 1fr; gap: var(--space-5); padding: var(--space-6); border-radius: 20px; background: #fff; color: var(--qw-slate-900); box-shadow: 0 20px 40px -32px rgba(34,43,55,.6); transition: transform .3s; }
+  .consider:hover { transform: translateX(6px); }
+  .consider__n { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px; background: var(--qw-slate-900); color: #fff; font-size: var(--fs-xs); }
+  .consider h3 { font-size: var(--fs-md); margin-bottom: var(--space-2); color: var(--qw-slate-900); }
+  .consider p { margin: 0; color: var(--qw-slate-800); }
+
+  /* Equal-height cards in grids. */
+  .eq { align-items: stretch; }
+  .eq > :global(*) { height: 100%; }
+  .eq > div > :global(*) { height: 100%; }
   .rel-products { margin-top: var(--space-12); }
   .rel-title { font-size: var(--fs-md); }
   .ind-links { margin-top: var(--space-6); font-weight: var(--fw-semibold); }

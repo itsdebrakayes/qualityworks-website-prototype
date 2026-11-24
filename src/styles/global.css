@@ -23,6 +23,9 @@
 /* Design tokens first, then the @font-face rules for the self-hosted brand fonts (Montserrat, Lato). */
 @import './tokens.css';
 @import '../fonts.css';
+@import './surfaces.css';
+@import './motion.css';
+@import './glass.css';
 
 /* Base elements ------------------------------------------------------------ */
 /* scroll-padding-top keeps in-page anchor targets clear of the sticky header. */
@@ -252,14 +255,7 @@ table { border-collapse: collapse; width: 100%; }
 .data-table th { font-weight: var(--fw-semibold); background: var(--qw-mint-50); position: sticky; top: 0; }
 .table-scroll { overflow-x: auto; border: 1px solid var(--qw-line); border-radius: var(--radius-md); }
 
-/* Motion: restrained reveal, disabled for reduced motion ---------------- */
-/* .reveal elements start hidden and slide in once BaseLayout's IntersectionObserver adds
-   .is-visible. Only applied when the user has not asked for reduced motion, so content is never
-   hidden for those users (QA-29). */
-@media (prefers-reduced-motion: no-preference) {
-  .reveal { opacity: 0; transform: translateY(14px); transition: opacity 600ms var(--ease-out), transform 600ms var(--ease-out); }
-  .reveal.is-visible { opacity: 1; transform: none; }
-}
+/* Motion and the redesign's surfaces/visual grammar live in motion.css and surfaces.css (imported at the top). */
 /* Reduced motion: every animation and transition shortened to near zero (0.01ms) and smooth scrolling turned off. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }

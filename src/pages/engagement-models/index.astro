@@ -23,14 +23,36 @@ import ServiceCard from '../../components/ServiceCard.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import { services } from '../../data/services';
 import { ctas } from '../../data/site';
+import SignatureVisual from '../../components/solutions/SignatureVisual.astro';
+import { peopleImage } from '../../data/peopleImagery';
 // Selected by `kind` (not path) so the cards follow the content model; order follows services.ts.
 const models = services.filter((s) => s.kind === 'engagement-model');
 const crumbs = [{ label: 'Home', href: '/' }, { label: 'Solutions', href: '/services/' }, { label: 'Engagement models' }];
 ---
 <BaseLayout seo={{ title: 'Engagement Models: Dedicated Teams, Staff Augmentation | QualityWorks', description: 'Work with QualityWorks through dedicated teams, staff augmentation or consulting and training — whichever fits your roadmap.' }} breadcrumbs={crumbs}>
-  <PageHero eyebrow="Engagement models" title="Choose how we work together" lede="The same QualityWorks standards, delivered in the way that fits your team: a dedicated team, embedded specialists, or consulting and training." breadcrumbs={crumbs} primary={ctas.contact} />
-  {/* Model cards. The visually hidden h2 keeps the heading outline valid (h1 in hero, then h2). */}
-  <section class="section"><div class="container"><h2 class="visually-hidden">Models</h2><div class="grid grid--3">{models.map((m) => <ServiceCard service={m} />)}</div></div></section>
+  <PageHero tone="green" image={peopleImage('about-team')} ui="people" eyebrow="Engagement models" title="Choose how we work together" lede="The same QualityWorks standards, delivered in the way that fits your team: a dedicated team, embedded specialists, or consulting and training." breadcrumbs={crumbs} primary={ctas.contact} />
+  {/* Model cards as colour-block tiles (equal height) beside a team visual. The visually hidden h2 keeps
+      the heading outline valid (h1 in hero, then h2). */}
+  <section class="section surface-mint em"><div class="container em__grid">
+    <h2 class="visually-hidden">Models</h2>
+    <div class="em__cards" data-reveal-stagger>{models.map((m, i) => (
+      <div class:list={['em__card', `em__card--${i % 3}`]} data-reveal="up">
+        <ServiceCard service={m} />
+      </div>
+    ))}</div>
+    <div class="em__visual" data-reveal="scale"><SignatureVisual slug="dedicated-teams" pathway="build" /></div>
+  </div></section>
   {/* Closing conversion band: same global contact CTA as the hero. */}
-  <CtaBand title="Not sure which model fits?" primary={ctas.contact} />
+  <CtaBand tone="green" title="Not sure which model fits?" primary={ctas.contact} />
 </BaseLayout>
+<style>
+  .em__grid { display: grid; gap: var(--space-10); align-items: center; }
+  @media (min-width: 1024px) { .em__grid { grid-template-columns: 1.4fr 0.6fr; gap: var(--space-12); } }
+  .em__cards { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); align-items: stretch; }
+  .em__card { position: relative; height: 100%; }
+  .em__card > :global(*) { height: 100%; border-top: 6px solid var(--qw-green-500); }
+  .em__card--1 > :global(*) { border-top-color: var(--qw-teal-500); }
+  .em__card--2 > :global(*) { border-top-color: var(--qw-slate-900); }
+  .em__card :global(.card), .em__card > :global(article) { transition: transform .3s; }
+  .em__card:hover > :global(*) { transform: translateY(-4px); }
+</style>

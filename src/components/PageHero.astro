@@ -1,147 +1,131 @@
 ---
 /**
- * Shared inner-page hero. Variants: corporate (light), dark (slate), product (deep product surface).
+ * Shared inner-page hero (redesign, docs/16-redesign-system.md §4).
  *
- * What: the top band of every inner page: optional breadcrumbs, eyebrow, the page <h1>, a lede,
- * free content, the brand gradient rule, up to two CTAs, and either a people photograph (`image` prop,
- * blended into the band like the homepage hero) or a custom right-hand "aside" column.
+ * What: the top band of every inner page: optional breadcrumbs, eyebrow, the page <h1> (words animate
+ * in), a lede, free content, the brand rule, up to two CTAs (equal width), and either a people photograph
+ * (`image`) or a custom right-hand "aside" column.
  *
- * Why: one hero component gives every inner page the same structure and guarantees exactly one <h1>
- * per page (CONTRIBUTING 3.4, QA-01). The variants implement the design direction
- * (docs/02-design-direction.md, updated by docs/15-visual-revision.md): "light" is the corporate
- * default on the guide's Mint surface, "dark" the slate surface, and "product" the product layer used
- * for QualityWatcher, Agents as a Service and PRISM. The `image` option was added in the visual
- * revision so page headers can feature people (Janique's feedback), using photographs QualityWorks
- * already publishes (src/data/peopleImagery.ts).
+ * Why: Janique's feedback (23 Nov 2026): navy heroes are dull; use brighter brand colours, people-focused
+ * imagery and more motion. The default hero is therefore a bright colour block (Teal, Green or Mint), the
+ * photo blends into that colour on its left edge (the blended treatment approved in the previous round),
+ * and floating interface chips (FloatingUI) drift over the photo and follow the pointer.
  *
- * Props: eyebrow, title, lede, variant, breadcrumbs, primary, secondary, compact, image.
+ * Props: eyebrow, title, lede, tone, variant (legacy alias), breadcrumbs, primary, secondary, compact,
+ *   image, ui (FloatingUI set; default chosen by tone).
+ *   tone: 'teal' (default with a photo), 'green', 'mint' (default without a photo), 'white', 'dark', 'product'.
  * Slots: default (extra content under the lede) and "aside" (right column on wide screens).
  *
- * Used by: components/LegalStub.astro, components/templates/ServiceTemplate.astro and most inner
- * pages (about-us, blog, careers, case-studies, engagement-models, events, events/[slug], industries,
- * industries/[slug], products, products/prism, products/agents-as-a-service, qualitywatcher-ai-tools,
- * resources, services, prototype, prototype/claims, design-system).
- *
- * Accessibility: renders the page's only <h1>, so do not add another h1 in the page body. The photo
- * carries real alt text from peopleImagery.ts (it shows who the work is for, so it is not treated as
- * decoration); the gradient rule and blend layer are aria-hidden. Text never sits on top of the photo:
- * on desktop the copy column is on the solid slate part of the band, so contrast does not depend on it. The `surface-dark` / `surface-product` classes (global.css) switch
- * text, link and focus colours to their on-dark values.
+ * Accessibility: renders the page's only <h1>. On teal/green all text is slate-900 (4.73:1 / 5.14:1).
+ * Text never sits on the photo: on desktop the photo occupies the right part of the band and its blend
+ * fades towards the copy; on phones it is a plain picture above the copy. Chips are aria-hidden.
  *
  * Gotchas:
- * - The primary CTA is always forced to `kind: 'primary'`; the secondary keeps its own kind or falls
- *   back to 'secondary'. Change the Cta data, not this component, if a page needs a ghost secondary.
- * - The two-column layout only applies at 1024px and up and only with the "aside" slot. If both `image`
- *   and the aside slot are given, the aside slot wins and the image is not rendered.
- * - A header with `image` is always the dark slate band, whatever `variant` says (it matches the homepage
- *   hero). Below 1024px the photo is a plain 16:9 picture above the copy; from 1024px it fills the right
- *   62% and blends into slate. `focus` in peopleImagery.ts keeps faces in frame at both crops.
- * - Breadcrumbs given here are visible only; pass the same array to BaseLayout for the JSON-LD.
- * - The gradient rule is the page's single "brand signature" moment (guide: once per layout). Do not
- *   add another gradient element to a page that uses PageHero.
+ * - `variant` is kept for older call sites: 'light' → mint, 'dark' → dark, 'product' → product.
+ * - If both `image` and the aside slot are given, the aside slot wins.
+ * - The brand rule is the page's single gradient moment; do not add another gradient element.
  */
 import Breadcrumbs from './Breadcrumbs.astro';
 import Button from './Button.astro';
+import FloatingUI from './FloatingUI.astro';
 import type { Cta } from '../data/types';
 import { type PeopleImage, peopleSrc, peopleSrcset } from '../data/peopleImagery';
+type Tone = 'teal' | 'green' | 'mint' | 'white' | 'dark' | 'product';
 interface Props {
-  /** Short uppercase label above the title. */
   eyebrow?: string;
-  /** The page h1 text. Required. */
   title: string;
-  /** Intro paragraph under the h1. */
   lede?: string;
-  /** Visual surface: 'light' (default, corporate mint), 'dark' (slate) or 'product' (deep product surface with grid). */
+  /** Background colour block. Default: 'teal' when a photo is shown, otherwise 'mint'. */
+  tone?: Tone;
+  /** Legacy alias for tone: 'light' | 'dark' | 'product'. */
   variant?: 'light' | 'dark' | 'product';
-  /** Visible breadcrumb trail rendered above the eyebrow. */
   breadcrumbs?: { label: string; href?: string }[];
-  /** Main call to action; always rendered as a primary button. */
   primary?: Cta;
-  /** Second call to action; rendered with its own `kind`, defaulting to 'secondary'. */
   secondary?: Cta;
-  /** Reduced vertical padding, for utility pages (legal stubs, prototype tools). */
   compact?: boolean;
-  /** People photograph shown in the right column (use peopleImage('id') from src/data/peopleImagery.ts). */
+  /** People photograph (peopleImage('id') from src/data/peopleImagery.ts). */
   image?: PeopleImage;
+  /** Which floating interface chips to show over the photo; false hides them. */
+  ui?: 'testing' | 'ai' | 'agents' | 'build' | 'people' | 'contact' | false;
 }
-const { eyebrow, title, lede, variant = 'light', breadcrumbs, primary, secondary, compact, image } = Astro.props;
-// The aside slot takes precedence over the image; either one switches on the two-column grid.
+const { eyebrow, title, lede, variant, breadcrumbs, primary, secondary, compact, image, ui } = Astro.props;
 const hasAside = Astro.slots.has('aside');
 const showImage = !!image && !hasAside;
+const legacy: Record<string, Tone> = { light: 'mint', dark: 'dark', product: 'product' };
+const tone: Tone = Astro.props.tone ?? (variant ? legacy[variant] : showImage ? 'teal' : 'mint');
+const surface = { teal: 'surface-teal', green: 'surface-green', mint: 'surface-mint', white: 'surface-white', dark: 'surface-dark', product: 'surface-product' }[tone];
+// Floating chips are off unless a page asks for them explicitly (removed by request, 24 Nov 2026).
+const uiSet = ui && false ? ui : null; // chips disabled site-wide by request; the `ui` prop is ignored
+// Split the title into words for the staggered rise (CSS in motion.css; static without JS / reduced motion).
+const words = title.split(' ');
 ---
-{/* surface-dark / surface-product are global theme classes that re-map colour tokens for dark backgrounds. */}
-<section class:list={['page-hero', showImage ? 'page-hero--photo' : `page-hero--${variant}`, { 'surface-dark': variant === 'dark' || showImage, 'surface-product': variant === 'product' && !showImage, 'page-hero--compact': compact }]}>
-  {/* Photo header (same treatment as the homepage hero): below 1024px a plain edge-to-edge picture above the
-      copy; from 1024px the photo fills the right side of the band and blends into slate on its left edge.
-      The photo is the hero's LCP candidate, so it loads eagerly with high fetch priority. */}
+<section class:list={['page-hero', `page-hero--${tone}`, surface, { 'page-hero--photo': showImage, 'page-hero--compact': compact }]} data-pointer-scene={showImage ? '' : undefined}>
+  {/* Decorative colour blocks for heroes without a photo (no gradients). */}
+  {!showImage && !hasAside && !compact && (tone === 'mint' || tone === 'white') && (
+    <div class="page-hero__shapes" aria-hidden="true"><span class="ph-shape ph-shape--a" data-parallax="0.08"></span><span class="ph-shape ph-shape--b" data-parallax="0.16"></span></div>
+  )}
   {showImage && image && (
     <div class="page-hero__media">
-      <img class="page-hero__img" src={peopleSrc(image)} srcset={peopleSrcset(image)} sizes="(min-width: 1024px) 62vw, 100vw"
+      <img class="page-hero__img" src={peopleSrc(image)} srcset={peopleSrcset(image)} sizes="(min-width: 1024px) 60vw, 100vw"
         alt={image.alt} width="1600" height={Math.round(1600 / image.ratio)} loading="eager" fetchpriority="high" decoding="async"
         style={`object-position: ${image.focus}`} />
-      <div class="page-hero__blend" aria-hidden="true"></div>
+      {uiSet && <FloatingUI set={uiSet} />}
     </div>
   )}
   <div class:list={['container', 'page-hero__grid', { 'page-hero__grid--aside': hasAside }]}>
     <div class="page-hero__copy">
       {breadcrumbs && <Breadcrumbs items={breadcrumbs} />}
       {eyebrow && <p class="eyebrow">{eyebrow}</p>}
-      {/* The one and only h1 on the page. */}
-      <h1>{title}</h1>
-      {lede && <p class="lede">{lede}</p>}
+      <h1 data-words>{words.map((w, i) => <><span class="word" style={`--w:${i}`}>{w}</span>{i < words.length - 1 ? ' ' : ''}</>)}</h1>
+      {lede && <p class="lede" data-reveal style="--i:2">{lede}</p>}
       <slot />
-      {/* Brand signature: the guide's green-teal-blue gradient, used once per page. Decorative. */}
       {!compact && <span class="brand-rule page-hero__rule" aria-hidden="true"></span>}
-      {/* CTA row: primary is always primary-styled; secondary defaults to the outline style. */}
       {(primary || secondary) && (
-        <div class="btn-row page-hero__ctas">
+        <div class="btn-row btn-row--equal page-hero__ctas">
           {primary && <Button cta={{ ...primary, kind: 'primary' }} />}
           {secondary && <Button cta={{ ...secondary, kind: secondary.kind ?? 'secondary' }} />}
         </div>
       )}
     </div>
-    {/* Optional right column: custom aside content (e.g. "At a glance" on service pages). */}
-    {hasAside && <div class="page-hero__aside"><slot name="aside" /></div>}
+    {hasAside && <div class="page-hero__aside" data-reveal="right"><slot name="aside" /></div>}
   </div>
 </section>
 <style>
-  .page-hero { position: relative; overflow: hidden; padding-block: var(--space-12) var(--space-16); background: var(--color-bg); }
-  /* Light (corporate) variant: the guide's Mint, its one light surface. */
-  .page-hero--light { background: var(--qw-mint-50); }
+  .page-hero { position: relative; overflow: hidden; padding-block: var(--space-16) var(--space-20); background: var(--color-bg); }
   .page-hero--compact { padding-block: var(--space-10) var(--space-12); }
-  .page-hero__grid { position: relative; display: grid; gap: var(--space-10); align-items: center; }
-  /* Two columns only on desktop and only with an aside or photo; copy gets slightly more width. */
+  .page-hero__grid { position: relative; display: grid; gap: var(--space-10); align-items: center; z-index: 1; }
   @media (min-width: 1024px) { .page-hero__grid--aside { grid-template-columns: 1.15fr 0.85fr; gap: var(--space-16); } }
-  /* Cap the h1 at about 22 characters per line so long titles wrap into a balanced block. */
-  .page-hero h1 { font-size: var(--fs-2xl); max-width: 22ch; }
-  .page-hero__copy .lede { margin-bottom: 0; }
+  .page-hero h1 { font-size: clamp(2.25rem, 1.5rem + 2.6vw, 3.75rem); line-height: 1.03; letter-spacing: -0.025em; max-width: 18ch; }
+  .page-hero--compact h1 { font-size: var(--fs-2xl); }
+  .page-hero__copy .lede { margin-bottom: 0; max-width: 38rem; }
   .page-hero__rule { margin-top: var(--space-8); }
   .page-hero__ctas { margin-top: var(--space-8); }
-  /* Photo header (visual revision, docs/15): slate-900 band. Mobile and tablet: the picture is a plain
-     edge-to-edge 16:9 band at the top (no radius, no shadow, no text over it). */
-  .page-hero--photo { background: var(--qw-slate-900); padding-top: 0; }
+  /* On bright blocks the gradient rule would disappear into the background; use solid slate instead. */
+  .page-hero--teal .page-hero__rule, .page-hero--green .page-hero__rule { background: var(--qw-slate-900); }
+
+  /* Mint/white heroes without a photo: two large solid brand shapes (teal and green) at the right edge. */
+  .page-hero__shapes { position: absolute; inset: 0; pointer-events: none; }
+  .ph-shape { position: absolute; border-radius: 50%; }
+  .ph-shape--a { width: clamp(220px, 30vw, 460px); aspect-ratio: 1; right: -6%; top: -18%; background: var(--qw-teal-500); }
+  .ph-shape--b { width: clamp(120px, 14vw, 220px); aspect-ratio: 1; right: 18%; bottom: -12%; background: var(--qw-green-500); }
+  @media (max-width: 767px) { .ph-shape--a { opacity: 0.35; } .ph-shape--b { display: none; } }
+
+  /* Photo hero. Phones/tablets: plain edge-to-edge 16:9 picture on top, copy below on the colour block. */
+  .page-hero--photo { padding-top: 0; }
   .page-hero__media { position: relative; margin-bottom: var(--space-8); }
   .page-hero__img { display: block; width: 100%; aspect-ratio: 16 / 9; height: auto; object-fit: cover; }
-  .page-hero__blend { display: none; }
   @media (min-width: 1024px) {
-    /* Desktop: the photo fills the right 62% of the band at full height. The blend layer fades it into
-       slate-900 on its left edge (and slightly at the bottom), so the copy always sits on solid slate and
-       never covers faces; `focus` in peopleImagery.ts keeps faces in the visible part of the crop. */
-    .page-hero--photo { padding-top: var(--space-12); }
-    .page-hero__media { position: absolute; top: 0; right: 0; bottom: 0; width: 62%; margin: 0; }
-    .page-hero__img { width: 100%; height: 100%; aspect-ratio: auto; }
-    .page-hero__blend { display: block; position: absolute; inset: 0; pointer-events: none;
-      background:
-        linear-gradient(90deg, var(--qw-slate-900) 0%, color-mix(in srgb, var(--qw-slate-900) 80%, transparent) 14%, color-mix(in srgb, var(--qw-slate-900) 35%, transparent) 34%, transparent 58%),
-        linear-gradient(0deg, color-mix(in srgb, var(--qw-slate-900) 55%, transparent) 0%, transparent 30%); }
-    /* Copy column stays on the solid slate part of the band (left 38% of the width plus the blend zone). */
-    .page-hero--photo .page-hero__copy { max-width: min(32rem, 38vw); }
-    .page-hero--photo { min-height: 30rem; display: flex; align-items: center; }
+    /* Desktop: the photo fills the right 60% at full height and fades into the colour block on its left edge
+       (a mask, so it blends into whichever surface colour the hero uses). Copy stays on the solid part. */
+    .page-hero--photo { padding-top: var(--space-16); min-height: 34rem; display: flex; align-items: center; }
     .page-hero--photo .page-hero__grid { width: 100%; }
+    .page-hero__media { position: absolute; top: 0; right: 0; bottom: 0; width: 60%; margin: 0; }
+    .page-hero__img { width: 100%; height: 100%; aspect-ratio: auto;
+      -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 34%); mask-image: linear-gradient(90deg, transparent 0%, #000 34%); }
+    .page-hero--photo .page-hero__copy { max-width: min(34rem, 40vw); }
   }
-  /* Product variant: deepest product surface (slate-950) with a faint teal glow in the top-right corner. */
-  .page-hero--product { background: radial-gradient(80% 60% at 85% 0%, color-mix(in srgb, var(--qw-teal-500) 16%, transparent), transparent 60%), var(--qw-slate-950); }
-  /* Product variant grid: 1px white lines at 3.5% alpha on a 48px grid, faded out toward the bottom.
-     This "fine grid" is the signature of the product layer in doc 02. */
+  @media (max-width: 1023px) { .page-hero__media :global(.fui) { display: none; } }
+
+  /* Product layer: deep slate with the fine product grid (kept for product pages that opt in). */
   .page-hero--product::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px); background-size: 48px 48px; mask: linear-gradient(180deg, #000, transparent 85%); -webkit-mask: linear-gradient(180deg, #000, transparent 85%); pointer-events: none; }
 </style>

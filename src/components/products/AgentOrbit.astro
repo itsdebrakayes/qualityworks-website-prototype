@@ -1,0 +1,64 @@
+---
+/**
+ * AgentOrbit: hero visual for /products/agents-as-a-service/. The agent persona portraits (marketplace
+ * personas from agents.qualityworkscg.com, never staff) circle a central "your team" node on two rings,
+ * with pointer parallax (data-pointer-scene / data-depth) and a slow orbit (paused for reduced motion).
+ * Decorative: the list of agents is given in text by the page (catalog preview), so this is aria-hidden
+ * apart from a short figure label.
+ */
+import Icon from '../Icon.astro';
+import { agentSnapshot } from '../../data/products';
+const outer = agentSnapshot.slice(0, 5);
+const inner = agentSnapshot.slice(5);
+---
+<figure class="orbit" data-pointer-scene aria-label="Illustration: AI agent personas working around your team">
+  <div class="orbit__stage" aria-hidden="true">
+    <span class="orbit__ring orbit__ring--outer" data-depth style="--depth:8"></span>
+    <span class="orbit__ring orbit__ring--inner" data-depth style="--depth:14"></span>
+    <div class="orbit__core" data-depth style="--depth:4"><span class="orbit__coreicon"><Icon name="team" /></span><strong>Your team</strong><small>Human approval</small></div>
+    <div class="orbit__spin orbit__spin--outer">
+      {outer.map((a, i) => (
+        <span class="orbit__slot" style={`--a:${(360 / outer.length) * i}deg;--r:var(--r-outer)`}>
+          <span class="orbit__face"><span class="orbit__p" data-depth style={`--depth:${18 + i * 4}`}><img src={`/agents/${a.id}.webp`} alt="" width="96" height="96" loading="eager" /><em>{a.name}</em></span></span>
+        </span>
+      ))}
+    </div>
+    <div class="orbit__spin orbit__spin--inner">
+      {inner.map((a, i) => (
+        <span class="orbit__slot" style={`--a:${(360 / inner.length) * i + 30}deg;--r:var(--r-inner)`}>
+          <span class="orbit__face orbit__face--sm"><span class="orbit__p" data-depth style={`--depth:${26 + i * 4}`}><img src={`/agents/${a.id}.webp`} alt="" width="72" height="72" loading="eager" /><em>{a.name}</em></span></span>
+        </span>
+      ))}
+    </div>
+    <div class="chip-ui float orbit__chip orbit__chip--a" data-depth style="--depth:30;--f:0"><span class="chip-ui__icon chip-ui__icon--slate"><Icon name="agent" /></span><span>Agent: drafting reply<small>Inbox · Support</small></span></div>
+    <div class="chip-ui float orbit__chip orbit__chip--b" data-depth style="--depth:22;--f:2"><span class="chip-ui__dot"></span><span>Human approval<small>Kept in the loop</small></span></div>
+  </div>
+</figure>
+<style>
+  .orbit { margin: 0; position: relative; --size: min(450px, calc(100vw - 48px)); --r-outer: calc(var(--size) * 0.40); --r-inner: calc(var(--size) * 0.255); }
+  .orbit__stage { position: relative; width: var(--size); aspect-ratio: 1; margin-inline: auto; }
+  .orbit__ring { position: absolute; left: 50%; top: 50%; border-radius: 50%; border: 2px dashed color-mix(in srgb, var(--qw-slate-900) 35%, transparent); }
+  .orbit__ring--outer { width: calc(var(--r-outer) * 2); height: calc(var(--r-outer) * 2); margin: calc(var(--r-outer) * -1) 0 0 calc(var(--r-outer) * -1); }
+  .orbit__ring--inner { width: calc(var(--r-inner) * 2); height: calc(var(--r-inner) * 2); margin: calc(var(--r-inner) * -1) 0 0 calc(var(--r-inner) * -1); border-style: solid; border-color: color-mix(in srgb, var(--qw-white) 55%, transparent); border-width: 10px; }
+  .orbit__core { position: absolute; left: 50%; top: 50%; width: calc(var(--size) * 0.3); aspect-ratio: 1; margin: calc(var(--size) * -0.15) 0 0 calc(var(--size) * -0.15); border-radius: 50%; background: var(--qw-slate-900); color: var(--qw-white); display: grid; place-content: center; justify-items: center; text-align: center; gap: 2px; box-shadow: 0 30px 60px -30px rgba(34,43,55,.8); }
+  .orbit__core strong { font: var(--fw-bold) clamp(0.8rem, 0.6rem + 0.6vw, 1rem)/1.2 var(--font-display); }
+  .orbit__core small { font-size: 0.72rem; color: var(--qw-green-500); font-weight: 700; }
+  .orbit__coreicon { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; background: var(--qw-green-500); color: var(--qw-slate-900); margin-bottom: 4px; }
+  .orbit__coreicon :global(svg) { width: 20px; height: 20px; }
+  .orbit__spin { position: absolute; inset: 0; animation: qw-spin 60s linear infinite; }
+  .orbit__spin--inner { animation-duration: 45s; animation-direction: reverse; }
+  .orbit__slot { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform: rotate(var(--a)) translateX(var(--r)) rotate(calc(var(--a) * -1)); }
+  .orbit__face { position: absolute; left: 0; top: 0; translate: -50% -50%; display: grid; justify-items: center; gap: 4px; animation: qw-spin 60s linear infinite reverse; }
+  .orbit__spin--inner .orbit__face { animation: qw-spin 45s linear infinite; }
+  .orbit__face img { width: calc(var(--size) * 0.18); height: auto; aspect-ratio: 1; border-radius: 50%; object-fit: cover; border: 4px solid var(--qw-white); background: var(--qw-mint-50); box-shadow: 0 16px 30px -14px rgba(34,43,55,.6); }
+  .orbit__face--sm img { width: calc(var(--size) * 0.13); }
+  .orbit__face em { font: normal var(--fw-bold) 0.7rem/1 var(--font-display); background: var(--qw-white); color: var(--qw-slate-900); padding: 3px 8px; border-radius: 99px; }
+  /* The face counter-rotates (transform animation) so portraits stay upright; pointer parallax sits on the
+     inner .orbit__p so the two transforms never fight. */
+  .orbit__p { display: grid; justify-items: center; gap: 4px; }
+  .orbit__chip { position: absolute; }
+  .orbit__chip--a { left: 0; top: 2%; }
+  .orbit__chip--b { right: 0; bottom: 4%; }
+  @media (prefers-reduced-motion: reduce) { .orbit__spin, .orbit__face { animation: none; } }
+  @media (max-width: 559px) { .orbit__chip--a { left: 0; top: -2%; } .orbit__chip--b { right: 0; } }
+</style>

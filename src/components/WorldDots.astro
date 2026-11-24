@@ -1,0 +1,84 @@
+---
+/**
+ * WorldDots: a dotted world map generated at BUILD time (no map library ships to the browser), highlighting
+ * the regions QualityWorks states it serves and marking its two offices with an animated arc between them.
+ *
+ * Why: Janique's homepage comment on the regions line ("Thinking about these stats"). The regions are NOT
+ * changed or extended: exactly "US, UK, Latin America & Caribbean" (claim C15) and the two offices in
+ * src/data/site.ts (Los Angeles HQ, Kingston nearshore). Country lists below implement that wording.
+ *
+ * How: world-atlas (Natural Earth 1:110m, public domain) + topojson-client + d3-geo run in Astro's
+ * frontmatter. Land is sampled on a lat/long grid; each land dot is tested against the highlighted
+ * countries. The result is two SVG paths of round dots (base + highlighted), cached per build.
+ *
+ * Motion: when visible, highlighted dots fade in, the office arc draws and the pins pulse (CSS); static with
+ * reduced motion. Accessibility: role="img" with a text description; the visible legend repeats it.
+ */
+import { feature } from 'topojson-client';
+import { geoContains } from 'd3-geo';
+import countries50 from 'world-atlas/countries-110m.json';
+import land50 from 'world-atlas/land-110m.json';
+
+// ISO 3166-1 numeric codes: United States, United Kingdom, Latin America (Mexico, Central & South America)
+// and the Caribbean. Small islands without land at this grid density are covered by the office pin.
+const HIGHLIGHT = new Set([
+  '840', '826',
+  '484', '320', '084', '340', '222', '558', '188', '591',
+  '032', '068', '076', '152', '170', '218', '328', '600', '604', '740', '858', '862', '238',
+  '192', '388', '332', '214', '630', '044', '780', '052', '028', '659', '662', '670', '308', '212', '533', '531', '136', '796', '092', '850', '660',
+]);
+const W = 1000, LAT_MAX = 78, LAT_MIN = -56, STEP = 2.4;
+const H = Math.round((W * (LAT_MAX - LAT_MIN)) / 360);
+const x = (lon: number) => ((lon + 180) / 360) * W;
+const y = (lat: number) => ((LAT_MAX - lat) / (LAT_MAX - LAT_MIN)) * H;
+
+// Module-level cache: computed once per build.
+const g = globalThis as unknown as { __qwDots?: { base: string; hi: string } };
+if (!g.__qwDots) {
+  const land = feature(land50 as any, (land50 as any).objects.land) as any;
+  const feats = (feature(countries50 as any, (countries50 as any).objects.countries) as any).features.filter((f: any) => HIGHLIGHT.has(String(f.id).padStart(3, '0')));
+  let base = '', hi = '';
+  for (let lat = LAT_MAX; lat >= LAT_MIN; lat -= STEP) {
+    for (let lon = -180; lon < 180; lon += STEP) {
+      if (!geoContains(land, [lon, lat])) continue;
+      const seg = `M${x(lon).toFixed(1)} ${y(lat).toFixed(1)}h0`;
+      if (feats.some((f: any) => geoContains(f, [lon, lat]))) hi += seg; else base += seg;
+    }
+  }
+  g.__qwDots = { base, hi };
+}
+const { base, hi } = g.__qwDots;
+// Offices (src/data/site.ts): Los Angeles and Kingston, Jamaica.
+const la = { x: x(-118.24), y: y(34.05) }, kin = { x: x(-76.79), y: y(18.0) };
+const arc = `M${la.x} ${la.y} Q ${(la.x + kin.x) / 2} ${Math.min(la.y, kin.y) - 70} ${kin.x} ${kin.y}`;
+---
+<figure class="world" data-reveal="fade">
+  <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby="world-title world-desc">
+    <title id="world-title">Where QualityWorks works</title>
+    <desc id="world-desc">Dotted world map highlighting the United States, the United Kingdom, Latin America and the Caribbean, with offices in Los Angeles and Kingston, Jamaica.</desc>
+    <path class="world__base" d={base} />
+    <path class="world__hi" d={hi} />
+    <path class="world__arc" d={arc} pathLength="1" />
+    {[la, kin].map((p, i) => (
+      <g class="world__pin" style={`--d:${i}`}>
+        <circle cx={p.x} cy={p.y} r="16" class="world__pulse" />
+        <circle cx={p.x} cy={p.y} r="6.5" class="world__dot" />
+      </g>
+    ))}
+    <text x={la.x - 12} y={la.y - 16} text-anchor="end" class="world__label">Los Angeles · HQ</text>
+    <text x={kin.x + 14} y={kin.y + 24} class="world__label">Kingston · Nearshore</text>
+  </svg>
+</figure>
+<style>
+  .world { margin: 0; }
+  svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .world__base { stroke: color-mix(in srgb, var(--qw-slate-900) 18%, transparent); stroke-width: 4.6; stroke-linecap: round; fill: none; }
+  .world__hi { stroke: var(--qw-teal-500); stroke-width: 5.2; stroke-linecap: round; fill: none; transition: opacity 1200ms var(--ease-out) 200ms; }
+  .world__arc { fill: none; stroke: var(--qw-slate-900); stroke-width: 2.5; stroke-dasharray: 1; stroke-dashoffset: 0; transition: stroke-dashoffset 1600ms var(--ease-out) 900ms; }
+  .world__dot { fill: var(--qw-slate-900); stroke: var(--qw-white); stroke-width: 2.5; }
+  .world__pulse { fill: var(--qw-green-500); opacity: 0.45; transform-box: fill-box; transform-origin: center; animation: world-pulse 2.4s ease-out infinite; animation-delay: calc(var(--d) * 1.2s); }
+  .world__label { font: 700 15px/1 var(--font-display); fill: var(--qw-slate-900); paint-order: stroke; stroke: var(--qw-white); stroke-width: 5px; stroke-linejoin: round; }
+  @keyframes world-pulse { 0% { transform: scale(0.4); opacity: 0.6; } 100% { transform: scale(2.2); opacity: 0; } }
+  :global(html.js-motion:not(.reduced-motion)) .world:not(.is-visible) .world__hi { opacity: 0.15; }
+  :global(html.js-motion:not(.reduced-motion)) .world:not(.is-visible) .world__arc { stroke-dashoffset: 1; }
+</style>

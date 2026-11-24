@@ -6,7 +6,7 @@
  *   "Who are they; are they credible and stable?" Proof required: C13–C15 and leadership. Primary CTA:
  *   "Work with us" (hero, to /contact-us/); secondary "Explore careers".
  * What, top to bottom: hero; "Our story" (company description with ClaimRefs C14, C15); CEO block on a
- *   dark surface (photo, quote, certification line with ClaimRef C13); six core values; "Leadership and
+ *   green colour block (photo, quote, certification line with ClaimRef C13); six core values as large numbered colour tiles with animated icons around a values orbit (redesign, Janique 24 Nov: "more graphical"); "Leadership and
  *   team" as three Wireframe placeholders; client reviews (ProofBlock + Clutch link); closing CtaBand.
  * Data: src/data/team.ts (`leadership[0]` = the CEO, the only profile verifiable on the live site),
  *   src/data/site.ts (`ctas.contact`, `site.externalPlatforms.clutch`), testimonials via ProofBlock
@@ -28,47 +28,100 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
 // People photograph for the header (visual revision, docs/15).
-import { peopleImage } from '../../data/peopleImagery';
+import { peopleImage, peopleSrc, peopleSrcset } from '../../data/peopleImagery';
 import SectionHeading from '../../components/SectionHeading.astro';
 import ProofBlock from '../../components/ProofBlock.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import ClaimRef from '../../components/ClaimRef.astro';
 import Wireframe from '../../components/Wireframe.astro';
 import Button from '../../components/Button.astro';
+import Icon from '../../components/Icon.astro';
 import { leadership } from '../../data/team';
 import { ctas, site } from '../../data/site';
 const crumbs = [{ label: 'Home', href: '/' }, { label: 'Company' }, { label: 'About Us' }];
-// Core values as [term, description] pairs, copied from the live About page.
+// Core values as [term, description, icon, tile tone], copied from the live About page (copy unchanged).
+// Icon and tone are presentation only.
 const values = [
-  ['Quality', 'We infuse quality into everything we do to deliver industry-leading solutions.'],
-  ['Innovation', 'We’re innovators who focus on creating the highest value for our clients.'],
-  ['Integrity', 'We pride ourselves on being true to our word and transparent in our work.'],
-  ['Teamwork', 'We take a one-team approach to ensure the success of every project.'],
-  ['Entrepreneurial spirit', 'We actively seek out change and opportunities for continuous improvement.'],
-  ['Results oriented', 'We are a results-driven bunch, focused on deliverables and hitting our milestones.'],
+  ['Quality', 'We infuse quality into everything we do to deliver industry-leading solutions.', 'check', 'teal'],
+  ['Innovation', 'We’re innovators who focus on creating the highest value for our clients.', 'spark', 'slate'],
+  ['Integrity', 'We pride ourselves on being true to our word and transparent in our work.', 'shield', 'mint'],
+  ['Teamwork', 'We take a one-team approach to ensure the success of every project.', 'team', 'green'],
+  ['Entrepreneurial spirit', 'We actively seek out change and opportunities for continuous improvement.', 'compass', 'white'],
+  ['Results oriented', 'We are a results-driven bunch, focused on deliverables and hitting our milestones.', 'gauge', 'teal'],
 ];
 // First leadership record = CEO (see Gotchas).
 const ceo = leadership[0];
+// Supporting people photos for the story collage (decorative alongside the copy; alt from the image record).
+const storyA = peopleImage('home-mentoring');
+const storyB = peopleImage('industries-team');
 ---
 <BaseLayout seo={{ title: 'About QualityWorks | The Quality-Driven Innovation Company', description: 'Founded in 2010, QualityWorks is a Black-owned, woman-led software solutions firm helping companies build higher-quality software, future-ready teams and faster delivery.' }} breadcrumbs={crumbs}>
-  <PageHero image={peopleImage('about-team')} eyebrow="About us" title="The quality-driven innovation company" lede="We go beyond the code and beyond testing to help our clients achieve their most extraordinary digital goals." breadcrumbs={crumbs} primary={{ label: 'Work with us', href: '/contact-us/' }} secondary={{ label: 'Explore careers', href: '/careers/' }} />
+  <PageHero image={peopleImage('about-team')} ui="people" eyebrow="About us" title="The quality-driven innovation company" lede="We go beyond the code and beyond testing to help our clients achieve their most extraordinary digital goals." breadcrumbs={crumbs} primary={{ label: 'Work with us', href: '/contact-us/' }} secondary={{ label: 'Explore careers', href: '/careers/' }} />
 
-  {/* Our story: company description with claim annotations for ownership (C14) and regions (C15). */}
-  <section class="section" aria-labelledby="story-title">
-    <div class="container split">
-      <div><p class="eyebrow">Who we are</p><h2 id="story-title">Our story</h2></div>
-      <div class="story">
+  {/* Our story: company description with claim annotations for ownership (C14) and regions (C15), beside a
+      two-photo collage and a "since 2010" badge. */}
+  <section class="section surface-white story-sec" aria-labelledby="story-title">
+    <div class="container story-grid">
+      <div class="story" data-reveal="up">
+        <p class="eyebrow">Who we are</p>
+        <h2 id="story-title" class="display-sm">Our <span class="mark">story</span></h2>
         <p class="lede">Founded in 2010, QualityWorks is a Black-owned, woman-led software solutions firm<ClaimRef id="C14" /> focused on enabling companies to build higher-quality software, create future-ready teams and accelerate software delivery.</p>
         <p>The company has grown to serve clients in the US, UK, Latin America and the Caribbean<ClaimRef id="C15" />. Our vision is to deliver next-level digital solutions through innovations in testing and quality-driven development. At our core, we are an innovation company committed to revolutionizing how the world efficiently and collaboratively builds quality software.</p>
+        <ul class="regions" aria-label="Regions we serve">
+          {['US', 'UK', 'Latin America', 'Caribbean'].map((r) => <li><Icon name="globe" />{r}</li>)}
+        </ul>
+      </div>
+      <div class="collage" data-pointer-scene>
+        <img class="collage__a" data-reveal="scale" src={peopleSrc(storyA)} srcset={peopleSrcset(storyA)} sizes="(min-width: 1024px) 34vw, 90vw" alt={storyA.alt} width="1600" height={Math.round(1600 / storyA.ratio)} loading="lazy" decoding="async" style={`object-position:${storyA.focus}`} />
+        <img class="collage__b" data-reveal="up" src={peopleSrc(storyB)} srcset={peopleSrcset(storyB)} sizes="(min-width: 1024px) 20vw, 50vw" alt={storyB.alt} width="1136" height={Math.round(1136 / storyB.ratio)} loading="lazy" decoding="async" style={`object-position:${storyB.focus}`} />
+        <p class="collage__badge" data-depth style="--depth:14"><span class="collage__year">2010</span><span>Founded</span></p>
+        <span class="collage__dot" aria-hidden="true" data-depth style="--depth:24"></span>
       </div>
     </div>
   </section>
 
-  {/* CEO block: portrait, quote and the certification statement (C13) awaiting certificate details. */}
-  <section class="section surface-dark" aria-labelledby="ceo-title">
+  {/* Core values: six large numbered colour tiles with animated icons. All text is always visible (no
+      hidden content); the auto-cycle (data-cycle, motion.ts) only highlights one tile at a time, pauses on
+      hover/focus and is off for reduced motion. Hover/focus enlarges a tile's icon and number. */}
+  <section class="section values-sec surface-mint" aria-labelledby="values-title">
+    <div class="container">
+      <div class="values-head">
+        <div class="section-intro" data-reveal="up">
+          <p class="eyebrow">What we stand for</p>
+          <h2 id="values-title" class="display-sm">Our core values</h2>
+          <p class="lede">Six principles behind every engagement, every team and every line of code we test.</p>
+        </div>
+        {/* Decorative orbit: the six value icons circle a QualityWorks hub. */}
+        <div class="orbit" aria-hidden="true">
+          <div class="orbit__ring"></div>
+          <div class="orbit__hub"><span>QW</span><small>One team</small></div>
+          <div class="orbit__spin">
+            {values.map(([, , icon, tone], i) => <span class:list={['orbit__node', `orbit__node--${tone}`]} style={`--a:${i * 60}deg`}><span class="orbit__icon"><Icon name={icon} /></span></span>)}
+          </div>
+        </div>
+      </div>
+      <ol class="values" data-cycle="2600" data-cycle-count="6" data-reveal-stagger>
+        {values.map(([t, d, icon, tone], i) => (
+          <li class:list={['value', `value--${tone}`]} data-cycle-panel={i} data-reveal="up" tabindex="0">
+            <span class="value__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <span class="value__icon" aria-hidden="true"><Icon name={icon} /></span>
+            <h3 class="value__term">{t}</h3>
+            <p class="value__desc">{d}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  {/* CEO block: portrait, quote and the certification statement (C13) awaiting certificate details. Green
+      colour block with slate-900 text (5.14:1). */}
+  <section class="section surface-green ceo-sec" aria-labelledby="ceo-title">
     <div class="container ceo">
-      <img src={ceo.photo} alt={ceo.photoAlt} width="320" height="303" loading="lazy" />
-      <div>
+      <div class="ceo__photo" data-reveal="scale">
+        <span class="ceo__ring" aria-hidden="true"></span>
+        <img src={ceo.photo} alt={ceo.photoAlt} width="320" height="303" loading="lazy" />
+      </div>
+      <div data-reveal="up">
         <p class="eyebrow">From our CEO</p>
         <h2 id="ceo-title">{ceo.name}, {ceo.role}</h2>
         <blockquote><p>“I started QualityWorks because I wanted to build a company that was passionate about what it takes to deliver continuous quality and value to users. Our philosophy as a company is to always take a ‘One Team Approach.’ We do this by focusing on creating partnerships with our clients that are built on transparency, collaboration, and diverse perspectives.”</p></blockquote>
@@ -77,16 +130,8 @@ const ceo = leadership[0];
     </div>
   </section>
 
-  {/* Core values as a description list (dt term, dd description). */}
-  <section class="section" aria-labelledby="values-title">
-    <div class="container">
-      <SectionHeading eyebrow="What we stand for" title="Our core values" id="values-title" />
-      <dl class="values">{values.map(([t, d]) => <div><dt>{t}</dt><dd>{d}</dd></div>)}</dl>
-    </div>
-  </section>
-
   {/* Team: wireframes for live-site sections whose content is not yet approved for reuse. */}
-  <section class="section surface-alt" aria-labelledby="team-title">
+  <section class="section surface-white" aria-labelledby="team-title">
     <div class="container">
       <SectionHeading eyebrow="Our team" title="Leadership and team" lede="We provide agile-minded digital experience experts who are ready to make an impact from day one — coaches focused on team capacity building, not just technologists who write and test code." id="team-title" />
       <div class="grid grid--3">
@@ -98,7 +143,7 @@ const ceo = leadership[0];
   </section>
 
   {/* Reviews: live-site testimonials plus an external link to the Clutch profile (opens a new tab via Button). */}
-  <section class="section" aria-labelledby="reviews-title">
+  <section class="section surface-mint" aria-labelledby="reviews-title">
     <div class="container">
       <SectionHeading eyebrow="Reviews" title="Ranked by our clients as one of the top companies in the industry" id="reviews-title" />
       <ProofBlock />
@@ -106,21 +151,78 @@ const ceo = leadership[0];
     </div>
   </section>
   {/* Closing CTA serves both buyers (contact) and applicants (careers). */}
-  <CtaBand title="Want to work with us?" text="Jumpstart your project, or your career in tech." primary={ctas.contact} secondary={{ label: 'Explore careers', href: '/careers/' }} />
+  <CtaBand title="Want to work with us?" text="Jumpstart your project, or your career in tech." primary={ctas.contact} secondary={{ label: 'Explore careers', href: '/careers/' }} photo="careers-colleagues" />
 </BaseLayout>
 <style>
-  /* Story: supporting paragraphs in muted text so the lede leads. */
-  .story p:not(.lede) { color: var(--color-muted); }
-  /* CEO block: stacked on small screens, 18rem photo column from 860px. The photo is cropped to a circle
-     (aspect-ratio 1 + object-fit: cover) even though the source image is 320 x 303. */
+  /* STORY: copy left, photo collage right from 1024px. */
+  .story-sec { overflow-x: clip; }
+  .story-grid { display: grid; gap: var(--space-12); align-items: center; }
+  @media (min-width: 1024px) { .story-grid { grid-template-columns: 1.05fr 0.95fr; gap: var(--space-16); } }
+  .story h2 { margin-bottom: var(--space-6); }
+  .story p:not(.lede):not(.eyebrow) { color: var(--color-muted); }
+  .regions { list-style: none; padding: 0; margin: var(--space-6) 0 0; display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .regions li { display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.45rem 0.9rem; border-radius: var(--radius-pill); background: var(--qw-mint-50); color: var(--qw-slate-900); font: var(--fw-semibold) var(--fs-sm)/1 var(--font-display); }
+  .regions :global(svg) { width: 16px; height: 16px; color: var(--qw-teal-700); }
+  .collage { position: relative; min-height: 22rem; }
+  .collage img { display: block; object-fit: cover; border-radius: 28px; box-shadow: 0 30px 60px -30px rgba(34, 43, 55, 0.5); }
+  .collage__a { width: 82%; aspect-ratio: 4 / 3.3; margin-left: auto; }
+  .collage__b { position: absolute; left: 0; bottom: -2rem; width: 46%; aspect-ratio: 1; border: 6px solid #fff; }
+  .collage__badge { position: absolute; left: 6%; top: 6%; margin: 0; display: grid; place-items: center; width: 8.5rem; aspect-ratio: 1; border-radius: 50%; background: var(--qw-teal-500); color: var(--qw-slate-900); font: var(--fw-semibold) var(--fs-sm)/1.1 var(--font-display); text-align: center; box-shadow: 0 18px 40px -16px rgba(34,43,55,0.45); }
+  .collage__year { display: block; font-weight: var(--fw-black); font-size: 2.1rem; letter-spacing: -0.03em; }
+  .collage__dot { position: absolute; right: -0.5rem; bottom: 18%; width: 4.5rem; aspect-ratio: 1; border-radius: 50%; background: var(--qw-green-500); z-index: -1; }
+  @media (max-width: 559px) { .collage__badge { width: 6.5rem; } .collage__year { font-size: 1.6rem; } }
+
+  /* VALUES: heading + decorative orbit, then six numbered colour tiles. */
+  .values-sec { overflow: hidden; }
+  .values-head { display: grid; gap: var(--space-8); align-items: center; margin-bottom: var(--space-10); }
+  .values-head .section-intro { margin-bottom: 0; }
+  @media (min-width: 900px) { .values-head { grid-template-columns: 1fr 22rem; } }
+  .orbit { position: relative; width: min(22rem, 80vw); aspect-ratio: 1; margin-inline: auto; }
+  .orbit__ring { position: absolute; inset: 12%; border-radius: 50%; border: 2px dashed color-mix(in srgb, var(--qw-teal-700) 45%, transparent); }
+  .orbit__hub { position: absolute; inset: 32%; border-radius: 50%; background: var(--qw-slate-900); color: #fff; display: grid; place-content: center; text-align: center; font: var(--fw-black) 1.9rem/1 var(--font-display); letter-spacing: -0.02em; box-shadow: 0 0 0 12px color-mix(in srgb, var(--qw-teal-500) 25%, transparent); }
+  .orbit__hub small { display: block; font: var(--fw-semibold) 0.7rem/1.4 var(--font-display); letter-spacing: 0.08em; text-transform: uppercase; color: var(--qw-mint-50); margin-top: 0.3rem; }
+  .orbit__spin { position: absolute; inset: 0; animation: qw-orbit 40s linear infinite; }
+  .orbit__node { position: absolute; left: 50%; top: 50%; width: 3.6rem; height: 3.6rem; margin: -1.8rem; transform: rotate(var(--a)) translateY(calc(min(22rem, 80vw) * -0.38)) rotate(calc(var(--a) * -1)); }
+  .orbit__icon { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 18px; background: var(--qw-teal-500); color: var(--qw-slate-900); box-shadow: 0 12px 26px -12px rgba(34,43,55,0.5); animation: qw-orbit 40s linear infinite reverse; }
+  .orbit__icon :global(svg) { width: 24px; height: 24px; }
+  .orbit__node--green .orbit__icon { background: var(--qw-green-500); }
+  .orbit__node--slate .orbit__icon { background: var(--qw-slate-900); color: #fff; }
+  .orbit__node--mint .orbit__icon, .orbit__node--white .orbit__icon { background: #fff; color: var(--qw-teal-700); }
+  @keyframes qw-orbit { to { rotate: 360deg; } }
+
+  .values { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); }
+  .value { position: relative; overflow: hidden; display: flex; flex-direction: column; min-height: 17rem; padding: var(--space-8); border-radius: 28px; background: var(--tile-bg); color: var(--tile-fg); border: 2px solid var(--tile-border, transparent); transition: transform 0.45s var(--ease-out), box-shadow 0.45s var(--ease-out); outline-offset: 4px; }
+  .value--teal { --tile-bg: var(--qw-teal-500); --tile-fg: var(--qw-slate-900); --tile-icon-bg: var(--qw-slate-900); --tile-icon-fg: #fff; }
+  .value--green { --tile-bg: var(--qw-green-500); --tile-fg: var(--qw-slate-900); --tile-icon-bg: #fff; --tile-icon-fg: var(--qw-slate-900); }
+  .value--slate { --tile-bg: var(--qw-slate-900); --tile-fg: #fff; --tile-icon-bg: var(--qw-teal-500); --tile-icon-fg: var(--qw-slate-900); }
+  .value--mint { --tile-bg: #fff; --tile-fg: var(--qw-slate-900); --tile-border: var(--qw-teal-500); --tile-icon-bg: var(--qw-teal-500); --tile-icon-fg: var(--qw-slate-900); }
+  .value--white { --tile-bg: #fff; --tile-fg: var(--qw-slate-900); --tile-border: var(--qw-green-500); --tile-icon-bg: var(--qw-green-500); --tile-icon-fg: var(--qw-slate-900); }
+  .value__num { position: absolute; right: 1.1rem; top: 0.2rem; font: var(--fw-black) clamp(4.5rem, 3rem + 4vw, 7rem)/1 var(--font-display); letter-spacing: -0.05em; opacity: 0.16; transition: opacity 0.45s, transform 0.6s var(--ease-out); pointer-events: none; }
+  .value__icon { display: grid; place-items: center; width: 3.5rem; height: 3.5rem; border-radius: 18px; background: var(--tile-icon-bg); color: var(--tile-icon-fg); transition: transform 0.5s var(--ease-out); }
+  .value__icon :global(svg) { width: 26px; height: 26px; }
+  .value__term { margin: auto 0 var(--space-2); padding-top: var(--space-8); font-size: var(--fs-xl); color: inherit; letter-spacing: -0.02em; }
+  .value__desc { margin: 0; color: inherit; max-width: 30ch; }
+  .value::after { content: ""; position: absolute; left: var(--space-8); right: var(--space-8); bottom: 0; height: 6px; border-radius: 6px 6px 0 0; background: var(--tile-fg); transform: scaleX(0); transform-origin: left; transition: transform 0.6s var(--ease-out); opacity: 0.85; }
+  .value:hover, .value:focus-visible, .value.is-active { transform: translateY(-6px); box-shadow: 0 28px 50px -28px rgba(34,43,55,0.55); }
+  .value:hover .value__num, .value:focus-visible .value__num, .value.is-active .value__num { opacity: 0.32; transform: scale(1.08) translateY(4px); }
+  .value:hover .value__icon, .value:focus-visible .value__icon, .value.is-active .value__icon { transform: rotate(-8deg) scale(1.14); }
+  .value:hover::after, .value:focus-visible::after, .value.is-active::after { transform: scaleX(1); }
+  .value:focus-visible { outline: 3px solid var(--qw-slate-900); }
+  @media (max-width: 767px) { .value { min-height: 0; padding: var(--space-6); } .value__term { padding-top: var(--space-6); } }
+  @media (min-width: 1100px) {
+    .values { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (prefers-reduced-motion: reduce) { .orbit__spin, .orbit__icon { animation: none; } .value, .value__num, .value__icon, .value::after { transition: none; } }
+
+  /* CEO block on green: stacked on small screens, photo column from 860px. The photo is cropped to a circle. */
   .ceo { display: grid; gap: var(--space-10); align-items: center; }
-  @media (min-width: 860px) { .ceo { grid-template-columns: 18rem 1fr; gap: var(--space-16); } }
-  .ceo img { border-radius: 50%; width: 100%; max-width: 18rem; aspect-ratio: 1; object-fit: cover; }
-  .ceo blockquote { margin: 0 0 var(--space-6); font-size: var(--fs-md); line-height: 1.6; color: #fff; }
-  .ceo__cert { font-size: var(--fs-sm); color: var(--color-muted); }
-  /* Values grid: auto-fit columns of at least 18rem (or full width on narrow screens), teal rule above each term. */
-  .values { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: var(--space-8) var(--space-6); margin: 0; }
-  .values dt { font-size: var(--fs-md); font-weight: var(--fw-bold); color: var(--color-heading); padding-top: var(--space-4); border-top: 2px solid var(--qw-teal-500); }
-  .values dd { margin: var(--space-2) 0 0; color: var(--color-muted); }
+  @media (min-width: 860px) { .ceo { grid-template-columns: 22rem 1fr; gap: var(--space-16); } }
+  .ceo__photo { position: relative; max-width: 22rem; }
+  .ceo__ring { position: absolute; inset: -14px; border-radius: 50%; border: 3px dashed var(--qw-slate-900); opacity: 0.35; animation: qw-orbit 60s linear infinite; }
+  .ceo img { position: relative; border-radius: 50%; width: 100%; aspect-ratio: 1; object-fit: cover; border: 8px solid #fff; box-shadow: 0 30px 60px -30px rgba(34,43,55,0.6); }
+  .ceo blockquote { position: relative; margin: 0 0 var(--space-6); padding-left: var(--space-6); border-left: 6px solid var(--qw-slate-900); font: var(--fw-semibold) clamp(1.15rem, 1rem + 0.6vw, 1.5rem)/1.5 var(--font-display); color: var(--qw-slate-900); }
+  .ceo blockquote p { position: relative; }
+  .ceo__cert { font-size: var(--fs-sm); color: var(--qw-slate-900); }
+  @media (prefers-reduced-motion: reduce) { .ceo__ring { animation: none; } }
   .reviews-more { margin-top: var(--space-6); }
 </style>

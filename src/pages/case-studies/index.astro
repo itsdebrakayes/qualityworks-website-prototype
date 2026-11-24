@@ -55,10 +55,10 @@ const industryOpts = [...new Set(caseStudies.map((c) => c.industry))].map((v) =>
 const serviceOpts = [...new Set(caseStudies.flatMap((c) => c.serviceTags))].map((v) => ({ value: v, label: serviceBySlug(v)?.name ?? v, count: count((c) => c.serviceTags.includes(v)) })).sort((a, b) => a.label.localeCompare(b.label));
 ---
 <BaseLayout seo={{ title: 'Case Studies: Testing, Development & AI Results | QualityWorks', description: 'Results from QualityWorks engagements in banking, insurance, healthcare, utilities, media and more. Filter case studies by industry and service.' }} breadcrumbs={crumbs}>
-  <PageHero image={peopleImage('results-celebration')} eyebrow="Results" title="Case studies" lede="How we’ve helped organizations solve difficult digital challenges — with the outcomes as each client engagement reported them." breadcrumbs={crumbs} compact />
-  <section class="section" aria-labelledby="list-title">
+  <PageHero image={peopleImage('results-celebration')} tone="green" ui={false} eyebrow="Results · Part of the Resource Hub" title="Case studies" lede="How we’ve helped organizations solve difficult digital challenges — with the outcomes as each client engagement reported them." breadcrumbs={crumbs} primary={{ label: 'Browse results', href: '#list-title' }} secondary={{ label: 'Resource Hub', href: '/resources/' }} />
+  <section class="section surface-mint cs-list" aria-labelledby="list-title">
     <div class="container">
-      <h2 id="list-title" class="visually-hidden">Case study list</h2>
+      <h2 id="list-title" class="visually-hidden" style="scroll-margin-top:6rem">Case study list</h2>
       <FilterBar id="cs-filter" resultLabel="case studies" filters={[{ name: 'industry', label: 'Industry', options: industryOpts }, { name: 'service', label: 'Service', options: serviceOpts }]} />
 
       {/* Prototype control (review only): shows how the list must behave if case studies ever load from a CMS/API. */}
@@ -92,6 +92,10 @@ const serviceOpts = [...new Set(caseStudies.flatMap((c) => c.serviceTags))].map(
   .proto-states summary { cursor: pointer; display: inline-block; }
   .proto-states p { margin: var(--space-3) 0; }
   #cs-error { margin-bottom: var(--space-6); }
+  /* Redesign: mint band with white, rounded, lifted cards and a white filter panel. */
+  .cs-list :global(.filter-bar) { background: #fff; border-radius: 22px; border: 0; box-shadow: 0 18px 40px -32px rgba(34,43,55,0.5); }
+  .cs-list :global(.card) { border-radius: 24px; border: 0; box-shadow: 0 22px 44px -32px rgba(34,43,55,0.55); transition: transform 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out); }
+  .cs-list :global(.card:hover) { transform: translateY(-6px); box-shadow: 0 30px 56px -30px rgba(34,43,55,0.6); }
 </style>
 <script>
   // Combined filters via src/lib/filters.ts: industry must match exactly, and the selected service must be one

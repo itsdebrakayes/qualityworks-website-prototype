@@ -52,6 +52,7 @@ import EventCard from '../components/EventCard.astro';
 import ProofBlock from '../components/ProofBlock.astro';
 import CtaBand from '../components/CtaBand.astro';
 import EmptyState from '../components/EmptyState.astro';
+import WorldDots from '../components/WorldDots.astro';
 import { pathways, servicesByPathway } from '../data/services';
 import { products } from '../data/products';
 import { caseStudyBySlug } from '../data/caseStudies';
@@ -64,6 +65,9 @@ import { organizationLd } from '../lib/schema';
 
 // Homepage hero photograph (visual revision, docs/15): people working through a technical problem together.
 const heroImage = peopleImage('home-mentoring');
+// People collage in WHY QUALITYWORKS (Janique: add people here).
+const teamImg = peopleImage('about-team');
+const pairImg = peopleImage('careers-colleagues');
 // Bullet lists for the THREE WAYS cards, keyed by pathway id. Homepage-only copy.
 const pathwayBullets = {
   quality: ['AI-generated test cases & automation scripts', 'AI-assisted regression testing', 'Web, mobile, API & USSD coverage', 'Full-stack QA managed service', 'Test maturity assessments & roadmaps'],
@@ -89,58 +93,63 @@ const industryList = industries.filter((i) => i.status === 'live');
   seo={{ title: 'QualityWorks Consulting Group | Software Quality, Custom Software & AI', description: 'QualityWorks tests smarter, builds faster and deploys AI: AI-powered testing, custom web and mobile development, and agentic business solutions since 2010.' }}
   jsonLd={[organizationLd()]}
 >
-  {/* HERO: h1, two CTAs (Talk to an expert, Explore solutions), company facts, then the three pathway cards.
-      Everything here must fit above the fold at 1440 x 900 (AC-HOME-1).
-      Visual revision (docs/15): the stage is a photograph of people working through a technical problem
-      together (src/data/peopleImagery.ts, "home-mentoring", from the live site). On desktop the photo fills
-      the stage and a slate scrim sits behind the copy, so the text never depends on the image for contrast;
-      the people stay clear on the right. Below 1100px the photo becomes a band above the copy. */}
-  <section class="home-hero surface-dark" aria-labelledby="hero-title">
-    <div class="home-hero__stage">
-      <img class="home-hero__photo" src={peopleSrc(heroImage)} srcset={peopleSrcset(heroImage)} sizes="100vw"
-        alt={heroImage.alt} width="1600" height="900" loading="eager" fetchpriority="high" decoding="async"
-        style={`object-position: ${heroImage.focus}`} />
-      <div class="home-hero__scrim" aria-hidden="true"></div>
-      <div class="container home-hero__grid">
-        <div class="home-hero__copy">
-          <p class="eyebrow">QualityWorks Consulting Group</p>
-          {/* Tagline per the brand guide: title case, always with the period. */}
-          <h1 id="hero-title">Engineered for Excellence.</h1>
-          <p class="lede">We test smarter, build faster, and deploy AI to transform how businesses operate — from AI-powered testing to custom apps to AI agents that take work off your team’s plate.</p>
-          {/* The page's single brand-gradient moment (guide: once per layout). */}
-          <span class="brand-rule home-hero__rule" aria-hidden="true"></span>
-          <div class="btn-row home-hero__ctas">
-            <Button cta={ctas.contact} />
-            <Button cta={ctas.exploreSolutions} />
-          </div>
-          <ul class="home-hero__facts" aria-label="Company facts">
-            <li>Founded 2010<ClaimRef id="C14" /></li>
-            <li>Los Angeles · Kingston</li>
-            <li>US, UK, Latin America & Caribbean<ClaimRef id="C15" /></li>
-          </ul>
+  {/* HERO (redesign, docs/16): bright brand-Teal block (Janique/Sabrina: navy heroes are dull). Left: tagline
+      (words rise in), lede, equal-width CTAs, company facts. Right: a photograph of people working through a
+      problem, blended into the teal (floating chips removed at the user's request). Text never sits on the photo. Pathway cards overlap the bottom edge so all three
+      pathways stay above the fold at 1440 x 900 (AC-HOME-1). */}
+  {/* INTRO (scroll-driven, Samsung-style): the hero first fills the whole screen with no header and no cards.
+      Scrolling the first ~90% of a viewport "zooms out": the hero shrinks into a rounded panel, the site header
+      slides down and the three pathway cards rise in. The stage is sticky, then the page scrolls on normally.
+      Desktop with motion only; phones, tablets and reduced motion get the static layout. */}
+  <div class="intro" data-intro>
+  <div class="intro__stage">
+  <section class="hero surface-teal" aria-labelledby="hero-title" data-pointer-scene>
+    <p class="intro__hint" aria-hidden="true"><i></i>Scroll</p>
+    <div class="hero__media" aria-hidden="false">
+      <img class="hero__photo" src={peopleSrc(heroImage)} srcset={peopleSrcset(heroImage)} sizes="(min-width: 1024px) 62vw, 100vw"
+        alt={heroImage.alt} width="1600" height="900" loading="eager" fetchpriority="high" decoding="async" style={`object-position: ${heroImage.focus}`} />
+    </div>
+    <div class="container hero__grid">
+      <div class="hero__copy">
+        <p class="eyebrow" data-reveal="fade">QualityWorks Consulting Group</p>
+        {/* Tagline per the brand guide: title case, always with the period. */}
+        <h1 id="hero-title" class="display" data-words><span class="word" style="--w:0">Engineered</span> <span class="word" style="--w:1">for</span> <span class="word" style="--w:2">Excellence.</span></h1>
+        <p class="lede hero__lede" data-reveal style="--i:3">We test smarter, build faster, and deploy AI to transform how businesses operate — from AI-powered testing to custom apps to AI agents that take work off your team’s plate.</p>
+        <div class="btn-row btn-row--equal hero__ctas" data-reveal style="--i:4">
+          <Button cta={ctas.contact} />
+          <Button cta={ctas.exploreSolutions} />
         </div>
+        <ul class="hero__facts" aria-label="Company facts" data-reveal style="--i:5">
+          <li>Founded 2010<ClaimRef id="C14" /></li>
+          <li>Los Angeles · Kingston</li>
+          <li>US, UK, Latin America & Caribbean<ClaimRef id="C15" /></li>
+        </ul>
       </div>
     </div>
-    <div class="container">
-      <ul class="pathways" aria-label="Three ways we help">
-        {pathways.map((p) => (
-          <li class="pathway" data-pathway={p.id}>
-            {/* Whole card is clickable: the title link's ::after stretches over the card (see CSS). The CTA text is
-                aria-hidden so screen readers hear the link once, via the h2. */}
-            <p class="pathway__label">{p.label}</p>
-            <h2 class="pathway__title"><a href={p.href}>{p.title}</a></h2>
-            <p class="pathway__text">{p.text}</p>
-            <span class="pathway__cta" aria-hidden="true">{p.cta}<Icon name="arrow" /></span>
-          </li>
-        ))}
-      </ul>
-    </div>
   </section>
+  <div class="container pathways-wrap">
+    <ul class="pathways" aria-label="Three ways we help" data-reveal-stagger>
+      {pathways.map((p, i) => (
+        <li class:list={['pathway', `pathway--${['white', 'green', 'slate'][i]}`]} data-pathway={p.id} data-reveal="up" data-tilt="5">
+          <span class="pathway__icon" aria-hidden="true"><Icon name={['shield', 'devices', 'agent'][i]} /></span>
+          <p class="pathway__label">{p.label}</p>
+          <h2 class="pathway__title"><a href={p.href}>{p.title}</a></h2>
+          <p class="pathway__text">{p.text}</p>
+          <span class="pathway__cta" aria-hidden="true">{p.cta}<Icon name="arrow" /></span>
+        </li>
+      ))}
+    </ul>
+  </div>
+  </div>
+  </div>
 
-  {/* STATS: headline figures, each tied to a claim ID (AC-HOME-2). StatBlock removes unverified ones in release. */}
-  <section class="section section--tight" aria-labelledby="impact-title">
+  {/* STATS: colourful count-up tiles (StatBlock), each tied to a claim ID (AC-HOME-2). */}
+  <section class="section stats-sec" aria-labelledby="impact-title">
     <div class="container">
-      <h2 id="impact-title" class="visually-hidden">QualityWorks impact</h2>
+      <div class="section-intro" data-reveal>
+        <p class="eyebrow">Impact</p>
+        <h2 id="impact-title" class="display-sm">Quality you can <span class="mark">measure</span>.</h2>
+      </div>
       <StatBlock
         stats={[
           { value: '16+', label: 'Years of quality-driven development', claim: 'C01' },
@@ -153,75 +162,105 @@ const industryList = industries.filter((i) => i.status === 'live');
     </div>
   </section>
 
-  {/* INTRO: "Why QualityWorks": positioning statement plus three reasons, with claim annotations on each figure. */}
-  <section class="section surface-alt intro" aria-labelledby="intro-title">
-    <div class="container split">
-      <div>
-        <p class="eyebrow">Why QualityWorks</p>
-        <h2 id="intro-title">We go <em class="beyond">beyond the code</em> to help clients reach their most extraordinary digital goals.</h2>
+  {/* WHY QUALITYWORKS: people collage (layered photos with parallax and a floating chip) beside the bold
+      "beyond the code" statement (Janique: "We could bold this too"; "We could also add some people here too"). */}
+  <section class="section surface-mint why-sec" aria-labelledby="intro-title">
+    <div class="container why-grid">
+      <div class="collage" data-pointer-scene>
+        <img class="collage__a" data-parallax="0.06" src={peopleSrc(teamImg)} srcset={peopleSrcset(teamImg)} sizes="(min-width: 960px) 30vw, 70vw" alt={teamImg.alt} width="1600" height="875" loading="lazy" style={`object-position:${teamImg.focus}`} />
+        <img class="collage__b" data-parallax="0.14" src={peopleSrc(pairImg)} srcset={peopleSrcset(pairImg)} sizes="(min-width: 960px) 22vw, 50vw" alt={pairImg.alt} width="1600" height="1067" loading="lazy" style={`object-position:${pairImg.focus}`} />
+        <span class="collage__block" aria-hidden="true" data-parallax="0.2"></span>
       </div>
       <div class="intro__copy">
-        <p class="lede">Founded in 2010, QualityWorks is a Black-owned, woman-led software solutions firm<ClaimRef id="C14" /> focused on helping companies build higher-quality software, create future-ready teams and accelerate delivery.</p>
-        <div class="why">
-          <div class="why__item">
+        <p class="eyebrow">Why QualityWorks</p>
+        <h2 id="intro-title" class="display-sm" data-reveal>We go <strong class="beyond">beyond the code</strong> to help clients reach their most extraordinary digital goals.</h2>
+        <p class="lede" data-reveal>Founded in 2010, QualityWorks is a Black-owned, woman-led software solutions firm<ClaimRef id="C14" /> focused on helping companies build higher-quality software, create future-ready teams and accelerate delivery.</p>
+        <ol class="why" data-reveal-stagger>
+          <li class="why__item" data-reveal="left">
             <h3>We make your team faster without making it bigger</h3>
             <p>AI-powered automation and process improvements have taken regression cycles from 4 days to 45 minutes<ClaimRef id="C05" /> and saved nearly 500 testing hours weekly for a single client<ClaimRef id="C06" />.</p>
-          </div>
-          <div class="why__item">
+          </li>
+          <li class="why__item" data-reveal="left">
             <h3>AI is baked in, not bolted on</h3>
             <p>Our own AI tools help create test cases and automation faster<ClaimRef id="C07" />, and PRISM™ evaluates the quality of AI-generated outputs themselves.</p>
-          </div>
-          <div class="why__item">
+          </li>
+          <li class="why__item" data-reveal="left">
             <h3>We leave your team better than we found it</h3>
             <p>We train your QA and development teams alongside every engagement. At JMMB, manual testers learned to write and run automated tests.</p>
-          </div>
-        </div>
+          </li>
+        </ol>
         <a class="link-arrow" href="/about-us/">About QualityWorks<Icon name="arrow" /></a>
       </div>
     </div>
   </section>
 
-  {/* THREE WAYS: one card per pathway with bullets, up to four related full-depth services and a CTA.
-      id="solutions" makes this section an in-page anchor. */}
-  <section class="section" id="solutions" aria-labelledby="ways-title">
+  {/* THREE WAYS: a scroll-driven story. A sticky visual on the left transforms between three states (testing
+      dashboard → product build → agent network) as each pathway's text scrolls past on the right. Without JS
+      or with reduced motion every state is visible beside its own text (stacked). id="solutions" anchor. */}
+  <section class="section story-sec" id="solutions" aria-labelledby="ways-title">
     <div class="container">
-      <SectionHeading eyebrow="Our services" title="Three ways we drive your business forward" lede="From bulletproof testing to full-scale digital products to AI-powered operations — we handle the hard parts so you can move faster." id="ways-title" />
-      <div class="ways">
-        {pathways.map((p) => (
-          <article class="way reveal" data-pathway={p.id}>
-            <p class="way__index mono">{p.index} / {p.label}</p>
-            <h3 class="way__title">{p.title}</h3>
-            <p class="way__text">{p.text}</p>
-            <ul class="checklist way__list">{pathwayBullets[p.id].map((b) => <li>{b}</li>)}</ul>
-            <div class="way__links">
-              <p class="way__links-title">Related services</p>
-              <ul>
-                {servicesByPathway(p.id).filter((s) => s.contentDepth === 'full').slice(0, 4).map((s) => <li><a href={s.path}>{s.name}</a></li>)}
-              </ul>
+      <div class="section-intro" data-reveal>
+        <p class="eyebrow">Our services</p>
+        <h2 id="ways-title" class="display-sm">Three ways we drive your business forward</h2>
+        <p class="lede">From bulletproof testing to full-scale digital products to AI-powered operations — we handle the hard parts so you can move faster.</p>
+      </div>
+      <div class="story" data-story data-active="0">
+        <div class="story__visual" aria-hidden="true">
+          <div class="story__screen">
+            <div class="sv sv--0">
+              <p class="sv__title"><Icon name="shield" /> Quality pipeline</p>
+              {['Unit tests', 'API checks', 'UI regression', 'Accessibility', 'Performance'].map((t, k) => <div class="sv-row" style={`--k:${k}`}><span>{t}</span><span class="sv-bar"><i></i></span><Icon name="check" /></div>)}
             </div>
-            <Button href={p.href} label={p.cta} variant="secondary" size="sm" />
-          </article>
-        ))}
+            <div class="sv sv--1">
+              <p class="sv__title"><Icon name="devices" /> Product build</p>
+              <div class="sv-app"><span class="sv-app__phone"><i></i><i></i><i></i></span><span class="sv-app__web"><i></i><i></i><i></i><i></i></span></div>
+            </div>
+            <div class="sv sv--2">
+              <p class="sv__title"><Icon name="agent" /> AI agents + people</p>
+              <svg class="sv-net" viewBox="0 0 300 200"><g class="sv-net__lines"><path d="M150 100 L60 45"/><path d="M150 100 L240 45"/><path d="M150 100 L60 155"/><path d="M150 100 L240 155"/></g><circle cx="150" cy="100" r="26" class="sv-net__hub"/><circle cx="60" cy="45" r="15"/><circle cx="240" cy="45" r="15"/><circle cx="60" cy="155" r="15"/><circle cx="240" cy="155" r="15"/></svg>
+              <p class="sv-net__label">Human approval at every step</p>
+            </div>
+          </div>
+        </div>
+        <div class="story__steps">
+          {pathways.map((p, i) => (
+            <article class="story__step" data-step data-pathway={p.id}>
+              <p class="way__index">{p.index} / {p.label}</p>
+              <h3 class="way__title">{p.title}</h3>
+              <p class="way__text">{p.text}</p>
+              <ul class="checklist way__list">{pathwayBullets[p.id].map((b) => <li>{b}</li>)}</ul>
+              <div class="way__links">
+                <p class="way__links-title">Related services</p>
+                <ul>{servicesByPathway(p.id).filter((s) => s.contentDepth === 'full').slice(0, 4).map((s) => <li><a href={s.path}>{s.name}</a></li>)}</ul>
+              </div>
+              <Button href={p.href} label={p.cta} variant="secondary" size="sm" />
+            </article>
+          ))}
+        </div>
       </div>
     </div>
   </section>
 
-  {/* PRODUCTS: featured product cards, review-only PRISM sample score, and compact links to external products. */}
-  <section class="section surface-product products" aria-labelledby="products-title">
+  {/* PRODUCTS: equal-height product cards on a bright Green block; external products as equal-height tiles. */}
+  <section class="section surface-green products" aria-labelledby="products-title">
     <div class="container">
       <div class="products__head">
-        <SectionHeading eyebrow="Products & innovations" title="Software we build for quality and AI" lede="Our products are separate from our consulting services. Some live on their own platforms — we’ll always tell you when a link takes you there." id="products-title" />
+        <div class="section-intro" data-reveal>
+          <p class="eyebrow">Products & innovations</p>
+          <h2 id="products-title" class="display-sm">Software we build for quality and AI</h2>
+          <p class="lede">Our products are separate from our consulting services. Some live on their own platforms — we’ll always tell you when a link takes you there.</p>
+        </div>
         {/* Review-only: reproduces the sample score from the live homepage; removed from release builds. */}
-        {REVIEW && <div class="prism-sample" data-review-note="Sample score reproduced from the live homepage">
-          <p class="prism-sample__label mono">PRISM™ sample score</p>
+        {REVIEW && <div class="prism-sample" data-review-note="Sample score reproduced from the live homepage" data-tilt="6">
+          <p class="prism-sample__label">PRISM™ sample score</p>
           <p class="prism-sample__grade">C+</p>
           <p class="prism-sample__desc">Fair — correct in parts</p>
           <div class="prism-sample__bar" role="img" aria-label="Sample score 78 percent"><span style="width:78%"></span></div>
           <p class="prism-sample__note">Illustrative sample, as shown on the current homepage.</p>
         </div>}
       </div>
-      <div class="grid grid--3">
-        {featuredProducts.map((p) => <ProductCard p={p} />)}
+      <div class="grid grid--3 products__cards" data-reveal-stagger>
+        {featuredProducts.map((p) => <div class="products__card" data-reveal="up"><ProductCard p={p} /></div>)}
       </div>
       <ul class="products__more">
         {otherProducts.map((p) => (
@@ -232,38 +271,61 @@ const industryList = industries.filter((i) => i.status === 'live');
     </div>
   </section>
 
-  {/* PROOF: Clutch badges and awards (claims C10–C12), testimonials, and a link to Clutch reviews. */}
+  {/* PROOF: recognition tiles and the interactive testimonial stage (ProofBlock). The official Inc. Best in
+      Business badge was not found (docs/16 §6), so the award is a typographic tile linking to the news post. */}
   <section class="section" aria-labelledby="proof-title">
     <div class="container">
-      <SectionHeading eyebrow="Recognition" title="What our clients say" id="proof-title" />
-      <ul class="awards" aria-label="Awards and recognition">
-        <li><img src="/brand/Clutch_TopAutomationTesting-500x540.png" alt="Clutch: Top Automation Testing Company" width="96" height="104" loading="lazy" /></li>
-        <li><img src="/brand/Clutch_TopComplianceTesting-500x540.png" alt="Clutch: Top Compliance Testing Company" width="96" height="104" loading="lazy" /></li>
-        <li><img src="/brand/Clutch_TopRecoveryTesting-1-500x540.png" alt="Clutch: Top Global Recovery Testing Company" width="96" height="104" loading="lazy" /><ClaimRef id="C12" /></li>
-        <li class="awards__text"><a href="/qualityworks-wins-inc-best-in-business-2025-award/">Inc. Best in Business 2025</a><ClaimRef id="C11" /></li>
-        <li class="awards__text awards__text--wide"><a href="/qualityworks-wins-us-navy-ai-testing-challenge/">First Prize, U.S. Navy AI Augmented Testing (AIAT) Challenge</a><ClaimRef id="C10" /><span class="awards__note">Administered by PEO MLB with Palmetto Tech Bridge</span></li>
+      <div class="section-intro" data-reveal>
+        <p class="eyebrow">Recognition</p>
+        <h2 id="proof-title" class="display-sm">What our clients say</h2>
+      </div>
+      <ul class="awards" aria-label="Awards and recognition" data-reveal-stagger>
+        <li class="award award--img" data-reveal="scale"><img src="/brand/Clutch_TopAutomationTesting-500x540.png" alt="Clutch: Top Automation Testing Company" width="96" height="104" loading="lazy" /></li>
+        <li class="award award--img" data-reveal="scale"><img src="/brand/Clutch_TopComplianceTesting-500x540.png" alt="Clutch: Top Compliance Testing Company" width="96" height="104" loading="lazy" /></li>
+        <li class="award award--img" data-reveal="scale"><img src="/brand/Clutch_TopRecoveryTesting-1-500x540.png" alt="Clutch: Top Global Recovery Testing Company" width="96" height="104" loading="lazy" /><ClaimRef id="C12" /></li>
+        <li class="award award--inc" data-reveal="scale"><a href="/qualityworks-wins-inc-best-in-business-2025-award/"><span class="award__brand">Inc.</span><span class="award__name">Best in Business</span><span class="award__year">2025</span></a><ClaimRef id="C11" /></li>
+        <li class="award award--navy" data-reveal="scale"><a href="/qualityworks-wins-us-navy-ai-testing-challenge/"><span class="award__name">First Prize</span><span class="award__sub">U.S. Navy AI Augmented Testing (AIAT) Challenge</span></a><ClaimRef id="C10" /><span class="awards__note">Administered by PEO MLB with Palmetto Tech Bridge</span></li>
       </ul>
       <ProofBlock />
       <p class="proof-more"><a class="link-arrow" href={site.externalPlatforms.clutch} target="_blank" rel="noopener">Read more reviews on Clutch<Icon name="external" /><span class="visually-hidden"> (opens in a new tab)</span></a></p>
     </div>
   </section>
 
-  {/* WHO WE HELP: live industry chips, plus cards for the two proposed audience pages (personas C and D). */}
-  <section class="section surface-tint" aria-labelledby="help-title">
-    <div class="container split split--reverse">
-      <div>
-        <SectionHeading eyebrow="Who we help" title="Quality for the way your industry works" lede="Each industry carries its own risks — regulated calculations in banking, patient data in healthcare, peak-day traffic in entertainment." id="help-title" />
-        <ul class="industry-chips">
-          {industryList.map((i) => <li><a href={i.path}>{i.name}</a></li>)}
+  {/* WHERE WE WORK: build-time dotted map of the stated regions (C15) and the two offices, with an animated arc
+      (Janique: "Thinking about these stats"). Regions and offices are unchanged from the live site. */}
+  <section class="section surface-mint map-sec" aria-labelledby="map-title">
+    <div class="container map-grid">
+      <div class="map-copy" data-reveal>
+        <p class="eyebrow">Where we work</p>
+        <h2 id="map-title" class="display-sm">Two offices. One connected team.</h2>
+        <dl class="map-facts">
+          <div><dt>Headquarters</dt><dd>Los Angeles, CA</dd></div>
+          <div><dt>Nearshore delivery</dt><dd>Kingston, Jamaica</dd></div>
+          <div><dt>Clients across</dt><dd>US, UK, Latin America & Caribbean<ClaimRef id="C15" /></dd></div>
+        </dl>
+      </div>
+      <WorldDots />
+    </div>
+  </section>
+
+  {/* WHO WE HELP: people photo + industry chips, and the two audience cards. */}
+  <section class="section help-sec" aria-labelledby="help-title">
+    <div class="container help-grid">
+      <div data-reveal>
+        <p class="eyebrow">Who we help</p>
+        <h2 id="help-title" class="display-sm">Quality for the way your industry works</h2>
+        <p class="lede">Each industry carries its own risks — regulated calculations in banking, patient data in healthcare, peak-day traffic in entertainment.</p>
+        <ul class="industry-chips" data-reveal-stagger>
+          {industryList.map((i) => <li data-reveal="scale"><a href={i.path}>{i.name}</a></li>)}
         </ul>
       </div>
       <div class="audience-cards">
-        <a class="audience" href="/industries/public-sector/">
+        <a class="audience audience--teal" href="/industries/public-sector/" data-reveal="right" data-tilt="4">
           <span class="eyebrow">Public sector & utilities</span>
           <span class="audience__title">Documented, requirement-based QA — with evidence you can verify.</span>
           <span class="link-arrow">For agencies and utilities<Icon name="arrow" /></span>
         </a>
-        <a class="audience" href="/industries/small-business/">
+        <a class="audience audience--slate" href="/industries/small-business/" data-reveal="right" data-tilt="4">
           <span class="eyebrow">Small & mid-size businesses</span>
           <span class="audience__title">Ready-made AI agent, custom build, or neither? Start with the problem.</span>
           <span class="link-arrow">For growing businesses<Icon name="arrow" /></span>
@@ -273,34 +335,36 @@ const industryList = industries.filter((i) => i.status === 'live');
   </section>
 
   {/* RESULTS: the three featured case studies. */}
-  <section class="section" aria-labelledby="results-title">
+  <section class="section surface-mint" aria-labelledby="results-title">
     <div class="container">
       <div class="section-row">
-        <SectionHeading eyebrow="Results" title="Outcomes from recent engagements" id="results-title" />
+        <div class="section-intro" data-reveal><p class="eyebrow">Results</p><h2 id="results-title" class="display-sm">Outcomes from recent engagements</h2></div>
         <Button href="/case-studies/" label="All case studies" variant="secondary" size="sm" />
       </div>
-      <div class="grid grid--3">
-        {featuredCases.map((cs) => <CaseStudyCard cs={cs!} />)}
+      <div class="grid grid--3" data-reveal-stagger>
+        {featuredCases.map((cs) => <div data-reveal="up"><CaseStudyCard cs={cs!} /></div>)}
       </div>
     </div>
   </section>
 
-  {/* INSIGHTS + EVENTS: latest articles (with an empty state) and the events strip with its no-upcoming fallback (AC-HOME-3). */}
-  <section class="section surface-alt" aria-labelledby="insights-title">
+  {/* INSIGHTS + EVENTS: latest articles and the events panel (AC-HOME-3). The events panel is a contrasting
+      grey card so past events no longer blend into the background (Janique). */}
+  <section class="section" aria-labelledby="insights-title">
     <div class="container insights">
       <div>
         <div class="section-row">
-          <SectionHeading eyebrow="Insights" title="From our team" id="insights-title" />
+          <div class="section-intro" data-reveal><p class="eyebrow">Insights</p><h2 id="insights-title" class="display-sm">From our team</h2></div>
           <Button href="/blog/" label="All articles" variant="secondary" size="sm" />
         </div>
         {latest.length ? (
-          <div class="grid grid--3">{latest.map((a) => <ArticleCard a={a} />)}</div>
+          <div class="grid grid--3" data-reveal-stagger>{latest.map((a) => <div data-reveal="up"><ArticleCard a={a} /></div>)}</div>
         ) : (
           <EmptyState title="New articles are on the way"><p>Meanwhile, browse our <a href="/case-studies/">case studies</a>.</p></EmptyState>
         )}
       </div>
-      <div class="events-strip">
-        <div class="section-row">
+      <div class="events-strip" data-reveal>
+        <div class="events-strip__head">
+          <img src="/brand/stacy-kirk.png" alt="Stacy Kirk, CEO and Founder of QualityWorks" width="480" height="454" loading="lazy" class="events-strip__photo" />
           <SectionHeading eyebrow="Events" title="Events & speaking" subheading="Where’s Stacy?" level="h2" lede="Stacy Kirk, CEO and Founder, speaks to professional and student groups across the United States and abroad." />
         </div>
         {upcoming.length === 0 && (
@@ -312,128 +376,249 @@ const industryList = industries.filter((i) => i.status === 'live');
     </div>
   </section>
 
-  {/* Closing CTA: contact, or see case studies. */}
+  {/* Closing CTA: bright teal block with people photo. */}
   <CtaBand title="Tell us what you’re trying to launch." text="Testing, a new product or an AI initiative — one conversation is enough to find out whether we can help." primary={ctas.contact} secondary={ctas.caseStudies} eyebrow="Let’s talk" />
+  {/* Scroll intro driver: sets --p on the intro and --ip on <html> (header reveal). Desktop + motion only. */}
+  <script is:inline>
+    (function () {
+      var intro = document.querySelector('[data-intro]'); if (!intro) return;
+      var mq = matchMedia('(min-width: 1024px) and (prefers-reduced-motion: no-preference)');
+      var html = document.documentElement, raf = 0;
+      var update = function () {
+        raf = 0;
+        var on = mq.matches; html.classList.toggle('intro-mode', on);
+        if (!on) { html.style.removeProperty('--ip'); return; }
+        var p = Math.min(1, Math.max(0, window.scrollY / (window.innerHeight * 0.9)));
+        intro.style.setProperty('--p', p.toFixed(4));
+        html.style.setProperty('--ip', Math.min(1, Math.max(0, (p - 0.55) / 0.4)).toFixed(4));
+      };
+      var queue = function () { if (!raf) raf = requestAnimationFrame(update); };
+      addEventListener('scroll', queue, { passive: true }); addEventListener('resize', queue); mq.addEventListener('change', queue);
+      update();
+    })();
+  </script>
 </BaseLayout>
 
 <style>
-  /* Hero (visual revision): solid slate-900 section. The "stage" holds the photo, the scrim and the copy;
-     the pathway cards sit below the stage on plain slate. */
-  .home-hero { position: relative; overflow: hidden; background: var(--qw-slate-900); padding-bottom: clamp(3rem, 2rem + 3vw, 5rem); }
-  .home-hero__stage { position: relative; }
-  /* Photo: below 1100px it is an ordinary 16:9 band above the copy, so text never covers faces on phones
-     and tablets. */
-  .home-hero__photo { display: block; width: 100%; aspect-ratio: 16 / 9; height: auto; object-fit: cover; }
-  .home-hero__scrim { display: none; }
-  .home-hero__grid { position: relative; display: grid; gap: var(--space-12); align-items: center; padding-top: var(--space-8); }
-  @media (min-width: 1100px) {
-    /* From 1100px the photo fills the whole stage behind the copy; the people sit to the right of it. */
-    .home-hero__photo { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; }
-    /* Scrim: solid slate-900 behind the copy column, fading out towards the people on the right, plus a
-       bottom fade into the pathway band. The copy area is solid to 38% and at least 92% slate-900 to 50% of the
-       width; measured worst-case contrast behind the text is recorded in docs/15 §5 (teal eyebrow >= 4.5:1). */
-    .home-hero__scrim { display: block; position: absolute; inset: 0; pointer-events: none;
-      background:
-        linear-gradient(180deg, transparent 70%, var(--qw-slate-900) 100%),
-        linear-gradient(90deg, var(--qw-slate-900) 0%, var(--qw-slate-900) 38%, color-mix(in srgb, var(--qw-slate-900) 92%, transparent) 50%, color-mix(in srgb, var(--qw-slate-900) 45%, transparent) 64%, color-mix(in srgb, var(--qw-slate-900) 6%, transparent) 82%, transparent 100%); }
-    .home-hero__grid { padding-block: clamp(3rem, 2rem + 3vw, 5.5rem) clamp(2.5rem, 2rem + 2vw, 4rem); }
-    .home-hero__copy { max-width: 36rem; }
+  /* ---------- HERO: bright teal block ---------- */
+  .hero { position: relative; overflow: hidden; padding: 0 0 clamp(7rem, 5rem + 6vw, 10rem); }
+  .hero__media { position: relative; overflow: hidden; }
+  .hero__photo { display: block; width: 100%; aspect-ratio: 16 / 10; height: auto; object-fit: cover; }
+  .hero__grid { position: relative; z-index: 2; padding-top: var(--space-8); }
+  .hero__copy h1 { margin-bottom: var(--space-6); max-width: 10ch; font-size: clamp(2.75rem, 1.6rem + 3.6vw, 4.75rem); }
+  .hero__lede { max-width: 31rem; font-size: var(--fs-md); }
+  .hero__ctas { margin-top: var(--space-6); }
+  .hero__facts { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); list-style: none; padding: 0; margin: var(--space-6) 0 0; font: var(--fw-semibold) var(--fs-sm)/1.4 var(--font-display); }
+  .hero__facts li { display: inline-flex; align-items: center; gap: var(--space-2); }
+  .hero__facts li::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--qw-slate-900); }
+  .hero__media :global(.fui) { display: none; }
+  .stack3d { display: none; }
+  @media (min-width: 1024px) {
+    .hero { display: flex; align-items: center; padding-block: var(--space-12) 8.5rem; }
+    .hero__grid { width: 100%; padding-top: 0; }
+    .hero__media { position: absolute; top: 0; right: 0; bottom: 0; width: 62%; }
+    .hero__photo { height: 100%; aspect-ratio: auto; -webkit-mask-image: linear-gradient(90deg, transparent 0%, transparent 8%, #000 40%); mask-image: linear-gradient(90deg, transparent 0%, transparent 8%, #000 40%); }
+    .hero__copy { max-width: 33rem; }
+    .hero__media :global(.fui) { display: block; }
+    /* 3D stack of report cards that tilts toward the pointer (--mx/--my from data-pointer-scene). */
+    .stack3d { display: block; position: absolute; left: 24%; bottom: 20%; width: 200px; height: 150px; perspective: 900px; z-index: 3; }
+    .stack3d__card { position: absolute; inset: 0; border-radius: 16px; background: var(--qw-white); color: var(--qw-slate-900); box-shadow: 0 30px 60px -20px rgba(34,43,55,.5); padding: 14px 16px; font: 700 12px/1.3 var(--font-display); display: grid; align-content: start; gap: 8px;
+      transform: rotateX(calc(14deg - var(--my) * 10deg)) rotateY(calc(-18deg + var(--mx) * 14deg)) translateZ(var(--z)); transition: transform 600ms var(--ease-out); }
+    .stack3d__card--1 { --z: 0px; }
+    .stack3d__card--2 { --z: 40px; inset: 34px -34px -34px 34px; background: var(--qw-slate-900); color: var(--qw-white); }
+    .stack3d__card--3 { --z: 80px; inset: 92px auto auto 140px; width: 130px; height: 48px; display: flex; align-items: center; gap: 8px; background: var(--qw-green-500); }
+    .stack3d__card--3 :global(svg) { width: 18px; height: 18px; }
+    .stack3d__card i { display: block; height: 7px; width: var(--w); border-radius: 6px; background: var(--qw-teal-500); }
+    .stack3d__card code { font: 500 11px/1.4 var(--font-code); color: var(--qw-green-500); }
+    .s3-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--qw-green-500); animation: qw-pulse 1.8s ease-out infinite; }
   }
 
-  /* Hero text. max-width: 12ch keeps the h1 to about two lines. */
-  .home-hero h1 { font-size: var(--fs-3xl); font-weight: var(--fw-black); max-width: 12ch; margin-bottom: var(--space-6); }
-  .home-hero .lede { color: var(--qw-ink-1); max-width: 36rem; }
-  .home-hero__rule { margin-top: var(--space-8); }
-  .home-hero__ctas { margin-top: var(--space-8); }
-  .home-hero__facts { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); list-style: none; padding: 0; margin: var(--space-10) 0 0; font-size: var(--fs-sm); color: var(--qw-ink-2); }
-  .home-hero__facts li { display: inline-flex; align-items: center; gap: var(--space-2); }
-  .home-hero__facts li::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--qw-green-500); }
+  /* ---------- SCROLL INTRO (desktop, motion allowed; html.intro-mode set by the script below) ----------
+     --p runs 0 → 1 over the first 90% of a viewport of scroll. p=0: hero covers the screen edge to edge, photo
+     zoomed in, header hidden above, cards hidden below. p=1: hero is an inset rounded panel below the header,
+     photo at normal scale, cards in place overlapping its bottom edge. */
+  @media (min-width: 1024px) {
+    :global(html.intro-mode) .intro { --p: 0; height: 190vh; position: relative; }
+    :global(html.intro-mode) .intro__stage { position: sticky; top: 0; height: 100vh; overflow: hidden; background: var(--qw-white); }
+    :global(html.intro-mode) .intro .hero { position: absolute; min-height: 0; padding-block: 0;
+      top: calc(var(--p) * 88px); left: calc(var(--p) * 24px); right: calc(var(--p) * 24px); bottom: calc(var(--p) * 24px);
+      border-radius: calc(var(--p) * 32px); }
+    :global(html.intro-mode) .intro .hero__photo { transform: scale(calc(1.18 - var(--p) * 0.18)); transform-origin: 60% 50%; }
+    :global(html.intro-mode) .intro .hero__copy { transform: translateY(calc(var(--p) * -84px)) scale(calc(1.08 - var(--p) * 0.14)); transform-origin: left center; }
+    :global(html.intro-mode) .intro .pathways-wrap { position: absolute; left: 0; right: 0; width: auto; bottom: 48px; margin: 0 auto;
+      opacity: clamp(0, calc(var(--p) * 2 - 0.8), 1); transform: translateY(calc((1 - var(--p)) * 160px)); }
+    :global(html.intro-mode) .intro .pathway { padding-block: var(--space-6) var(--space-5); }
+    :global(html.intro-mode) .intro .pathway__text, :global(html.intro-mode) .intro .pathway__icon { display: none; }
+    :global(html.intro-mode .site-header) { position: fixed; left: 0; right: 0; top: 0; transform: translateY(calc((var(--ip, 1) - 1) * 110%)); }
+    :global(html.intro-mode) .intro .hero__facts { display: none; }
+    :global(html.intro-mode) .intro__hint { display: flex; }
+  }
+  .intro__hint { display: none; position: absolute; left: 50%; bottom: 28px; translate: -50% 0; z-index: 4; align-items: center; gap: 8px; font: var(--fw-bold) var(--fs-xs)/1 var(--font-display); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-slate-900); opacity: calc(1 - var(--p, 1) * 4); pointer-events: none; }
+  .intro__hint i { width: 22px; height: 34px; border: 2px solid currentColor; border-radius: 12px; position: relative; }
+  .intro__hint i::after { content: ""; position: absolute; left: 50%; top: 6px; width: 4px; height: 7px; margin-left: -2px; border-radius: 2px; background: currentColor; animation: hint 1.6s ease-in-out infinite; }
+  @keyframes hint { 50% { transform: translateY(8px); opacity: 0.3; } }
 
-  /* Pathway cards: teal top rule (green for the AI pathway). No fill, so the teal CTA text sits on slate-900
-     (4.73:1); a translucent fill would lower it below 4.5:1. */
-  .pathways { position: relative; list-style: none; margin: var(--space-12) 0 0; padding: 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); }
-  .pathway { position: relative; display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-6); border-radius: var(--radius-lg); background: transparent; border: 1px solid rgba(255,255,255,0.12); border-top: 3px solid var(--qw-teal-500); transition: background var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out); }
-  .pathway[data-pathway="ai"] { border-top-color: var(--qw-green-500); }
-  .pathway:hover { background: color-mix(in srgb, var(--qw-teal-500) 10%, transparent); border-color: color-mix(in srgb, var(--qw-teal-500) 45%, transparent); }
-  .pathway__label { margin: 0; font: var(--fw-bold) var(--fs-xs)/1.3 var(--font-display); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-ink-2); }
-  .pathway__title { margin: 0; font-size: var(--fs-md); line-height: 1.3; }
-  .pathway__title a { color: #fff; text-decoration: none; }
-  /* Stretched link: the title link's ::after covers the whole card, so the card is one click target. The focus
-     ring is drawn on the card (:has) instead of the invisible stretched link. */
+  /* Pathway cards overlap the hero's bottom edge. */
+  .pathways-wrap { position: relative; z-index: 3; margin-top: calc(-1 * clamp(5rem, 4rem + 3vw, 7rem)); }
+  .pathways { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); }
+  .pathway { position: relative; display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-8) var(--space-6) var(--space-6); border-radius: 24px; box-shadow: 0 30px 60px -30px rgba(34,43,55,.45); }
+  .pathway--white { background: linear-gradient(160deg, rgba(29,118,111,0.78), rgba(24,98,92,0.86)); -webkit-backdrop-filter: blur(24px) saturate(170%); backdrop-filter: blur(24px) saturate(170%); border: 1px solid rgba(255,255,255,0.32); color: var(--qw-white); }
+  .pathway--green { background: rgba(44,175,129,0.72); -webkit-backdrop-filter: blur(20px) saturate(160%); backdrop-filter: blur(20px) saturate(160%); border: 1px solid rgba(255,255,255,0.4); color: var(--qw-slate-900); }
+  .pathway--slate { background: rgba(34,43,55,0.66); -webkit-backdrop-filter: blur(20px) saturate(140%); backdrop-filter: blur(20px) saturate(140%); border: 1px solid rgba(255,255,255,0.14); color: var(--qw-white); }
+  /* Liquid glass: a soft specular sheen and bright top edge over the blur. */
+  .pathway { box-shadow: 0 30px 60px -30px rgba(34,43,55,.5), inset 0 1px 0 rgba(255,255,255,.75), inset 0 -1px 0 rgba(255,255,255,.12); overflow: hidden; }
+  .pathway::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: linear-gradient(135deg, rgba(255,255,255,.45) 0%, rgba(255,255,255,0) 38%, rgba(255,255,255,0) 70%, rgba(255,255,255,.18) 100%); }
+  .pathway__icon { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: var(--qw-teal-500); color: var(--qw-slate-900); margin-bottom: var(--space-3); }
+  .pathway--green .pathway__icon { background: var(--qw-slate-900); color: var(--qw-white); }
+  .pathway--slate .pathway__icon { background: var(--qw-green-500); }
+  .pathway__icon :global(svg) { width: 22px; height: 22px; }
+  .pathway__label { margin: 0; font: var(--fw-bold) var(--fs-xs)/1.3 var(--font-display); letter-spacing: var(--tracking-label); text-transform: uppercase; }
+  .pathway__title { margin: 0; font-size: var(--fs-lg); line-height: 1.2; }
+  .pathway__title { color: inherit; }
+  .pathway__title a { color: inherit; text-decoration: none; }
   .pathway__title a::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
-  .pathway:has(a:focus-visible) { outline: 3px solid var(--qw-green-500); outline-offset: 3px; }
+  .pathway:has(a:focus-visible) { outline: 3px solid var(--qw-slate-900); outline-offset: 3px; }
   .pathway__title a:focus-visible { outline: none; }
-  .pathway__text { margin: 0; font-size: var(--fs-sm); color: var(--color-text); }
-  .pathway__cta { margin-top: auto; padding-top: var(--space-2); display: inline-flex; align-items: center; gap: 0.4rem; font-weight: var(--fw-semibold); font-size: var(--fs-sm); color: var(--qw-teal-500); }
-  .pathway__cta :global(svg) { width: 16px; height: 16px; transition: transform var(--dur-base) var(--ease-out); }
-  .pathway:hover .pathway__cta :global(svg) { transform: translateX(3px); }
+  .pathway__text { margin: 0; font-size: var(--fs-sm); }
+  .pathway__cta { margin-top: auto; padding-top: var(--space-4); display: inline-flex; align-items: center; gap: 0.4em; font: var(--fw-bold) var(--fs-sm)/1 var(--font-display); }
+  .pathway--white .pathway__cta { color: var(--qw-white); }
+  .pathway--white .pathway__icon { background: var(--qw-white); color: var(--qw-teal-800); }
+  .pathway--slate .pathway__cta { color: var(--qw-green-500); }
+  .pathway__cta :global(svg) { width: 1em; height: 1em; transition: transform var(--dur-base) var(--ease-out); }
+  .pathway:hover .pathway__cta :global(svg) { transform: translateX(4px); }
 
-  /* Intro: positioning headline and three "why" items with a teal left rule. */
-  .intro h2 { font-size: var(--fs-xl); font-weight: var(--fw-semibold); line-height: 1.2; }
-  .intro .beyond { white-space: normal; font-size: 0.9em; }
-  .why { display: grid; gap: var(--space-6); margin: var(--space-8) 0; }
-  .why__item { padding-left: var(--space-5); border-left: 2px solid var(--qw-teal-500); }
+  /* ---------- WHY: collage + bold statement ---------- */
+  .why-grid { display: grid; gap: var(--space-12); align-items: center; }
+  @media (min-width: 960px) { .why-grid { grid-template-columns: 0.95fr 1.05fr; gap: var(--space-16); } }
+  .collage { position: relative; min-height: 26rem; }
+  .collage img { position: absolute; object-fit: cover; border-radius: 24px; box-shadow: var(--shadow-lg); }
+  .collage__a { left: 0; top: 0; width: 78%; height: 68%; }
+  .collage__b { right: 0; bottom: 0; width: 56%; height: 52%; border: 6px solid var(--qw-mint-50); }
+  .collage__chip { left: 6%; bottom: 8%; position: absolute; }
+  .collage__block { position: absolute; right: 6%; top: -6%; width: 110px; height: 110px; border-radius: 50%; background: var(--qw-green-500); z-index: -1; }
+  .beyond { font-weight: var(--fw-black); color: var(--qw-teal-700); white-space: nowrap; background: linear-gradient(transparent 64%, color-mix(in srgb, var(--qw-green-500) 45%, transparent) 64%); }
+  .intro__copy .lede { margin-block: var(--space-6); }
+  .why { list-style: none; padding: 0; margin: 0 0 var(--space-8); display: grid; gap: var(--space-4); counter-reset: why; }
+  .why__item { counter-increment: why; position: relative; padding: var(--space-5) var(--space-6) var(--space-5) 4.5rem; background: rgba(255,255,255,0.7); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.7); border-radius: 18px; box-shadow: var(--shadow-sm); }
+  .why__item::before { content: "0" counter(why); position: absolute; left: var(--space-5); top: var(--space-5); font: var(--fw-black) var(--fs-lg)/1 var(--font-display); color: var(--qw-teal-500); }
   .why__item h3 { font-size: var(--fs-md); margin-bottom: var(--space-2); }
-  .why__item p { margin: 0; color: var(--color-muted); }
+  .why__item p { margin: 0; font-size: var(--fs-sm); color: var(--color-muted); }
 
-  /* Three ways: one card per pathway. The ::before bar colour marks the pathway (quality = logo teal,
-     build = teal-700, ai = logo green). Related links sit at the bottom (margin-top: auto). */
-  .ways { display: grid; gap: var(--space-6); grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); }
-  .way { display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-8) var(--space-6); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: #fff; position: relative; }
-  .way::before { content: ""; position: absolute; top: -1px; left: var(--space-6); right: var(--space-6); height: 3px; border-radius: 0 0 3px 3px; background: var(--qw-teal-500); }
-  .way[data-pathway="build"]::before { background: var(--qw-teal-700); }
-  .way[data-pathway="ai"]::before { background: var(--qw-green-500); }
-  .way__index { font-size: var(--fs-xs); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--color-muted); margin: 0; }
-  .way__title { font-size: var(--fs-lg); margin: 0; }
-  .way__text { color: var(--color-muted); margin: 0; }
-  .way__list { font-size: var(--fs-sm); }
-  .way__links { margin-top: auto; padding-top: var(--space-4); border-top: 1px solid var(--color-border); }
-  .way__links-title { font: var(--fw-medium) var(--fs-xs)/1.3 var(--font-mono); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--color-muted); margin-bottom: var(--space-2); }
-  .way__links ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); font-size: var(--fs-sm); font-weight: var(--fw-semibold); }
-  .way :global(.btn) { align-self: flex-start; }
+  /* ---------- STORY: sticky transforming visual ---------- */
+  .story { display: grid; gap: var(--space-10); }
+  .story__visual { display: none; }
+  .story__step { padding: var(--space-8); border-radius: 24px; background: var(--qw-mint-50); }
+  .way__index { font: var(--fw-bold) var(--fs-xs)/1 var(--font-display); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-teal-700); }
+  .way__title { font-size: var(--fs-xl); margin: var(--space-3) 0; }
+  .way__list { margin: var(--space-6) 0; }
+  .way__links-title { font: var(--fw-bold) var(--fs-xs)/1.3 var(--font-display); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--color-muted); margin: 0 0 var(--space-2); }
+  .way__links ul { list-style: none; padding: 0; margin: 0 0 var(--space-6); display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); font-size: var(--fs-sm); }
+  @media (min-width: 1024px) {
+    .story { grid-template-columns: 1fr 1fr; gap: var(--space-16); align-items: start; }
+    .story__visual { display: block; position: sticky; top: 7rem; }
+    .story__steps { display: grid; gap: 40vh; padding-block: 8vh 18vh; }
+    .story__step { background: transparent; padding: 0; opacity: 0.35; transition: opacity 500ms var(--ease-out); }
+    .story__step.is-active { opacity: 1; }
+    :global(html:not(.js-motion)) .story__step, :global(html.reduced-motion) .story__step { opacity: 1; }
+  }
+  .story__screen { position: relative; aspect-ratio: 4 / 3.4; border-radius: 28px; background: var(--qw-teal-500); overflow: hidden; box-shadow: 0 40px 80px -40px rgba(34,43,55,.5); transition: background 700ms var(--ease-out); }
+  .story[data-active="1"] .story__screen { background: var(--qw-green-500); }
+  .story[data-active="2"] .story__screen { background: var(--qw-slate-900); }
+  .sv { position: absolute; inset: 8%; background: rgba(255,255,255,0.78); -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%); border: 1px solid rgba(255,255,255,0.7); border-radius: 20px; padding: 7%; opacity: 0; transform: translateY(30px) scale(0.96); transition: opacity 600ms var(--ease-out), transform 700ms var(--ease-out); }
+  .story[data-active="0"] .sv--0, .story[data-active="1"] .sv--1, .story[data-active="2"] .sv--2 { opacity: 1; transform: none; }
+  .sv__title { display: flex; align-items: center; gap: 8px; font: var(--fw-bold) var(--fs-md)/1.2 var(--font-display); margin: 0 0 var(--space-6); }
+  .sv__title :global(svg) { width: 22px; height: 22px; color: var(--qw-teal-700); }
+  .sv-row { display: grid; grid-template-columns: 8rem 1fr 22px; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--qw-line); font: 600 var(--fs-sm)/1 var(--font-display); }
+  .sv-row :global(svg) { width: 20px; height: 20px; color: var(--qw-green-500); opacity: 0; transition: opacity 300ms; transition-delay: calc(var(--k) * 260ms + 900ms); }
+  .sv-bar { height: 8px; border-radius: 8px; background: var(--qw-mint-50); overflow: hidden; }
+  .sv-bar i { display: block; height: 100%; width: 0; background: var(--qw-teal-500); border-radius: inherit; transition: width 900ms var(--ease-out); transition-delay: calc(var(--k) * 260ms); }
+  .story[data-active="0"] .sv-bar i { width: 100%; }
+  .story[data-active="0"] .sv-row :global(svg) { opacity: 1; }
+  .sv-app { display: flex; gap: 6%; align-items: flex-end; height: 75%; }
+  .sv-app span { display: grid; gap: 8px; align-content: start; padding: 12px; border-radius: 14px; border: 2px solid var(--qw-slate-900); }
+  .sv-app__phone { width: 30%; height: 100%; }
+  .sv-app__web { flex: 1; height: 78%; }
+  .sv-app i { display: block; height: 14px; border-radius: 6px; background: var(--qw-mint-50); transform-origin: left; transform: scaleX(0); transition: transform 700ms var(--ease-out); }
+  .sv-app i:nth-child(1) { background: var(--qw-green-500); height: 40px; }
+  .sv-app i:nth-child(2) { transition-delay: 250ms; } .sv-app i:nth-child(3) { transition-delay: 500ms; } .sv-app i:nth-child(4) { transition-delay: 750ms; }
+  .story[data-active="1"] .sv-app i { transform: none; }
+  .sv--2 { background: rgba(43,53,64,0.72); color: var(--qw-white); }
+  .sv--2 .sv__title :global(svg) { color: var(--qw-green-500); }
+  .sv-net { width: 100%; height: auto; }
+  .sv-net circle { fill: var(--qw-teal-500); }
+  .sv-net .sv-net__hub { fill: var(--qw-green-500); }
+  .sv-net__lines path { stroke: var(--qw-white); stroke-width: 3; stroke-dasharray: 6 8; fill: none; animation: net-flow 1.4s linear infinite; }
+  @keyframes net-flow { to { stroke-dashoffset: -28; } }
+  .sv-net__label { font: 700 var(--fs-sm)/1 var(--font-display); text-align: center; color: var(--qw-green-500); margin: var(--space-4) 0 0; }
 
-  /* Products: heading + PRISM sample side by side from 960px; sample card tinted gold; external links below. */
-  .products__head { display: grid; gap: var(--space-8); align-items: end; margin-bottom: var(--space-10); }
-  .products__head :global(.section-heading) { margin-bottom: 0; }
-  @media (min-width: 960px) { .products__head { grid-template-columns: 1fr 18rem; } }
-  .prism-sample { border: 1px solid color-mix(in srgb, var(--qw-caution) 40%, transparent); border-radius: var(--radius-lg); padding: var(--space-5); background: color-mix(in srgb, var(--qw-caution) 6%, transparent); }
-  .prism-sample__label { font-size: var(--fs-xs); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-caution); margin-bottom: var(--space-2); }
-  .prism-sample__grade { font-size: 3.25rem; font-weight: var(--fw-bold); line-height: 1; color: #fff; margin: 0; }
-  .prism-sample__desc { color: var(--color-text); margin: var(--space-1) 0 var(--space-3); font-size: var(--fs-sm); }
-  .prism-sample__bar { height: 6px; border-radius: 6px; background: rgba(255,255,255,0.1); overflow: hidden; }
-  .prism-sample__bar span { display: block; height: 100%; background: linear-gradient(90deg, var(--qw-teal-500), var(--qw-caution)); }
-  .prism-sample__note { font-size: var(--fs-xs); color: var(--color-muted); margin: var(--space-3) 0 0; }
-  .products__more { list-style: none; padding: 0; margin: var(--space-8) 0 0; display: grid; gap: var(--space-2); grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); }
-  .products__more a { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-4) var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-md); color: var(--color-text); text-decoration: none; font-size: var(--fs-sm); }
-  .products__more a:hover { border-color: var(--qw-teal-500); }
-  .products__more strong { color: #fff; }
-  .products__more :global(svg) { width: 16px; height: 16px; margin-left: auto; flex: none; color: var(--qw-teal-500); }
+  /* ---------- PRODUCTS (green block) ---------- */
+  .products__head { display: grid; gap: var(--space-8); align-items: end; }
+  @media (min-width: 960px) { .products__head { grid-template-columns: 1fr 22rem; } }
+  .products__cards { align-items: stretch; }
+  .products__card { height: 100%; display: flex; }
+  .products__card > :global(*) { flex: 1; }
+  .prism-sample { background: rgba(34,43,55,0.82); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,0.15); color: var(--qw-white); border-radius: 22px; padding: var(--space-6); margin-bottom: var(--space-12); }
+  .prism-sample__label { font: var(--fw-bold) var(--fs-xs)/1.3 var(--font-display); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-green-500); margin: 0; }
+  .prism-sample__grade { font: var(--fw-black) 3.5rem/1 var(--font-display); margin: var(--space-3) 0 0; }
+  .prism-sample__desc { margin: var(--space-1) 0 var(--space-3); color: var(--qw-ink-1); }
+  .prism-sample__bar { height: 8px; background: rgba(255,255,255,0.15); border-radius: 8px; overflow: hidden; }
+  .prism-sample__bar span { display: block; height: 100%; background: var(--qw-green-500); }
+  .prism-sample__note { font-size: var(--fs-xs); color: var(--qw-ink-2); margin: var(--space-3) 0 0; }
+  .products__more { list-style: none; padding: 0; margin: var(--space-6) 0 0; display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); align-items: stretch; }
+  .products__more li { display: flex; }
+  .products__more a { flex: 1; display: flex; align-items: center; gap: var(--space-2); padding: var(--space-4) var(--space-5); border-radius: 16px; background: rgba(255,255,255,0.7); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.6); color: var(--qw-slate-900); text-decoration: none; font-size: var(--fs-sm); min-height: 4.5rem; transition: transform var(--dur-base) var(--ease-out); }
+  .products__more a:hover { transform: translateY(-3px); }
+  .products__more :global(svg) { width: 1em; height: 1em; margin-left: auto; flex: none; }
 
-  /* Awards: Clutch badge images are drawn at 72px wide (intrinsic size attributes 96 x 104 reserve space);
-     text awards are separated by a left rule. */
-  .awards { list-style: none; padding: 0; margin: 0 0 var(--space-10); display: flex; flex-wrap: wrap; gap: var(--space-4) var(--space-8); align-items: center; }
-  .awards img { width: 72px; height: auto; }
-  .awards li { display: flex; align-items: center; }
-  .awards__text { display: flex; flex-direction: column; align-items: flex-start !important; gap: 2px; max-width: 16rem; font-weight: var(--fw-semibold); font-size: var(--fs-sm); padding-left: var(--space-6); border-left: 1px solid var(--color-border); }
-  .awards__text--wide { max-width: 20rem; }
-  .awards__note { font-weight: var(--fw-regular); font-size: var(--fs-xs); color: var(--color-muted); }
-  .proof-more { margin-top: var(--space-6); }
+  /* ---------- AWARDS ---------- */
+  .awards { list-style: none; padding: 0; margin: 0 0 var(--space-12); display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr)); align-items: stretch; }
+  .award { position: relative; border-radius: 20px; padding: var(--space-5); display: grid; place-items: center; text-align: center; min-height: 9.5rem; }
+  .award--img { background: var(--qw-mint-50); }
+  .award--img img { width: 84px; height: auto; }
+  .award a { color: inherit; text-decoration: none; display: grid; gap: 2px; }
+  .award--inc { background: var(--qw-slate-900); color: var(--qw-white); }
+  .award__brand { font: 900 1.6rem/1 Georgia, 'Times New Roman', serif; }
+  .award__name { font: var(--fw-black) var(--fs-md)/1.1 var(--font-display); }
+  .award__year { font: var(--fw-bold) var(--fs-sm)/1 var(--font-display); color: var(--qw-green-500); }
+  .award--navy { background: var(--qw-teal-500); color: var(--qw-slate-900); grid-column: span 2; }
+  .award__sub { font-size: var(--fs-sm); }
+  .awards__note { display: block; font-size: var(--fs-xs); margin-top: var(--space-2); }
+  @media (max-width: 559px) { .award--navy { grid-column: auto; } }
+  .proof-more { margin-top: var(--space-8); }
 
-  /* Who we help: industry chips (44px touch targets) and the two audience cards. */
-  .industry-chips { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--space-2); }
-  .industry-chips a { display: inline-flex; align-items: center; min-height: 44px; padding: 0.5rem 1rem; border-radius: var(--radius-pill); background: #fff; border: 1px solid var(--qw-mint-200); color: var(--qw-slate-900); font-weight: var(--fw-semibold); font-size: var(--fs-sm); text-decoration: none; }
-  .industry-chips a:hover { border-color: var(--qw-teal-700); color: var(--qw-teal-800); }
+  /* ---------- MAP ---------- */
+  .map-grid { display: grid; gap: var(--space-10); align-items: center; }
+  @media (min-width: 960px) { .map-grid { grid-template-columns: 0.7fr 1.3fr; } }
+  .map-facts { display: grid; gap: var(--space-3); margin: var(--space-8) 0 0; }
+  .map-facts div { background: var(--qw-white); border-radius: 16px; padding: var(--space-4) var(--space-5); border-left: 5px solid var(--qw-teal-500); }
+  .map-facts div:nth-child(2) { border-color: var(--qw-green-500); } .map-facts div:nth-child(3) { border-color: var(--qw-slate-900); }
+  .map-facts dt { font: var(--fw-bold) var(--fs-xs)/1.3 var(--font-display); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-teal-700); }
+  .map-facts dd { margin: 2px 0 0; font: var(--fw-bold) var(--fs-md)/1.3 var(--font-display); }
+
+  /* ---------- WHO WE HELP ---------- */
+  .help-grid { display: grid; gap: var(--space-10); align-items: center; }
+  @media (min-width: 960px) { .help-grid { grid-template-columns: 1.1fr 0.9fr; } }
+  .industry-chips { list-style: none; padding: 0; margin: var(--space-8) 0 0; display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .industry-chips a { display: inline-flex; min-height: 44px; align-items: center; padding: 0.5rem 1.1rem; border-radius: 999px; background: var(--qw-mint-50); color: var(--qw-slate-900); text-decoration: none; font: var(--fw-semibold) var(--fs-sm)/1 var(--font-display); transition: background var(--dur-base), color var(--dur-base); }
+  .industry-chips a:hover { background: var(--qw-teal-500); }
   .audience-cards { display: grid; gap: var(--space-4); }
-  .audience { display: grid; gap: var(--space-3); padding: var(--space-6); background: #fff; border: 1px solid var(--qw-mint-200); border-radius: var(--radius-lg); text-decoration: none; color: var(--qw-slate-800); transition: box-shadow var(--dur-base), border-color var(--dur-base); }
-  .audience:hover { box-shadow: var(--shadow-md); border-color: var(--qw-teal-500); }
-  .audience .eyebrow { margin: 0; }
-  .audience__title { font-size: var(--fs-lg); font-weight: var(--fw-bold); color: var(--qw-slate-900); line-height: 1.25; }
+  .audience { display: grid; gap: var(--space-3); padding: var(--space-8); border-radius: 24px; text-decoration: none; }
+  .audience--teal { background: var(--qw-teal-500); color: var(--qw-slate-900); --color-eyebrow: var(--qw-slate-900); }
+  .audience--slate { background: var(--qw-slate-900); color: var(--qw-white); --color-eyebrow: var(--qw-green-500); }
+  .audience__title { font: var(--fw-bold) var(--fs-lg)/1.3 var(--font-display); }
+  .audience--teal .link-arrow { color: var(--qw-slate-900); }
+  .audience--slate .link-arrow { color: var(--qw-green-500); }
 
-  /* Shared row: section heading on the left, "All ..." button on the right (wraps on small screens). */
+  /* ---------- SHARED ROWS ---------- */
   .section-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: var(--space-4); margin-bottom: var(--space-8); }
-  .section-row :global(.section-heading) { margin-bottom: 0; }
-  /* Insights + events stack, and the no-upcoming-events fallback line. */
+  .section-row .section-intro { margin-bottom: 0; }
   .insights { display: grid; gap: var(--space-16); }
-  .events-strip__fallback { display: flex; gap: var(--space-2); align-items: center; font-size: var(--fs-sm); color: var(--color-muted); margin-bottom: var(--space-4); }
-  .events-strip__fallback :global(svg) { width: 18px; height: 18px; color: var(--qw-teal-700); flex: none; }
+  /* Events panel: grey card so it never blends with the page (Janique). */
+  .events-strip { background: color-mix(in srgb, var(--qw-slate-900) 6%, white); border-radius: 28px; padding: clamp(1.5rem, 1rem + 2vw, 3rem); }
+  .events-strip__head { display: flex; gap: var(--space-6); align-items: center; margin-bottom: var(--space-6); }
+  .events-strip__photo { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; flex: none; border: 4px solid var(--qw-teal-500); }
+  .events-strip :global(.card) { background: var(--qw-white); }
+  .events-strip__fallback { display: flex; gap: var(--space-2); align-items: center; font-size: var(--fs-sm); }
+  .events-strip__fallback :global(svg) { width: 1.1em; height: 1.1em; color: var(--qw-teal-700); }
+  @media (max-width: 559px) { .events-strip__head { flex-direction: column; align-items: flex-start; } }
 </style>

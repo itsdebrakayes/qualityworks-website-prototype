@@ -38,12 +38,12 @@ const crumbs = [{ label: 'Home', href: '/' }, { label: 'Products & Innovations' 
 const forWhom: Record<string, string> = { 'qualitywatcher-ai-tools': 'QA teams and automation engineers', 'qualitywatcher-tcm': 'QA teams managing test cases', 'agents-as-a-service': 'Small businesses and business teams', prism: 'Teams running AI in production', posture: 'Suppliers managing cyber risk' };
 ---
 <BaseLayout seo={{ title: 'Products & Innovations: QualityWatcher, Agents as a Service, PRISM | QualityWorks', description: 'Compare QualityWorks products: QualityWatcher AI tools and test management, Agents as a Service, the PRISM AI output quality standard and Posture.' }} breadcrumbs={crumbs}>
-  <PageHero image={peopleImage('products-engineer')} variant="product" eyebrow="Products & Innovations" title="Software we build, alongside the services we deliver" lede="Products are things you can use or buy; services are work we do with you. Several products live on their own platforms — this page shows where each one lives before you click." breadcrumbs={crumbs} />
+  <PageHero tone="teal" image={peopleImage('products-engineer')} ui="build" eyebrow="Products & Innovations" title="Software we build, alongside the services we deliver" lede="Products are things you can use or buy; services are work we do with you. Several products live on their own platforms — this page shows where each one lives before you click." breadcrumbs={crumbs} />
   {/* Comparison table: answers "which product is which and where does it live" before any click. */}
-  <section class="section" aria-labelledby="compare-title">
+  <section class="section surface-white" aria-labelledby="compare-title">
     <div class="container">
       <SectionHeading eyebrow="Compare" title="Which product is which" id="compare-title" />
-      <div class="table-scroll">
+      <div class="table-scroll compare-wrap" data-reveal>
         <table class="data-table">
           <caption class="visually-hidden">QualityWorks products compared</caption>
           <thead><tr><th scope="col">Product</th><th scope="col">What it is</th><th scope="col">For</th><th scope="col">Where it lives</th></tr></thead>
@@ -60,13 +60,20 @@ const forWhom: Record<string, string> = { 'qualitywatcher-ai-tools': 'QA teams a
     </div>
   </section>
   {/* Product cards (same records as the table) with status badges from ProductCard. */}
-  <section class="section surface-alt" aria-labelledby="all-title">
+  <section class="section surface-mint" aria-labelledby="all-title">
     <div class="container">
       <h2 id="all-title" class="visually-hidden">All products</h2>
-      <div class="grid grid--3">{products.map((p) => <ProductCard p={p} />)}</div>
+      <div class="pgrid" data-reveal-stagger>{products.map((p, i) => (
+        <div class:list={['pcell', `pcell--${p.accent}`, i === 0 && 'pcell--wide']} data-reveal="up">
+          <div class="ptilt" data-tilt="5">
+            <span class="pcell__icon icon-badge" aria-hidden="true"><Icon name={({ 'qualitywatcher-ai-tools': 'spark', 'qualitywatcher-tcm': 'layers', 'agents-as-a-service': 'agent', prism: 'gauge', posture: 'shield' } as Record<string, string>)[p.slug] ?? 'spark'} /></span>
+            <ProductCard p={p} />
+          </div>
+        </div>
+      ))}</div>
     </div>
   </section>
-  <CtaBand title="Need help choosing between a product and a service?" primary={ctas.contact} />
+  <CtaBand photo="industries-team" title="Need help choosing between a product and a service?" primary={ctas.contact} />
 </BaseLayout>
 <style>
   /* "Where it lives" cell: small external-link icon inline with the hostname. */
@@ -74,4 +81,23 @@ const forWhom: Record<string, string> = { 'qualitywatcher-ai-tools': 'QA teams a
   /* Row headers (product names): global.css makes every .data-table th sticky with a canvas background,
      which is meant for column headers, so reset that here. */
   th[scope="row"] { font-weight: var(--fw-semibold); background: transparent; position: static; }
+  .compare-wrap { border-radius: 22px; border: 1px solid color-mix(in srgb, var(--qw-slate-900) 10%, transparent); }
+  /* Product cards (redesign): equal-height tiles in a bright grid, tilt toward the pointer, accent-coloured
+     icon badge. The first product spans two columns on wide screens. */
+  .pgrid { display: grid; gap: var(--space-5); grid-template-columns: 1fr; align-items: stretch; }
+  @media (min-width: 640px) { .pgrid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1024px) { .pgrid { grid-template-columns: repeat(3, 1fr); } }
+  .pcell { height: 100%; }
+  .ptilt { position: relative; height: 100%; }
+  .ptilt :global(.product-card) { height: 100%; display: flex; flex-direction: column; border-radius: 22px; border: 0; border-top: 0; padding-top: var(--space-16); background: var(--qw-white); transition: box-shadow 300ms; }
+  .ptilt :global(.card__body) { flex: 1; display: flex; flex-direction: column; }
+  .ptilt :global(.card__footer) { margin-top: auto; }
+  .ptilt:hover :global(.product-card) { box-shadow: 0 30px 50px -30px rgba(34,43,55,.5); }
+  .pcell__icon { position: absolute; top: var(--space-6); left: var(--space-6); z-index: 1; pointer-events: none; }
+  .pcell--green .pcell__icon { background: var(--qw-green-500); }
+  .pcell--gold .pcell__icon { background: var(--qw-caution); }
+  .pcell--slate .pcell__icon { background: var(--qw-slate-900); color: var(--qw-white); }
+  .pcell--wide .ptilt :global(.product-card) { background: var(--qw-teal-500); --color-heading: var(--qw-slate-900); --color-text: var(--qw-slate-900); --color-muted: var(--qw-slate-900); --color-link: var(--qw-slate-900); color: var(--qw-slate-900); }
+  .pcell--wide .pcell__icon { background: var(--qw-slate-900); color: var(--qw-white); }
+  @media (min-width: 1024px) { .pcell--wide { grid-column: span 2; } }
 </style>

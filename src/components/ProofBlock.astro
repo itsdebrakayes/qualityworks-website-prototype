@@ -4,7 +4,7 @@ import { rn } from '../lib/release';
  * Testimonial / proof block. Quotes are published on the live site today; each requires re-approval
  * from the person quoted before reuse (approval state shown in review mode).
  *
- * What: a responsive grid of quote cards (quote, name, role) drawn from src/data/testimonials.ts.
+ * What: an interactive testimonial stage (tabs + large quote panel) drawn from src/data/testimonials.ts.
  *
  * Why: social proof is reused from the live site rather than rewritten, so wording stays exactly as
  * the person approved it. Each quote carries provenance so reviewers can see that re-approval is
@@ -32,26 +32,57 @@ interface Props {
 // Filter keeps data-file order (see Gotchas). The `!` is safe: this branch only runs when ids is set.
 const list = Astro.props.ids ? testimonials.filter((t) => Astro.props.ids!.includes(t.id)) : testimonials;
 ---
-<div class="proof">
-  {list.map((t) => (
-    <figure class="proof__item" data-review-note={rn(`${t.id}: ${t.provenance.approval}`)}>
-      <blockquote><p>{t.quote}</p></blockquote>
-      {/* Name and role as separate lines; figcaption ties them to the quote. */}
-      <figcaption><span class="proof__name">{t.name}</span><span class="proof__role">{t.role}</span></figcaption>
-    </figure>
-  ))}
+{/* Redesign (docs/16 §4; Janique: "Can we make this section a bit more interactive"): an interactive
+    testimonial stage. Tabs list each person; the selected quote fills a large teal panel. It auto-advances
+    every 7 s while visible (paused on hover/focus, never with reduced motion); clicking a tab or using the
+    arrow keys takes control. All quotes stay in the DOM (inactive panels are hidden), verbatim. */}
+<div class="proof" data-cycle="7000" data-reveal="up">
+  <div class="proof__stage">
+    <svg class="proof__mark" viewBox="0 0 64 48" aria-hidden="true"><path d="M0 48V28C0 12 8 2 24 0l3 7C17 10 13 16 13 24h11v24H0zm36 0V28C36 12 44 2 60 0l3 7C53 10 49 16 49 24h11v24H36z" fill="currentColor"/></svg>
+    {list.map((t, i) => (
+      <figure class="proof__item" id={`proof-${t.id}`} role="tabpanel" aria-labelledby={`proof-tab-${t.id}`} data-cycle-panel={String(i)} data-cycle-hide hidden={i !== 0} data-review-note={rn(`${t.id}: ${t.provenance.approval}`)}>
+        <blockquote><p>{t.quote}</p></blockquote>
+        <figcaption><span class="proof__name">{t.name}</span><span class="proof__role">{t.role}</span></figcaption>
+      </figure>
+    ))}
+  </div>
+  {list.length > 1 && (
+    <div class="proof__tabs" role="tablist" aria-label="Client testimonials">
+      {list.map((t, i) => (
+        <button type="button" role="tab" class="proof__tab" id={`proof-tab-${t.id}`} aria-controls={`proof-${t.id}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-cycle-tab={String(i)}>
+          <span class="proof__avatar" aria-hidden="true">{t.name.replace(/^Dr\.\s*/, '').split(' ').map((w) => w[0]).slice(0, 2).join('')}</span>
+          <span class="proof__who"><strong>{t.name}</strong><span>{t.role}</span></span>
+          <span class="proof__timer" aria-hidden="true"></span>
+        </button>
+      ))}
+    </div>
+  )}
 </div>
 <style>
-  /* Grid: cards at least 20rem wide; min(100%, 20rem) avoids overflow on 360px phones. */
-  .proof { display: grid; gap: var(--space-6); grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); }
-  /* Card: space-between pins the attribution to the bottom so names align across cards of different quote lengths. */
-  .proof__item { margin: 0; display: flex; flex-direction: column; justify-content: space-between; gap: var(--space-6); padding: var(--space-8) var(--space-6) var(--space-6); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); position: relative; }
-  /* Short 28px x 3px teal accent bar at the top-left of each card (the extra top padding makes room for it). */
-  .proof__item::before { content: ""; position: absolute; top: var(--space-6); left: var(--space-6); width: 28px; height: 3px; background: var(--qw-teal-500); }
-  /* Element selectors are safe here: Astro scopes them to this component's markup only. */
-  blockquote { margin: var(--space-4) 0 0; font-size: var(--fs-base); line-height: 1.6; color: var(--color-heading); }
+  .proof { display: grid; gap: var(--space-6); }
+  @media (min-width: 960px) { .proof { grid-template-columns: 1.6fr 1fr; align-items: stretch; } }
+  .proof__stage { position: relative; background: var(--qw-teal-500); color: var(--qw-slate-900); border-radius: 28px; padding: clamp(2rem, 1.2rem + 3vw, 3.5rem); min-height: 20rem; display: grid; }
+  .proof__mark { width: 56px; color: var(--qw-white); margin-bottom: var(--space-6); }
+  .proof__item[hidden] { display: none; }
+  .proof__item { margin: 0; grid-area: 2 / 1; display: flex; flex-direction: column; justify-content: space-between; gap: var(--space-8); }
+  :global(html.js-motion) .proof__item.is-active { animation: proof-in 700ms var(--ease-out); }
+  @keyframes proof-in { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  blockquote { margin: 0; font-family: var(--font-display); font-weight: var(--fw-semibold); font-size: clamp(1.15rem, 0.95rem + 0.9vw, 1.6rem); line-height: 1.4; letter-spacing: -0.01em; }
   blockquote p { margin: 0; }
   figcaption { display: grid; gap: 2px; font-size: var(--fs-sm); }
-  .proof__name { font-weight: var(--fw-bold); color: var(--color-heading); }
-  .proof__role { color: var(--color-muted); }
+  .proof__name { font-family: var(--font-display); font-weight: var(--fw-bold); font-size: var(--fs-md); }
+  .proof__tabs { display: grid; gap: var(--space-3); align-content: center; }
+  .proof__tab { position: relative; overflow: hidden; display: flex; align-items: center; gap: var(--space-4); text-align: left; padding: var(--space-4) var(--space-5); border-radius: 18px; border: 1.5px solid var(--qw-line); background: var(--qw-white); color: var(--qw-slate-900); cursor: pointer; transition: border-color var(--dur-base), background var(--dur-base), transform var(--dur-base) var(--ease-out); }
+  .proof__tab:hover { transform: translateX(4px); border-color: var(--qw-teal-500); }
+  .proof__tab[aria-selected="true"] { border-color: var(--qw-slate-900); background: var(--qw-mint-50); }
+  .proof__avatar { width: 44px; height: 44px; flex: none; border-radius: 50%; display: grid; place-items: center; background: var(--qw-slate-900); color: var(--qw-white); font: var(--fw-bold) var(--fs-sm)/1 var(--font-display); }
+  .proof__tab[aria-selected="true"] .proof__avatar { background: var(--qw-green-500); color: var(--qw-slate-900); }
+  .proof__who { display: grid; font-size: var(--fs-sm); line-height: 1.35; }
+  .proof__who strong { font-family: var(--font-display); }
+  .proof__who span { color: var(--qw-muted); }
+  /* Progress line along the bottom of the selected tab while auto-advancing. */
+  .proof__timer { position: absolute; left: 0; bottom: 0; height: 3px; width: 0; background: var(--qw-teal-500); }
+  :global(html.js-motion:not(.reduced-motion)) .proof__tab[aria-selected="true"] .proof__timer { animation: proof-timer 7s linear; }
+  .proof:hover .proof__timer, .proof:focus-within .proof__timer { animation-play-state: paused !important; }
+  @keyframes proof-timer { to { width: 100%; } }
 </style>

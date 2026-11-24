@@ -58,7 +58,7 @@ const isCurrent = (href: string) => norm(href) === cur;
   <div class="container site-header__inner">
     {/* Logo: alt names the link destination rather than describing the image (review round 1, D1). */}
     <a class="site-header__logo" href="/">
-      <img src="/brand/qualityworks-wordmark-teal-on-slate.jpg" alt="QualityWorks Consulting Group home" width="677" height="156" />
+      <img src="/brand/qualityworks-wordmark-white.png" alt="QualityWorks Consulting Group home" width="291" height="63" />
     </a>
 
     {/* Desktop navigation, shown from 1024px. Each top-level item is a disclosure button plus a hidden panel. */}
@@ -179,9 +179,8 @@ const isCurrent = (href: string) => norm(href) === cur;
 </header>
 
 <style>
-  /* Bar: sticky header above page content (z-index token). Background is the guide's Slate 800, because the
-     supplied primary lockup (teal wordmark) is delivered on Slate 800 (/brand/qualityworks-wordmark-teal-on-slate.jpg,
-     background baked in). Keep the two in step. Nav text is ink-1 (8.71:1); the focus ring is the guide's
+  /* Bar: sticky header above page content (z-index token). Background is the guide's Slate 800 with the
+     white reversed wordmark (Janique, 23 Nov 2026: "Let's use the white version of the logo"). Nav text is ink-1 (8.71:1); the focus ring is the guide's
      Green (3.73:1, above the 3:1 needed for focus indicators). */
   .site-header { position: sticky; top: 0; z-index: var(--z-header); background: var(--qw-slate-800); color: #fff; border-bottom: 1px solid rgba(255,255,255,0.08); --focus-ring: var(--qw-green-500); }
   /* Bar height 72px. Triggers use the same min-height so their underline sits on the bottom edge. */

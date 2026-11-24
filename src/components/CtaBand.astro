@@ -1,6 +1,6 @@
 ---
 /**
- * CtaBand: the dark "next step" band near the bottom of a page, with an eyebrow, an h2, optional
+ * CtaBand: the bright "next step" colour block near the bottom of a page (teal or green, people photo), with an eyebrow, an h2, optional
  * supporting text and one or two buttons.
  *
  * Why: every page should end with a clear next action (contact, see case studies, open a product).
@@ -25,8 +25,9 @@
  */
 import Button from './Button.astro';
 import type { Cta } from '../data/types';
+import { peopleImage, peopleSrc, peopleSrcset } from '../data/peopleImagery';
 interface Props {
-  /** Band heading (h2). Keep it short; it is capped at 26 characters per line. */
+  /** Band heading (h2). Keep it short. */
   title: string;
   /** Supporting sentence under the heading. Optional. */
   text?: string;
@@ -34,38 +35,45 @@ interface Props {
   primary: Cta;
   /** Second action; always styled as the secondary (outline) button. */
   secondary?: Cta;
-  /** Small mono label above the heading. Default 'Next step'. */
-  eyebrow?: string
+  /** Small label above the heading. Default 'Next step'. */
+  eyebrow?: string;
+  /** Colour block: 'teal' (default) or 'green'. */
+  tone?: 'teal' | 'green';
+  /** People photo id from src/data/peopleImagery.ts shown on the right (default 'contact-team'); false hides it. */
+  photo?: string | false;
 }
-const { title, text, primary, secondary, eyebrow = 'Next step' } = Astro.props;
+const { title, text, primary, secondary, eyebrow = 'Next step', tone = 'teal', photo = 'contact-team' } = Astro.props;
+const img = photo ? peopleImage(photo) : null;
 // Unique heading id per instance so aria-labelledby never points at another band's heading.
 const headingId = `cta-band-${Math.random().toString(36).slice(2, 8)}`;
 ---
-<section class="cta-band surface-dark" aria-labelledby={headingId}>
+{/* Redesign (docs/16 §4): a bright colour block (Teal or Green, slate-900 text) with a people photo that
+    blends into the block on its left edge, like the page heroes. Buttons are equal width. */}
+<section class:list={['cta-band', `surface-${tone}`, { 'cta-band--photo': !!img }]} aria-labelledby={headingId}>
+  {img && <img class="cta-band__img" src={peopleSrc(img)} srcset={peopleSrcset(img)} sizes="(min-width: 960px) 45vw, 100vw" alt="" width="1600" height={Math.round(1600 / img.ratio)} loading="lazy" decoding="async" style={`object-position:${img.focus}`} />}
   <div class="container cta-band__inner">
-    <div>
+    <div data-reveal="up">
       <p class="eyebrow">{eyebrow}</p>
-      <h2 id={headingId}>{title}</h2>
+      <h2 id={headingId} class="display-sm">{title}</h2>
       {text && <p class="cta-band__text">{text}</p>}
-    </div>
-    {/* kind is overridden so the band always shows one primary and at most one secondary button. */}
-    <div class="btn-row">
-      <Button cta={{ ...primary, kind: 'primary' }} />
-      {secondary && <Button cta={{ ...secondary, kind: 'secondary' }} />}
+      <div class="btn-row btn-row--equal cta-band__ctas">
+        <Button cta={{ ...primary, kind: 'primary' }} />
+        {secondary && <Button cta={{ ...secondary, kind: 'secondary' }} />}
+      </div>
     </div>
   </div>
 </section>
 <style>
-  /* Band: solid slate-800, the guide's page-background slate. The brand gradient is reserved for one
-     accent per page (the hero rule), so the band carries no gradient or decorative motif. On slate-800
-     the guide's teal is below 4.5:1 for small text, so the eyebrow and muted copy switch to ink-1. */
-  .cta-band { position: relative; overflow: hidden; padding-block: var(--space-16); background: var(--qw-slate-800);
-    --color-bg: var(--qw-slate-800); --color-eyebrow: var(--qw-ink-1); --color-muted: var(--qw-ink-1); --color-link: var(--qw-white); }
-  /* z-index 1 keeps the copy and buttons above any background layer. */
-  .cta-band__inner { position: relative; z-index: 1; display: grid; gap: var(--space-8); align-items: end; }
-  /* From 900px, text and buttons sit side by side; the button column takes only the width it needs. */
-  @media (min-width: 900px) { .cta-band__inner { grid-template-columns: 1.5fr auto; } }
-  .cta-band h2 { font-size: var(--fs-xl); max-width: 26ch; margin-bottom: var(--space-3); }
-  /* Supporting text in ink-1 (8.71:1 on slate-800), capped at 46ch for readability. */
-  .cta-band__text { color: var(--color-muted); max-width: 46ch; margin: 0; }
+  .cta-band { position: relative; overflow: hidden; padding-block: clamp(4rem, 3rem + 4vw, 7rem); }
+  .cta-band__inner { position: relative; z-index: 1; }
+  .cta-band__inner > div { max-width: 38rem; }
+  .cta-band h2 { margin-bottom: var(--space-4); }
+  .cta-band__text { font-size: var(--fs-md); margin: 0; max-width: 34rem; }
+  .cta-band__ctas { margin-top: var(--space-8); }
+  /* Photo is decorative here (alt=""): the people imagery supports, the heading carries the message. */
+  .cta-band__img { display: none; }
+  @media (min-width: 960px) {
+    .cta-band__img { display: block; position: absolute; top: 0; right: 0; bottom: 0; width: 48%; height: 100%; object-fit: cover;
+      -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 40%); mask-image: linear-gradient(90deg, transparent 0%, #000 40%); }
+  }
 </style>
