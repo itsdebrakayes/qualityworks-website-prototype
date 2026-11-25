@@ -1,0 +1,87 @@
+---
+/**
+ * AppScreen: an ILLUSTRATIVE application interface (desktop web app + phone companion) rendered in HTML/CSS
+ * from a ScreenSpec (src/data/portfolio.ts). Used by the custom development portfolio gallery.
+ *
+ * Why HTML instead of screenshots: Stacy approved fake data to evaluate the portfolio design (24 Nov 2026);
+ *   rendering the screens keeps them crisp at every size and easy to restyle per project (`accent`).
+ * Honesty: the data is invented; the gallery labels every sample project. Replace with real screenshots
+ *   (`<img>`) when clients approve them.
+ * Accessibility: decorative duplicate of the project text, so the whole figure is aria-hidden.
+ * Sizing: everything scales with the container width (container queries, cqw units).
+ * Props: spec, accent, phone (show the phone companion, default true).
+ */
+import type { ScreenSpec } from '../data/portfolio';
+interface Props { spec: ScreenSpec; accent: string; phone?: boolean }
+const { spec, accent, phone = true } = Astro.props;
+const max = Math.max(...spec.series);
+const pts = spec.series.map((v, i) => `${(i / (spec.series.length - 1)) * 100},${100 - (v / max) * 86}`).join(' ');
+---
+<div class="as" style={`--a:${accent}`} aria-hidden="true">
+  <div class="as__win">
+    <div class="as__chrome"><i></i><i></i><i></i><span>{spec.app.toLowerCase().replace(/\s+/g, '')}.app</span></div>
+    <div class="as__body">
+      <nav class="as__nav"><b class="as__logo">{spec.app}</b>{spec.nav.map((n, i) => <span class:list={{ on: i === 0 }}>{n}</span>)}</nav>
+      <div class="as__main">
+        <div class="as__kpis">{spec.kpis.map((k) => <div class="as__kpi"><small>{k.l}</small><strong>{k.v}</strong>{k.d && <em>{k.d}</em>}</div>)}</div>
+        <div class="as__chart">
+          <small>{spec.chartLabel}</small>
+          {spec.chart === 'line' ? (
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none"><polyline points={`0,100 ${pts} 100,100`} class="as__area" /><polyline points={pts} class="as__line" /></svg>
+          ) : (
+            <div class="as__bars">{spec.series.map((v, i) => <i style={`--h:${(v / max) * 100}%;--k:${i}`}></i>)}</div>
+          )}
+        </div>
+        <div class="as__rows">{spec.rows.map((r) => <div class="as__row"><span>{r[0]}</span><span>{r[1]}</span><b>{r[2]}</b></div>)}</div>
+      </div>
+    </div>
+  </div>
+  {phone && (
+    <div class="as__phone">
+      <div class="as__notch"></div>
+      <p class="as__ptitle">{spec.phone.title}</p>
+      <div class="as__phero"><strong>{spec.phone.hero}</strong><small>{spec.phone.heroSub}</small></div>
+      {spec.phone.items.map(([l, v]) => <div class="as__pitem"><span>{l}</span><b>{v}</b></div>)}
+      <span class="as__pcta">{spec.phone.cta}</span>
+    </div>
+  )}
+</div>
+<style>
+  .as { position: relative; container-type: inline-size; width: 100%; aspect-ratio: 16 / 10.6; font-family: var(--font-body); color: #1f2933; }
+  .as__win { position: absolute; left: 0; top: 0; width: 86%; height: 92%; border-radius: 1.6cqw; background: #fff; overflow: hidden; box-shadow: 0 3cqw 7cqw -2cqw rgba(15,23,42,.45), 0 0 0 1px rgba(15,23,42,.08); display: flex; flex-direction: column; }
+  .as__chrome { display: flex; align-items: center; gap: .7cqw; padding: 1cqw 1.4cqw; background: #f1f4f7; border-bottom: 1px solid #e3e8ee; }
+  .as__chrome i { width: 1cqw; height: 1cqw; border-radius: 50%; background: #ff5f57; } .as__chrome i:nth-child(2) { background: #febc2e; } .as__chrome i:nth-child(3) { background: #28c840; }
+  .as__chrome span { margin-left: 2cqw; padding: .3cqw 2.4cqw; border-radius: 1cqw; background: #fff; font-size: 1.15cqw; color: #475569; }
+  .as__body { flex: 1; display: grid; grid-template-columns: 19% 1fr; min-height: 0; }
+  .as__nav { background: color-mix(in srgb, var(--a) 62%, #0b1f1d); color: #fff; padding: 2cqw 1.4cqw; display: flex; flex-direction: column; gap: 1.1cqw; font-size: 1.3cqw; }
+  .as__logo { font: 800 1.6cqw/1.1 var(--font-display); margin-bottom: 1.2cqw; }
+  .as__nav span { padding: .6cqw .9cqw; border-radius: .8cqw; }
+  .as__nav span.on { background: rgba(0,0,0,.28); font-weight: 700; }
+  .as__main { padding: 2cqw; display: grid; grid-template-rows: auto 1fr auto; gap: 1.6cqw; min-height: 0; background: #f8fafc; }
+  .as__kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2cqw; }
+  .as__kpi { background: #fff; border-radius: 1cqw; padding: 1.2cqw 1.4cqw; box-shadow: 0 1px 2px rgba(15,23,42,.06); display: grid; gap: .4cqw; }
+  .as__kpi small { font-size: 1.05cqw; color: #475569; }
+  .as__kpi strong { font: 800 2.1cqw/1 var(--font-display); color: #0f172a; }
+  .as__kpi em { font-style: normal; font-size: 1.05cqw; color: #15803d; font-weight: 700; }
+  .as__chart { background: #fff; border-radius: 1cqw; padding: 1.2cqw 1.4cqw; display: flex; flex-direction: column; gap: .8cqw; min-height: 0; box-shadow: 0 1px 2px rgba(15,23,42,.06); }
+  .as__chart small { font-size: 1.05cqw; color: #475569; }
+  .as__chart svg { flex: 1; width: 100%; min-height: 0; }
+  .as__line { fill: none; stroke: var(--a); stroke-width: 2.2; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+  .as__area { fill: color-mix(in srgb, var(--a) 16%, transparent); stroke: none; }
+  .as__bars { flex: 1; display: flex; align-items: flex-end; gap: 1.2cqw; min-height: 0; }
+  .as__bars i { flex: 1; height: var(--h); border-radius: .6cqw .6cqw 0 0; background: linear-gradient(var(--a), color-mix(in srgb, var(--a) 55%, #fff)); }
+  .as__rows { background: #fff; border-radius: 1cqw; padding: .4cqw 1.4cqw; box-shadow: 0 1px 2px rgba(15,23,42,.06); }
+  .as__row { display: grid; grid-template-columns: 1.6fr 1fr auto; gap: 1cqw; padding: .9cqw 0; font-size: 1.1cqw; border-bottom: 1px solid #eef2f6; }
+  .as__row:last-child { border-bottom: 0; }
+  .as__row span:nth-child(2) { color: #475569; }
+  .as__row b { color: color-mix(in srgb, var(--a) 55%, #000); }
+  .as__phone { position: absolute; right: 0; bottom: 0; width: 25%; aspect-ratio: 9 / 18.5; border-radius: 3.4cqw; background: #fff; border: .9cqw solid #111827; padding: 3.6cqw 1.6cqw 1.8cqw; display: flex; flex-direction: column; gap: 1cqw; box-shadow: 0 3cqw 6cqw -1.5cqw rgba(15,23,42,.55); font-size: 1.15cqw; }
+  .as__notch { position: absolute; top: .8cqw; left: 50%; width: 32%; height: 1.3cqw; border-radius: 1cqw; background: #111827; transform: translateX(-50%); }
+  .as__ptitle { margin: 0; font: 700 1.35cqw/1.2 var(--font-display); }
+  .as__phero { border-radius: 1.4cqw; padding: 1.6cqw 1.4cqw; background: color-mix(in srgb, var(--a) 62%, #0b1f1d); color: #fff; display: grid; gap: .4cqw; }
+  .as__phero strong { font: 800 2.2cqw/1 var(--font-display); }
+  .as__phero small { font-size: 1cqw; opacity: .9; }
+  .as__pitem { display: flex; justify-content: space-between; gap: 1cqw; padding: .9cqw 1cqw; border-radius: 1cqw; background: #f1f5f9; }
+  .as__pitem b { color: color-mix(in srgb, var(--a) 55%, #000); }
+  .as__pcta { margin-top: auto; text-align: center; padding: 1.1cqw; border-radius: 2cqw; background: #111827; color: #fff; font-weight: 700; }
+</style>

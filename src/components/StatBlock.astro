@@ -21,10 +21,9 @@ import { RELEASE, REVIEW } from '../lib/release';
  * - RELEASE: stats whose claim is 'required-before-launch' or 'wording-approval-needed' are removed, ClaimRef renders nothing, and
  *   the footnote is not rendered. If no stats remain, the whole block disappears.
  *
- * Accessibility: a <dl> pairs each label (dt) with its value (dd); graphics are aria-hidden; counters keep the
- * final value in the DOM (src/lib/motion.ts). CSS shows the value above the label
- * (column-reverse) while the DOM keeps label-then-value, so screen readers hear "Years of quality-driven
- * development, 16+" in a sensible order.
+ * Accessibility: a <dl> pairs each label (dt) with its value (dd); the index and rule are aria-hidden; counters
+ * keep the final value in the DOM (src/lib/motion.ts). CSS grid areas show the value above the label while the
+ * DOM keeps label-then-value, so screen readers hear "Years of quality-driven development, 16+".
  *
  * Gotchas:
  * - To make a stat release-visible, set its claim's `verification` to 'source-checked' (or clear it) in
@@ -49,24 +48,19 @@ stats.forEach((s) => { if (!claimById(s.claim)) throw new Error(`Stat "${s.label
 ---
 {/* Render nothing at all when the release filter has removed every stat. */}
 {stats.length > 0 && <div class="stats">
-  {/* Redesign (docs/16 §4): colourful tiles (Janique: "redesign these stats to be more visually interesting";
-      her own suggestion for statistics was colourful tiles on white). Each tile counts up when it enters the
-      viewport and draws a small graphic chosen from the value's form: a ring for percentages, rising bars for
-      money, a timeline for years. The graphics are decorative (aria-hidden); the dl carries the meaning. */}
+  {/* Spec-sheet layout (CEO review follow-up, 25 Nov 2026: the icon tiles felt "generated and juvenile";
+      asked for "a more modern tech sheet"). One white panel split into columns by hairlines: a small mono
+      index, a large precise numeral that counts up on reveal (and again when scrolled back to), the label,
+      and a thin rule that draws in. No pictograms. The dl carries the meaning; the rule is aria-hidden. */}
   <dl class="stats__list" data-reveal-stagger>
     {stats.map((s, i) => {
-      const tone = ['teal', 'slate', 'green', 'mint'][i % 4];
-      const pct = /%/.test(s.value) ? Math.min(100, parseFloat(s.value)) : null;
-      const kind = pct !== null ? 'ring' : /\$/.test(s.value) ? 'bars' : 'line';
+      const pct = /%/.test(s.value) ? Math.min(100, parseFloat(s.value)) : 100;
       return (
-        <div class:list={['stats__item', `stats__item--${tone}`]} data-reveal="up">
+        <div class="stats__item" data-reveal="up" style={`--pct:${pct}`}>
           <dt>{s.label}</dt>
           <dd><span class="stats__value" data-count>{s.value}</span><ClaimRef id={s.claim} /></dd>
-          <div class:list={['stats__viz', `stats__viz--${kind}`]} aria-hidden="true">
-            {kind === 'ring' && <svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" class="ring-bg" /><circle cx="32" cy="32" r="26" class="ring-fg" pathLength="100" style={`--pct:${pct}`} /></svg>}
-            {kind === 'bars' && <span class="bars">{[28, 44, 38, 62, 78, 100].map((h, k) => <i style={`--h:${h}%;--k:${k}`}></i>)}</span>}
-            {kind === 'line' && <span class="dots">{Array.from({ length: 8 }, (_, k) => <i style={`--k:${k}`}></i>)}</span>}
-          </div>
+          <span class="stats__idx" aria-hidden="true">{String(i + 1).padStart(2, '0')} / {String(stats.length).padStart(2, '0')}</span>
+          <span class="stats__rule" aria-hidden="true"><i></i></span>
         </div>
       );
     })}
@@ -75,27 +69,19 @@ stats.forEach((s) => { if (!claimById(s.claim)) throw new Error(`Stat "${s.label
   {footnote && REVIEW && <p class="stats__note">{footnote}</p>}
 </div>}
 <style>
-  .stats__list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: var(--space-4); margin: 0; }
-  /* Tile: value above label visually (column-reverse) while the DOM keeps dt before dd. */
-  .stats__item { position: relative; overflow: hidden; display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: var(--space-2); padding: var(--space-8) var(--space-6) var(--space-6); border-radius: var(--radius-lg); min-height: 15rem; transition: transform var(--dur-base) var(--ease-out); }
-  .stats__item:hover { transform: translateY(-4px); }
-  .stats__item--teal { background: var(--qw-teal-500); --t: var(--qw-slate-900); --g: var(--qw-white); }
-  .stats__item--slate { background: var(--qw-slate-900); --t: var(--qw-white); --g: var(--qw-green-500); }
-  .stats__item--green { background: var(--qw-green-500); --t: var(--qw-slate-900); --g: var(--qw-white); }
-  .stats__item--mint { background: var(--qw-mint-50); --t: var(--qw-slate-900); --g: var(--qw-teal-500); }
-  .stats dd { margin: 0; font-family: var(--font-display); font-size: clamp(2.75rem, 2rem + 2.6vw, 4.25rem); font-weight: var(--fw-black); line-height: 1; letter-spacing: -0.04em; color: var(--t); font-variant-numeric: tabular-nums; }
-  .stats dt { font-family: var(--font-display); font-weight: var(--fw-semibold); font-size: var(--fs-sm); color: var(--t); max-width: 20ch; }
+  .stats__list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); margin: 0; border-radius: 24px; overflow: hidden;
+    background: linear-gradient(160deg, rgba(41,165,154,.10) 0%, rgba(255,255,255,.97) 55%); border: 1px solid rgba(255,255,255,.9); box-shadow: 0 10px 30px rgba(34,43,55,.07), 0 1px 2px rgba(34,43,55,.04), inset 0 1px 0 #fff; }
+  /* Column: index on top, number, label, rule. DOM keeps dt before dd for screen readers. */
+  .stats__item { position: relative; display: grid; grid-template-areas: "idx" "num" "lbl" "rule"; align-content: start; gap: var(--space-3); padding: var(--space-8) var(--space-8) var(--space-8); border-left: 1px solid rgba(34,43,55,.09); }
+  .stats__item:first-child { border-left: 0; }
+  @media (max-width: 899px) { .stats__item { border-left: 0; border-top: 1px solid rgba(34,43,55,.09); } .stats__item:first-child { border-top: 0; } }
+  .stats__idx { grid-area: idx; font: 700 0.8rem/1 var(--font-display); letter-spacing: .08em; color: var(--qw-teal-700); }
+  .stats dd { grid-area: num; margin: 0; font-family: var(--font-display); font-size: clamp(2.75rem, 2rem + 2.4vw, 4rem); font-weight: 800; line-height: 1; letter-spacing: -0.045em; font-variant-numeric: tabular-nums;
+    background: linear-gradient(180deg, var(--qw-slate-900) 40%, #18625C 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .stats dd :global(.claim-ref) { -webkit-text-fill-color: initial; }
+  .stats dt { grid-area: lbl; font-family: var(--font-body); font-weight: 600; font-size: var(--fs-base); line-height: 1.4; color: var(--qw-slate-700); max-width: 22ch; }
+  .stats__rule { grid-area: rule; display: block; height: 3px; margin-top: var(--space-3); border-radius: 3px; background: rgba(34,43,55,.08); overflow: hidden; }
+  .stats__rule i { display: block; height: 100%; width: calc(var(--pct) * 1%); border-radius: inherit; background: linear-gradient(90deg, var(--qw-teal-500), var(--qw-green-500)); transition: width 1400ms var(--ease-out) 250ms; }
+  :global(html.js-motion:not(.reduced-motion)) .stats__item:not(.is-visible) .stats__rule i { width: 0; }
   .stats__note { font-size: var(--fs-xs); color: var(--color-muted); margin: var(--space-4) 0 0; }
-  /* Graphics sit in the top-right corner of each tile. */
-  /* Graphic sits above the number in normal flow (column-reverse puts it first), so it never overlaps text. */
-  .stats__viz { width: 56px; height: 56px; color: var(--g); margin-bottom: auto; }
-  .ring-bg { fill: none; stroke: color-mix(in srgb, var(--g) 25%, transparent); stroke-width: 7; }
-  .ring-fg { fill: none; stroke: var(--g); stroke-width: 7; stroke-linecap: round; stroke-dasharray: var(--pct) 100; transform: rotate(-90deg); transform-origin: center; transition: stroke-dasharray 1400ms var(--ease-out) 200ms; }
-  :global(html.js-motion:not(.reduced-motion)) .stats__item:not(.is-visible) .ring-fg { stroke-dasharray: 0 100; }
-  .bars { display: flex; align-items: flex-end; gap: 4px; height: 100%; }
-  .bars i { flex: 1; height: var(--h); background: var(--g); border-radius: 3px 3px 0 0; transition: height 900ms var(--ease-out); transition-delay: calc(var(--k) * 80ms + 200ms); }
-  :global(html.js-motion:not(.reduced-motion)) .stats__item:not(.is-visible) .bars i { height: 6%; }
-  .dots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; height: 100%; align-content: center; }
-  .dots i { aspect-ratio: 1; border-radius: 50%; background: var(--g); transition: transform 500ms var(--ease-out); transition-delay: calc(var(--k) * 70ms + 200ms); }
-  :global(html.js-motion:not(.reduced-motion)) .stats__item:not(.is-visible) .dots i { transform: scale(0); }
 </style>

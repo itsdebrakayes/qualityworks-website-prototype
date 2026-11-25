@@ -39,10 +39,10 @@ interface Props {
   eyebrow?: string;
   /** Colour block: 'teal' (default) or 'green'. */
   tone?: 'teal' | 'green';
-  /** People photo id from src/data/peopleImagery.ts shown on the right (default 'contact-team'); false hides it. */
+  /** People photo id from src/data/peopleImagery.ts shown on the right (default 'exec-review': mature buyers, CEO direction 25 Nov 2026); false hides it. */
   photo?: string | false;
 }
-const { title, text, primary, secondary, eyebrow = 'Next step', tone = 'teal', photo = 'contact-team' } = Astro.props;
+const { title, text, primary, secondary, eyebrow = 'Next step', tone = 'teal', photo = 'exec-review' } = Astro.props;
 const img = photo ? peopleImage(photo) : null;
 // Unique heading id per instance so aria-labelledby never points at another band's heading.
 const headingId = `cta-band-${Math.random().toString(36).slice(2, 8)}`;

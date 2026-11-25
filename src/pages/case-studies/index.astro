@@ -55,7 +55,7 @@ const industryOpts = [...new Set(caseStudies.map((c) => c.industry))].map((v) =>
 const serviceOpts = [...new Set(caseStudies.flatMap((c) => c.serviceTags))].map((v) => ({ value: v, label: serviceBySlug(v)?.name ?? v, count: count((c) => c.serviceTags.includes(v)) })).sort((a, b) => a.label.localeCompare(b.label));
 ---
 <BaseLayout seo={{ title: 'Case Studies: Testing, Development & AI Results | QualityWorks', description: 'Results from QualityWorks engagements in banking, insurance, healthcare, utilities, media and more. Filter case studies by industry and service.' }} breadcrumbs={crumbs}>
-  <PageHero image={peopleImage('results-celebration')} tone="green" ui={false} eyebrow="Results · Part of the Resource Hub" title="Case studies" lede="How we’ve helped organizations solve difficult digital challenges — with the outcomes as each client engagement reported them." breadcrumbs={crumbs} primary={{ label: 'Browse results', href: '#list-title' }} secondary={{ label: 'Resource Hub', href: '/resources/' }} />
+  <PageHero image={peopleImage('work-team')} tone="green" ui={false} eyebrow="Results · Part of the Resource Hub" title="Case studies" lede="How we’ve helped organizations solve difficult digital challenges — with the outcomes as each client engagement reported them." breadcrumbs={crumbs} primary={{ label: 'Browse results', href: '#list-title' }} secondary={{ label: 'Resource Hub', href: '/resources/' }} />
   <section class="section surface-mint cs-list" aria-labelledby="list-title">
     <div class="container">
       <h2 id="list-title" class="visually-hidden" style="scroll-margin-top:6rem">Case study list</h2>

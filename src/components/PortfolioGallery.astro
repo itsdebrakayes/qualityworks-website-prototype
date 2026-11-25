@@ -1,0 +1,189 @@
+---
+/**
+ * PortfolioGallery: the cinematic custom development portfolio (executive review, Stacy Kirk, 24 Nov 2026:
+ * "It really needs to be an online portfolio": screens behind it, what the technology does, a testimonial,
+ * an industry tag, and visitors "can just keep looking at all of the technology that we built").
+ *
+ * Experience: projects sit on a tilted 3D carousel (centre project large, neighbours angled away like a
+ *   gallery wall). Arrows, dots, keyboard arrows, swipe or clicking a neighbour rotates it. The panel under
+ *   the stage shows the selected project's industry, challenge, what was built, technology, outcomes and
+ *   testimonial, with Start a project / View project actions.
+ * Modes: 'full' (custom development page, all details) and 'preview' (homepage: 3 projects, shorter panel,
+ *   "View project" deep-links to the full gallery with ?project=slug, which opens that project).
+ * Content: src/data/portfolio.ts. All current records are FICTIONAL SAMPLES and are labelled on screen.
+ * No JS / reduced motion: the slides become a horizontal scroll-snap row and every project panel is listed.
+ * Accessibility: the stage is a labelled region; controls are buttons with names; the active panel is a live
+ *   region so screen readers hear the change; slide screens are aria-hidden (the panel carries the text).
+ */
+import AppScreen from './AppScreen.astro';
+import Icon from './Icon.astro';
+import { portfolio, type PortfolioProject } from '../data/portfolio';
+import { RELEASE } from '../lib/release';
+interface Props { mode?: 'full' | 'preview'; projects?: PortfolioProject[]; id?: string }
+const { mode = 'full', id = 'portfolio' } = Astro.props;
+const projects = Astro.props.projects ?? (mode === 'preview' ? portfolio.slice(0, 3) : portfolio);
+const full = mode === 'full';
+const pageUrl = '/services/custom-software-development/';
+---
+<div class:list={['pf', `pf--${mode}`]} data-portfolio data-mode={mode} id={id}>
+  <div class="pf__stage" role="region" aria-roledescription="carousel" aria-label="Custom development portfolio" tabindex="0">
+    <ol class="pf__track">
+      {projects.map((p, i) => (
+        <li class="pf__slide" data-i={i} data-slug={p.slug}>
+          <div class="pf__frame">
+            <AppScreen spec={p.screen} accent={p.accent} />
+          </div>
+          <div class="pf__cap">
+            <span class="pf__tag">{p.industry}</span>
+            <span class="pf__name">{p.name}</span>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </div>
+  <div class="pf__controls">
+    <button type="button" class="pf__btn" data-pf-prev aria-label="Previous project"><Icon name="arrow" /></button>
+    <div class="pf__dots">{projects.map((p, i) => <button type="button" class="pf__dot" data-pf-dot={i} aria-label={`Show ${p.name}`}></button>)}</div>
+    <button type="button" class="pf__btn" data-pf-next aria-label="Next project"><Icon name="arrow" /></button>
+  </div>
+  <div class="pf__panels" aria-live="polite">
+    {projects.map((p, i) => (
+      <article class="pf__panel" data-pf-panel={i} id={`project-${p.slug}`} data-release-blocker={RELEASE && p.sample ? 'sample-portfolio-project' : undefined}>
+        <div class="pf__lead">
+          <p class="pf__meta"><span class="pf__tag pf__tag--solid">{p.industry}</span><span>{p.platforms}</span>{p.sample && <span class="pf__sample">Sample project · fictional</span>}</p>
+          <h3 class="pf__title">{p.name}</h3>
+          <p class="pf__client">{p.client}</p>
+          {full && <p class="pf__challenge"><strong>The challenge.</strong> {p.challenge}</p>}
+          <p class="pf__built"><strong>What we built.</strong> {p.built}</p>
+          <ul class="pf__tech" aria-label="Technology">{p.tech.map((t) => <li>{t}</li>)}</ul>
+        </div>
+        <div class="pf__side">
+          <dl class="pf__outcomes">{p.outcomes.map((o) => <div><dt>{o.l}</dt><dd>{o.v}</dd></div>)}</dl>
+          {full && (
+            <blockquote class="pf__quote">
+              <p>“{p.testimonial.quote}”</p>
+              <footer>{p.testimonial.who} · {p.testimonial.role}</footer>
+            </blockquote>
+          )}
+          <div class="pf__ctas">
+            <a class="btn btn--primary" href="/contact-us/">Start a project<Icon name="arrow" /></a>
+            {full ? <a class="btn btn--secondary" href="#portfolio-cases">See published case studies</a>
+                  : <a class="btn btn--secondary" href={`${pageUrl}?project=${p.slug}#portfolio`}>View project<Icon name="arrow" /></a>}
+          </div>
+        </div>
+      </article>
+    ))}
+  </div>
+</div>
+<style>
+  .pf { position: relative; }
+  /* Base (no JS): horizontal scroll-snap row. */
+  .pf__stage { outline: none; }
+  .pf__track { list-style: none; margin: 0; padding: 0 0 var(--space-4); display: flex; gap: var(--space-6); overflow-x: auto; scroll-snap-type: x mandatory; }
+  .pf__slide { flex: 0 0 min(86%, 720px); scroll-snap-align: center; }
+  .pf__frame { padding: 4%; border-radius: 24px; background: linear-gradient(160deg, rgba(41,165,154,.22) 0%, rgba(255,255,255,.95) 76%); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,.9); box-shadow: 0 30px 60px -30px rgba(17,74,69,.4), inset 0 1px 0 #fff; }
+  .pf__cap { display: flex; align-items: center; gap: var(--space-3); margin-top: var(--space-4); }
+  .pf__tag { display: inline-flex; padding: 0.35em 0.85em; border-radius: 999px; font: 700 var(--fs-xs)/1.2 var(--font-display); letter-spacing: .04em; text-transform: uppercase; background: var(--qw-mint-50); color: var(--qw-teal-800); border: 1px solid rgba(41,165,154,.35); }
+  .pf__tag--solid { background: var(--qw-teal-500); color: var(--qw-slate-900); border-color: transparent; }
+  .pf__name { font: 700 var(--fs-md)/1.2 var(--font-display); color: var(--qw-slate-900); }
+  .pf__controls { display: none; }
+  .pf__panels { display: grid; gap: var(--space-8); margin-top: var(--space-8); }
+
+  /* Enhanced (JS): tilted 3D carousel. */
+  .pf.is-3d .pf__stage { position: relative; perspective: 1800px; perspective-origin: 50% 40%; }
+  .pf.is-3d .pf__track { position: relative; display: block; overflow: visible; padding: 0; height: var(--stage-h, 520px); transform-style: preserve-3d; }
+  .pf.is-3d .pf__slide { position: absolute; left: 50%; top: 0; width: min(62%, 760px); margin-left: calc(min(62%, 760px) / -2); transform-style: preserve-3d; cursor: pointer;
+    transform: translateX(calc(var(--d) * 64%)) translateZ(calc(var(--ad) * -220px)) rotateY(calc(var(--d) * -26deg)) scale(calc(1 - var(--ad) * 0.06));
+    opacity: calc(1 - var(--ad) * 0.32); z-index: calc(10 - var(--ad)); filter: saturate(calc(1 - var(--ad) * 0.35)) brightness(calc(1 - var(--ad) * 0.06));
+    transition: transform 900ms cubic-bezier(.2,.8,.2,1), opacity 700ms ease, filter 700ms ease; }
+  .pf.is-3d .pf__slide.is-far { opacity: 0; pointer-events: none; }
+  .pf.is-3d .pf__slide.is-active { cursor: default; }
+  .pf.is-3d .pf__slide:not(.is-active) .pf__cap { opacity: 0; }
+  .pf.is-3d .pf__cap { justify-content: center; transition: opacity 400ms; }
+  .pf.is-3d .pf__slide.is-active .pf__frame { box-shadow: 0 50px 100px -40px rgba(34,43,55,.6), 0 0 0 1px rgba(41,165,154,.25), inset 0 1px 0 #fff; }
+  .pf.is-3d .pf__controls { display: flex; align-items: center; justify-content: center; gap: var(--space-4); margin-top: var(--space-6); }
+  .pf__btn { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.9); background: rgba(255,255,255,.7); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); color: var(--qw-slate-900); box-shadow: 0 8px 24px -10px rgba(34,43,55,.4); cursor: pointer; transition: transform 200ms, background 200ms; }
+  .pf__btn:hover { transform: scale(1.08); background: #fff; }
+  .pf__btn :global(svg) { width: 20px; height: 20px; }
+  .pf__btn[data-pf-prev] :global(svg) { transform: rotate(180deg); }
+  .pf__dots { display: flex; gap: 2px; }
+  /* 24px target (WCAG 2.2 2.5.8); the visible dot is drawn by ::before. */
+  .pf__dot { width: 24px; height: 24px; border: 0; padding: 0; background: none; display: grid; place-items: center; cursor: pointer; transition: width 300ms; }
+  .pf__dot::before { content: ""; width: 10px; height: 10px; border-radius: 10px; background: rgba(54,65,79,.3); transition: width 300ms, background 300ms; }
+  .pf__dot.is-active { width: 40px; }
+  .pf__dot.is-active::before { width: 34px; background: var(--qw-teal-500); }
+  .pf.is-3d .pf__panels { display: block; position: relative; margin-top: var(--space-8); }
+  .pf.is-3d .pf__panel { display: none; }
+  .pf.is-3d .pf__panel.is-active { display: grid; animation: pf-in 600ms cubic-bezier(.2,.8,.2,1); }
+  @keyframes pf-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+
+  /* Detail panel: frosted glass. */
+  .pf__panel { display: grid; gap: var(--space-8); padding: clamp(1.5rem, 1rem + 2vw, 2.75rem); border-radius: 24px; background: linear-gradient(160deg, rgba(41,165,154,.18) 0%, rgba(255,255,255,.96) 60%); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,.9); box-shadow: var(--gc-shadow); }
+  @media (min-width: 960px) { .pf__panel { grid-template-columns: 1.25fr 1fr; align-items: start; } }
+  .pf__meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); margin: 0 0 var(--space-3); font: 600 var(--fs-sm)/1.3 var(--font-display); color: var(--qw-slate-700); }
+  .pf__sample { padding: .3em .8em; border-radius: 999px; background: #FFF4D6; color: #7A5300; font-size: var(--fs-xs); font-weight: 700; }
+  .pf__title { margin: 0; font-size: clamp(1.6rem, 1.2rem + 1.4vw, 2.3rem); line-height: 1.1; }
+  .pf__client { margin: var(--space-2) 0 var(--space-5); color: var(--qw-slate-700); font-weight: 600; }
+  .pf__challenge, .pf__built { margin: 0 0 var(--space-4); font-size: var(--fs-md); line-height: 1.6; }
+  .pf__tech { list-style: none; padding: 0; margin: var(--space-5) 0 0; display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .pf__tech li { padding: .45em .9em; border-radius: 10px; background: var(--qw-slate-900); color: #fff; font: 600 var(--fs-sm)/1 var(--font-display); }
+  .pf__outcomes { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); margin: 0 0 var(--space-5); }
+  .pf__outcomes div { padding: var(--space-4) var(--space-5); border-radius: 16px; background: rgba(255,255,255,.9); border: 1px solid rgba(41,165,154,.25); box-shadow: inset 0 1px 0 #fff; color: var(--qw-slate-900); }
+  .pf__outcomes dd { color: var(--qw-teal-800); }
+  .pf__outcomes dt { font-size: var(--fs-sm); opacity: .92; order: 2; }
+  .pf__outcomes div { display: flex; flex-direction: column-reverse; gap: 4px; }
+  .pf__outcomes dd { margin: 0; font: 800 clamp(1.6rem, 1.2rem + 1vw, 2.1rem)/1 var(--font-display); }
+  .pf__quote { margin: 0 0 var(--space-5); padding: var(--space-5); border-radius: 18px; background: var(--qw-mint-50); border-left: 4px solid var(--qw-green-500); }
+  .pf__quote p { margin: 0 0 var(--space-3); font: 600 var(--fs-md)/1.5 var(--font-display); color: var(--qw-slate-900); }
+  .pf__quote footer { font-size: var(--fs-sm); color: var(--qw-slate-700); }
+  .pf__ctas { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  @media (max-width: 767px) {
+    .pf.is-3d .pf__slide { width: 84%; margin-left: -42%; transform: translateX(calc(var(--d) * 96%)) translateZ(calc(var(--ad) * -120px)) rotateY(calc(var(--d) * -18deg)); }
+  }
+  @media (prefers-reduced-motion: reduce) { .pf.is-3d .pf__slide { transition: none; } .pf.is-3d .pf__panel.is-active { animation: none; } }
+</style>
+<script>
+  // Enhances every [data-portfolio] into the 3D carousel. Skipped with reduced motion (scroll row instead).
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll<HTMLElement>('[data-portfolio]').forEach((root) => {
+    if (reduce) return;
+    const slides = [...root.querySelectorAll<HTMLElement>('.pf__slide')];
+    const panels = [...root.querySelectorAll<HTMLElement>('[data-pf-panel]')];
+    const dots = [...root.querySelectorAll<HTMLElement>('[data-pf-dot]')];
+    const stage = root.querySelector<HTMLElement>('.pf__stage')!;
+    const n = slides.length; if (!n) return;
+    root.classList.add('is-3d');
+    let active = 0;
+    const want = new URLSearchParams(location.search).get('project');
+    const wi = slides.findIndex((s) => s.dataset.slug === want); if (wi >= 0) active = wi;
+    const size = () => { const f = slides[active].offsetHeight; root.style.setProperty('--stage-h', `${f}px`); };
+    const render = () => {
+      slides.forEach((s, i) => {
+        let d = i - active; if (d > n / 2) d -= n; if (d < -n / 2) d += n;
+        s.style.setProperty('--d', String(d)); s.style.setProperty('--ad', String(Math.min(Math.abs(d), 3)));
+        s.classList.toggle('is-active', d === 0); s.classList.toggle('is-far', Math.abs(d) > 2);
+      });
+      panels.forEach((p, i) => p.classList.toggle('is-active', i === active));
+      dots.forEach((d, i) => { d.classList.toggle('is-active', i === active); d.setAttribute('aria-current', i === active ? 'true' : 'false'); });
+      size();
+    };
+    const go = (i: number) => { active = (i + n) % n; render(); };
+    root.querySelector('[data-pf-prev]')?.addEventListener('click', () => go(active - 1));
+    root.querySelector('[data-pf-next]')?.addEventListener('click', () => go(active + 1));
+    dots.forEach((d, i) => d.addEventListener('click', () => go(i)));
+    slides.forEach((s, i) => s.addEventListener('click', () => { if (i !== active) go(i); }));
+    stage.addEventListener('keydown', (e) => { if (e.key === 'ArrowLeft') go(active - 1); if (e.key === 'ArrowRight') go(active + 1); });
+    let x0: number | null = null;
+    stage.addEventListener('pointerdown', (e) => { x0 = e.clientX; });
+    stage.addEventListener('pointerup', (e) => { if (x0 !== null && Math.abs(e.clientX - x0) > 40) go(active + (e.clientX < x0 ? 1 : -1)); x0 = null; });
+    addEventListener('resize', size);
+    render();
+    if (want && wi >= 0) requestAnimationFrame(() => root.scrollIntoView({ block: 'start' }));
+    // Preview mode drifts to the next project every 7s until the visitor interacts.
+    if (root.dataset.mode === 'preview') {
+      let timer = window.setInterval(() => go(active + 1), 7000);
+      const stop = () => { clearInterval(timer); timer = 0; };
+      root.addEventListener('pointerenter', stop); root.addEventListener('focusin', stop);
+    }
+  });
+</script>

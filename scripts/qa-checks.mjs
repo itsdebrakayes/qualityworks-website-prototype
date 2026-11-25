@@ -188,7 +188,7 @@ for (const r of ['/', '/services/test-automation/', '/qualitywatcher-ai-tools/',
 rec('QA-09', 'BR-17 Typography', '8 representative pages, every text node', 'All glyphs rendered in Montserrat / Lato (no fallback font for any character; code samples excluded)', fontFindings.length === 0, fontFindings.length ? fontFindings.join(' | ') : 'All glyphs on 8 pages rendered by Montserrat/Lato (via CDP CSS.getPlatformFontsForNode)', '');
 
 // ---- 5. Desktop mega-menu behaviour
-await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+await page.goto(BASE + '/about-us/', { waitUntil: 'networkidle' }); // not '/': the homepage scroll intro hides the header at the top
 const trig = page.locator('[data-menu-trigger][aria-controls="menu-solutions"]');
 const panel = page.locator('#menu-solutions');
 const tb = await trig.boundingBox();
@@ -210,7 +210,7 @@ await page.mouse.move(pb.x + 20, Math.min(pb.y + pb.height + 60, 880), { steps: 
 const closesOnLeave = !(await panel.isVisible());
 rec('QA-11', 'BR-5 Header', 'Desktop dropdown (mouse leave)', 'Panel closes ~280ms after the pointer leaves', closesOnLeave, `closed after leave: ${closesOnLeave}`);
 // keyboard
-await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+await page.goto(BASE + '/about-us/', { waitUntil: 'networkidle' }); // not '/': the homepage scroll intro hides the header at the top
 await trig.focus(); await page.keyboard.press('Enter');
 const kbOpen = (await trig.getAttribute('aria-expanded')) === 'true' && await panel.isVisible();
 await page.keyboard.press('Escape');
@@ -259,11 +259,14 @@ await m.close();
 
 // ---- 7. Homepage CTAs and pathways
 await page.goto(BASE + '/', { waitUntil: 'networkidle' });
-const heroCtas = await page.$$eval('.home-hero__ctas a', (as) => as.map((a) => a.getAttribute('href')));
+const heroCtas = await page.$$eval('.hero__ctas a', (as) => as.map((a) => a.getAttribute('href')));
 const pathwayHrefs = await page.$$eval('.pathway a', (as) => as.map((a) => a.getAttribute('href')));
-const pathwaysAboveFold = await page.$$eval('.pathway', (as) => as.every((a) => a.getBoundingClientRect().top < 900));
-rec('QA-16', 'BR-7.1', 'Homepage hero', 'Two hero CTAs to different approved destinations; three pathway cards start above the fold at 1440×900', heroCtas.length === 2 && heroCtas[0] !== heroCtas[1] && pathwayHrefs.length === 3 && pathwaysAboveFold, `CTAs: ${heroCtas.join(' | ')}; pathways: ${pathwayHrefs.join(' | ')}; above fold: ${pathwaysAboveFold}`, 'qa-output/evidence/1440-home.png');
-const svcLinks = await page.$$eval('.way__links a', (as) => as.map((a) => a.getAttribute('href')));
+// CEO-approved scroll intro (docs/17): at the top the hero fills the screen; the pathway cards rise in over the
+// first ~90% of a viewport of scroll. Check them where the intro ends.
+await page.mouse.wheel(0, 820); await page.waitForTimeout(900);
+const pathwaysAboveFold = await page.$$eval('.pathway', (as) => as.every((a) => { const r = a.getBoundingClientRect(); return r.top < 900 && r.bottom > 0; }));
+rec('QA-16', 'BR-7.1', 'Homepage hero', 'Two hero CTAs to different destinations; three pathway cards in view at 1440×900 once the scroll intro completes', heroCtas.length === 2 && heroCtas[0] !== heroCtas[1] && pathwayHrefs.length === 3 && pathwaysAboveFold, `CTAs: ${heroCtas.join(' | ')}; pathways: ${pathwayHrefs.join(' | ')}; above fold: ${pathwaysAboveFold}`, 'qa-output/evidence/1440-home.png');
+const svcLinks = await page.$$eval('.pillar__ctas a', (as) => as.map((a) => a.getAttribute('href')));
 rec('QA-17', 'BR-7.1', 'Homepage service links', 'Service links route to the matching service detail pages', svcLinks.every((h) => routeSet.has(h)), `${svcLinks.length} links, all resolve`);
 
 // ---- 8. Contact form states

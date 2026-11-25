@@ -158,7 +158,7 @@ const HERO_IMAGES: Record<string, string> = {
   insurance: 'insurance-advisor',
   logistics: 'logistics-warehouse',
   retail: 'retail-ecommerce',
-  technology: 'technology-pair',
+  technology: 'svc-build',
 };
 for (const ind of industries) ind.heroImage = HERO_IMAGES[ind.slug];
 

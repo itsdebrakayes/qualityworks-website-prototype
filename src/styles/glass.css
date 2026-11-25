@@ -1,33 +1,62 @@
-/* Site-wide liquid glass (pattern from the IntelliBus project: translucent tint + blur/saturate +
-   white rim + inset top highlight + soft tinted shadow, over drifting brand-colour glows so the glass
-   has something to refract on light pages). */
-.surface-white, .surface-mint, .stats, .section:not([class*="surface-teal"]):not([class*="surface-green"]):not([class*="surface-dark"]):not([class*="surface-product"]) {
-  position: relative; isolation: isolate;
-}
-.surface-white::before, .surface-mint::before, .stats::before {
-  content: ""; position: absolute; inset: -10% -5%; z-index: -1; pointer-events: none;
-  background:
-    radial-gradient(38% 46% at 12% 22%, rgba(41,165,154,.38), transparent 70%),
-    radial-gradient(34% 42% at 88% 30%, rgba(44,175,129,.34), transparent 70%),
-    radial-gradient(40% 48% at 55% 92%, rgba(40,157,173,.30), transparent 70%);
-  filter: blur(10px); animation: qw-glow 18s ease-in-out infinite alternate;
-}
-@keyframes qw-glow { 0% { transform: translate3d(0,0,0) scale(1); } 50% { transform: translate3d(2%,-3%,0) scale(1.05); } 100% { transform: translate3d(-2%,2%,0) scale(1); } }
-@media (prefers-reduced-motion: reduce) { .surface-white::before, .surface-mint::before, .stats::before { animation: none; } }
+/* =====================================================================================================
+   GLASS CARD SYSTEM — ported from the IntelliBus Hack 2026 project (CyberShield: client/src/index.css,
+   classes glass-card, glass-inset-panel, glass-hero-blue, dashboard-service-card/-accent/-icon), at the
+   user's request (25 Nov 2026: "find references to other glass cards on how I've done them before").
 
-.glass, .card, .stats__item, .bento > * {
-  -webkit-backdrop-filter: blur(22px) saturate(180%) !important; backdrop-filter: blur(22px) saturate(180%) !important;
-  box-shadow: 0 10px 36px rgba(29,118,111,.14), 0 1px 3px rgba(34,43,55,.06), inset 0 1px 0 rgba(255,255,255,.7), inset 0 -1px 0 rgba(255,255,255,.12) !important;
-}
-.card { background: rgba(255,255,255,.58) !important; border: 1px solid rgba(255,255,255,.75) !important; }
-.card:hover { box-shadow: 0 18px 48px rgba(29,118,111,.22), inset 0 1px 0 rgba(255,255,255,.85) !important; transform: translateY(-3px); }
+   What makes that look (and what this file reproduces in QualityWorks brand colours):
+   - Cards are NEAR-OPAQUE white (95%), not see-through. A soft brand tint sits in the top-left corner and
+     fades to white by 76% (linear-gradient 160deg). Light blur (14px) only softens what is behind the rim.
+   - A thin white rim, a very soft drop shadow tinted with the brand colour, and a bright inset top edge.
+   - A short pill "accent bar" (60 x 6px gradient) at the top of feature cards, and a tinted icon tile
+     with a white rim.
+   - On colour or photo backgrounds: "inset panels", 88% white with a 12px blur, inside rich dark
+     gradient banners ("glass-hero").
+   - The page behind is a cool, very light grey-mint so the white cards lift off it (no drifting blobs).
 
-/* Stat tiles: tinted glass in the brand colours, with a specular sheen. */
-.stats__item { border: 1px solid rgba(255,255,255,.45); }
-.stats__item::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-  background: linear-gradient(135deg, rgba(255,255,255,.42) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 72%, rgba(255,255,255,.16) 100%); }
-.stats__item--teal  { background: linear-gradient(160deg, rgba(29,118,111,.92), rgba(24,98,92,.96)) !important; --t: var(--qw-white) !important; --g: var(--qw-green-500) !important; }
-.stats__item--slate { background: linear-gradient(160deg, rgba(43,53,64,.94), rgba(34,43,55,.98)) !important; --t: var(--qw-white) !important; }
-.stats__item--green { background: linear-gradient(160deg, rgba(30,127,92,.92), rgba(22,104,75,.96)) !important; --t: var(--qw-white) !important; --g: #9BE7C8 !important; }
-.stats__item--mint  { background: linear-gradient(160deg, rgba(31,124,137,.92), rgba(24,98,110,.96)) !important; --t: var(--qw-white) !important; --g: #A8E4EA !important; border-color: rgba(255,255,255,.4); }
-.stats__item dd, .stats__item dt { text-shadow: 0 1px 2px rgba(0,0,0,.18); }
+   Tones (set --tint / --tint-strong on any .gc element): teal (default), green, blue, slate.
+   ===================================================================================================== */
+:root {
+  --gc-bg: #F3F7F7;                 /* light page tone behind cards (IntelliBus: hsl(220 20% 97%)) */
+  --gc-radius: 20px;
+  --gc-shadow: 0 10px 26px rgba(34, 43, 55, 0.07), 0 1px 2px rgba(34, 43, 55, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --gc-shadow-hover: 0 22px 48px -12px rgba(29, 118, 111, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+.gc-tone-teal, .gc { --tint: 41, 165, 154; --tint-ink: #18625C; }
+.gc-tone-green { --tint: 44, 175, 129; --tint-ink: #17694C; }
+.gc-tone-blue  { --tint: 40, 157, 173; --tint-ink: #17606A; }
+.gc-tone-slate { --tint: 54, 65, 79; --tint-ink: #222B37; }
+
+/* The card (dashboard-service-card). */
+.gc {
+  position: relative; overflow: hidden; border-radius: var(--gc-radius);
+  background: linear-gradient(160deg, rgba(var(--tint), 0.2) 0%, rgba(255, 255, 255, 0.95) 76%);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: var(--gc-shadow);
+  transition: transform 300ms var(--ease-out), box-shadow 300ms var(--ease-out);
+}
+a.gc:hover, .gc--hover:hover { transform: translateY(-4px); box-shadow: var(--gc-shadow-hover); }
+/* Accent bar (dashboard-service-accent) and icon tile (dashboard-service-icon). */
+.gc-accent { display: block; width: 3.75rem; height: 0.4rem; border-radius: 999px; background: linear-gradient(90deg, rgb(var(--tint)), rgba(var(--tint), 0.3)); }
+.gc-icon { display: inline-flex; width: 3.1rem; height: 3.1rem; align-items: center; justify-content: center; border-radius: 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.6); background: rgba(var(--tint), 0.16); color: var(--tint-ink); }
+.gc-icon svg { width: 1.4rem; height: 1.4rem; }
+/* Inset panel (glass-inset-panel): white panel inside coloured banners or over photos. */
+.gc-inset { border-radius: 1rem; background: rgba(255, 255, 255, 0.88); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.5); color: var(--qw-slate-900); }
+/* Dark banner (glass-hero-blue) in brand colours, with the dashboard-score-hero glow. */
+.gc-hero { position: relative; overflow: hidden; color: #fff;
+  background: linear-gradient(135deg, #0E3B38 0%, #114A45 50%, #1B2733 100%); box-shadow: 0 12px 40px rgba(17, 74, 69, 0.35); }
+.gc-hero::before { content: ""; position: absolute; inset: -30% auto auto -12%; width: 42%; height: 120%; pointer-events: none;
+  background: radial-gradient(circle, rgba(44, 175, 129, 0.18) 0%, transparent 70%); }
+
+/* ---- Light page tone: white sections become the light grey-mint so white cards lift off them. ---- */
+.section:not([class*="surface-"]), .surface-white { background: var(--gc-bg); }
+.surface-mint { background: #EAF4F2; }
+
+/* ---- Site-wide application ---- */
+.card { background: linear-gradient(160deg, rgba(41,165,154,.12) 0%, rgba(255,255,255,.96) 60%) !important; border: 1px solid rgba(255,255,255,.85) !important; box-shadow: var(--gc-shadow) !important; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+.card:hover { box-shadow: var(--gc-shadow-hover) !important; transform: translateY(-3px); }
+.bento > * { box-shadow: var(--gc-shadow); }
+
+/* Stat spec sheet: styled in components/StatBlock.astro (no tile overrides here). */

@@ -30,7 +30,7 @@ const models = services.filter((s) => s.kind === 'engagement-model');
 const crumbs = [{ label: 'Home', href: '/' }, { label: 'Solutions', href: '/services/' }, { label: 'Engagement models' }];
 ---
 <BaseLayout seo={{ title: 'Engagement Models: Dedicated Teams, Staff Augmentation | QualityWorks', description: 'Work with QualityWorks through dedicated teams, staff augmentation or consulting and training — whichever fits your roadmap.' }} breadcrumbs={crumbs}>
-  <PageHero tone="green" image={peopleImage('about-team')} ui="people" eyebrow="Engagement models" title="Choose how we work together" lede="The same QualityWorks standards, delivered in the way that fits your team: a dedicated team, embedded specialists, or consulting and training." breadcrumbs={crumbs} primary={ctas.contact} />
+  <PageHero tone="green" image={peopleImage('exec-office')} ui="people" eyebrow="Engagement models" title="Choose how we work together" lede="The same QualityWorks standards, delivered in the way that fits your team: a dedicated team, embedded specialists, or consulting and training." breadcrumbs={crumbs} primary={ctas.contact} />
   {/* Model cards as colour-block tiles (equal height) beside a team visual. The visually hidden h2 keeps
       the heading outline valid (h1 in hero, then h2). */}
   <section class="section surface-mint em"><div class="container em__grid">

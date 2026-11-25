@@ -104,7 +104,36 @@ main { overflow-x: clip; }
   .glass { background: rgba(255, 255, 255, 0.94); } .glass-dark { background: rgba(34, 43, 55, 0.95); }
 }
 /* Site header as dark frosted glass. */
-.site-header { background: rgba(54, 65, 79, 0.72) !important; -webkit-backdrop-filter: blur(18px) saturate(150%); backdrop-filter: blur(18px) saturate(150%); }
+.site-header { background: rgba(34, 43, 55, 0.88) !important; -webkit-backdrop-filter: blur(18px) saturate(150%); backdrop-filter: blur(18px) saturate(150%); }
 .mega { background: rgba(255, 255, 255, 0.86) !important; -webkit-backdrop-filter: blur(22px) saturate(160%); backdrop-filter: blur(22px) saturate(160%); }
 /* Cards that sit on colour blocks or photos become glass. */
 .surface-teal .card, .surface-green .card, .surface-teal .steps__card, .surface-green .steps__card { background: rgba(255, 255, 255, 0.7); -webkit-backdrop-filter: blur(16px) saturate(160%); backdrop-filter: blur(16px) saturate(160%); border-color: rgba(255, 255, 255, 0.6); }
+
+/* ---------------------------------------------------------------------------------------------------
+   SCENE: a viewport-sized image + text composition (user feedback 25 Nov 2026: photos should blend like the
+   hero, be full size, and "line up" with the words, like Apple's pages, where at one scroll position the
+   whole composition sits in frame).
+   Desktop (>=1024px): the section is at least one screen tall (minus the header); the photo fills one half
+   edge to edge, top to bottom, and fades into the section colour on its inner edge (mask); the copy is
+   vertically centred in the other half, so photo and text share one centre line.
+   Phones/tablets: the photo sits on top, full width, fading into the colour at its bottom edge.
+   Markup: <section class="scene scene--media-left|right"><figure class="scene__media"><img/></figure>
+           <div class="container scene__grid"><div class="scene__copy">…</div></div></section>
+   --------------------------------------------------------------------------------------------------- */
+.scene { position: relative; overflow: hidden; }
+.scene__media { margin: 0; position: relative; }
+.scene__media img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover;
+  -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent 100%); mask-image: linear-gradient(180deg, #000 70%, transparent 100%); }
+.scene__grid { position: relative; z-index: 1; }
+@media (min-width: 1024px) {
+  .scene { min-height: calc(100vh - 72px); min-height: calc(100svh - 72px); display: flex; align-items: center; padding-block: var(--space-12); }
+  .scene__media { position: absolute; top: 0; bottom: 0; width: 50%; }
+  .scene--media-left .scene__media { left: 0; }
+  .scene--media-right .scene__media { right: 0; }
+  .scene__media img { height: 100%; aspect-ratio: auto; }
+  .scene--media-left .scene__media img { -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 58%, transparent 98%); mask-image: linear-gradient(90deg, #000 0%, #000 58%, transparent 98%); }
+  .scene--media-right .scene__media img { -webkit-mask-image: linear-gradient(270deg, #000 0%, #000 58%, transparent 98%); mask-image: linear-gradient(270deg, #000 0%, #000 58%, transparent 98%); }
+  .scene__grid { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-16); align-items: center; }
+  .scene--media-left .scene__copy { grid-column: 2; }
+  .scene--media-right .scene__copy { grid-column: 1; }
+}

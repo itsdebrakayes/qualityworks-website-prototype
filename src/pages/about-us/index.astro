@@ -52,11 +52,11 @@ const values = [
 // First leadership record = CEO (see Gotchas).
 const ceo = leadership[0];
 // Supporting people photos for the story collage (decorative alongside the copy; alt from the image record).
-const storyA = peopleImage('home-mentoring');
-const storyB = peopleImage('industries-team');
+const storyA = peopleImage('exec-boardroom');
+const storyB = peopleImage('exec-meeting');
 ---
 <BaseLayout seo={{ title: 'About QualityWorks | The Quality-Driven Innovation Company', description: 'Founded in 2010, QualityWorks is a Black-owned, woman-led software solutions firm helping companies build higher-quality software, future-ready teams and faster delivery.' }} breadcrumbs={crumbs}>
-  <PageHero image={peopleImage('about-team')} ui="people" eyebrow="About us" title="The quality-driven innovation company" lede="We go beyond the code and beyond testing to help our clients achieve their most extraordinary digital goals." breadcrumbs={crumbs} primary={{ label: 'Work with us', href: '/contact-us/' }} secondary={{ label: 'Explore careers', href: '/careers/' }} />
+  <PageHero image={peopleImage('exec-review')} ui="people" eyebrow="About us" title="The quality-driven innovation company" lede="We go beyond the code and beyond testing to help our clients achieve their most extraordinary digital goals." breadcrumbs={crumbs} primary={{ label: 'Work with us', href: '/contact-us/' }} secondary={{ label: 'Explore careers', href: '/careers/' }} />
 
   {/* Our story: company description with claim annotations for ownership (C14) and regions (C15), beside a
       two-photo collage and a "since 2010" badge. */}

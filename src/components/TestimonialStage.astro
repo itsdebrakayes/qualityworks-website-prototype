@@ -1,0 +1,122 @@
+---
+/**
+ * TestimonialStage: the people-forward testimonial carousel (executive review, Stacy Kirk, 24 Nov 2026:
+ * "real faces of real people", "an animation of different people saying different things").
+ *
+ * Layout: a large portrait with a frosted-glass quote panel overlapping its edge (Pinterest reference
+ *   pin 69045818666877586). Photos cross-fade with a slow zoom; the panel slides in; prev/next buttons,
+ *   numbered dots and a progress bar; auto-advances every 8s and pauses on hover/focus.
+ * Content: src/data/testimonialPlaceholders.ts. Every current record is a PLACEHOLDER (stock portrait +
+ *   sample wording); each slide shows a visible "Sample testimonial" label until replaced.
+ * No JS / reduced motion: every testimonial is listed (stacked) with no auto-advance.
+ * Accessibility: region with aria-roledescription="carousel"; each slide is a group "n of N"; the live
+ *   region is polite and only announces on manual navigation (auto-advance sets aria-live="off").
+ */
+import Icon from './Icon.astro';
+import { testimonialPlaceholders as items } from '../data/testimonialPlaceholders';
+import { peopleImage, peopleSrc, peopleSrcset } from '../data/peopleImagery';
+import { RELEASE } from '../lib/release';
+---
+<div class="ts" data-ts role="region" aria-roledescription="carousel" aria-label="What our clients say">
+  <div class="ts__slides" aria-live="off">
+    {items.map((t, i) => {
+      const img = peopleImage(t.photo);
+      return (
+        <figure class:list={['ts__slide', { 'is-active': i === 0 }]} role="group" aria-roledescription="slide" aria-label={`${i + 1} of ${items.length}`} data-release-blocker={RELEASE && t.placeholder ? 'placeholder-testimonial' : undefined}>
+          <div class="ts__photo"><img src={peopleSrc(img)} srcset={peopleSrcset(img)} sizes="(min-width: 960px) 55vw, 100vw" alt={t.placeholder ? img.alt : `${t.name}, ${t.role}, ${t.org}`} width="1200" height="1500" loading="lazy" style={`object-position:${img.focus}`} /></div>
+          <div class="ts__panel">
+            {t.placeholder && <span class="ts__sample">Sample testimonial · placeholder</span>}
+            <span class="ts__mark" aria-hidden="true">“</span>
+            <blockquote><p>{t.quote}</p></blockquote>
+            <figcaption>
+              <strong>{t.name}</strong>
+              <span>{t.role}, {t.org}</span>
+              <span class="ts__ind">{t.industry}</span>
+            </figcaption>
+          </div>
+        </figure>
+      );
+    })}
+  </div>
+  <div class="ts__controls">
+    <button type="button" class="ts__btn" data-ts-prev aria-label="Previous testimonial"><Icon name="arrow" /></button>
+    <div class="ts__dots">{items.map((_, i) => <button type="button" class="ts__dot" data-ts-dot={i} aria-label={`Testimonial ${i + 1}`}><i></i></button>)}</div>
+    <button type="button" class="ts__btn" data-ts-next aria-label="Next testimonial"><Icon name="arrow" /></button>
+  </div>
+</div>
+<style>
+  .ts { position: relative; }
+  .ts__slides { display: grid; gap: var(--space-12); }
+  .ts__slide { margin: 0; display: grid; position: relative; }
+  .ts__photo { border-radius: 32px; overflow: hidden; aspect-ratio: 4 / 3; background: var(--qw-mint-50); }
+  .ts__photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .ts__panel { position: relative; margin: -4rem var(--space-4) 0; padding: clamp(1.5rem, 1rem + 2vw, 3rem); border-radius: 28px;
+    background: linear-gradient(160deg, rgba(41,165,154,.2) 0%, rgba(255,255,255,.9) 60%); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,.85); box-shadow: 0 24px 60px -24px rgba(17,74,69,.4), 0 2px 12px rgba(0,0,0,.05), inset 0 1px 0 #fff; color: var(--qw-slate-900); }
+  .ts__panel::before { content: ""; display: block; width: 3.75rem; height: .4rem; border-radius: 999px; margin-bottom: var(--space-5); background: linear-gradient(90deg, var(--qw-teal-500), rgba(41,165,154,.3)); }
+  .ts__mark { position: absolute; top: -0.32em; right: 0.3em; font: 900 8rem/1 var(--font-display); color: var(--qw-teal-500); opacity: .35; pointer-events: none; }
+  .ts__sample { display: inline-block; margin-bottom: var(--space-4); padding: .35em .85em; border-radius: 999px; background: #FFF4D6; color: #7A5300; font: 700 var(--fs-xs)/1.2 var(--font-display); }
+  .ts__panel blockquote { margin: 0; }
+  .ts__panel blockquote p { margin: 0; font: 600 clamp(1.25rem, 1rem + 1vw, 1.75rem)/1.4 var(--font-display); letter-spacing: -0.01em; }
+  .ts__panel figcaption { display: grid; gap: 4px; margin-top: var(--space-6); font-size: var(--fs-md); }
+  .ts__panel figcaption strong { font: 800 var(--fs-lg)/1.2 var(--font-display); }
+  .ts__ind { justify-self: start; margin-top: var(--space-2); padding: .3em .8em; border-radius: 999px; background: var(--qw-teal-500); color: var(--qw-slate-900); font: 700 var(--fs-xs)/1.2 var(--font-display); text-transform: uppercase; letter-spacing: .05em; }
+  .ts__controls { display: none; }
+  @media (min-width: 960px) {
+    .ts__slide { grid-template-columns: 58% 1fr; align-items: center; }
+    .ts__photo { aspect-ratio: 5 / 4.4; grid-column: 1; grid-row: 1; }
+    .ts__panel { grid-column: 1 / -1; grid-row: 1; justify-self: end; width: 52%; margin: 0; }
+  }
+  /* Enhanced carousel */
+  .ts.is-on .ts__slides { display: grid; }
+  .ts.is-on .ts__slide { grid-area: 1 / 1; visibility: hidden; }
+  .ts.is-on .ts__slide.is-active { visibility: visible; z-index: 1; }
+  .ts.is-on .ts__photo img { opacity: 0; transform: scale(1.08); transition: opacity 900ms ease, transform 6s ease-out; }
+  .ts.is-on .ts__slide.is-active .ts__photo img { opacity: 1; transform: scale(1); }
+  .ts.is-on .ts__panel { opacity: 0; transform: translateX(40px); transition: opacity 600ms ease 250ms, transform 800ms cubic-bezier(.2,.8,.2,1) 250ms; }
+  .ts.is-on .ts__slide.is-active .ts__panel { opacity: 1; transform: none; }
+  .ts.is-on .ts__slide.was-active { visibility: visible; z-index: 0; }
+  .ts.is-on .ts__controls { display: flex; align-items: center; gap: var(--space-4); margin-top: var(--space-8); }
+  @media (min-width: 960px) { .ts.is-on .ts__controls { width: 52%; margin-left: auto; } }
+  .ts__btn { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; border: 0; background: var(--qw-slate-900); color: #fff; cursor: pointer; transition: transform 200ms, background 200ms; }
+  .ts__btn:hover { transform: scale(1.08); background: var(--qw-teal-800); }
+  .ts__btn :global(svg) { width: 20px; height: 20px; }
+  .ts__btn[data-ts-prev] :global(svg) { transform: rotate(180deg); }
+  .ts__dots { flex: 1; display: flex; gap: 8px; }
+  .ts__dot { flex: 1; height: 6px; padding: 0; border: 0; border-radius: 6px; background: rgba(54,65,79,.18); overflow: hidden; cursor: pointer; }
+  .ts__dot i { display: block; height: 100%; width: 0; background: var(--qw-teal-500); }
+  .ts__dot.is-done i { width: 100%; }
+  .ts__dot.is-active i { animation: ts-prog var(--ts-dur, 8s) linear forwards; }
+  .ts.is-paused .ts__dot.is-active i { animation-play-state: paused; }
+  @keyframes ts-prog { to { width: 100%; } }
+</style>
+<script>
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll<HTMLElement>('[data-ts]').forEach((root) => {
+    if (reduce) return;
+    const slides = [...root.querySelectorAll<HTMLElement>('.ts__slide')];
+    const dots = [...root.querySelectorAll<HTMLElement>('[data-ts-dot]')];
+    const live = root.querySelector<HTMLElement>('.ts__slides')!;
+    const n = slides.length; if (n < 2) return;
+    root.classList.add('is-on');
+    const DUR = 8000; let i = 0; let timer = 0; let paused = false;
+    const show = (k: number, manual = false) => {
+      live.setAttribute('aria-live', manual ? 'polite' : 'off');
+      slides.forEach((s) => s.classList.remove('was-active'));
+      slides[i].classList.add('was-active');
+      i = (k + n) % n;
+      slides.forEach((s, j) => { s.classList.toggle('is-active', j === i); s.setAttribute('aria-hidden', j === i ? 'false' : 'true'); });
+      dots.forEach((d, j) => { d.classList.toggle('is-active', j === i); d.classList.toggle('is-done', j < i); d.setAttribute('aria-current', j === i ? 'true' : 'false');
+        const bar = d.querySelector('i') as HTMLElement; bar.style.animation = 'none'; void bar.offsetWidth; bar.style.animation = ''; });
+      schedule();
+    };
+    const schedule = () => { clearTimeout(timer); if (!paused) timer = window.setTimeout(() => show(i + 1), DUR); };
+    root.querySelector('[data-ts-prev]')?.addEventListener('click', () => show(i - 1, true));
+    root.querySelector('[data-ts-next]')?.addEventListener('click', () => show(i + 1, true));
+    dots.forEach((d, j) => d.addEventListener('click', () => show(j, true)));
+    const pause = (p: boolean) => { paused = p; root.classList.toggle('is-paused', p); if (p) clearTimeout(timer); else schedule(); };
+    root.addEventListener('pointerenter', () => pause(true)); root.addEventListener('pointerleave', () => pause(false));
+    root.addEventListener('focusin', () => pause(true)); root.addEventListener('focusout', () => pause(false));
+    show(0);
+  });
+</script>

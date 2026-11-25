@@ -45,6 +45,7 @@ import { RELEASE, rn } from '../../lib/release';
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../PageHero.astro';
+import PortfolioGallery from '../PortfolioGallery.astro';
 import SectionHeading from '../SectionHeading.astro';
 import ProcessSteps from '../ProcessSteps.astro';
 import FaqAccordion from '../FaqAccordion.astro';
@@ -60,7 +61,7 @@ import { productBySlug } from '../../data/products';
 import { services } from '../../data/services';
 import { industryBySlug } from '../../data/industries';
 import { faqLd, serviceLd } from '../../lib/schema';
-import { peopleImage } from '../../data/peopleImagery';
+import { peopleImage, peopleSrc, peopleSrcset } from '../../data/peopleImagery';
 import SignatureVisual from '../solutions/SignatureVisual.astro';
 import CapabilityExplorer from '../solutions/CapabilityExplorer.astro';
 import type { Service } from '../../data/types';
@@ -91,17 +92,19 @@ const heroTone = ({ quality: 'teal', build: 'green', ai: 'mint' } as const)[pw];
 const heroUi = ({ quality: 'testing', build: 'build', ai: 'ai' } as const)[pw];
 // People photograph per page (falls back by pathway). Only approved library photos (peopleImagery.ts).
 const heroPhotoBySlug: Record<string, string> = {
-  'test-automation': 'technology-pair', 'full-stack-testing': 'services-pair', 'web-mobile-application-testing': 'products-engineer',
-  'non-functional-testing': 'home-mentoring', 'api-cloud-services-testing': 'products-engineer', 'ai-test-squad': 'about-team',
-  'maturity-assessments': 'home-mentoring', 'custom-software-development': 'products-engineer', 'technology-advisory-partnership': 'home-mentoring',
-  'digital-agile-transformation': 'careers-colleagues', 'dedicated-teams': 'about-team', 'staff-augmentation': 'careers-colleagues',
-  'consulting-training': 'resources-audience', 'innovation-tourism': 'industries-team', 'ai-service': 'contact-team',
-  'data-quality': 'technology-pair', 'ai-governance': 'finance-client-meeting',
+  // Mature, corporate buyer imagery only (CEO direction, 25 Nov 2026). See peopleImagery.ts.
+  'test-automation': 'svc-testing', 'full-stack-testing': 'exec-review', 'web-mobile-application-testing': 'svc-build',
+  'non-functional-testing': 'exec-meeting', 'api-cloud-services-testing': 'svc-testing', 'ai-test-squad': 'exec-review',
+  'maturity-assessments': 'exec-meeting', 'custom-software-development': 'work-team', 'technology-advisory-partnership': 'exec-office',
+  'digital-agile-transformation': 'exec-boardroom', 'dedicated-teams': 'exec-review', 'staff-augmentation': 'exec-office',
+  'consulting-training': 'exec-boardroom', 'innovation-tourism': 'exec-boardroom', 'ai-service': 'svc-agents',
+  'data-quality': 'exec-desk', 'ai-governance': 'finance-client-meeting', 'performance-testing': 'svc-testing',
+  'security-testing': 'exec-meeting', 'accessibility': 'exec-desk', 'user-experience-testing': 'svc-build',
 };
-const heroPhoto = peopleImage(heroPhotoBySlug[s.slug] ?? { quality: 'technology-pair', build: 'products-engineer', ai: 'contact-team' }[pw]);
-// Considerations photo: a different people photo from the hero.
-const considerPhotoId = ({ quality: 'home-mentoring', build: 'careers-colleagues', ai: 'about-team' } as const)[pw];
-const considerPhoto = peopleImage(considerPhotoId === heroPhoto.id ? 'services-pair' : considerPhotoId);
+const heroPhoto = peopleImage(heroPhotoBySlug[s.slug] ?? { quality: 'svc-testing', build: 'svc-build', ai: 'svc-agents' }[pw]);
+// Considerations scene photo: a different senior-buyer photo from the hero.
+const considerPhotoId = ({ quality: 'exec-office', build: 'exec-review', ai: 'exec-desk' } as const)[pw];
+const considerPhoto = peopleImage(considerPhotoId === heroPhoto.id ? 'exec-boardroom' : considerPhotoId);
 const considerSurface = ({ quality: 'surface-teal', build: 'surface-mint', ai: 'surface-green' } as const)[pw];
 // Capabilities layout: quality services get the interactive explorer; build/ai (and engagement models) a bento.
 const useExplorer = pw === 'quality' && s.kind !== 'engagement-model' && s.capabilities.length >= 3;
@@ -120,6 +123,29 @@ const capIcon = (t: string) => capIcons.find(([r]) => r.test(t))?.[1] ?? s.icon;
   {/* Hero: pathway colour block + people photograph + floating UI chips (Janique: people-focused hero).
       eyebrow = the mega-menu group, h1 = heroTitle, CTAs from the record (equal width in PageHero). */}
   <PageHero tone={heroTone} image={heroPhoto} ui={heroUi} eyebrow={s.group} title={s.heroTitle} lede={s.heroLede} breadcrumbs={crumbs} primary={s.primaryCta} secondary={s.secondaryCta} />
+
+  {/* PORTFOLIO (custom development only; CEO review 24 Nov 2026: "it really needs to be an online portfolio").
+      Directly under the hero so the work is the first thing a buyer sees. Sample projects are labelled. */}
+  {s.slug === 'custom-software-development' && (
+    <section class="section svc-portfolio" aria-labelledby="portfolio-title">
+      <div class="container">
+        <div class="svc-portfolio__head" data-reveal>
+          <p class="eyebrow">Our work</p>
+          <h2 id="portfolio-title" class="display-sm">Step inside the software we’ve built</h2>
+          <p class="lede">Browse the gallery: every project shows the screens, the problem it solved, the technology and what changed for the client. Then tell us what you want to build.</p>
+        </div>
+        <PortfolioGallery mode="full" id="portfolio" />
+        <div class="svc-portfolio__cases" id="portfolio-cases">
+          <p class="eyebrow">Published custom development case studies</p>
+          <ul>
+            <li><a href="/case-studies/mobile-game-development-creating-legacy/">BB&amp;T / SunTrust Leadership Institute: “Legacy” leadership game, rebuilt in 3 months</a></li>
+            <li><a href="/case-studies/social-enterprise-org/">Shared Harvest: role-based volunteer matching platform</a></li>
+            <li><a href="/case-studies/transforming-workforce-development-through-modern-technology/">Knowledge Architects: workforce training platform performance</a></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  )}
 
   {/* Intro band: "At a glance" card (lifted over the hero edge), the challenge, and the page's signature
       animated visual (chosen by slug in SignatureVisual). */}
@@ -203,25 +229,21 @@ const capIcon = (t: string) => capIcons.find(([r]) => r.test(t))?.[1] ?? s.icon;
   {/* Buyer considerations: proposed copy (pending approval). People photo with overlay chips beside the
       considerations (Janique). Colour block varies by pathway. Optional. */}
   {s.considerations && s.considerations.length > 0 && (
-    <section class:list={['section', considerSurface, 'svc-consider']} aria-labelledby="consider-title" data-review-note={rn('Proposed buyer-specific copy (pending approval)')}>
-      <div class="container svc-consider__grid">
-        <div class="svc-consider__media" data-reveal="left" data-pointer-scene>
-          <img src={`/people/${considerPhoto.id}-800.webp`} alt={considerPhoto.alt} width="800" height={Math.round(800 / considerPhoto.ratio)} loading="lazy" decoding="async" style={`object-position: ${considerPhoto.focus}`} />
-          <div class="svc-consider__chips" aria-hidden="true">
-            {s.considerations.map((c, i) => (
-              <span class="chip-ui" data-depth style={`--depth:${12 + i * 8}; --cx:${[6, 22, 10][i % 3]}%; --cy:${[7, 44, 78][i % 3]}%`}>
-                <span class:list={['chip-ui__icon', { 'chip-ui__icon--green': i === 0, 'chip-ui__icon--slate': i === 2 }]}><Icon name={['team', 'check', 'shield'][i % 3]} /></span>{c.audience}
-              </span>
-            ))}
-          </div>
-        </div>
-        <div>
+    <section class:list={['section', considerSurface, 'svc-consider', 'scene', 'scene--media-left']} aria-labelledby="consider-title" data-review-note={rn('Proposed buyer-specific copy (pending approval)')}>
+      {/* Scene layout (surfaces.css): the photo fills the left half and fades into the section colour; the
+          considerations are centred beside it so image and text line up in one frame. */}
+      <figure class="scene__media" data-reveal="fade">
+        <img src={peopleSrc(considerPhoto)} srcset={peopleSrcset(considerPhoto)} sizes="(min-width: 1024px) 50vw, 100vw" alt={considerPhoto.alt} width="1600" height={Math.round(1600 / considerPhoto.ratio)} loading="lazy" decoding="async" style={`object-position: ${considerPhoto.focus}`} />
+      </figure>
+      <div class="container scene__grid">
+        <div class="scene__copy">
           <SectionHeading eyebrow="Buyer considerations" title="What to know before you start" id="consider-title" />
           <div class="svc-consider__list" data-reveal-stagger>
             {s.considerations.map((c, i) => (
               <div class="consider" data-reveal="up"><span class="consider__n mono" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span><div><h3>{c.audience}</h3><p>{c.text}</p></div></div>
             ))}
           </div>
+          <p class="svc-consider__cta"><a class="btn" href="/contact-us/">Talk to us about your project</a></p>
         </div>
       </div>
     </section>
@@ -341,4 +363,9 @@ const capIcon = (t: string) => capIcons.find(([r]) => r.test(t))?.[1] ?? s.icon;
   .rel-products { margin-top: var(--space-12); }
   .rel-title { font-size: var(--fs-md); }
   .ind-links { margin-top: var(--space-6); font-weight: var(--fw-semibold); }
+  .svc-portfolio { overflow: hidden; background: radial-gradient(50% 40% at 15% 20%, rgba(41,165,154,.18), transparent 70%), radial-gradient(40% 40% at 90% 70%, rgba(44,175,129,.16), transparent 70%), var(--qw-white); }
+  .svc-portfolio__head { max-width: 46rem; margin-bottom: var(--space-12); }
+  .svc-portfolio__cases { margin-top: var(--space-12); padding: var(--space-6) var(--space-8); border-radius: 22px; background: var(--qw-mint-50); }
+  .svc-portfolio__cases ul { margin: var(--space-3) 0 0; padding-left: 1.2rem; display: grid; gap: var(--space-2); font-size: var(--fs-base); }
+  .svc-consider__cta { margin: var(--space-6) 0 0; }
 </style>

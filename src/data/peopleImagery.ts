@@ -42,7 +42,7 @@ export interface PeopleImage {
   /** The live-site URL the original was taken from. */
   sourceUrl: string;
   /** Licence/approval status for reuse on the new site. */
-  licence: 'live-site-asset-unconfirmed';
+  licence: 'live-site-asset-unconfirmed' | 'unsplash-licence' | 'pexels-licence';
 }
 
 const LIVE = 'https://qualityworkscg.com/wp-content/uploads/';
@@ -98,6 +98,52 @@ export const peopleImagery: PeopleImage[] = [
   { id: 'resources-audience', widths: [600], ratio: 1, focus: '50% 45%',
     alt: 'An audience smiles and applauds during a presentation',
     sourceUrl: `${LIVE}About_Us_Our_Team_image_sm.jpg`, licence: 'live-site-asset-unconfirmed' },
+  // Executive review, 24-25 Nov 2026 (Stacy Kirk, relayed by the project lead): every person on the site should
+  // look like our BUYERS: mature, corporate, well-dressed decision-makers. Senior white male executives first,
+  // then Black businesswomen in their 40s+ and mature Black businessmen. No young developers or students.
+  // Stock photographs (Unsplash License / Pexels License: free commercial use, no attribution required).
+  // Stock models, NOT QualityWorks staff or clients. Placeholders until commissioned photography exists (docs/17 §6).
+  { id: 'exec-leader', widths: [800, 1600, 2400], ratio: 2 / 3, focus: '50% 22%',
+    alt: 'An experienced business leader in a blazer and glasses stands in a modern office',
+    sourceUrl: 'https://unsplash.com/photos/1560250097-0b93528c311a', licence: 'unsplash-licence' },
+  { id: 'why-leader', widths: [800, 1600], ratio: 1600 / 2343, focus: '50% 28%',
+    alt: 'A senior businesswoman in a white blouse holds a stack of binders in a modern office',
+    sourceUrl: 'https://www.pexels.com/photo/5668875/', licence: 'pexels-licence' },
+  { id: 'svc-testing', widths: [800, 1600], ratio: 2 / 3, focus: '50% 35%',
+    alt: 'A senior manager in a shirt and tie reviews results on a laptop at his desk',
+    sourceUrl: 'https://www.pexels.com/photo/5668886/', licence: 'pexels-licence' },
+  { id: 'svc-build', widths: [800, 1600], ratio: 1600 / 1091, focus: '45% 40%',
+    alt: 'An executive in a suit walks a colleague through an application on a laptop in a bright office',
+    sourceUrl: 'https://unsplash.com/photos/1560250056-07ba64664864', licence: 'unsplash-licence' },
+  { id: 'svc-agents', widths: [800, 1600], ratio: 3 / 2, focus: '50% 35%',
+    alt: 'Two senior colleagues review a document together in a meeting room',
+    sourceUrl: 'https://www.pexels.com/photo/5668830/', licence: 'pexels-licence' },
+  { id: 'exec-review', widths: [800, 1600], ratio: 3 / 2, focus: '50% 35%',
+    alt: 'Three senior colleagues stand together reviewing a document in an office',
+    sourceUrl: 'https://www.pexels.com/photo/5668840/', licence: 'pexels-licence' },
+  { id: 'exec-office', widths: [800, 1600], ratio: 3 / 2, focus: '40% 35%',
+    alt: 'Two executives talk as they walk through a bright modern office',
+    sourceUrl: 'https://unsplash.com/photos/1560250163-17506787d971', licence: 'unsplash-licence' },
+  { id: 'exec-desk', widths: [800, 1600], ratio: 2 / 3, focus: '50% 30%',
+    alt: 'A businesswoman works at a laptop by the window of her office',
+    sourceUrl: 'https://www.pexels.com/photo/5668846/', licence: 'pexels-licence' },
+  { id: 'exec-meeting', widths: [800, 1600], ratio: 1600 / 2351, focus: '50% 40%',
+    alt: 'Two senior colleagues meet across a desk in a glass-walled office',
+    sourceUrl: 'https://www.pexels.com/photo/5668844/', licence: 'pexels-licence' },
+  { id: 'exec-boardroom', widths: [800, 1600], ratio: 3 / 2, focus: '30% 35%',
+    alt: 'Senior professionals talk together during a business conference',
+    sourceUrl: 'https://www.pexels.com/photo/8761562/', licence: 'pexels-licence' },
+  { id: 'work-team', widths: [800, 1600], ratio: 3 / 2, focus: '50% 40%',
+    alt: 'Two senior colleagues celebrate a milestone with a high five across a meeting table',
+    sourceUrl: 'https://unsplash.com/photos/1600880292203-757bb62b4baf', licence: 'unsplash-licence' },
+  { id: 'telecom-ops', widths: [800, 1600], ratio: 3 / 2, focus: '60% 45%',
+    alt: 'An engineer walks through a data centre aisle carrying a laptop',
+    sourceUrl: 'https://unsplash.com/photos/1573164713988-8665fc963095', licence: 'unsplash-licence' },
+  // Testimonial PLACEHOLDER portraits (stock models). Never pair them with a real client's name or quote.
+  { id: 't-1', widths: [800, 1200], ratio: 3 / 2, focus: '55% 30%', alt: 'Placeholder portrait: a businesswoman in a blazer and glasses', sourceUrl: 'https://www.pexels.com/photo/1181519/', licence: 'pexels-licence' },
+  { id: 't-2', widths: [800, 1200], ratio: 2 / 3, focus: '50% 30%', alt: 'Placeholder portrait: a senior executive with glasses and a grey beard', sourceUrl: 'https://unsplash.com/photos/1504257432389-52343af06ae3', licence: 'unsplash-licence' },
+  { id: 't-3', widths: [800, 1200], ratio: 2 / 3, focus: '50% 22%', alt: 'Placeholder portrait: an executive in a suit with folded arms', sourceUrl: 'https://www.pexels.com/photo/3778876/', licence: 'pexels-licence' },
+  { id: 't-4', widths: [800, 1200], ratio: 3 / 2, focus: '50% 30%', alt: 'Placeholder portrait: a businesswoman in a grey blazer', sourceUrl: 'https://www.pexels.com/photo/2381069/', licence: 'pexels-licence' },
 ];
 
 /** Look up a header photo by id. Throws at build time for an unknown id, so a typo cannot reach a built page. */

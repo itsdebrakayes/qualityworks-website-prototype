@@ -115,9 +115,9 @@
      scale (D1 44/800, D2 30/700, Heading 22/700, Eyebrow 13/700, Body 17/400/1.6, Caption 13/400).
      The large steps are fluid: clamp(minimum, preferred, maximum) so headings scale between phone
      and desktop. The homepage display size tops out at 56px (the guide's own cover heading is 54px). */
-  --fs-xs: 0.8125rem;   /* 13: eyebrow and caption */
-  --fs-sm: 0.9375rem;   /* 15 */
-  --fs-base: 1.0625rem; /* 17: body */
+  --fs-xs: 0.875rem;    /* 14: eyebrow and caption (raised from 13 for readability, CEO review 24 Nov 2026) */
+  --fs-sm: 1rem;        /* 16 (raised from 15) */
+  --fs-base: 1.125rem;  /* 18: body (raised from 17) */
   --fs-md: 1.1875rem;   /* 19 */
   --fs-lg: clamp(1.25rem, 1.15rem + 0.4vw, 1.375rem);
   --fs-xl: clamp(1.5rem, 1.3rem + 0.8vw, 1.875rem);

@@ -1,0 +1,162 @@
+---
+/**
+ * QwShowcase: the homepage "Products & innovation" section, led by QualityWatcher (executive review, Stacy
+ * Kirk, 24 Nov 2026: "I would put Quality Watcher in this section"; "the most important thing to talk about
+ * here is the Navy Award Challenge and ... agentic AI"; PRISM "is probably going to be replaced").
+ *
+ * Content sources (no new claims):
+ *   - Product positioning, the four agents and their descriptions: qualitywatcher.ai homepage, retrieved
+ *     25 Nov 2026 ("Agentic AI Test Automation Platform", Capture / Generation / Execution / Analytics agents,
+ *     "keeping humans in control"). The "4-5x productivity gains" figure on that page is NOT repeated here
+ *     (no claim ID / evidence yet).
+ *   - The window contents recreate the interface panels shown on qualitywatcher.ai (recording session, AI test
+ *     generation, execution run, quality executive report). Labelled "Interface as shown on qualitywatcher.ai";
+ *     swap for product screenshots or a screen recording when available.
+ *   - Navy prize: claim C10 (news post, 27 Apr 2026), with the published photo of Stacy Kirk with Navy leaders.
+ * Layout: dark slate band (the page's one strategically dark section). People photo with the product window
+ *   layered over it; agent tabs auto-cycle (motion.ts data-cycle) and pause on hover/focus.
+ */
+import Icon from './Icon.astro';
+import ClaimRef from './ClaimRef.astro';
+import { peopleImage, peopleSrc, peopleSrcset } from '../data/peopleImagery';
+const photo = peopleImage('svc-testing');
+const agents = [
+  { k: 'Capture', t: 'Capture agent', d: 'Records complete context (screenshots, DOM, user interactions and workflows) with zero manual scripting.' },
+  { k: 'Generate', t: 'Generation agent', d: 'Produces test cases from requirements and UI context in minutes, with human review and approval before execution.' },
+  { k: 'Execute', t: 'Execution agent', d: 'Turns natural-language tests into executable scripts, with self-healing selectors and parallel runs.' },
+  { k: 'Analyze', t: 'Analytics agent', d: 'Executive dashboards, quality metrics and compliance reporting in one place.' },
+];
+---
+<div class="qws" data-cycle="5200">
+  <div class="qws__copy">
+    <p class="eyebrow eyebrow--light">Products & innovation</p>
+    <img class="qws__logo" src="/qw/qw-logo.png" alt="QualityWatcher" width="697" height="262" loading="lazy" />
+    <h2 id="products-title" class="qws__h">AI testing agents. <span>Your rules.</span></h2>
+    <p class="qws__lede">QualityWatcher is our agentic AI test automation platform. Specialised agents capture, generate, run and analyse your tests, while your team sets the quality gates and approves every release.</p>
+    <div class="qws__tabs" role="tablist" aria-label="QualityWatcher agents">
+      {agents.map((a, i) => (
+        <button type="button" class="qws__tab" role="tab" id={`qws-tab-${i}`} aria-controls={`qws-panel-${i}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-cycle-tab={i}>
+          <span class="qws__tabk">{a.t}</span><span class="qws__tabd">{a.d}</span><i aria-hidden="true"></i>
+        </button>
+      ))}
+    </div>
+    <div class="btn-row qws__ctas">
+      <a class="btn" href="/qualitywatcher-ai-tools/">Explore QualityWatcher<Icon name="arrow" /></a>
+      <a class="btn btn--light" href="/contact-us/">Request a demo<Icon name="arrow" /></a>
+    </div>
+  </div>
+
+  <div class="qws__visual">
+    <img class="qws__photo" src={peopleSrc(photo)} srcset={peopleSrcset(photo)} sizes="(min-width: 1024px) 50vw, 100vw" alt={photo.alt} width="1600" height="1067" loading="lazy" style={`object-position:${photo.focus}`} />
+    <figure class="qws__win" aria-labelledby="qws-cap">
+      <div class="qws__bar" aria-hidden="true"><i></i><i></i><i></i><span>qualitywatcher.ai</span></div>
+      <div class="qws__body">
+        <div class="qp" id="qws-panel-0" role="tabpanel" aria-labelledby="qws-tab-0" data-cycle-panel="0" data-cycle-hide>
+          <p class="qp__h"><span class="rec"></span>Recording session: Login flow</p>
+          {[['Navigate to /login', 'captured'], ['Type "admin@company.com" in email field', 'captured'], ['Type password in password field', 'captured'], ['Click "Sign In" button', 'pending']].map(([s, st], k) => (
+            <div class="qp__row" style={`--k:${k}`}><span>{s}</span><b class:list={['pill', st === 'pending' ? 'pill--wait' : 'pill--ok']}>{st}</b></div>
+          ))}
+        </div>
+        <div class="qp" id="qws-panel-1" role="tabpanel" aria-labelledby="qws-tab-1" data-cycle-panel="1" data-cycle-hide>
+          <p class="qp__h"><Icon name="spark" />AI test generation <small>Generating 12 cases…</small></p>
+          {[['TC-001: Valid login with correct credentials', 'Given user is on login page — When enters valid email and password — Then redirected to dashboard'], ['TC-002: Login with invalid password shows error', 'Given user is on login page — When enters wrong password — Then error message displayed'], ['TC-003: SSO redirect for enterprise users', 'Given user domain is SSO-enabled — When enters email — Then redirected to identity provider']].map(([t, g], k) => (
+            <div class="qp__case" style={`--k:${k}`}><strong>{t}</strong><small>{g}</small></div>
+          ))}
+        </div>
+        <div class="qp" id="qws-panel-2" role="tabpanel" aria-labelledby="qws-tab-2" data-cycle-panel="2" data-cycle-hide>
+          <p class="qp__h"><Icon name="cycle" />Procurement requisition flow <b class="pill pill--run">Running</b></p>
+          <ol class="qp__steps">
+            {['Navigate to the procurement portal', 'Search for “Industrial Safety Equipment” in the catalog', 'Select the first vendor with a compliance rating above 95%', 'Add 200 units to the purchase requisition', 'Verify the unit price matches the contracted rate of $42.50', 'Submit the requisition for manager approval'].map((s, k) => <li style={`--k:${k}`}><span class="dot"></span>{s}</li>)}
+          </ol>
+        </div>
+        <div class="qp" id="qws-panel-3" role="tabpanel" aria-labelledby="qws-tab-3" data-cycle-panel="3" data-cycle-hide>
+          <p class="qp__h"><Icon name="gauge" />Quality executive report</p>
+          <div class="qp__report">
+            <div class="meter"><svg viewBox="0 0 120 70"><path d="M10 64 A50 50 0 0 1 110 64" class="meter__bg" /><path d="M10 64 A50 50 0 0 1 110 64" class="meter__fg" pathLength="100" /></svg><strong>82%</strong><small>QualityMeter</small></div>
+            <dl class="qp__nums"><div><dt>Total cases</dt><dd>247</dd></div><div><dt>Executed</dt><dd>198</dd></div><div><dt>Passed</dt><dd>186</dd></div></dl>
+          </div>
+        </div>
+      </div>
+      <figcaption id="qws-cap">Interface as shown on qualitywatcher.ai (sample data).</figcaption>
+    </figure>
+    <div class="qws__navy">
+      <img src="/media/stacywithnavyleaders.jpg" alt="QualityWorks CEO Stacy Kirk with U.S. Navy leaders at the prize presentation" width="160" height="120" loading="lazy" />
+      <span><strong>First Prize</strong> U.S. Navy AI Augmented Testing (AIAT) Challenge<ClaimRef id="C10" /><a href="/qualityworks-wins-us-navy-ai-testing-challenge/">Read the story <Icon name="arrow" /></a></span>
+    </div>
+  </div>
+</div>
+<style>
+  .qws { display: grid; gap: var(--space-12); align-items: center; }
+  @media (min-width: 1024px) { .qws { grid-template-columns: 0.95fr 1.05fr; gap: var(--space-16); } }
+  .qws__copy { color: #fff; }
+  .eyebrow--light { color: #9BE7C8; }
+  .qws__logo { display: block; width: 220px; height: auto; margin: var(--space-4) 0 var(--space-8); }
+  .qws__h { color: #fff; font-size: clamp(2rem, 1.4rem + 2.2vw, 3.25rem); line-height: 1.05; letter-spacing: -0.03em; margin: 0 0 var(--space-5); }
+  .qws__h span { color: var(--qw-green-500); }
+  .qws__lede { font-size: var(--fs-md); line-height: 1.6; color: rgba(255,255,255,.88); margin: 0 0 var(--space-8); max-width: 36rem; }
+  .qws__tabs { display: grid; gap: var(--space-2); margin-bottom: var(--space-8); }
+  .qws__tab { position: relative; overflow: hidden; text-align: left; display: grid; gap: 4px; padding: var(--space-4) var(--space-5); border-radius: 16px; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.05); color: #fff; cursor: pointer; transition: background 300ms, border-color 300ms; }
+  .qws__tab:hover { background: rgba(255,255,255,.1); }
+  .qws__tabk { font: 700 var(--fs-md)/1.2 var(--font-display); }
+  .qws__tabd { font-size: var(--fs-sm); line-height: 1.5; color: rgba(255,255,255,.8); display: none; }
+  .qws__tab[aria-selected="true"] { background: rgba(255,255,255,.12); border-color: rgba(44,175,129,.6); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+  .qws__tab[aria-selected="true"] .qws__tabd { display: block; }
+  .qws__tab i { position: absolute; left: 0; bottom: 0; height: 3px; width: 0; background: var(--qw-green-500); }
+  .qws__tab[aria-selected="true"] i { animation: qws-prog 5.2s linear forwards; }
+  @keyframes qws-prog { to { width: 100%; } }
+  .qws__ctas { gap: var(--space-3); }
+  .btn--light { --btn-bg: transparent; --btn-fg: #fff; --btn-border: rgba(255,255,255,.7); }
+  .btn--light:hover { --btn-bg: #fff; --btn-fg: var(--qw-slate-900); --btn-border: #fff; }
+
+  .qws__visual { position: relative; padding-bottom: 6.5rem; }
+  .qws__photo { width: 82%; margin-left: auto; display: block; aspect-ratio: 4 / 4.4; object-fit: cover; border-radius: 32px; box-shadow: 0 40px 80px -40px rgba(0,0,0,.7); }
+  .qws__win { position: absolute; left: 0; top: 9%; width: 74%; margin: 0; border-radius: 20px; overflow: hidden; background: rgba(255,255,255,.88); -webkit-backdrop-filter: blur(24px) saturate(170%); backdrop-filter: blur(24px) saturate(170%); border: 1px solid rgba(255,255,255,.9); box-shadow: 0 40px 90px -30px rgba(0,0,0,.6), inset 0 1px 0 #fff; color: var(--qw-slate-900); }
+  .qws__bar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; background: rgba(241,244,247,.9); border-bottom: 1px solid #e3e8ee; }
+  .qws__bar i { width: 10px; height: 10px; border-radius: 50%; background: #ff5f57; } .qws__bar i:nth-child(2) { background: #febc2e; } .qws__bar i:nth-child(3) { background: #28c840; }
+  .qws__bar span { margin-left: 12px; font-size: .8rem; color: #64748b; }
+  .qws__body { padding: 18px 20px; min-height: 18rem; }
+  .qws__win figcaption { padding: 8px 20px 12px; font-size: .78rem; color: #64748b; border-top: 1px solid #eef2f6; }
+  .qp__h { display: flex; align-items: center; gap: 8px; margin: 0 0 14px; font: 700 1rem/1.3 var(--font-display); }
+  .qp__h :global(svg) { width: 18px; height: 18px; color: var(--qw-teal-700); }
+  .qp__h small { margin-left: auto; font: 600 .8rem/1 var(--font-body); color: var(--qw-teal-700); }
+  .rec { width: 10px; height: 10px; border-radius: 50%; background: #ef4444; animation: rec 1s ease-in-out infinite alternate; }
+  @keyframes rec { to { opacity: .25; } }
+  .qp__row, .qp__case, .qp__steps li { opacity: 0; transform: translateY(8px); animation: qp-in 500ms cubic-bezier(.2,.8,.2,1) forwards; animation-delay: calc(var(--k) * 350ms + 150ms); }
+  @keyframes qp-in { to { opacity: 1; transform: none; } }
+  .qp__row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 12px; margin-bottom: 8px; border-radius: 12px; background: #f6f8fa; font-size: .9rem; }
+  .pill { padding: .25em .7em; border-radius: 999px; font: 700 .72rem/1.2 var(--font-display); white-space: nowrap; }
+  .pill--ok { background: #dcfce7; color: #166534; } .pill--wait { background: #fef3c7; color: #92400e; } .pill--run { margin-left: auto; background: #dbeafe; color: #1e40af; }
+  .qp__case { display: grid; gap: 4px; padding: 10px 12px; margin-bottom: 8px; border-left: 3px solid var(--qw-green-500); border-radius: 8px; background: #f6f8fa; }
+  .qp__case strong { font-size: .9rem; } .qp__case small { font-size: .8rem; color: #475569; line-height: 1.45; }
+  .qp__steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: .88rem; }
+  .qp__steps li { display: flex; gap: 10px; align-items: center; }
+  .qp__steps .dot { flex: none; width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--qw-green-500); background: radial-gradient(circle, var(--qw-green-500) 45%, transparent 50%); }
+  .qp__report { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: center; }
+  .meter { position: relative; display: grid; justify-items: center; }
+  .meter svg { width: 100%; max-width: 200px; }
+  .meter__bg { fill: none; stroke: #e2e8f0; stroke-width: 12; stroke-linecap: round; }
+  .meter__fg { fill: none; stroke: url(#none); stroke: var(--qw-green-500); stroke-width: 12; stroke-linecap: round; stroke-dasharray: 0 100; animation: meter 1.6s cubic-bezier(.2,.8,.2,1) .2s forwards; }
+  @keyframes meter { to { stroke-dasharray: 82 100; } }
+  .meter strong { margin-top: -2.4rem; font: 800 2rem/1 var(--font-display); }
+  .meter small { font-size: .8rem; color: #64748b; }
+  .qp__nums { margin: 0; display: grid; gap: 8px; }
+  .qp__nums div { display: flex; justify-content: space-between; padding: 8px 12px; border-radius: 10px; background: #f6f8fa; font-size: .9rem; }
+  .qp__nums dd { margin: 0; font: 800 1rem/1 var(--font-display); }
+  .qws__navy { position: absolute; right: 0; bottom: 0; display: flex; gap: 14px; align-items: center; max-width: 25rem; padding: 12px 16px 12px 12px; border-radius: 20px; text-decoration: none; color: #fff;
+    background: rgba(34,43,55,.72); -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%); border: 1px solid rgba(255,255,255,.2); box-shadow: 0 24px 50px -20px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.2); transition: transform 300ms; }
+  .qws__navy:hover { transform: translateY(-4px); }
+  .qws__navy img { width: 96px; height: 72px; object-fit: cover; border-radius: 12px; flex: none; }
+  .qws__navy span { display: grid; gap: 2px; font-size: .9rem; line-height: 1.35; }
+  .qws__navy strong { font: 800 1.05rem/1.2 var(--font-display); color: var(--qw-green-500); }
+  .qws__navy a { font-weight: 700; display: inline-flex; gap: 6px; align-items: center; color: #9BE7C8; text-decoration: none; }
+  .qws__navy a::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+  .qws__navy a:hover { text-decoration: underline; }
+  .qws__navy a :global(svg) { width: 14px; height: 14px; }
+  @media (max-width: 767px) {
+    .qws__photo { width: 100%; aspect-ratio: 4 / 3; }
+    .qws__win { position: relative; top: auto; width: 100%; margin-top: -3rem; }
+    .qws__navy { position: relative; margin-top: var(--space-4); max-width: none; }
+    .qws__visual { padding-bottom: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) { .qp__row, .qp__case, .qp__steps li { animation: none; opacity: 1; transform: none; } .meter__fg { animation: none; stroke-dasharray: 82 100; } }
+</style>
