@@ -70,9 +70,15 @@ const headingId = `cta-band-${Math.random().toString(36).slice(2, 8)}`;
   .cta-band h2 { margin-bottom: var(--space-4); }
   .cta-band__text { font-size: var(--fs-md); margin: 0; max-width: 34rem; }
   .cta-band__ctas { margin-top: var(--space-8); }
-  /* Photo is decorative here (alt=""): the people imagery supports, the heading carries the message. */
-  .cta-band__img { display: none; }
+  /* Photo is decorative here (alt=""): the people imagery supports, the heading carries the message.
+     Phones/tablets: the photo sits on top, full width, fading into the colour block (kept on mobile at the
+     project lead's request, 25 Nov 2026: Stacy approved this band including its photo). */
+  .cta-band--photo { padding-top: 0; }
+  .cta-band__img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; margin-bottom: var(--space-6);
+    -webkit-mask-image: linear-gradient(180deg, #000 60%, transparent 100%); mask-image: linear-gradient(180deg, #000 60%, transparent 100%); }
   @media (min-width: 960px) {
+    .cta-band--photo { padding-top: clamp(4rem, 3rem + 4vw, 7rem); }
+    .cta-band__img { margin: 0; aspect-ratio: auto; }
     .cta-band__img { display: block; position: absolute; top: 0; right: 0; bottom: 0; width: 48%; height: 100%; object-fit: cover;
       -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 40%); mask-image: linear-gradient(90deg, transparent 0%, #000 40%); }
   }

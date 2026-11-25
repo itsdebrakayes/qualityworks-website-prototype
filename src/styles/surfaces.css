@@ -105,7 +105,7 @@ main { overflow-x: clip; }
 }
 /* Site header as dark frosted glass. */
 .site-header { background: rgba(34, 43, 55, 0.88) !important; -webkit-backdrop-filter: blur(18px) saturate(150%); backdrop-filter: blur(18px) saturate(150%); }
-.mega { background: rgba(255, 255, 255, 0.86) !important; -webkit-backdrop-filter: blur(22px) saturate(160%); backdrop-filter: blur(22px) saturate(160%); }
+.mega { background: linear-gradient(170deg, rgba(41,165,154,.09) 0%, rgba(41,165,154,0) 45%), #fff !important; -webkit-backdrop-filter: blur(24px) saturate(160%); backdrop-filter: blur(24px) saturate(160%); box-shadow: 0 30px 60px -30px rgba(34,43,55,.35); }
 /* Cards that sit on colour blocks or photos become glass. */
 .surface-teal .card, .surface-green .card, .surface-teal .steps__card, .surface-green .steps__card { background: rgba(255, 255, 255, 0.7); -webkit-backdrop-filter: blur(16px) saturate(160%); backdrop-filter: blur(16px) saturate(160%); border-color: rgba(255, 255, 255, 0.6); }
 
