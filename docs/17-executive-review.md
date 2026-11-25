@@ -44,7 +44,20 @@ On `/services/custom-software-development/#portfolio`, directly under the hero:
 - **Readability:** base text 18px (was 17), small text 16px (was 15), captions 14px (was 13). The header glass is darker for contrast.
 - **Stats:** spec-sheet layout with no pictograms (`src/components/StatBlock.astro`).
 
-## 4. Content integrity and open items
+## 4. Secondary pages (Part 7 of the brief)
+
+| Page | Change | Status |
+|---|---|---|
+| Company (About) | Values were already graphical (numbered tiles around a values orbit). Header and story photos replaced with mature corporate imagery. | Finished |
+| AI-powered testing (every Improve Software Quality service page) | New **Measurable outcomes** spec sheet (C05 4 days to 45 min, C06 ~500 h/week, C07 10x faster test creation) with **Talk to a testing expert** / **See case studies**. A **Technology behind our testing** band shows QualityWatcher's agents and the Navy prize. The considerations section is a full-height scene with a contact button. | Finished |
+| Custom development | Full portfolio directly under the hero, with links to published case studies. | Visual prototype (sample projects) |
+| QualityWatcher | New **The platform today: agentic AI test automation** band right after the hero (four agents, recreated interfaces, Navy prize, link to qualitywatcher.ai). The older AI tools remain below as the free test-creation tools; their sign-in / 404 status notes are unchanged. | Finished; confirm with the product owner which older features to retire |
+| Agents as a Service | **Human oversight** moved up to directly after the hero as a people-first scene: a businesswoman at work, an "agent draft waiting for approval" panel, the three oversight facts and **Talk to us about agents**. The catalog, workflow and steps sections are unchanged. | Finished |
+| Contact | Already distinct sections (hero, four contact cards, "what happens next" + form). New mature header photo. | Finished |
+| Blog and Resource Hub | Already categorised: the blog filters Articles / News; the Resource Hub filters Articles, News & awards, Whitepapers and Events, with type labels on every card. All content is preserved and reachable from the Resources menu; none is on the homepage. | Finished (no change needed) |
+| Navigation | Mega-menu and mobile drawer group headings are now proper section headings (bold display type, accent bar, dividers). The desktop panel is solid white. | Finished |
+
+## 5. Content integrity and open items
 
 - **Photography:** all people photos are Unsplash/Pexels stock (free commercial licences), recorded in `src/data/peopleImagery.ts`. They are not staff or clients. Commissioned photography of real QualityWorks people and clients is the preferred replacement.
 - **Testimonials:** placeholders only. QualityWorks needs to ask current clients for an approved quote and photo (Stacy: "we're gonna have to figure out who we can ask").
@@ -53,4 +66,3 @@ On `/services/custom-software-development/#portfolio`, directly under the hero:
 - **Logo cluster industries:** Equinox and Dunmor are shown as "Industry to confirm".
 - **QualityWatcher:** the window recreates interface panels from qualitywatcher.ai with sample data. The "4–5x productivity" figure on that site is not repeated, because it has no claim record.
 - **Navy AIAT:** shown as First Prize (claim C10) with the published photo. The prize detail is unchanged from the news post.
-- **Not yet redesigned:** the secondary-page work in Part 7 of the brief (company values graphics, Agents as a Service workflow, contact page sections, blog/resource categorisation) is still pending beyond the photo and scene changes above.

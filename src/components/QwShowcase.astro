@@ -19,6 +19,15 @@
 import Icon from './Icon.astro';
 import ClaimRef from './ClaimRef.astro';
 import { peopleImage, peopleSrc, peopleSrcset } from '../data/peopleImagery';
+interface Props {
+  /** id for the h2 (must be unique on the page). */
+  headingId?: string;
+  /** Eyebrow above the logo. */
+  eyebrow?: string;
+  /** Primary CTA. Default: the QualityWatcher page. On that page itself, point it at qualitywatcher.ai. */
+  primary?: { label: string; href: string; external?: boolean };
+}
+const { headingId = 'products-title', eyebrow = 'Products & innovation', primary = { label: 'Explore QualityWatcher', href: '/qualitywatcher-ai-tools/' } } = Astro.props;
 const photo = peopleImage('svc-testing');
 const agents = [
   { k: 'Capture', t: 'Capture agent', d: 'Records complete context (screenshots, DOM, user interactions and workflows) with zero manual scripting.' },
@@ -29,9 +38,9 @@ const agents = [
 ---
 <div class="qws" data-cycle="5200">
   <div class="qws__copy">
-    <p class="eyebrow eyebrow--light">Products & innovation</p>
+    <p class="eyebrow eyebrow--light">{eyebrow}</p>
     <img class="qws__logo" src="/qw/qw-logo.png" alt="QualityWatcher" width="697" height="262" loading="lazy" />
-    <h2 id="products-title" class="qws__h">AI testing agents. <span>Your rules.</span></h2>
+    <h2 id={headingId} class="qws__h">AI testing agents. <span>Your rules.</span></h2>
     <p class="qws__lede">QualityWatcher is our agentic AI test automation platform. Specialised agents capture, generate, run and analyse your tests, while your team sets the quality gates and approves every release.</p>
     <div class="qws__tabs" role="tablist" aria-label="QualityWatcher agents">
       {agents.map((a, i) => (
@@ -41,7 +50,9 @@ const agents = [
       ))}
     </div>
     <div class="btn-row qws__ctas">
-      <a class="btn" href="/qualitywatcher-ai-tools/">Explore QualityWatcher<Icon name="arrow" /></a>
+      {primary.external
+        ? <a class="btn" href={primary.href} target="_blank" rel="noopener">{primary.label}<Icon name="external" /><span class="visually-hidden"> (opens in a new tab)</span></a>
+        : <a class="btn" href={primary.href}>{primary.label}<Icon name="arrow" /></a>}
       <a class="btn btn--light" href="/contact-us/">Request a demo<Icon name="arrow" /></a>
     </div>
   </div>
@@ -159,4 +170,6 @@ const agents = [
     .qws__visual { padding-bottom: 0; }
   }
   @media (prefers-reduced-motion: reduce) { .qp__row, .qp__case, .qp__steps li { animation: none; opacity: 1; transform: none; } .meter__fg { animation: none; stroke-dasharray: 82 100; } }
+  /* Band for use outside the homepage: <section class="section qw-band"> (same dark gradient as the homepage). */
+  :global(.section.qw-band) { position: relative; overflow: hidden; color: #fff; background: radial-gradient(42% 60% at 0% 20%, rgba(44,175,129,.2), transparent 70%), linear-gradient(135deg, #0E3B38 0%, #114A45 50%, #1B2733 100%); }
 </style>

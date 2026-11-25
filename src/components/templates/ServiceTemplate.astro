@@ -46,6 +46,8 @@ import { RELEASE, rn } from '../../lib/release';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../PageHero.astro';
 import PortfolioGallery from '../PortfolioGallery.astro';
+import QwShowcase from '../QwShowcase.astro';
+import StatBlockOutcomes from '../StatBlock.astro';
 import SectionHeading from '../SectionHeading.astro';
 import ProcessSteps from '../ProcessSteps.astro';
 import FaqAccordion from '../FaqAccordion.astro';
@@ -184,6 +186,30 @@ const capIcon = (t: string) => capIcons.find(([r]) => r.test(t))?.[1] ?? s.icon;
       </div>
     </div>
   </div>
+
+  {/* AI-POWERED TESTING: measurable outcomes + the technology (CEO review 24 Nov 2026: "emphasize measurable
+      business outcomes", "show current testing technology", prominent CTAs). Quality-pathway services only.
+      Every figure is a registered claim (StatBlock enforces it). */}
+  {pw === 'quality' && s.kind === 'service' && (
+    <section class="section svc-outcomes" aria-labelledby="outcomes-title">
+      <div class="container">
+        <div class="svc-outcomes__head" data-reveal>
+          <div><p class="eyebrow">Measurable outcomes</p><h2 id="outcomes-title" class="display-sm">What AI-powered testing changed for clients</h2></div>
+          <div class="btn-row"><a class="btn" href="/contact-us/">Talk to a testing expert</a><a class="btn btn--secondary" href="/case-studies/">See case studies</a></div>
+        </div>
+        <StatBlockOutcomes stats={[
+          { value: '45 min', label: 'Regression cycle, down from 4 days (JMMB Group)', claim: 'C05' },
+          { value: '~500 h', label: 'Testing hours saved every week for one client', claim: 'C06' },
+          { value: '10×', label: 'Faster test case creation with our AI tools', claim: 'C07' },
+        ]} />
+      </div>
+    </section>
+  )}
+  {pw === 'quality' && s.kind === 'service' && (
+    <section class="section surface-dark qw-band" aria-labelledby="qw-tech-title">
+      <div class="container"><QwShowcase headingId="qw-tech-title" eyebrow="The technology behind our testing" /></div>
+    </section>
+  )}
 
   {/* Capabilities: always rendered. Composition varies by pathway: quality = interactive explorer (tabs),
       build/ai/engagement models = bento of icon tiles. Engagement models get a different title. */}
@@ -368,4 +394,5 @@ const capIcon = (t: string) => capIcons.find(([r]) => r.test(t))?.[1] ?? s.icon;
   .svc-portfolio__cases { margin-top: var(--space-12); padding: var(--space-6) var(--space-8); border-radius: 22px; background: var(--qw-mint-50); }
   .svc-portfolio__cases ul { margin: var(--space-3) 0 0; padding-left: 1.2rem; display: grid; gap: var(--space-2); font-size: var(--fs-base); }
   .svc-consider__cta { margin: var(--space-6) 0 0; }
+  .svc-outcomes__head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: var(--space-6); margin-bottom: var(--space-10); }
 </style>

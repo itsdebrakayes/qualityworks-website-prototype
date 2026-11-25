@@ -44,7 +44,8 @@ import Icon from '../../components/Icon.astro';
 import AgentOrbit from '../../components/products/AgentOrbit.astro';
 import AgentFlow from '../../components/products/AgentFlow.astro';
 import ReviewPhoto from '../../components/products/ReviewPhoto.astro';
-import { peopleImage } from '../../data/peopleImagery';
+import { peopleImage, peopleSrc, peopleSrcset } from '../../data/peopleImagery';
+const humanPhoto = peopleImage('exec-desk');
 import { agentSnapshot, agentCatalogFacts } from '../../data/products';
 import { ctas } from '../../data/site';
 import { faqLd } from '../../lib/schema';
@@ -70,6 +71,34 @@ const faqs: FaqItem[] = [
     {/* Hero aside: agent persona portraits orbiting "your team" (decorative, pointer parallax). */}
     <Fragment slot="aside"><AgentOrbit /></Fragment>
   </PageHero>
+
+  {/* Human oversight, first after the hero (CEO review 24 Nov 2026: people-first; show where humans stay
+      involved). A full-height scene (surfaces.css .scene): a businesswoman at work fills the left half and fades
+      into the page, the oversight points sit beside her; a white inset panel shows an agent draft waiting for
+      approval. Copy restates facts already on this page / the marketplace. */}
+  <section class="section surface-mint scene scene--media-left aaas-human" aria-labelledby="human-title">
+    <figure class="scene__media aaas-human__media" data-reveal="fade">
+      <img src={peopleSrc(humanPhoto)} srcset={peopleSrcset(humanPhoto)} sizes="(min-width: 1024px) 50vw, 100vw" alt={humanPhoto.alt} width="1600" height="2400" loading="lazy" style={`object-position:${humanPhoto.focus}`} />
+      <div class="gc-inset aaas-approve" aria-hidden="true">
+        <img src="/agents/kai-customer-service.webp" alt="" width="44" height="44" />
+        <span><strong>Kai drafted a reply</strong><small>Waiting for your approval</small></span>
+        <b>Approve</b>
+      </div>
+    </figure>
+    <div class="container scene__grid">
+      <div class="scene__copy">
+        <p class="eyebrow" data-reveal>Human oversight</p>
+        <h2 id="human-title" class="display-sm" data-reveal>Agents take the repeat work. <span class="mark">People stay in charge.</span></h2>
+        <ul class="oversight" data-reveal-stagger>
+          <li data-reveal><span class="icon-badge icon-badge--green"><Icon name="calendar" /></span><span>Every agent still needs a setup call before QualityWorks deploys it.</span></li>
+          <li data-reveal><span class="icon-badge icon-badge--slate"><Icon name="shield" /></span><span>Nothing is deployed automatically at checkout. QualityWorks finalizes setup and deploys the agents into your workstream.</span></li>
+          <li data-reveal><span class="icon-badge icon-badge--mint"><Icon name="team" /></span><span>Agents such as Kai handle common support questions quickly while keeping human review in control.</span></li>
+        </ul>
+        <div class="btn-row"><Button href="/contact-us/?topic=smb-ai" label="Talk to us about agents" /></div>
+        {REVIEW && <p class="small-note" data-review-note={rn('Proposed section — confirm human-oversight wording with product owner')}>Proposed section built from statements already on this page and the marketplace listing. Confirm wording with the product owner.</p>}
+      </div>
+    </div>
+  </section>
 
   {/* The problem: the repetitive work SMB teams want to offload. */}
   <section class="section surface-white" aria-labelledby="problem-title">
@@ -187,27 +216,6 @@ const faqs: FaqItem[] = [
     </div>
   </section>
 
-  {/* Human oversight: people photo + review chips. Copy restates facts already on this page / the marketplace. */}
-  <section class="section surface-mint" aria-labelledby="human-title">
-    <div class="container human">
-      <ReviewPhoto tone="green" image={peopleImage('finance-client-meeting')} chips={[
-        { title: 'Kai: drafting reply', sub: 'Human review in control', faces: ['/agents/kai-customer-service.webp'], x: '2%', y: '6%' },
-        { title: 'Setup call', sub: 'With the QualityWorks team', icon: 'calendar', tone: 'slate', x: '50%', y: '62%' },
-        { title: 'Human approval', sub: 'Kept in the loop', dot: true, x: '8%', y: '80%' },
-      ]} />
-      <div>
-        <p class="eyebrow" data-reveal>Human oversight</p>
-        <h2 id="human-title" class="display-sm" data-reveal>Agents take the repeat work. <span class="mark">People stay in charge.</span></h2>
-        <ul class="oversight" data-reveal-stagger>
-          <li data-reveal><span class="icon-badge icon-badge--green"><Icon name="calendar" /></span><span>Every agent still needs a setup call before QualityWorks deploys it.</span></li>
-          <li data-reveal><span class="icon-badge icon-badge--slate"><Icon name="shield" /></span><span>Nothing is deployed automatically at checkout. QualityWorks finalizes setup and deploys the agents into your workstream.</span></li>
-          <li data-reveal><span class="icon-badge icon-badge--mint"><Icon name="team" /></span><span>Agents such as Kai handle common support questions quickly while keeping human review in control.</span></li>
-        </ul>
-        {REVIEW && <p class="small-note" data-review-note={rn('Proposed section — confirm human-oversight wording with product owner')}>Proposed section built from statements already on this page and the marketplace listing. Confirm wording with the product owner.</p>}
-      </div>
-    </div>
-  </section>
-
   {/* FAQ: same `faqs` array as the FAQPage JSON-LD. */}
   <section class="section surface-white" aria-labelledby="faq-title">
     <div class="container container--narrow">
@@ -295,6 +303,13 @@ const faqs: FaqItem[] = [
   .oversight .icon-badge { width: 44px; height: 44px; border-radius: 13px; }
   .oversight .icon-badge :global(svg) { width: 22px; height: 22px; }
   .small-note { font-size: var(--fs-xs); margin-top: var(--space-4); color: var(--qw-muted); }
+  .aaas-human .oversight { margin-block: var(--space-6); }
+  .aaas-approve { position: absolute; left: 8%; bottom: 10%; z-index: 2; display: flex; align-items: center; gap: 12px; padding: 12px 14px; max-width: 22rem; box-shadow: 0 20px 40px -16px rgba(17,74,69,.45), inset 0 1px 0 #fff; }
+  .aaas-approve img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; flex: none; -webkit-mask-image: none !important; mask-image: none !important; aspect-ratio: 1 !important; }
+  .aaas-approve span { display: grid; gap: 2px; font-size: .9rem; }
+  .aaas-approve strong { font: 700 .95rem/1.2 var(--font-display); }
+  .aaas-approve small { color: var(--qw-slate-700); }
+  .aaas-approve b { margin-left: auto; padding: .45em .9em; border-radius: 999px; background: var(--qw-green-500); color: var(--qw-slate-900); font: 800 .8rem/1 var(--font-display); }
 </style>
 <script>
   // Department filter (single-select). Clicking a chip marks it pressed, hides cards from other departments

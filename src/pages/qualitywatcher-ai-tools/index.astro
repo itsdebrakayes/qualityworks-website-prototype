@@ -52,6 +52,7 @@ import Button from '../../components/Button.astro';
 import Icon from '../../components/Icon.astro';
 import CaseStudyCard from '../../components/CaseStudyCard.astro';
 import QwDemo from '../../components/products/QwDemo.astro';
+import QwShowcase from '../../components/QwShowcase.astro';
 import ReviewPhoto from '../../components/products/ReviewPhoto.astro';
 import { peopleImage } from '../../data/peopleImagery';
 import { qwTools } from '../../data/products';
@@ -82,6 +83,15 @@ const wssc = caseStudyBySlug('ai-powered-test-case-generation-wssc');
 <BaseLayout seo={{ title: 'QualityWatcher AI: AI Test Case & Automation Generation | QualityWorks', description: 'Generate test cases from any requirement format, turn them into UI automation and get automation help with QualityWatcher AI tools from QualityWorks.' }} breadcrumbs={crumbs} jsonLd={[faqLd(faqs)].filter((x) => x !== null)}>
   {/* Bright teal hero with a people photo and floating AI-review chips (replaces the dark product-grid hero). */}
   <PageHero tone="teal" image={peopleImage('svc-testing')} ui="ai" eyebrow="QualityWatcher AI · Product" title="Simplify quality with AI-driven testing tools" lede="Generate real-world test cases from requirements in any format, convert them into automation scripts, and get expert automation help — with your QA team reviewing every output." breadcrumbs={crumbs} primary={qwExternal} secondary={{ label: 'Talk to an automation expert', href: '/contact-us/' }} />
+
+  {/* THE PLATFORM TODAY (CEO review 24 Nov 2026: focus on current agentic AI capabilities, show the actual
+      technology). QualityWatcher's four agents and recreated interface panels from qualitywatcher.ai, plus the
+      Navy AIAT prize. The AI tools below remain as the free test-creation tools. */}
+  <section class="section surface-dark qw-band" aria-labelledby="platform-title">
+    <div class="container">
+      <QwShowcase headingId="platform-title" eyebrow="The platform today: agentic AI test automation" primary={{ label: 'Visit qualitywatcher.ai', href: 'https://www.qualitywatcher.ai/', external: true }} />
+    </div>
+  </section>
 
   {/* How it works: interactive, auto-cycling product demonstration (QwDemo). Carries the illustrative-mock
       caption and RELEASE blocker that the old hero mock had. */}
