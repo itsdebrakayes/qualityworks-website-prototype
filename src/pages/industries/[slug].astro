@@ -82,7 +82,7 @@ const cases = ind.caseStudies.map(caseStudyBySlug).filter(Boolean);
 
   {/* Considerations: only full records have them; ClaimRef annotations attach to specific cards (see Gotchas). */}
   {ind.considerations.length > 0 && (
-    <section class="section surface-mint" aria-labelledby="consider-title">
+    <section class="section surface-green" aria-labelledby="consider-title" data-note="green breaks up the teal/mint run (Janique, 26 Nov 2026)">
       <div class="container">
         <SectionHeading eyebrow="How we approach it" title={`Considerations for ${ind.name.toLowerCase()}`} id="consider-title" />
         <div class="grid grid--2 eq" data-reveal-stagger>

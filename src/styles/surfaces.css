@@ -142,3 +142,9 @@ main { overflow-x: clip; }
    different height"). Grid items stretch to the row height; labels centre inside. */
 .btn-row.btn-row--equal { align-items: stretch; }
 .btn-row.btn-row--equal > .btn, .btn-row.btn-row--equal > a, .btn-row.btn-row--equal > button { height: auto; min-height: 100%; justify-content: center; text-align: center; }
+
+/* Equal buttons, final rule (26 Nov 2026): side by side at equal width when both labels fit on one line; when
+   they do not, each wraps onto its own full-width line. Labels never break or overflow (Janique's comments). */
+.btn-row.btn-row--equal { display: flex; flex-wrap: wrap; width: 100%; max-width: 36rem; }
+.btn-row.btn-row--equal > .btn, .btn-row.btn-row--equal > a { flex: 1 1 0; min-width: max-content; white-space: nowrap; justify-content: center; }
+@media (max-width: 559px) { .btn-row.btn-row--equal > .btn, .btn-row.btn-row--equal > a { flex-basis: 100%; min-width: 0; white-space: normal; } }

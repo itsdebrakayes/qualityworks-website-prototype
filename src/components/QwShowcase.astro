@@ -120,7 +120,8 @@ const agents = [
   @keyframes qws-prog { to { width: 100%; } }
   /* Equal-width buttons (Janique, 25 Nov 2026). */
   .qws__ctas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); max-width: 32rem; }
-  .qws__ctas :global(.btn), .qws__ctas .btn { justify-content: center; width: 100%; height: 100%; white-space: nowrap; padding-inline: 1rem; }
+  .qws__ctas :global(.btn), .qws__ctas .btn { justify-content: center; width: 100%; height: 100%; white-space: nowrap; padding: 1rem 1.6rem; }
+  .qws__ctas { max-width: 36rem !important; }
   .btn--light { --btn-bg: transparent; --btn-fg: #fff; --btn-border: rgba(255,255,255,.7); }
   .btn--light:hover { --btn-bg: #fff; --btn-fg: var(--qw-slate-900); --btn-border: #fff; }
 
@@ -163,12 +164,13 @@ const agents = [
   .qp__nums { margin: 0; display: grid; gap: 8px; }
   .qp__nums div { display: flex; justify-content: space-between; padding: 8px 12px; border-radius: 10px; background: #f6f8fa; font-size: .9rem; }
   .qp__nums dd { margin: 0; font: 800 1rem/1 var(--font-display); }
-  .qws__navy { position: absolute; right: 0; bottom: 0; display: flex; gap: 14px; align-items: center; max-width: 25rem; padding: 12px 16px 12px 12px; border-radius: 20px; text-decoration: none; color: #fff;
+  /* Navy prize, more prominent (Janique, 26 Nov 2026: Stacy would want it to stand out). */
+  .qws__navy { position: absolute; right: 0; bottom: 0; display: flex; gap: 18px; align-items: center; max-width: 30rem; padding: 14px 20px 14px 14px; border: 1px solid rgba(44,175,129,.6) !important; box-shadow: 0 0 0 4px rgba(44,175,129,.18), 0 30px 60px -20px rgba(0,0,0,.7) !important; border-radius: 20px; text-decoration: none; color: #fff;
     background: rgba(34,43,55,.72); -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%); border: 1px solid rgba(255,255,255,.2); box-shadow: 0 24px 50px -20px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.2); transition: transform 300ms; }
   .qws__navy:hover { transform: translateY(-4px); }
-  .qws__navy img { width: 96px; height: 72px; object-fit: cover; border-radius: 12px; flex: none; }
+  .qws__navy img { width: 132px; height: 96px; object-fit: cover; border-radius: 12px; flex: none; }
   .qws__navy span { display: grid; gap: 2px; font-size: .9rem; line-height: 1.35; }
-  .qws__navy strong { font: 800 1.05rem/1.2 var(--font-display); color: var(--qw-green-500); }
+  .qws__navy strong { font: 800 1.35rem/1.15 var(--font-display); color: var(--qw-green-500); }
   .qws__navy a { font-weight: 700; display: inline-flex; gap: 6px; align-items: center; color: #9BE7C8; text-decoration: none; }
   .qws__navy a::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
   .qws__navy a:hover { text-decoration: underline; }

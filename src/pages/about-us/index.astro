@@ -30,7 +30,7 @@ import PageHero from '../../components/PageHero.astro';
 // People photograph for the header (visual revision, docs/15).
 import { peopleImage, peopleSrc, peopleSrcset } from '../../data/peopleImagery';
 import SectionHeading from '../../components/SectionHeading.astro';
-import ProofBlock from '../../components/ProofBlock.astro';
+import TestimonialStage from '../../components/TestimonialStage.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import ClaimRef from '../../components/ClaimRef.astro';
 import Wireframe from '../../components/Wireframe.astro';
@@ -118,7 +118,6 @@ const storyB = peopleImage('px-8761516');
   <section class="section surface-green ceo-sec" aria-labelledby="ceo-title">
     <div class="container ceo">
       <div class="ceo__photo" data-reveal="scale">
-        <span class="ceo__ring" aria-hidden="true"></span>
         <img src={ceo.photo} alt={ceo.photoAlt} width="320" height="303" loading="lazy" />
       </div>
       <div data-reveal="up">
@@ -142,11 +141,11 @@ const storyB = peopleImage('px-8761516');
     </div>
   </section>
 
-  {/* Reviews: live-site testimonials plus an external link to the Clutch profile (opens a new tab via Button). */}
+  {/* Reviews: the people-forward testimonial carousel used on the homepage (Janique, 26 Nov 2026), plus an external link to the Clutch profile (opens a new tab via Button). */}
   <section class="section surface-mint" aria-labelledby="reviews-title">
     <div class="container">
       <SectionHeading eyebrow="Reviews" title="Ranked by our clients as one of the top companies in the industry" id="reviews-title" />
-      <ProofBlock />
+      <TestimonialStage />
       <p class="reviews-more"><Button cta={{ label: 'Read more reviews on Clutch', href: site.externalPlatforms.clutch, external: true, kind: 'secondary', handoffNote: 'Opens clutch.co' }} /></p>
     </div>
   </section>

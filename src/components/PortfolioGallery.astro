@@ -137,6 +137,13 @@ const pageUrl = '/services/custom-software-development/';
   .pf__quote p { margin: 0 0 var(--space-3); font: 600 var(--fs-md)/1.5 var(--font-display); color: var(--qw-slate-900); }
   .pf__quote footer { font-size: var(--fs-sm); color: var(--qw-slate-700); }
   .pf__ctas { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  /* Homepage preview: smaller stage so the heading, buttons and screens fit in one frame at 1440 x 900
+     (Janique, 26 Nov 2026); project details sit below and are reached by scrolling. */
+  @media (min-width: 768px) {
+    .pf--preview.is-3d .pf__slide { width: min(46%, 560px); margin-left: calc(min(46%, 560px) / -2); }
+    .pf--preview.is-3d .pf__controls { margin-top: var(--space-4); }
+    .pf--preview.is-3d .pf__cap { margin-top: var(--space-2); }
+  }
   @media (max-width: 767px) {
     .pf.is-3d .pf__slide { width: 84%; margin-left: -42%; transform: translateX(calc(var(--d) * 96%)) translateZ(calc(var(--ad) * -120px)) rotateY(calc(var(--d) * -18deg)); }
   }

@@ -9,8 +9,9 @@
  *     to public/clients/ from wp-content/uploads, retrieved 25 Nov 2026). Logo-use approval for the new site
  *     still needs confirming (docs/17 §6). The sales-deck logo sheet in Canva (mentioned by Stacy) should
  *     replace or extend this list.
- *   - records without a logo: clients named in published case studies (src/data/caseStudies.ts). Shown as
- *     a name mark until an approved logo file exists.
+ *   - case-study clients: official logos downloaded from each company's own website or the qualitywatcher.ai
+ *     client strip (26 Nov 2026): Truist, JMMB, Swagbucks, WSSC Water, Wisynco. Sagicor, IEHP and Legacy.com
+ *     could not be fetched (bot protection / no logo file) and stay as name marks until the files are supplied.
  *   - `industry`: from the case-study record where one exists; otherwise the client's widely known sector.
  *     'Industry to confirm' where we could not confirm it.
  */
@@ -33,12 +34,12 @@ export const clients: ClientMark[] = [
   { name: 'Equinox', industry: 'Industry to confirm', logo: '/clients/Equinox_logo.png', size: 1 },
   { name: 'Dunmor', industry: 'Industry to confirm', logo: '/clients/dunmor2.png', size: 1 },
   { name: 'A-MAN, Inc.', industry: 'Education', logo: '/clients/logo-aman.png', size: 1 },
-  { name: 'WSSC Water', industry: 'Public sector & utilities', size: 2 },
-  { name: 'BB&T / SunTrust (now Truist)', industry: 'Finance & banking', size: 2 },
+  { name: 'WSSC Water', industry: 'Public sector & utilities', logo: '/clients/wssc-water.svg', size: 2 },
+  { name: 'Truist (BB&T / SunTrust)', industry: 'Finance & banking', logo: '/clients/truist.svg', size: 2 },
   { name: 'Sagicor', industry: 'Insurance', size: 1 },
-  { name: 'JMMB Group', industry: 'Finance & banking', size: 1 },
-  { name: 'Wisynco', industry: 'Retail & distribution', size: 1 },
+  { name: 'JMMB Group', industry: 'Finance & banking', logo: '/clients/jmmb.png', size: 1 },
+  { name: 'Wisynco', industry: 'Retail & distribution', logo: '/clients/wisynco.png', size: 1 },
   { name: 'IEHP', industry: 'Healthcare', size: 1 },
-  { name: 'Swagbucks', industry: 'Technology', size: 1 },
+  { name: 'Swagbucks', industry: 'Technology', logo: '/clients/swagbucks.svg', size: 1 },
   { name: 'Legacy.com', industry: 'Media & entertainment', size: 1 },
 ];
