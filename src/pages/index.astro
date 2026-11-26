@@ -53,8 +53,14 @@ import { organizationLd } from '../lib/schema';
 
 // Hero: an experienced business leader (Stacy: "the hero section is supposed to make them a hero").
 const heroImage = peopleImage('exec-leader');
+// Hero service tabs (AI-powered testing and custom development first, per the CEO review).
+const heroTabs = [
+  { label: 'AI-Powered Testing', text: 'Release with confidence. AI-augmented testing and quality engineering, with human expertise at every step.', href: '/services/test-automation/' },
+  { label: 'Custom Development', text: 'Web and mobile products designed, built and tested by one team, from first idea to launch.', href: '/services/custom-software-development/' },
+  { label: 'AI Agents', text: 'AI agents that take repeat work off your team\u2019s plate, with people approving every step.', href: '/products/agents-as-a-service/' },
+];
 // Why QualityWorks: one large portrait (Stacy: "I'd rather it just be someone's face here").
-const whyImg = peopleImage('px-5668766');
+const whyImg = peopleImage('why-exec');
 // Service pillars: photo, emphasis and a second "talk to us" action per pathway (ids from services.ts).
 const pillarMeta: Record<string, { photo: string; core: boolean; contact: string }> = {
   quality: { photo: 'svc-testing', core: true, contact: 'Talk to a testing expert' },
@@ -80,26 +86,39 @@ const agents = products.find((p) => p.slug === 'agents-as-a-service');
       Desktop with motion only; phones, tablets and reduced motion get the static layout. */}
   <div class="intro" data-intro>
   <div class="intro__stage">
+  {/* Hero layout per the project lead's reference (26 Nov 2026, Stacy prefers it): the photo is the full background,
+      the copy sits over it, "Excellence." carries the brand gradient, and a glass card switches between the three
+      services. The teal rises from the bottom only to just below the headline (not halfway across the photo) and
+      fades out before it reaches the executive, so his face stays clear. --teal-top tunes how high it comes. */}
   <section class="hero surface-teal" aria-labelledby="hero-title">
     <p class="intro__hint" aria-hidden="true"><i></i>Scroll</p>
     <div class="hero__media">
-      <img class="hero__photo" src={peopleSrc(heroImage)} srcset={peopleSrcset(heroImage)} sizes="(min-width: 1024px) 62vw, 100vw"
-        alt={heroImage.alt} width="1600" height="2400" loading="eager" fetchpriority="high" decoding="async" style={`object-position: ${heroImage.focus}`} />
+      <img class="hero__photo" src={peopleSrc(heroImage)} srcset={peopleSrcset(heroImage)} sizes="100vw"
+        alt={heroImage.alt} width="1672" height="941" loading="eager" fetchpriority="high" decoding="async" style={`object-position: ${heroImage.focus}`} />
+      <span class="hero__teal" aria-hidden="true"></span>
     </div>
     <div class="container hero__grid">
       <div class="hero__copy">
         <p class="hero__brand" data-reveal="fade"><img src="/brand/qualityworks-wordmark-white.png" alt="" width="146" height="32" /></p>
+        <p class="hero__eyebrow" data-reveal="fade">Human expertise · AI-powered possibilities</p>
         {/* Tagline per the brand guide: title case, always with the period. */}
-        <h1 id="hero-title" class="display" data-words><span class="word" style="--w:0">Engineered</span> <span class="word" style="--w:1">for</span> <span class="word" style="--w:2">Excellence.</span></h1>
-        <p class="hero__pos" data-reveal style="--i:3">
-          <a href="/services/test-automation/"><Icon name="shield" />AI-powered testing</a>
-          <span aria-hidden="true">+</span>
-          <a href="/services/custom-software-development/"><Icon name="devices" />Custom software development</a>
-        </p>
-        <p class="lede hero__lede" data-reveal style="--i:4">Enterprise-grade quality for the software you release, and for the software we build with you.</p>
-        <div class="btn-row hero__ctas" data-reveal style="--i:5">
-          <Button href="/contact-us/" label="Contact us" />
-          <a class="hero__more" href="#services">See what we do<Icon name="arrow" /></a>
+        <h1 id="hero-title" class="display" data-words><span class="word" style="--w:0">Engineered</span><br /><span class="word" style="--w:1">for</span> <span class="word hero__excel" style="--w:2">Excellence.</span></h1>
+        <p class="lede hero__lede" data-reveal style="--i:3">Your vision deserves exceptional software. We bring the people, precision and AI-powered expertise to make it happen.</p>
+        <div class="hero__card" data-cycle="6000" data-reveal style="--i:4">
+          <div class="hero__tabs" role="tablist" aria-label="What we do">
+            {heroTabs.map((t, i) => (
+              <button type="button" class="hero__tab" role="tab" id={`hero-tab-${i}`} aria-controls={`hero-panel-${i}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-cycle-tab={i}>{t.label}</button>
+            ))}
+          </div>
+          {heroTabs.map((t, i) => (
+            <div class="hero__panel" id={`hero-panel-${i}`} role="tabpanel" aria-labelledby={`hero-tab-${i}`} data-cycle-panel={i} data-cycle-hide hidden={i !== 0}>
+              <p>{t.text}</p>
+              <div class="hero__ctas">
+                <a class="btn hero__explore" href={t.href}>Explore<Icon name="arrow" /></a>
+                <a class="btn btn--secondary hero__contact" href="/contact-us/">Contact us</a>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -319,20 +338,61 @@ const agents = products.find((p) => p.slug === 'agents-as-a-service');
   .hero__ctas { margin-top: var(--space-6); }
   .hero__brand { display: flex; align-items: center; gap: 10px; margin: 0 0 var(--space-5); font: 700 var(--fs-sm)/1 var(--font-display); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-slate-900); }
   .hero__brand img { height: 38px; width: auto; filter: brightness(0) saturate(100%) invert(14%) sepia(12%) saturate(1100%) hue-rotate(176deg); }
-  .hero__pos { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); margin: 0 0 var(--space-4); font: 800 clamp(1.15rem, 1rem + .6vw, 1.5rem)/1.2 var(--font-display); }
-  .hero__pos a { display: inline-flex; align-items: center; gap: 10px; padding: .5em .9em; border-radius: 14px; color: var(--qw-slate-900); text-decoration: none; background: rgba(255,255,255,.32); border: 1px solid rgba(255,255,255,.55); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); transition: background 250ms, transform 250ms; }
-  .hero__pos a:hover { background: rgba(255,255,255,.55); transform: translateY(-2px); }
-  .hero__pos :global(svg) { width: 1.1em; height: 1.1em; }
-  .hero__pos > span { font-weight: 900; color: var(--qw-slate-900); }
-  .hero__more { display: inline-flex; align-items: center; gap: .5em; font: 700 var(--fs-base)/1 var(--font-display); color: var(--qw-slate-900); text-decoration: none; padding: .9em .4em; }
-  .hero__more:hover { text-decoration: underline; }
-  .hero__more :global(svg) { width: 1em; height: 1em; }
+  .hero__eyebrow { margin: 0 0 var(--space-4); font: 800 var(--fs-xs)/1.3 var(--font-display); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-teal-800); }
+  .hero__copy h1 { max-width: none; }
+  /* "Excellence." in the brand gradient (reference design). Dark enough to keep 3:1 on the bright photo. */
+  .hero__excel { background: linear-gradient(95deg, var(--qw-slate-900) 0%, #18625C 30%, #1D8C7F 60%, #1E9A6E 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero__lede { color: var(--qw-slate-900); }
+  .hero__card { margin-top: var(--space-6); max-width: 40rem; padding: var(--space-4) var(--space-5) var(--space-5); border-radius: 22px;
+    background: linear-gradient(160deg, rgba(255,255,255,.62), rgba(255,255,255,.42)); -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid rgba(255,255,255,.75); box-shadow: 0 24px 50px -24px rgba(17,74,69,.5), inset 0 1px 0 rgba(255,255,255,.9); }
+  .hero__tabs { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 999px; background: rgba(34,43,55,.1); margin-bottom: var(--space-4); }
+  .hero__tab { border: 0; cursor: pointer; padding: .5em 1em; border-radius: 999px; background: transparent; color: var(--qw-slate-900); font: 700 var(--fs-sm)/1.2 var(--font-display); transition: background 250ms, color 250ms; }
+  .hero__tab:hover { background: rgba(255,255,255,.6); }
+  .hero__tab[aria-selected="true"] { background: var(--qw-slate-900); color: #fff; }
+  .hero__panel { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-4); }
+  .hero__panel[hidden] { display: none; }
+  .hero__panel p { margin: 0; flex: 1 1 16rem; font-size: var(--fs-base); line-height: 1.55; color: var(--qw-slate-900); }
+  .hero__ctas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
+  .hero__ctas .btn { justify-content: center; white-space: nowrap; }
+  .hero__ctas :global(svg) { width: 1em; height: 1em; }
+  .hero__teal { display: none; }
+  @media (max-width: 1023px) {
+    /* On the solid teal block the light end of the gradient disappears: keep it dark. */
+    .hero__excel { background: linear-gradient(95deg, var(--qw-slate-900) 0%, #0E3B38 100%); -webkit-background-clip: text; background-clip: text; }
+    .hero__eyebrow { color: var(--qw-slate-900); }
+    .hero__tabs { display: grid; grid-template-columns: repeat(3, 1fr); width: 100%; border-radius: 16px; }
+    .hero__tab { font-size: .8rem; padding: .6em .4em; border-radius: 12px; text-align: center; }
+  }
   @media (min-width: 1024px) {
-    .hero { display: flex; align-items: center; padding-block: var(--space-12) 8.5rem; }
+    .hero { display: flex; align-items: center; padding-block: var(--space-12) 8.5rem; min-height: 100vh; }
     .hero__grid { width: 100%; padding-top: 0; }
-    .hero__media { position: absolute; top: 0; right: 0; bottom: 0; width: 60%; }
-    .hero__photo { height: 100%; aspect-ratio: auto; -webkit-mask-image: linear-gradient(90deg, transparent 0%, transparent 6%, #000 38%); mask-image: linear-gradient(90deg, transparent 0%, transparent 6%, #000 38%); }
-    .hero__copy { max-width: 38rem; }
+    .hero__media { position: absolute; inset: 0; width: auto; }
+    .hero__photo { height: 100%; aspect-ratio: auto; }
+    /* Overlay per the reference (project lead, 26 Nov 2026): a subtle dark gradient over the photo behind the copy
+       (white text), plus a faint teal tint from the left edge that fades out exactly where the text column
+       begins (--text-x = the container's left edge). The executive on the right stays untouched. */
+    .hero__teal { --text-x: max(var(--gutter), calc((100% - var(--container)) / 2)); display: block; position: absolute; inset: 0; pointer-events: none;
+      background:
+        linear-gradient(90deg, rgba(41,165,154,.55) 0%, rgba(41,165,154,.3) calc(var(--text-x) * .6), rgba(41,165,154,0) var(--text-x)),
+        linear-gradient(90deg, rgba(9,22,27,.78) 0%, rgba(9,22,27,.66) 34%, rgba(9,22,27,.3) 55%, rgba(9,22,27,0) 70%),
+        linear-gradient(0deg, rgba(9,22,27,.5) 0%, rgba(9,22,27,0) 34%); }
+    .hero__brand img { filter: none; }
+    .hero__eyebrow { color: #7FDCC9; }
+    .hero__copy h1 { color: #fff; }
+    .hero__excel { background: linear-gradient(95deg, #fff 0%, #fff 22%, #A6EEDD 48%, #5FD6B3 75%, #2CAF81 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .hero__lede { color: rgba(255,255,255,.86); }
+    .hero__card { background: linear-gradient(160deg, rgba(255,255,255,.16), rgba(255,255,255,.06)); border-color: rgba(255,255,255,.28); box-shadow: 0 24px 50px -24px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.25); }
+    .hero__tabs { background: rgba(0,0,0,.25); }
+    .hero__tab { color: #fff; }
+    .hero__tab:hover { background: rgba(255,255,255,.14); }
+    .hero__tab[aria-selected="true"] { background: #fff; color: var(--qw-slate-900); }
+    .hero__panel p { color: rgba(255,255,255,.86); }
+    .hero__explore { --btn-bg: #fff; --btn-fg: var(--qw-slate-900); --btn-border: #fff; }
+    .hero__contact { --btn-fg: #fff; --btn-border: rgba(255,255,255,.7); }
+    .hero__contact:hover { --btn-bg: #fff; --btn-fg: var(--qw-slate-900); --btn-border: #fff; }
+    :global(html.intro-mode) .intro__hint { color: #fff; }
+    .hero__copy { max-width: 44rem; }
   }
 
   /* ---------- SCROLL INTRO (desktop, motion allowed; html.intro-mode set by the script below) ----------
@@ -353,6 +413,7 @@ const agents = products.find((p) => p.slug === 'agents-as-a-service');
     :global(html.intro-mode) .intro .pathway__text, :global(html.intro-mode) .intro .pathway__icon { display: none; }
     :global(html.intro-mode .site-header) { position: fixed; left: 0; right: 0; top: 0; transform: translateY(calc((var(--ip, 1) - 1) * 110%)); }
         :global(html.intro-mode) .intro__hint { display: flex; }
+    :global(html.intro-mode) .intro .hero__card { opacity: clamp(0, calc(1 - var(--p) * 2.2), 1); }
   }
   .intro__hint { display: none; position: absolute; left: 50%; bottom: 28px; translate: -50% 0; z-index: 4; align-items: center; gap: 8px; font: var(--fw-bold) var(--fs-xs)/1 var(--font-display); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-slate-900); opacity: calc(1 - var(--p, 1) * 4); pointer-events: none; }
   .intro__hint i { width: 22px; height: 34px; border: 2px solid currentColor; border-radius: 12px; position: relative; }

@@ -261,7 +261,7 @@ await m.close();
 
 // ---- 7. Homepage CTAs and pathways
 await page.goto(BASE + '/', { waitUntil: 'networkidle' });
-const heroCtas = await page.$$eval('.hero__ctas a', (as) => as.map((a) => a.getAttribute('href')));
+const heroCtas = await page.$$eval('.hero__panel:not([hidden]) .hero__ctas a', (as) => as.map((a) => a.getAttribute('href')));
 const pathwayHrefs = await page.$$eval('.pathway a', (as) => as.map((a) => a.getAttribute('href')));
 // CEO-approved scroll intro (docs/17): at the top the hero fills the screen; the pathway cards rise in over the
 // first ~90% of a viewport of scroll. Check them where the intro ends.

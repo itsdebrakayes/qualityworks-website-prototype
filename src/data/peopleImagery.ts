@@ -103,12 +103,14 @@ export const peopleImagery: PeopleImage[] = [
   // then Black businesswomen in their 40s+ and mature Black businessmen. No young developers or students.
   // Stock photographs (Unsplash License / Pexels License: free commercial use, no attribution required).
   // Stock models, NOT QualityWorks staff or clients. Placeholders until commissioned photography exists (docs/17 §6).
-  // Hero (26 Nov 2026): AI-generated portrait supplied by the project lead (taken from their Lovable concept,
-  // cropped from a 1920px screenshot, so the source is ~800px and upscaled). Replace with a full-resolution
-  // render of the same likeness when the approved AI image set is produced.
-  { id: 'exec-leader', widths: [800, 1600, 2400], ratio: 800 / 652, focus: '45% 28%',
-    alt: 'A senior executive with grey hair in a navy suit, in a high-rise office',
-    sourceUrl: 'supplied by the project lead (AI-generated, Lovable concept)', licence: 'ai-generated-supplied' },
+  // Homepage hero + Why QualityWorks (26 Nov 2026): AI-generated portraits supplied by the project lead, matching
+  // the agreed buyer criteria. Generated images, not real people; not QualityWorks staff or clients.
+  { id: 'exec-leader', widths: [800, 1600], ratio: 1672 / 941, focus: '74% 30%',
+    alt: 'A senior executive in a navy suit sits at his laptop in a high-rise office',
+    sourceUrl: 'supplied by the project lead (AI-generated)', licence: 'ai-generated-supplied' },
+  { id: 'why-exec', widths: [800, 1600], ratio: 1536 / 1024, focus: '28% 30%',
+    alt: 'A senior businesswoman in a cream blazer holds a laptop in a bright modern office',
+    sourceUrl: 'supplied by the project lead (AI-generated)', licence: 'ai-generated-supplied' },
   { id: 'why-leader', widths: [800, 1600], ratio: 1600 / 2343, focus: '50% 28%',
     alt: 'A senior businesswoman in a white blouse holds a stack of binders in a modern office',
     sourceUrl: 'https://www.pexels.com/photo/5668875/', licence: 'pexels-licence' },
