@@ -42,7 +42,7 @@ export interface PeopleImage {
   /** The live-site URL the original was taken from. */
   sourceUrl: string;
   /** Licence/approval status for reuse on the new site. */
-  licence: 'live-site-asset-unconfirmed' | 'unsplash-licence' | 'pexels-licence';
+  licence: 'live-site-asset-unconfirmed' | 'unsplash-licence' | 'pexels-licence' | 'ai-generated-supplied';
 }
 
 const LIVE = 'https://qualityworkscg.com/wp-content/uploads/';
@@ -103,10 +103,12 @@ export const peopleImagery: PeopleImage[] = [
   // then Black businesswomen in their 40s+ and mature Black businessmen. No young developers or students.
   // Stock photographs (Unsplash License / Pexels License: free commercial use, no attribution required).
   // Stock models, NOT QualityWorks staff or clients. Placeholders until commissioned photography exists (docs/17 §6).
-  // Hero (replaced 26 Nov 2026 after Janique's review comment): a senior executive in a suit and tie.
-  { id: 'exec-leader', widths: [800, 1600, 2400], ratio: 2400 / 1597, focus: '28% 30%',
-    alt: 'A senior executive in a suit and tie smiles in front of a brick wall',
-    sourceUrl: 'https://unsplash.com/photos/1562788869-4ed32648eb72', licence: 'unsplash-licence' },
+  // Hero (26 Nov 2026): AI-generated portrait supplied by the project lead (taken from their Lovable concept,
+  // cropped from a 1920px screenshot, so the source is ~800px and upscaled). Replace with a full-resolution
+  // render of the same likeness when the approved AI image set is produced.
+  { id: 'exec-leader', widths: [800, 1600, 2400], ratio: 800 / 652, focus: '45% 28%',
+    alt: 'A senior executive with grey hair in a navy suit, in a high-rise office',
+    sourceUrl: 'supplied by the project lead (AI-generated, Lovable concept)', licence: 'ai-generated-supplied' },
   { id: 'why-leader', widths: [800, 1600], ratio: 1600 / 2343, focus: '50% 28%',
     alt: 'A senior businesswoman in a white blouse holds a stack of binders in a modern office',
     sourceUrl: 'https://www.pexels.com/photo/5668875/', licence: 'pexels-licence' },
