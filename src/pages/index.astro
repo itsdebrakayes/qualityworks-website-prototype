@@ -405,7 +405,9 @@ const agents = products.find((p) => p.slug === 'agents-as-a-service');
       top: calc(var(--p) * 88px); left: calc(var(--p) * 24px); right: calc(var(--p) * 24px); bottom: calc(var(--p) * 104px);
       border-radius: calc(var(--p) * 32px); }
     :global(html.intro-mode) .intro .hero__photo { transform: scale(calc(1.18 - var(--p) * 0.18)); transform-origin: 60% 50%; }
-    :global(html.intro-mode) .intro .hero__copy { transform: translateY(calc(var(--p) * -60px)) scale(calc(1.06 - var(--p) * 0.18)); transform-origin: left center; }
+    /* As the tab card fades out, move the remaining copy down so it is centred between the panel top and the service cards. */
+    :global(html.intro-mode) .intro .hero__copy { transform: translateY(calc(var(--p) * var(--copy-shift, 5.5vh))) scale(calc(1.04 - var(--p) * var(--copy-shrink, 0.12))); transform-origin: left center; }
+    @media (max-height: 820px) { :global(html.intro-mode) .intro .hero__copy { --copy-shift: 5vh; --copy-shrink: 0.24; } }
     :global(html.intro-mode) .intro .pathways-wrap { position: absolute; left: 0; right: 0; width: auto; bottom: 24px; margin: 0 auto;
       opacity: clamp(0, calc(var(--p) * 2 - 0.8), 1); transform: translateY(calc((1 - var(--p)) * 160px)); }
     :global(html.intro-mode) .intro .pathway { padding-block: var(--space-6) var(--space-5); }
