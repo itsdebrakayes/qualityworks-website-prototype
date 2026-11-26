@@ -26,9 +26,11 @@ interface Props {
   eyebrow?: string;
   /** Primary CTA. Default: the QualityWatcher page. On that page itself, point it at qualitywatcher.ai. */
   primary?: { label: string; href: string; external?: boolean };
+  /** People photo id behind the product window, or false for the window on its own (graphic variant). */
+  photo?: string | false;
 }
-const { headingId = 'products-title', eyebrow = 'Products & innovation', primary = { label: 'Explore QualityWatcher', href: '/qualitywatcher-ai-tools/' } } = Astro.props;
-const photo = peopleImage('svc-testing');
+const { photo: photoId = 'px-5439459', headingId = 'products-title', eyebrow = 'Products & innovation', primary = { label: 'Explore QualityWatcher', href: '/qualitywatcher-ai-tools/' } } = Astro.props;
+const photo = photoId ? peopleImage(photoId) : null;
 const agents = [
   { k: 'Capture', t: 'Capture agent', d: 'Records complete context (screenshots, DOM, user interactions and workflows) with zero manual scripting.' },
   { k: 'Generate', t: 'Generation agent', d: 'Produces test cases from requirements and UI context in minutes, with human review and approval before execution.' },
@@ -39,7 +41,7 @@ const agents = [
 <div class="qws" data-cycle="5200">
   <div class="qws__copy">
     <p class="eyebrow eyebrow--light">{eyebrow}</p>
-    <img class="qws__logo" src="/qw/qw-logo.png" alt="QualityWatcher" width="697" height="262" loading="lazy" />
+    <img class="qws__logo" src="/qw/qw-logo-white.png" alt="QualityWatcher" width="697" height="262" loading="lazy" />
     <h2 id={headingId} class="qws__h">AI testing agents. <span>Your rules.</span></h2>
     <p class="qws__lede">QualityWatcher is our agentic AI test automation platform. Specialised agents capture, generate, run and analyse your tests, while your team sets the quality gates and approves every release.</p>
     <div class="qws__tabs" role="tablist" aria-label="QualityWatcher agents">
@@ -57,8 +59,9 @@ const agents = [
     </div>
   </div>
 
-  <div class="qws__visual">
-    <img class="qws__photo" src={peopleSrc(photo)} srcset={peopleSrcset(photo)} sizes="(min-width: 1024px) 50vw, 100vw" alt={photo.alt} width="1600" height="1067" loading="lazy" style={`object-position:${photo.focus}`} />
+  <div class:list={['qws__visual', { 'qws__visual--graphic': !photo }]}>
+    {photo ? <img class="qws__photo" src={peopleSrc(photo)} srcset={peopleSrcset(photo)} sizes="(min-width: 1024px) 50vw, 100vw" alt={photo.alt} width="1600" height="1067" loading="lazy" style={`object-position:${photo.focus}`} />
+           : <span class="qws__graphic" aria-hidden="true"></span>}
     <figure class="qws__win" aria-labelledby="qws-cap">
       <div class="qws__bar" aria-hidden="true"><i></i><i></i><i></i><span>qualitywatcher.ai</span></div>
       <div class="qws__body">
@@ -115,13 +118,20 @@ const agents = [
   .qws__tab i { position: absolute; left: 0; bottom: 0; height: 3px; width: 0; background: var(--qw-green-500); }
   .qws__tab[aria-selected="true"] i { animation: qws-prog 5.2s linear forwards; }
   @keyframes qws-prog { to { width: 100%; } }
-  .qws__ctas { gap: var(--space-3); }
+  /* Equal-width buttons (Janique, 25 Nov 2026). */
+  .qws__ctas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); max-width: 32rem; }
+  .qws__ctas :global(.btn), .qws__ctas .btn { justify-content: center; width: 100%; height: 100%; white-space: nowrap; padding-inline: 1rem; }
   .btn--light { --btn-bg: transparent; --btn-fg: #fff; --btn-border: rgba(255,255,255,.7); }
   .btn--light:hover { --btn-bg: #fff; --btn-fg: var(--qw-slate-900); --btn-border: #fff; }
 
-  .qws__visual { position: relative; padding-bottom: 6.5rem; }
-  .qws__photo { width: 82%; margin-left: auto; display: block; aspect-ratio: 4 / 4.4; object-fit: cover; border-radius: 32px; box-shadow: 0 40px 80px -40px rgba(0,0,0,.7); }
-  .qws__win { position: absolute; left: 0; top: 9%; width: 74%; margin: 0; border-radius: 20px; overflow: hidden; background: rgba(255,255,255,.88); -webkit-backdrop-filter: blur(24px) saturate(170%); backdrop-filter: blur(24px) saturate(170%); border: 1px solid rgba(255,255,255,.9); box-shadow: 0 40px 90px -30px rgba(0,0,0,.6), inset 0 1px 0 #fff; color: var(--qw-slate-900); }
+  .qws__visual { position: relative; padding-bottom: 11rem; }
+  /* The person stays visible: photo on the right, the smaller product window overlaps only its lower-left corner
+     (Janique, 25 Nov 2026: "move over more to the right so we can see ..."). */
+  .qws__photo { width: 74%; margin-left: auto; display: block; aspect-ratio: 4 / 4.6; object-fit: cover; object-position: 62% 30%; border-radius: 32px; box-shadow: 0 40px 80px -40px rgba(0,0,0,.7); }
+  .qws__graphic { display: block; width: 74%; margin-left: auto; aspect-ratio: 4 / 4.6; border-radius: 32px;
+    background: radial-gradient(circle at 1px 1px, rgba(255,255,255,.16) 1px, transparent 1.5px) 0 0 / 22px 22px, linear-gradient(150deg, rgba(44,175,129,.55), rgba(41,165,154,.25) 55%, rgba(255,255,255,.04));
+    border: 1px solid rgba(255,255,255,.14); }
+  .qws__win { position: absolute; left: 0; top: 18%; width: 62%; margin: 0; border-radius: 20px; overflow: hidden; background: rgba(255,255,255,.88); -webkit-backdrop-filter: blur(24px) saturate(170%); backdrop-filter: blur(24px) saturate(170%); border: 1px solid rgba(255,255,255,.9); box-shadow: 0 40px 90px -30px rgba(0,0,0,.6), inset 0 1px 0 #fff; color: var(--qw-slate-900); }
   .qws__bar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; background: rgba(241,244,247,.9); border-bottom: 1px solid #e3e8ee; }
   .qws__bar i { width: 10px; height: 10px; border-radius: 50%; background: #ff5f57; } .qws__bar i:nth-child(2) { background: #febc2e; } .qws__bar i:nth-child(3) { background: #28c840; }
   .qws__bar span { margin-left: 12px; font-size: .8rem; color: #64748b; }
@@ -164,7 +174,7 @@ const agents = [
   .qws__navy a:hover { text-decoration: underline; }
   .qws__navy a :global(svg) { width: 14px; height: 14px; }
   @media (max-width: 767px) {
-    .qws__photo { width: 100%; aspect-ratio: 4 / 3; }
+    .qws__photo, .qws__graphic { width: 100%; aspect-ratio: 4 / 3; }
     .qws__win { position: relative; top: auto; width: 100%; margin-top: -3rem; }
     .qws__navy { position: relative; margin-top: var(--space-4); max-width: none; }
     .qws__visual { padding-bottom: 0; }

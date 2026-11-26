@@ -156,9 +156,9 @@ export const primaryNav: NavItem[] = [
       {
         heading: 'Learn',
         links: [
-          { label: 'Resource Hub', href: '/resources/', description: 'Whitepapers, case studies and events', status: 'proposed' },
+          { label: 'Resource Hub', href: '/resources/', description: 'Whitepapers and case studies', status: 'proposed' },
           { label: 'Blog', href: '/blog/', description: 'Articles, news and insights' },
-          { label: 'Events & Speaking', href: '/events/', description: 'Where to catch our team next', status: 'proposed' },
+          // Events & Speaking removed (CEO review 24 Nov 2026: "take that whole thing out ... hard to keep updated").
         ],
       },
     ],

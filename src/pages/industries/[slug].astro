@@ -119,6 +119,8 @@ const cases = ind.caseStudies.map(caseStudyBySlug).filter(Boolean);
   /* :global because the class is passed into the Alert component, outside this file's style scope. */
   :global(.ind-alert) { margin-top: var(--space-8); }
   /* Consideration cards: white card with a 3px teal top rule to mark them as approach notes. */
+  /* Badge is a fixed square (it stretched to the card's height and pushed the text out of view; Janique 25 Nov). */
+  .consider :global(.icon-badge) { flex: none; width: 52px; height: 52px; align-self: flex-start; }
   .consider { position: relative; height: 100%; display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-8); background: #fff; border-radius: 24px; box-shadow: 0 24px 44px -34px rgba(34,43,55,.6); transition: transform .3s ease; }
   .consider:hover { transform: translateY(-4px); }
   .consider .icon-badge--mint { background: var(--qw-mint-50); }
@@ -128,7 +130,8 @@ const cases = ind.caseStudies.map(caseStudyBySlug).filter(Boolean);
   .ichal__card { display: grid; gap: var(--space-5); padding: var(--space-8); border-radius: 28px; background: var(--qw-mint-50); border-left: 8px solid var(--qw-green-500); }
   .ichal__card .lede { margin: 0; color: var(--qw-slate-900); }
   .eq { align-items: stretch; }
-  .eq > :global(*), .eq > div > :global(*) { height: 100%; }
+  /* Equal-height cards only: the card itself (or the card inside a reveal wrapper), never its contents. */
+  .eq > :global(*), .eq > div:not(.consider) > :global(*) { height: 100%; }
   .evidence-note { color: var(--qw-slate-900) !important; }
   .consider h3 { font-size: var(--fs-md); }
   .consider p { margin: 0; color: var(--qw-slate-800); }

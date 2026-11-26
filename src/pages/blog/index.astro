@@ -15,7 +15,7 @@
  * Redesign (Janique 24 Nov: "Not seeing how blog and Resource Hub differs"): the Blog is the editorial stream of
  *   articles, news and insights. Magazine layout: the newest post renders as a wide featured card (first grid
  *   item, CSS only, so filtering is unchanged), type chips (Articles / News) plus the category select, and
- *   a hero aside and closing band that point to the Resource Hub for whitepapers, case studies and events.
+ *   a hero aside and closing band that point to the Resource Hub for whitepapers and case studies.
  * Gotchas:
  *   - Only 12 of the 99 live posts are migrated. Production needs pagination (/blog/page/2/), which is
  *     not built.
@@ -42,12 +42,12 @@ const types = [{ id: 'blog', label: 'Articles' }, { id: 'news', label: 'News' }]
 ---
 <BaseLayout seo={{ title: 'Blog: Software Testing, QA & AI Insights | QualityWorks', description: 'What QualityWorks experts are saying about software testing, test automation, agentic QA, AI adoption, agile and software development.' }} breadcrumbs={crumbs}>
   <PageHero tone="mint" eyebrow="Blog · Articles, news and insights" title="Our blog" lede="See what our experts are saying about end-to-end testing, agile, automation, AI and software development." breadcrumbs={crumbs}>
-    <p class="purpose">Short reads from our team and company news, newest first. For whitepapers, case studies and events, visit the Resource Hub.</p>
+    <p class="purpose">Short reads from our team and company news, newest first. For whitepapers and case studies, visit the Resource Hub.</p>
     <div slot="aside" class="hub-card">
       <span class="hub-card__icon" aria-hidden="true"><Icon name="layers" /></span>
       <p class="hub-card__eyebrow">Looking to go deeper?</p>
       <p class="hub-card__title">Resource Hub</p>
-      <p class="hub-card__text">Whitepapers, case studies and events &amp; webinars.</p>
+      <p class="hub-card__text">Whitepapers and client case studies.</p>
       <a class="btn" href="/resources/">Visit the Resource Hub</a>
     </div>
   </PageHero>
@@ -76,7 +76,7 @@ const types = [{ id: 'blog', label: 'Articles' }, { id: 'news', label: 'News' }]
       <p class="migration">Showing the 12 most recent posts migrated from WordPress for the prototype. The live blog has 99 posts; pagination (12 per page, <code>/blog/page/2/</code>) is required in production.</p>
     </div>
   </section>
-  <CtaBand tone="green" eyebrow="Resource Hub" title="Whitepapers, case studies and events" text="Deeper educational material lives in the Resource Hub." primary={{ label: 'Visit the Resource Hub', href: '/resources/' }} secondary={{ label: 'Browse case studies', href: '/case-studies/' }} photo="resources-audience" />
+  <CtaBand tone="green" eyebrow="Resource Hub" title="Whitepapers and case studies" text="Deeper educational material lives in the Resource Hub." primary={{ label: 'Visit the Resource Hub', href: '/resources/' }} secondary={{ label: 'Browse case studies', href: '/case-studies/' }} photo={false} />
 </BaseLayout>
 <style>
   .purpose { margin-top: var(--space-4); max-width: 36rem; font-size: var(--fs-sm); color: var(--qw-slate-900); }

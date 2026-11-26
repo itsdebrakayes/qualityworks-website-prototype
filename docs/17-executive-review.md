@@ -66,3 +66,32 @@ On `/services/custom-software-development/#portfolio`, directly under the hero:
 - **Logo cluster industries:** Equinox and Dunmor are shown as "Industry to confirm".
 - **QualityWatcher:** the window recreates interface panels from qualitywatcher.ai with sample data. The "4–5x productivity" figure on that site is not repeated, because it has no claim record.
 - **Navy AIAT:** shown as First Prize (claim C10) with the published photo. The prize detail is unchanged from the news post.
+
+## 6. Review comments from Janique (25 Nov 2026), applied 26 Nov 2026
+
+| Comment | Change |
+|---|---|
+| Hero: "not sure about this one" | New hero photo: a senior executive in a suit and tie (`exec-leader`). |
+| Hero: logo + "Consulting Group" text looks off; just use the logo | The text is removed and the logo shown larger. |
+| Why QualityWorks: find another Black person who looks like an exec | New portrait: a Black businesswoman in a dark suit (`px-5668766`). |
+| Service pillars: make the cards the same width | All three pillars are now equal width. |
+| QualityWatcher: use the white logo | A white version is generated from the current logo (`public/qw/qw-logo-white.png`). Swap in the official white file when Janique sends it. |
+| QualityWatcher: the photo behind needs to move right so we can see it, or use a graphic | The photo sits further right and the product window covers only its lower-left corner. The QualityWatcher page and the testing service pages use a graphic background instead of a photo (`photo={false}`). |
+| QualityWatcher: make the buttons the same width | Done. The buttons are the same width and height. |
+| AaaS hero / closing CTA, Finance hero: buttons have different heights | `.btn-row--equal` buttons now stretch to the same height site-wide. |
+| Finance & banking: considerations section looks blank | Fixed a layout bug: a "same height" rule stretched the icon badges to the card height, which pushed the text out of view. |
+| Public sector: find a human for the hero | Added a photo of a senior executive; Small business and Media & entertainment headers got photos too. |
+| "Let's avoid using the same pic over and over" (custom development, dedicated teams) | Every service page now has its own hero photo **and** its own considerations photo. The main pages each have their own header and closing-band photo. Detail pages' closing band has no photo, so no photo repeats from page to page. The only reuse is deliberate: industry overview cards preview their own industry page's header. |
+| "All these pages seem to be the same" (testing services) | Sibling service pages now alternate hero colour (teal, mint or green) and capabilities layout (interactive explorer or bento), on top of their unique photos. |
+| Events: "Stacy wanted to remove events on a whole" | Events & Speaking is removed from the menu, the Resource Hub (band, filter, cards), the blog and the design-system page. The event pages are no longer built, and `/events/` and `/events/*` redirect (301) to `/resources/`. The event data file is kept, unused, so nothing is lost. |
+| Positive feedback (featured work, testimonials, client logos, the QualityWatcher agent tabs and animation) | Kept as is. |
+
+### Photo plan for the AI-generated set (pending supervisor approval)
+
+Each photo slot on the site is a separate entry in `src/data/peopleImagery.ts`, and each is used once. To replace the stock set with AI-generated photos, generate one image per id, keeping the criteria agreed so far:
+
+- mature, corporate, well-dressed decision-makers;
+- senior white male executives first, then Black businesswomen in their 40s and up, and mature Black businessmen;
+- modern offices, natural light, no young developers or students.
+
+Save each image under the same id (`public/people/<id>-800.webp` / `-1600.webp`). Then change `licence` and `sourceUrl` to record that the image is AI-generated. Testimonial portraits (`t-1`…`t-4`) stay labelled as placeholders until real client photos are approved.

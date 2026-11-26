@@ -1,18 +1,18 @@
 ---
 /**
  * RESOURCE HUB (proposed new route; live "Resources" menu holds only Blog).
- * Combines articles, news/awards, whitepapers and events with type chips + topic filter.
+ * Combines articles, news/awards and whitepapers with type chips + topic filter. Events were removed from the
+ * site (CEO review, 24 Nov 2026); /events/ URLs redirect here (scripts/gen-redirects.mjs).
  * Persona: QA Director (B), Marketing/Ops (E). Core question: "What can I learn before I talk to sales?"
  *
  * URL: /resources/. Marked "(proposed hub)" in the docs/03 page map: not in the live sitemap, needs QM-41.
  * Persona / CTA (docs/03-page-map-personas.md §2, "Resources / Blog / Article" row): primary B, E;
  *   secondary A. Proof required: author, dates, references. Primary CTA: "Talk to an expert" (here the
- *   closing CtaBand with `ctas.contact`). Required data: articles (WordPress), events.
- * What: one mixed grid of ArticleCards and EventCards with two combinable filters: content-type chips
+ *   closing CtaBand with `ctas.contact`). Required data: articles (WordPress).
+ * What: one grid of ArticleCards with two combinable filters: content-type chips
  *   (single-select toggle buttons) and a topic <select>. Empty state with its own "Clear filters" button.
  * Data: src/data/articles.ts (`articles` = migrated posts plus, in review builds only, the PRISM
- *   whitepaper fixture; `contentTypes` for the chips), src/data/events.ts (`events`; release builds drop
- *   fixtures, unverified and undated events), src/data/site.ts (`ctas.contact`).
+ *   whitepaper fixture; `contentTypes` for the chips), src/data/site.ts (`ctas.contact`).
  * SEO: inline title/description. Breadcrumbs Home > Resources produce BreadcrumbList JSON-LD via
  *   BaseLayout. No other JSON-LD.
  * Review/release: no REVIEW/RELEASE logic in this file; the review/release difference comes from the
@@ -20,7 +20,7 @@
  * Redesign (Janique 24 Nov: "Not seeing how blog and Resource Hub differs"): the hub is now framed as the home of
  *   deeper educational and downloadable material that exists today: whitepapers (articles typed 'whitepaper',
  *   incl. the PRISM "Coming soon" fixture in review builds), case studies (src/data/caseStudies.ts, linking to
- *   /case-studies/) and events & webinars (src/data/events.ts, linking to /events/). No guides exist, so
+ *   /case-studies/). Events & webinars were removed (CEO review, 24 Nov 2026). No guides exist, so
  *   none are shown. The Blog (articles, news and insights) is linked from the hero and the overview tiles.
  *   Below the featured sections, the original filterable library grid is kept unchanged.
  * Gotchas:
@@ -28,9 +28,6 @@
  *     renders <select>s and this page needs chip buttons. It still uses the same data-* hooks
  *     (data-filter-bar, data-chip-filter, data-filter, data-filter-clear, data-filter-count) that
  *     src/lib/filters.ts expects, and repeats the .filter-bar styles locally (FilterBar's are scoped).
- *   - Events are wrapped in a div with data-type="event" and an empty data-categories, because EventCard
- *     does not carry those attributes. Consequence: choosing any topic hides all events (the empty-state
- *     copy says so).
  *   - Topic options come from article categories only.
  *   - Filter state is mirrored in the URL (?type=...&topic=...) so filtered views are shareable.
  */
@@ -39,37 +36,32 @@ import PageHero from '../../components/PageHero.astro';
 // People photograph for the section overview header (visual revision, docs/15).
 import { peopleImage } from '../../data/peopleImagery';
 import ArticleCard from '../../components/ArticleCard.astro';
-import EventCard from '../../components/EventCard.astro';
 import CaseStudyCard from '../../components/CaseStudyCard.astro';
 import EmptyState from '../../components/EmptyState.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import Icon from '../../components/Icon.astro';
 import { articles, contentTypes, blogPosts } from '../../data/articles';
-import { events, eventPhase } from '../../data/events';
 import { caseStudies } from '../../data/caseStudies';
 import { ctas } from '../../data/site';
 const crumbs = [{ label: 'Home', href: '/' }, { label: 'Resources' }];
 // Topic options: unique article categories, minus WordPress's default "Uncategorized", sorted A-Z.
 const topics = [...new Set(articles.flatMap((a) => a.categories))].filter((c) => c !== 'Uncategorized').sort();
-// Item count shown on each content-type chip; "event" is not an article type, so count events separately.
-const count = (t: string) => t === 'event' ? events.length : articles.filter((a) => a.type === t).length;
+// Item count shown on each content-type chip.
+const count = (t: string) => articles.filter((a) => a.type === t).length;
 // Featured sections. Whitepapers: every article typed 'whitepaper'. Case studies: the first three records
 // that have a headline metric. Events: upcoming / date-TBC first (soonest first), then the most recent past.
 const whitepapers = articles.filter((a) => a.type === 'whitepaper');
 const featuredCases = caseStudies.filter((c) => c.metrics.length > 0).slice(0, 3);
-const upcomingEvents = events.filter((e) => ['upcoming', 'date-tbc'].includes(eventPhase(e))).sort((a, b) => (a.startDate || '9').localeCompare(b.startDate || '9'));
-const featuredEvents = [...upcomingEvents, ...events.filter((e) => eventPhase(e) === 'past').sort((a, b) => b.startDate.localeCompare(a.startDate))].slice(0, 3);
 // Overview tiles: what lives in the hub (three) plus the Blog crossover tile.
 const tiles = [
   { href: '#whitepapers', icon: 'doc', tone: 'teal', label: 'Whitepapers', n: whitepapers.length, text: 'In-depth papers on software quality and AI.' },
   { href: '/case-studies/', icon: 'gauge', tone: 'green', label: 'Case studies', n: caseStudies.length, text: 'How clients solved difficult digital challenges.' },
-  { href: '/events/', icon: 'calendar', tone: 'slate', label: 'Events & webinars', n: events.length, text: 'Conferences, webinars and speaking engagements.' },
   { href: '/blog/', icon: 'learn', tone: 'white', label: 'Blog', n: blogPosts.length, text: 'Articles, news and insights from our team.' },
 ];
 ---
-<BaseLayout seo={{ title: 'Resources: Articles, Whitepapers, News & Events | QualityWorks', description: 'Insights on software testing, test automation, agentic QA and AI adoption from QualityWorks, plus company news, whitepapers and speaking events.' }} breadcrumbs={crumbs}>
-  <PageHero image={peopleImage('resources-audience')} tone="teal" ui={false} eyebrow="Resource Hub · Whitepapers, case studies and events" title="The Resource Hub" lede="Practical thinking on software quality, AI and delivery from the QualityWorks team." breadcrumbs={crumbs} primary={{ label: 'Explore the hub', href: '#hub-overview' }} secondary={{ label: 'Read the blog', href: '/blog/' }}>
-    <p class="purpose">The Resource Hub collects our deeper material: whitepapers, client case studies and events &amp; webinars. For shorter articles and company news, see the <a href="/blog/">Blog</a>.</p>
+<BaseLayout seo={{ title: 'Resources: Articles, Whitepapers, Case Studies & News | QualityWorks', description: 'Insights on software testing, test automation, agentic QA and AI adoption from QualityWorks, plus company news, whitepapers and case studies.' }} breadcrumbs={crumbs}>
+  <PageHero image={peopleImage('resources-audience')} tone="teal" ui={false} eyebrow="Resource Hub · Whitepapers and case studies" title="The Resource Hub" lede="Practical thinking on software quality, AI and delivery from the QualityWorks team." breadcrumbs={crumbs} primary={{ label: 'Explore the hub', href: '#hub-overview' }} secondary={{ label: 'Read the blog', href: '/blog/' }}>
+    <p class="purpose">The Resource Hub collects our deeper material: whitepapers and client case studies. For shorter articles and company news, see the <a href="/blog/">Blog</a>.</p>
   </PageHero>
 
   {/* Overview: four big tiles explaining what is in the hub, with live counts from the data. */}
@@ -115,23 +107,12 @@ const tiles = [
     </div>
   </section>
 
-  {/* Events & webinars: up to three, upcoming first, on a grey band with white cards so past events stand out. */}
-  <section class="section ev-band" aria-labelledby="ev-title">
-    <div class="container">
-      <div class="feat-head" data-reveal="up">
-        <div><p class="eyebrow">Events &amp; webinars</p><h2 id="ev-title" class="display-sm">See the team live</h2></div>
-        <a class="btn btn--secondary" href="/events/">All events <Icon name="arrow" /></a>
-      </div>
-      <div class="grid grid--3">{featuredEvents.map((e) => <EventCard e={e} />)}</div>
-    </div>
-  </section>
-
   <section class="section surface-white" aria-labelledby="lib-title">
     <div class="container">
       <div class="section-intro" data-reveal="up">
         <p class="eyebrow">Browse everything</p>
         <h2 id="lib-title" class="display-sm">The full library</h2>
-        <p class="lede">Every whitepaper, article, news item and event in one filterable list.</p>
+        <p class="lede">Every whitepaper, article and news item in one filterable list.</p>
       </div>
       {/* Hand-built filter form (see Gotchas). onsubmit="return false" stops Enter from reloading the page. */}
       <form class="filter-bar res-filter" id="res-filter" role="search" aria-label="Filter resources" data-filter-bar onsubmit="return false">
@@ -149,13 +130,12 @@ const tiles = [
         <div class="filter-bar__actions"><button type="button" class="btn btn--ghost btn--sm" data-filter-clear disabled>Clear filters</button></div>
         <p class="filter-bar__count" aria-live="polite" data-filter-count></p>
       </form>
-      {/* Results grid: articles first (newest first, sorted in articles.ts), then events wrapped with filter data attributes. */}
+      {/* Results grid: articles, newest first (sorted in articles.ts). */}
       <div class="grid grid--3" id="res-results">
         {articles.map((a) => <ArticleCard a={a} />)}
-        {events.map((e) => <div class="res-event" data-type="event" data-categories=""><EventCard e={e} /></div>)}
       </div>
       {/* Empty state: shown by initFilters() when no item matches; its button is wired in the script below. */}
-      <EmptyState title="Nothing matches those filters" id="res-empty" hidden><p>Events have no topic tags yet. Try another topic or content type.</p><button type="button" class="btn btn--secondary btn--sm" data-empty-clear>Clear filters</button></EmptyState>
+      <EmptyState title="Nothing matches those filters" id="res-empty" hidden><p>Try another topic or content type.</p><button type="button" class="btn btn--secondary btn--sm" data-empty-clear>Clear filters</button></EmptyState>
     </div>
   </section>
   <CtaBand title="Want to talk it through with the authors?" primary={ctas.contact} />
@@ -187,12 +167,6 @@ const tiles = [
   .feat-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: var(--space-4); margin-bottom: var(--space-10); }
   .feat-head h2 { margin: 0; }
   .wp-grid > :global(.card) { border-radius: 24px; border: 0; box-shadow: 0 24px 50px -34px rgba(34,43,55,0.5); }
-  /* Grey band so event cards (incl. past events) never blend into the background (Janique: "maybe gray"). */
-  .ev-band { background: color-mix(in srgb, var(--qw-slate-700, #36414F) 9%, #fff); }
-  .ev-band :global(.event-card), .ev-band :global(.event-card--past), .ev-band :global(.event-card--cancelled) { background: #fff; border-color: color-mix(in srgb, var(--qw-slate-900) 18%, transparent); box-shadow: 0 18px 40px -30px rgba(34,43,55,0.6); border-radius: 22px; }
-  .ev-band :global(.event-card--upcoming) { border-top: 6px solid var(--qw-green-500); }
-  .ev-band :global(.event-card--date-tbc) { border-top: 6px solid var(--qw-teal-500); }
-  .ev-band :global(.event-card--past) { border-top: 6px solid var(--qw-slate-700, #36414F); }
   /* Library: past events in the mixed grid get a grey container instead of mint. */
   #res-results :global(.event-card--past), #res-results :global(.event-card--cancelled) { background: color-mix(in srgb, var(--qw-slate-700, #36414F) 7%, #fff); border-color: color-mix(in srgb, var(--qw-slate-900) 20%, transparent); }
   /* Filter panel layout: stacked on small screens; from 900px, chips | 16rem topic select | clear button. */

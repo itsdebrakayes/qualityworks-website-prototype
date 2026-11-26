@@ -44,5 +44,7 @@ for (const { slug } of caseStudies) {
   if (renames[slug]) lines.push(`/case-studies/${slug}/  ${target}  301`);
 }
 if (!existsSync(outDir)) throw new Error(`Output directory ${outDir} does not exist — run the build first`);
+// Events & Speaking was removed (CEO review, 24 Nov 2026): old event URLs go to the Resource Hub.
+lines.push('/events/  /resources/  301', '/events/*  /resources/  301');
 writeFileSync(`${outDir}/_redirects`, lines.join('\n') + '\n');
 console.log(`gen-redirects: wrote ${lines.length - 1} redirect rules to ${outDir}/_redirects (pending host configuration)`);

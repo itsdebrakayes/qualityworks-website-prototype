@@ -151,7 +151,7 @@ for (const w of [360, 640, 768, 1024, 1440]) {
 // ---- 3. axe-core (WCAG 2.x A/AA rules incl. colour contrast)
 // Key routes plus four more pages; WCAG 2.0/2.1 A and AA plus WCAG 2.2 AA rule tags.
 const axeFindings = [];
-for (const r of keyRoutes.concat(['/industries/', '/products/', '/blog/', '/events/pnsqc-2026/'])) {
+for (const r of keyRoutes.concat(['/industries/', '/products/', '/blog/', '/resources/'])) {
   await page.goto(BASE + r, { waitUntil: 'networkidle' });
   await page.evaluate(() => document.querySelectorAll('.reveal').forEach((e) => e.classList.add('is-visible')));
   await page.waitForTimeout(800);
@@ -344,24 +344,18 @@ await cs.close();
 const rs = await browser.newPage({ viewport: { width: 1280, height: 900 } });
 await rs.goto(BASE + '/resources/', { waitUntil: 'networkidle' });
 const rAll = await rs.$$eval('#res-results > *:not([hidden])', (l) => l.length);
-await rs.click('[data-chip-filter="type"] [data-value="event"]');
+await rs.click('[data-chip-filter="type"] [data-value="whitepaper"]');
 const rEv = await rs.$$eval('#res-results > *:not([hidden])', (l) => l.length);
-await rs.selectOption('#res-topic', 'AI');
+await rs.selectOption('#res-topic', 'Diversity'); // no whitepaper carries this topic
 const rNone = await rs.isVisible('#res-empty');
-rec('QA-25', 'BR-7.9', 'Resource hub filters', 'Type chips (aria-pressed) and topic filter combine; empty state on no match', rEv > 0 && rEv < rAll && rNone, `all:${rAll} events:${rEv} events+AI empty:${rNone}`);
+rec('QA-25', 'BR-7.9', 'Resource hub filters', 'Type chips (aria-pressed) and topic filter combine; empty state on no match', rEv > 0 && rEv < rAll && rNone, `all:${rAll} whitepapers:${rEv} whitepapers+Diversity empty:${rNone}`);
 await rs.close();
 
-// ---- 11. Events: no registration for past / cancelled / TBC
-const evBad = [];
-// Past (PNSQC, NTC), cancelled (fixture) and date-TBC (BOW) events: no link whose text mentions 'register'.
-for (const slug of ['pnsqc-2026', 'ntc-2025', 'fixture-cancelled-meetup', 'bow-growth-conference-2026']) {
-  await page.goto(`${BASE}/events/${slug}/`, { waitUntil: 'domcontentloaded' });
-  const reg = await page.$$eval('main a', (as) => as.filter((a) => /register/i.test(a.textContent)).length);
-  if (reg) evBad.push(slug);
-}
-await page.goto(`${BASE}/events/fixture-agentic-qa-webinar/`);
-const upcomingReg = await page.$$eval('main .demo-reg button[disabled]', (b) => b.length);
-rec('QA-26', 'BR-7.11', 'Event states', 'Past, cancelled and date-TBC events never offer registration; the upcoming fixture shows a disabled, labelled demo control (no placeholder link)', evBad.length === 0 && upcomingReg === 1, `violations:${evBad.join(',') || 'none'}; upcoming fixture demo control:${upcomingReg}`, '', 'Live homepage currently promotes past PNSQC 2026 as next event (audit C-03)');
+// ---- 11. Events removed (CEO review, 24 Nov 2026): no event pages or navigation links remain
+const evGone = await page.goto(`${BASE}/events/`).then((r) => r.status()).catch(() => 0);
+await page.goto(BASE + '/about-us/', { waitUntil: 'domcontentloaded' });
+const evLinks = await page.$$eval('a[href^="/events"]', (as) => as.length);
+rec('QA-26', 'BR-7.11', 'Events removed', 'No /events/ pages are built and no page links to them (old URLs redirect to /resources/ via _redirects)', evGone === 404 && evLinks === 0, `/events/ status:${evGone}; links to /events on a sample page:${evLinks}`);
 
 // ---- 12. Careers states
 const ca = await browser.newPage({ viewport: { width: 1280, height: 900 } });

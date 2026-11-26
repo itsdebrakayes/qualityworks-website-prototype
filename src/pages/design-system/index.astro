@@ -13,7 +13,7 @@
  *   example if it is visual.
  * Persona / CTA: none. Reviewer/developer tooling, not in the docs/03 persona table.
  * Data: src/styles/tokens.css (read from disk), plus sample records from src/data/services.ts,
- *   products.ts, caseStudies.ts, articles.ts and events.ts to feed the live component demos.
+ *   products.ts, caseStudies.ts, articles.ts to feed the live component demos.
  * SEO: inline title/description with `noindex: true`. Breadcrumbs Home > Prototype > Design system
  *   produce BreadcrumbList JSON-LD via BaseLayout. No other JSON-LD.
  * Review/release: no REVIEW guard in this file; scripts/release-check.mjs deletes /design-system/ from the
@@ -24,8 +24,6 @@
  *     overrides and the .surface-* theme variables, is not listed. A token's note is the comment that
  *     directly follows its value.
  *   - readFileSync uses process.cwd(), so the build must run from the project root (npm scripts do).
- *   - The event demo picks events by array position ([0], [3], [4]): today a real event plus the upcoming
- *     and cancelled fixtures. Reordering events.ts changes which states appear; missing indexes are skipped.
  *   - ProofBlock demo uses testimonial id 'T1'; it must exist in src/data/testimonials.ts.
  *   - The inline style attributes on the type specimen are intentional: they show raw token values.
  */
@@ -39,7 +37,6 @@ import ServiceCard from '../../components/ServiceCard.astro';
 import ProductCard from '../../components/ProductCard.astro';
 import CaseStudyCard from '../../components/CaseStudyCard.astro';
 import ArticleCard from '../../components/ArticleCard.astro';
-import EventCard from '../../components/EventCard.astro';
 import StatBlock from '../../components/StatBlock.astro';
 import ProofBlock from '../../components/ProofBlock.astro';
 import FaqAccordion from '../../components/FaqAccordion.astro';
@@ -55,7 +52,6 @@ import { serviceBySlug } from '../../data/services';
 import { productBySlug } from '../../data/products';
 import { caseStudies } from '../../data/caseStudies';
 import { blogPosts } from '../../data/articles';
-import { events } from '../../data/events';
 
 // Read the token file at build time so this page can never drift from the real tokens.
 const css = readFileSync(join(process.cwd(), 'src/styles/tokens.css'), 'utf8');
@@ -80,7 +76,6 @@ const inventory = [
   ['Product card', 'components/ProductCard.astro', 'Status badge says where the product lives'],
   ['Case-study card', 'components/CaseStudyCard.astro', 'Industry, headline metric, client'],
   ['Article card', 'components/ArticleCard.astro', 'Type, date, excerpt, fixture label when fictional'],
-  ['Event card', 'components/EventCard.astro', 'Upcoming / past / cancelled / date TBC derived from dates'],
   ['Statistic block', 'components/StatBlock.astro', 'Refuses to render a stat without a claim id'],
   ['Claim reference', 'components/ClaimRef.astro', 'Review-mode annotation linking to the claims register'],
   ['Testimonial / proof', 'components/ProofBlock.astro', 'Verbatim quotes with provenance'],
@@ -162,9 +157,6 @@ const inventory = [
         <ServiceCard service={serviceBySlug('test-automation')!} />
         <CaseStudyCard cs={caseStudies[0]} />
         <ArticleCard a={blogPosts[0]} />
-      </div>
-      <div class="grid grid--3 demo-gap">
-        {[events[0], events[3], events[4]].filter(Boolean).map((e) => <EventCard e={e!} />)}
       </div>
       <div class="surface-product demo-product"><div class="grid grid--3"><ProductCard p={productBySlug('qualitywatcher-ai-tools')!} /><ProductCard p={productBySlug('agents-as-a-service')!} /><ProductCard p={productBySlug('prism')!} /></div></div>
     </div>

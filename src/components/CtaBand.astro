@@ -39,11 +39,21 @@ interface Props {
   eyebrow?: string;
   /** Colour block: 'teal' (default) or 'green'. */
   tone?: 'teal' | 'green';
-  /** People photo id from src/data/peopleImagery.ts shown on the right (default 'exec-review': mature buyers, CEO direction 25 Nov 2026); false hides it. */
+  /** People photo id from src/data/peopleImagery.ts shown on the right (default: this page's entry in CTA_PHOTOS, or none); false hides it. */
   photo?: string | false;
 }
-const { title, text, primary, secondary, eyebrow = 'Next step', tone = 'teal', photo = 'exec-review' } = Astro.props;
-const img = photo ? peopleImage(photo) : null;
+const { title, text, primary, secondary, eyebrow = 'Next step', tone = 'teal', photo } = Astro.props;
+// No `photo` prop: each main page has its OWN closing photo, used nowhere else on the site (Janique, 25 Nov 2026:
+// "let's avoid using the same pic over and over"). Detail pages (services, industries, articles, case studies)
+// already carry two unique photos, so their closing band shows no photo rather than repeating one.
+const CTA_PHOTOS: Record<string, string> = {
+  '/': 'px-7841488', '/services/': 'px-7841500', '/industries/': 'px-7841509', '/qualitywatcher-ai-tools/': 'px-7841491',
+  '/about-us/': 'px-7841485', '/products/': 'px-7841432', '/products/agents-as-a-service/': 'px-7841456',
+  '/resources/': 'px-7841460', '/engagement-models/': 'px-7841468', '/case-studies/': 'px-5439403',
+};
+const path = Astro.url.pathname.endsWith('/') ? Astro.url.pathname : Astro.url.pathname + '/';
+const pick = photo === false ? undefined : (photo ?? CTA_PHOTOS[path]);
+const img = pick ? peopleImage(pick) : null;
 // Unique heading id per instance so aria-labelledby never points at another band's heading.
 const headingId = `cta-band-${Math.random().toString(36).slice(2, 8)}`;
 ---

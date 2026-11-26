@@ -90,26 +90,38 @@ const jsonLd = [serviceLd(s.name, s.seo.description, s.path), ...(s.faqs?.length
 // ---- Redesign (Janique, 23 Nov 2026): vary composition by pathway, people imagery, signature visual ----
 // Pathway -> hero colour block + floating UI chip set. quality = teal/testing, build = green/build, ai = mint/ai.
 const pw = s.pathway;
-const heroTone = ({ quality: 'teal', build: 'green', ai: 'mint' } as const)[pw];
+// Position of this page among its pathway's services, used to vary composition so sibling pages do not look
+// identical (Janique, 25 Nov 2026: "All these pages seem to be the same").
+const siblingIndex = services.filter((x) => x.pathway === pw && x.path.startsWith('/services/')).findIndex((x) => x.slug === s.slug);
+const toneCycle = ({ quality: ['teal', 'mint', 'green'], build: ['green', 'teal', 'mint'], ai: ['mint', 'green', 'teal'] } as const)[pw];
+const heroTone = toneCycle[Math.max(0, siblingIndex) % 3];
 const heroUi = ({ quality: 'testing', build: 'build', ai: 'ai' } as const)[pw];
 // People photograph per page (falls back by pathway). Only approved library photos (peopleImagery.ts).
+// Every service page has its OWN hero and considerations photo: no photo repeats across the site (Janique,
+// 25 Nov 2026: "let's avoid using the same pic over and over"). Mature, corporate buyer imagery only.
 const heroPhotoBySlug: Record<string, string> = {
-  // Mature, corporate buyer imagery only (CEO direction, 25 Nov 2026). See peopleImagery.ts.
-  'test-automation': 'svc-testing', 'full-stack-testing': 'exec-review', 'web-mobile-application-testing': 'svc-build',
-  'non-functional-testing': 'exec-meeting', 'api-cloud-services-testing': 'svc-testing', 'ai-test-squad': 'exec-review',
-  'maturity-assessments': 'exec-meeting', 'custom-software-development': 'work-team', 'technology-advisory-partnership': 'exec-office',
-  'digital-agile-transformation': 'exec-boardroom', 'dedicated-teams': 'exec-review', 'staff-augmentation': 'exec-office',
-  'consulting-training': 'exec-boardroom', 'innovation-tourism': 'exec-boardroom', 'ai-service': 'svc-agents',
-  'data-quality': 'exec-desk', 'ai-governance': 'finance-client-meeting', 'performance-testing': 'svc-testing',
-  'security-testing': 'exec-meeting', 'accessibility': 'exec-desk', 'user-experience-testing': 'svc-build',
+  'test-automation': 'px-5439409', 'full-stack-testing': 'px-5439391', 'web-mobile-application-testing': 'px-5439432',
+  'non-functional-testing': 'px-5668870', 'api-cloud-services-testing': 'px-5668852', 'ai-test-squad': 'px-5439394',
+  'maturity-assessments': 'px-5668858', 'performance-testing': 'px-5668790', 'security-testing': 'px-5668843',
+  'accessibility': 'px-5668879', 'user-experience-testing': 'px-5439406', 'custom-software-development': 'work-team',
+  'technology-advisory-partnership': 'px-7841444', 'digital-agile-transformation': 'px-5439397', 'dedicated-teams': 'px-5439474',
+  'staff-augmentation': 'px-5439373', 'consulting-training': 'px-8761513', 'innovation-tourism': 'px-8761552',
+  'ai-service': 'px-5439438', 'data-quality': 'px-5668796', 'ai-governance': 'px-7841452',
+};
+const considerPhotoBySlug: Record<string, string> = {
+  'test-automation': 'px-5439367', 'full-stack-testing': 'px-5439370', 'web-mobile-application-testing': 'px-5439376',
+  'non-functional-testing': 'px-5439382', 'api-cloud-services-testing': 'px-5439400', 'ai-test-squad': 'px-5439444',
+  'maturity-assessments': 'px-5439447', 'performance-testing': 'px-5439453', 'security-testing': 'px-5439465',
+  'accessibility': 'px-5439468', 'user-experience-testing': 'px-5439471', 'custom-software-development': 'px-5668832',
+  'technology-advisory-partnership': 'px-7841428', 'digital-agile-transformation': 'px-5668828', 'dedicated-teams': 'px-7841497',
+  'staff-augmentation': 'px-8761510', 'consulting-training': 'px-7841482', 'innovation-tourism': 'px-7841464',
+  'ai-service': 'px-5668877', 'data-quality': 'why-leader', 'ai-governance': 'px-7841476',
 };
 const heroPhoto = peopleImage(heroPhotoBySlug[s.slug] ?? { quality: 'svc-testing', build: 'svc-build', ai: 'svc-agents' }[pw]);
-// Considerations scene photo: a different senior-buyer photo from the hero.
-const considerPhotoId = ({ quality: 'exec-office', build: 'exec-review', ai: 'exec-desk' } as const)[pw];
-const considerPhoto = peopleImage(considerPhotoId === heroPhoto.id ? 'exec-boardroom' : considerPhotoId);
+const considerPhoto = peopleImage(considerPhotoBySlug[s.slug] ?? 'exec-boardroom');
 const considerSurface = ({ quality: 'surface-teal', build: 'surface-mint', ai: 'surface-green' } as const)[pw];
 // Capabilities layout: quality services get the interactive explorer; build/ai (and engagement models) a bento.
-const useExplorer = pw === 'quality' && s.kind !== 'engagement-model' && s.capabilities.length >= 3;
+const useExplorer = pw === 'quality' && s.kind !== 'engagement-model' && s.capabilities.length >= 3 && siblingIndex % 2 === 0;
 // Bento spans: rows of [4,2] / [2,4] / [2,2,2] so every row fills 6 columns and tiles in a row share height.
 const spans: number[] = [];
 { let left = s.capabilities.length; let flip = false;
@@ -207,7 +219,7 @@ const capIcon = (t: string) => capIcons.find(([r]) => r.test(t))?.[1] ?? s.icon;
   )}
   {pw === 'quality' && s.kind === 'service' && (
     <section class="section surface-dark qw-band" aria-labelledby="qw-tech-title">
-      <div class="container"><QwShowcase headingId="qw-tech-title" eyebrow="The technology behind our testing" /></div>
+      <div class="container"><QwShowcase headingId="qw-tech-title" eyebrow="The technology behind our testing" photo={false} /></div>
     </section>
   )}
 

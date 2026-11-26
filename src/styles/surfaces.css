@@ -137,3 +137,8 @@ main { overflow-x: clip; }
   .scene--media-left .scene__copy { grid-column: 2; }
   .scene--media-right .scene__copy { grid-column: 1; }
 }
+
+/* Equal buttons: same width AND same height even when one label wraps (Janique, 25 Nov 2026: "Buttons
+   different height"). Grid items stretch to the row height; labels centre inside. */
+.btn-row.btn-row--equal { align-items: stretch; }
+.btn-row.btn-row--equal > .btn, .btn-row.btn-row--equal > a, .btn-row.btn-row--equal > button { height: auto; min-height: 100%; justify-content: center; text-align: center; }

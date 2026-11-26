@@ -54,7 +54,7 @@ import { organizationLd } from '../lib/schema';
 // Hero: an experienced business leader (Stacy: "the hero section is supposed to make them a hero").
 const heroImage = peopleImage('exec-leader');
 // Why QualityWorks: one large portrait (Stacy: "I'd rather it just be someone's face here").
-const whyImg = peopleImage('why-leader');
+const whyImg = peopleImage('px-5668766');
 // Service pillars: photo, emphasis and a second "talk to us" action per pathway (ids from services.ts).
 const pillarMeta: Record<string, { photo: string; core: boolean; contact: string }> = {
   quality: { photo: 'svc-testing', core: true, contact: 'Talk to a testing expert' },
@@ -88,7 +88,7 @@ const agents = products.find((p) => p.slug === 'agents-as-a-service');
     </div>
     <div class="container hero__grid">
       <div class="hero__copy">
-        <p class="hero__brand" data-reveal="fade"><img src="/brand/qualityworks-wordmark-white.png" alt="" width="146" height="32" />Consulting Group</p>
+        <p class="hero__brand" data-reveal="fade"><img src="/brand/qualityworks-wordmark-white.png" alt="" width="146" height="32" /></p>
         {/* Tagline per the brand guide: title case, always with the period. */}
         <h1 id="hero-title" class="display" data-words><span class="word" style="--w:0">Engineered</span> <span class="word" style="--w:1">for</span> <span class="word" style="--w:2">Excellence.</span></h1>
         <p class="hero__pos" data-reveal style="--i:3">
@@ -318,7 +318,7 @@ const agents = products.find((p) => p.slug === 'agents-as-a-service');
   .hero__lede { max-width: 31rem; font-size: var(--fs-md); }
   .hero__ctas { margin-top: var(--space-6); }
   .hero__brand { display: flex; align-items: center; gap: 10px; margin: 0 0 var(--space-5); font: 700 var(--fs-sm)/1 var(--font-display); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--qw-slate-900); }
-  .hero__brand img { height: 30px; width: auto; filter: brightness(0) saturate(100%) invert(14%) sepia(12%) saturate(1100%) hue-rotate(176deg); }
+  .hero__brand img { height: 38px; width: auto; filter: brightness(0) saturate(100%) invert(14%) sepia(12%) saturate(1100%) hue-rotate(176deg); }
   .hero__pos { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); margin: 0 0 var(--space-4); font: 800 clamp(1.15rem, 1rem + .6vw, 1.5rem)/1.2 var(--font-display); }
   .hero__pos a { display: inline-flex; align-items: center; gap: 10px; padding: .5em .9em; border-radius: 14px; color: var(--qw-slate-900); text-decoration: none; background: rgba(255,255,255,.32); border: 1px solid rgba(255,255,255,.55); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); transition: background 250ms, transform 250ms; }
   .hero__pos a:hover { background: rgba(255,255,255,.55); transform: translateY(-2px); }
@@ -402,13 +402,12 @@ const agents = products.find((p) => p.slug === 'agents-as-a-service');
   /* ---------- SERVICES: three photo pillars ---------- */
   .section-intro--center { text-align: center; margin-inline: auto; }
   .pillars { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-5); }
-  @media (min-width: 960px) { .pillars { grid-template-columns: 1.12fr 1.12fr 0.92fr; align-items: stretch; } }
+  @media (min-width: 960px) { .pillars { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: stretch; } }
   .pillar { --tint: 41,165,154; --tint-ink: #18625C; position: relative; display: flex; flex-direction: column; border-radius: 24px; overflow: hidden; background: linear-gradient(170deg, rgba(var(--tint), .2) 30%, rgba(255,255,255,.96) 80%); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,.9); box-shadow: var(--gc-shadow); transition: transform 400ms cubic-bezier(.2,.8,.2,1), box-shadow 400ms; }
   .pillar--build { --tint: 44,175,129; --tint-ink: #17694C; } .pillar--ai { --tint: 54,65,79; --tint-ink: #222B37; }
   .pillar:hover { transform: translateY(-6px); box-shadow: var(--gc-shadow-hover); }
   .pillar__accent { display: block; width: 3.75rem; height: .4rem; border-radius: 999px; margin-bottom: var(--space-4); background: linear-gradient(90deg, rgb(var(--tint)), rgba(var(--tint), .3)); }
   .pillar__media { position: relative; overflow: hidden; aspect-ratio: 16 / 11; }
-  .pillar--core .pillar__media { aspect-ratio: 16 / 12; }
   .pillar__media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 900ms cubic-bezier(.2,.8,.2,1); }
   .pillar:hover .pillar__media img { transform: scale(1.06); }
   .pillar__badge { position: absolute; left: 16px; top: 16px; padding: .45em .9em; border-radius: 999px; font: 800 var(--fs-xs)/1 var(--font-display); letter-spacing: .06em; text-transform: uppercase; color: var(--qw-slate-900); background: rgba(255,255,255,.8); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }

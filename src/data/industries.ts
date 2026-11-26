@@ -158,7 +158,11 @@ const HERO_IMAGES: Record<string, string> = {
   insurance: 'insurance-advisor',
   logistics: 'logistics-warehouse',
   retail: 'retail-ecommerce',
-  technology: 'svc-build',
+  technology: 'px-5439477',
+  // Added 26 Nov 2026 (Janique: "Find a human to put here too"); Pexels stock, see peopleImagery.ts.
+  'public-sector': 'px-7841416',
+  'small-business': 'px-5439456',
+  'media-entertainment': 'px-8761528',
 };
 for (const ind of industries) ind.heroImage = HERO_IMAGES[ind.slug];
 

@@ -123,5 +123,4 @@ export const contentTypes = [
   { id: 'blog', label: 'Articles' },
   { id: 'news', label: 'News & awards' },
   { id: 'whitepaper', label: 'Whitepapers' },
-  { id: 'event', label: 'Events' },
 ] as const;

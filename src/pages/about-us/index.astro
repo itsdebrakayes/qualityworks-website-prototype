@@ -53,10 +53,10 @@ const values = [
 const ceo = leadership[0];
 // Supporting people photos for the story collage (decorative alongside the copy; alt from the image record).
 const storyA = peopleImage('exec-boardroom');
-const storyB = peopleImage('exec-meeting');
+const storyB = peopleImage('px-8761516');
 ---
 <BaseLayout seo={{ title: 'About QualityWorks | The Quality-Driven Innovation Company', description: 'Founded in 2010, QualityWorks is a Black-owned, woman-led software solutions firm helping companies build higher-quality software, future-ready teams and faster delivery.' }} breadcrumbs={crumbs}>
-  <PageHero image={peopleImage('exec-review')} ui="people" eyebrow="About us" title="The quality-driven innovation company" lede="We go beyond the code and beyond testing to help our clients achieve their most extraordinary digital goals." breadcrumbs={crumbs} primary={{ label: 'Work with us', href: '/contact-us/' }} secondary={{ label: 'Explore careers', href: '/careers/' }} />
+  <PageHero image={peopleImage('px-5439480')} ui="people" eyebrow="About us" title="The quality-driven innovation company" lede="We go beyond the code and beyond testing to help our clients achieve their most extraordinary digital goals." breadcrumbs={crumbs} primary={{ label: 'Work with us', href: '/contact-us/' }} secondary={{ label: 'Explore careers', href: '/careers/' }} />
 
   {/* Our story: company description with claim annotations for ownership (C14) and regions (C15), beside a
       two-photo collage and a "since 2010" badge. */}
@@ -151,7 +151,7 @@ const storyB = peopleImage('exec-meeting');
     </div>
   </section>
   {/* Closing CTA serves both buyers (contact) and applicants (careers). */}
-  <CtaBand title="Want to work with us?" text="Jumpstart your project, or your career in tech." primary={ctas.contact} secondary={{ label: 'Explore careers', href: '/careers/' }} photo="careers-colleagues" />
+  <CtaBand title="Want to work with us?" text="Jumpstart your project, or your career in tech." primary={ctas.contact} secondary={{ label: 'Explore careers', href: '/careers/' }} />
 </BaseLayout>
 <style>
   /* STORY: copy left, photo collage right from 1024px. */
