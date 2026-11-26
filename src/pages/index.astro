@@ -369,14 +369,13 @@ const agents = products.find((p) => p.slug === 'agents-as-a-service');
     .hero__grid { width: 100%; padding-top: 0; }
     .hero__media { position: absolute; inset: 0; width: auto; }
     .hero__photo { height: 100%; aspect-ratio: auto; }
-    /* Overlay per the reference (project lead, 26 Nov 2026): a subtle dark gradient over the photo behind the copy
+    /* Overlay per the reference (project lead, 26 Nov 2026): left-to-right gradients only (no bottom fade): a subtle dark gradient behind the copy
        (white text), plus a faint teal tint from the left edge that fades out exactly where the text column
        begins (--text-x = the container's left edge). The executive on the right stays untouched. */
     .hero__teal { --text-x: max(var(--gutter), calc((100% - var(--container)) / 2)); display: block; position: absolute; inset: 0; pointer-events: none;
       background:
         linear-gradient(90deg, rgba(41,165,154,.55) 0%, rgba(41,165,154,.3) calc(var(--text-x) * .6), rgba(41,165,154,0) var(--text-x)),
-        linear-gradient(90deg, rgba(9,22,27,.78) 0%, rgba(9,22,27,.66) 34%, rgba(9,22,27,.3) 55%, rgba(9,22,27,0) 70%),
-        linear-gradient(0deg, rgba(9,22,27,.5) 0%, rgba(9,22,27,0) 34%); }
+        linear-gradient(90deg, rgba(9,22,27,.78) 0%, rgba(9,22,27,.66) 34%, rgba(9,22,27,.3) 55%, rgba(9,22,27,0) 70%); }
     .hero__brand img { filter: none; }
     .hero__eyebrow { color: #7FDCC9; }
     .hero__copy h1 { color: #fff; }
